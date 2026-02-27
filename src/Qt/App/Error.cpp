@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 
+// TODO
 [[noreturn]] void App::Error::Exit(const std::string& Message) {
     if (QCoreApplication::instance() != nullptr) {
         // Emit on the GUI thread to open the popup

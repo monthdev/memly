@@ -3,10 +3,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "App/Error.hpp"
-#include "App/QmlResource.hpp"
-#include "App/SqlResource.hpp"
-#include "App/SupportData.hpp"
+#include "Qt/App/Error.hpp"
+#include "Qt/App/QmlResource.hpp"
+#include "Qt/App/SqlResource.hpp"
+#include "Qt/App/SupportData.hpp"
 
 int main(int argc, char* argv[]) {
     try {
