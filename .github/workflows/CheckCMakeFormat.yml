@@ -41,7 +41,6 @@ jobs:
           cmake-lint --version
 
       - name: Determine diff base
-        id: base
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -50,37 +49,60 @@ jobs:
             echo "BASE_SHA=${{ github.event.before }}" >> "$GITHUB_ENV"
           fi
 
-      - name: Collect changed CMake files
+      - name: Collect target CMake listfiles
         id: files
         shell: bash
         run: |
           set -euo pipefail
-          CHANGED="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
-            '**/CMakeLists.txt' '**/*.cmake' '**/*.cmake.in' \
-            '.cmake-format.yaml' '.cmakelintrc' || true)"
-          CHANGED="$(echo "$CHANGED" | sed '/^\s*$/d' || true)"
-          if [[ -z "$CHANGED" ]]; then
+
+          # Detect whether config changed (if yes, lint/format all listfiles).
+          CONFIG_CHANGED="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
+            .cmake-format.yaml .cmakelintrc | sed '/^\s*$/d' || true)"
+
+          # Collect changed listfiles (use :(glob) so ** works as expected in git pathspec).
+          CHANGED_LISTFILES="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
+            ':(glob)**/CMakeLists.txt' \
+            ':(glob)**/*.cmake' \
+            ':(glob)**/*.cmake.in' \
+            | sed '/^\s*$/d' || true)"
+
+          if [[ -n "$CONFIG_CHANGED" ]]; then
+            echo "Config changed; linting/format-checking all CMake listfiles."
+            git ls-files \
+              ':(glob)**/CMakeLists.txt' \
+              ':(glob)**/*.cmake' \
+              ':(glob)**/*.cmake.in' \
+              > /tmp/cmake_files.txt
+          elif [[ -n "$CHANGED_LISTFILES" ]]; then
+            printf '%s\n' "$CHANGED_LISTFILES" > /tmp/cmake_files.txt
+          else
             echo "has_files=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          printf '%s\n' "$CHANGED" > /tmp/cmake_files.txt
+
           echo "has_files=true" >> "$GITHUB_OUTPUT"
-          echo "Changed files:"
+          echo "Target files:"
           cat /tmp/cmake_files.txt
 
-      - name: Run cmake-lint (fail on warnings)
+      - name: Run cmake-format --check
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/cmake_files.txt
+          cmake-format --check "${FILES[@]}"
+
+      - name: Run cmake-lint (fail on any diagnostics)
         if: steps.files.outputs.has_files == 'true'
         shell: bash
         run: |
           set -euo pipefail
           mapfile -t FILES < /tmp/cmake_files.txt
 
-          set +e
-          OUTPUT="$(cmake-lint --suppress-decorations -c .cmakelintrc "${FILES[@]}" 2>&1)"
-          STATUS=$?
-          set -e
+          OUTPUT="$(cmake-lint --suppress-decorations -c .cmakelintrc "${FILES[@]}" 2>&1 || true)"
+          printf '%s\n' "$OUTPUT"
 
-          if [[ $STATUS -ne 0 || -n "$OUTPUT" ]]; then
-            printf '%s\n' "$OUTPUT"
+          # Fail the job if any lint codes are present (e.g. C0301) or if cmake-lint exited non-zero.
+          if echo "$OUTPUT" | grep -Eq '\b[CEW][0-9]{4}\b'; then
             exit 1
           fi
