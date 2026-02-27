@@ -1,0 +1,87 @@
+name: Check CMake Format
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/CMakeLists.txt"
+      - "**/*.cmake"
+      - "**/*.cmake.in"
+      - ".cmake-format.yaml"
+      - ".cmakelintrc"
+  push:
+    branches: [main]
+    paths:
+      - "**/CMakeLists.txt"
+      - "**/*.cmake"
+      - "**/*.cmake.in"
+      - ".cmake-format.yaml"
+      - ".cmakelintrc"
+
+jobs:
+  cmake-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+          cache: "pip"
+
+      - name: Install latest cmake-format/cmake-lint (cmakelang)
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade cmakelang
+          cmake-format --version
+          cmake-lint --version
+
+      - name: Determine diff base
+        id: base
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_ENV"
+          else
+            echo "BASE_SHA=${{ github.event.before }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Collect changed CMake files
+        id: files
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHANGED="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
+            '**/CMakeLists.txt' '**/*.cmake' '**/*.cmake.in' \
+            '.cmake-format.yaml' '.cmakelintrc' || true)"
+          CHANGED="$(echo "$CHANGED" | sed '/^\s*$/d' || true)"
+          if [[ -z "$CHANGED" ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s\n' "$CHANGED" > /tmp/cmake_files.txt
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Changed files:"
+          cat /tmp/cmake_files.txt
+
+      - name: Run cmake-lint (fail on warnings)
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/cmake_files.txt
+
+          set +e
+          OUTPUT="$(cmake-lint --suppress-decorations -c .cmakelintrc "${FILES[@]}" 2>&1)"
+          STATUS=$?
+          set -e
+
+          if [[ $STATUS -ne 0 || -n "$OUTPUT" ]]; then
+            printf '%s\n' "$OUTPUT"
+            exit 1
+          fi
