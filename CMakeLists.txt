@@ -120,6 +120,8 @@ endif()
 add_library(duckdb SHARED IMPORTED GLOBAL)
 set_target_properties(duckdb PROPERTIES IMPORTED_LOCATION "${_duckdb_lib}" INTERFACE_INCLUDE_DIRECTORIES "${_duckdb_inc}")
 
+# set_target_properties(duckdb PROPERTIES IMPORTED_LOCATION "${_duckdb_lib}" INTERFACE_INCLUDE_DIRECTORIES "${_duckdb_inc}") set_target_properties(duckdb PROPERTIES IMPORTED_LOCATION "${_duckdb_lib}" INTERFACE_INCLUDE_DIRECTORIES "${_duckdb_inc}")
+
 get_filename_component(_duckdb_libdir "${_duckdb_lib}" DIRECTORY)
 set(_duckdb_rpath_dirs "${_duckdb_libdir}")
 
