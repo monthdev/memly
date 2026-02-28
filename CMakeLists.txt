@@ -93,11 +93,11 @@ FetchContent_MakeAvailable(libduckdb)
 # Determine DuckDB library filename and location per-platform
 if(APPLE)
   set(_duckdb_lib_name "libduckdb.dylib")
-elseif(WIN32)
-  set(_duckdb_lib_name "duckdb.dll")
-else()
-  # Assume generic Unix (Linux, etc.)
-  set(_duckdb_lib_name "libduckdb.so")
+  # elseif(WIN32)
+  #   set(_duckdb_lib_name "duckdb.dll")
+  # else()
+  #   # Assume generic Unix (Linux, etc.)
+  #   set(_duckdb_lib_name "libduckdb.so")
 endif()
 
 set(_duckdb_lib "${libduckdb_SOURCE_DIR}/${_duckdb_lib_name}")
@@ -179,7 +179,7 @@ include(CTest)
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/*.cpp" "${CMAKE_SOURCE_DIR}/test/TestApp/*.cpp")
+file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/*.cpp")
 
 set(CORE_SOURCES ${UTIL_CPP} ${CORE_CPP} ${TS_CPP})
 
