@@ -16,8 +16,8 @@ std::string TestApp::SupportData::BaseDirectoryPath() {
 std::string TestApp::SupportData::DatabaseFilePath() {
     const std::string FilePath{ TestApp::SupportData::BaseDirectoryPath() +
                                 "/test.duckdb" };
-    std::error_code Ec{};
-    std::filesystem::remove(FilePath, Ec);
+    std::error_code ErrorCode{};
+    std::filesystem::remove(FilePath, ErrorCode);
     return FilePath;
 }
 
