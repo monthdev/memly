@@ -11,6 +11,7 @@ qt_standard_project_setup(REQUIRES 6.9)
 # App
 file(GLOB_RECURSE APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.cpp")
 file(GLOB_RECURSE APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.[Hh]*")
+list(REMOVE_ITEM APP_CPP "${CMAKE_SOURCE_DIR}/src/Qt/App/main.cpp")
 
 # Utility
 file(GLOB_RECURSE UTIL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Utility/*.cpp")
@@ -123,7 +124,7 @@ set_target_properties(duckdb PROPERTIES IMPORTED_LOCATION "${_duckdb_lib}" INTER
 get_filename_component(_duckdb_libdir "${_duckdb_lib}" DIRECTORY)
 set(_duckdb_rpath_dirs "${_duckdb_libdir}")
 
-qt_add_executable(memly MANUAL_FINALIZATION ${ALL_SOURCES})
+qt_add_executable(memly MANUAL_FINALIZATION ${ALL_SOURCES} ${CMAKE_SOURCE_DIR}/src/Qt/App/main.cpp)
 
 if(COMMAND qt_policy)
   qt_policy(SET QTP0004 NEW)
@@ -162,7 +163,7 @@ target_compile_options(
           -Wunused
           -pedantic
           -Werror
-          $<$<CONFIG:Debug>:-fsanitize=address
+          $<$<CONFIG:Debug>:-fsanitize=address;
           -fno-omit-frame-pointer>)
 
 target_link_options(memly PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
@@ -180,28 +181,39 @@ find_package(GTest REQUIRED)
 include(GoogleTest)
 
 file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/*.cpp")
+file(GLOB TEST_MACOS_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/MacOS/*.cpp")
 
-set(CORE_SOURCES ${UTIL_CPP} ${CORE_CPP} ${TS_CPP})
+set(CORE_SOURCES ${UTIL_CPP} ${CORE_CPP} ${TS_CPP} ${APP_CPP})
 
 add_executable(test-memly ${CORE_SOURCES} ${TEST_SOURCES})
 
-target_compile_definitions(test-memly PRIVATE CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
+# Add macOS-only test sources
+target_sources(test-memly PRIVATE
+  $<$<PLATFORM_ID:Darwin>:${TEST_MACOS_SOURCES}>
+)
+
+target_compile_definitions(test-memly PRIVATE
+  CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}"
+)
 
 target_include_directories(test-memly PRIVATE "${CMAKE_SOURCE_DIR}/src")
 target_compile_features(test-memly PUBLIC cxx_std_23)
-target_compile_options(
-  test-memly
-  PRIVATE -Wall
-          -Wextra
-          -Wunused
-          -pedantic
-          -Werror
-          $<$<CONFIG:Debug>:-fsanitize=address
-          -fno-omit-frame-pointer>)
 
-target_link_options(test-memly PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
+target_compile_options(test-memly PRIVATE
+  -Wall -Wextra -Wunused -pedantic -Werror
+  $<$<CONFIG:Debug>:-fsanitize=address;-fno-omit-frame-pointer>
+)
 
-target_link_libraries(test-memly PRIVATE GTest::gtest_main Qt6::Quick Qt6::Qml Qt6::Network Qt6::Core duckdb)
+target_link_options(test-memly PRIVATE
+  $<$<CONFIG:Debug>:-fsanitize=address>
+)
+
+target_link_libraries(test-memly PRIVATE
+  GTest::gtest_main
+  Qt6::Quick Qt6::Qml Qt6::Network Qt6::Core
+  duckdb
+)
+
 set_target_properties(test-memly PROPERTIES BUILD_RPATH "${_duckdb_rpath_dirs}")
 
 gtest_discover_tests(test-memly)
