@@ -50,23 +50,33 @@ include(FetchContent)
 
 # ====================== DuckDB: platform-specific binaries
 # ======================
-set(DUCKDB_VERSION "v1.4.4")
 
-# Select correct DuckDB archive and hash based on host OS + architecture
+set(DUCKDB_VERSION "1.4.4")
+set(DUCKDB_TAG "v${DUCKDB_VERSION}")
+
 if(APPLE)
-  # macOS universal binary (keep existing settings)
-  set(DUCKDB_URL "https://github.com/duckdb/duckdb/releases/download/${DUCKDB_VERSION}/libduckdb-osx-universal.zip")
+  set(DUCKDB_URL "https://install.duckdb.org/${DUCKDB_TAG}/libduckdb-osx-universal.zip")
   set(DUCKDB_SHA "5e6d79f5fb86bbd4f24d59cee3bc38f113d1433761df35337e3c01c62eeafe26")
-  # elseif(WIN32) if(CMAKE_SYSTEM_PROCESSOR MATCHES "^[Aa][Mm][Dd]64|^[Xx]86_64") # Windows amd64 set(DUCKDB_URL
-  # "https://install.duckdb.org/${DUCKDB_VERSION}/libduckdb-windows-amd64.zip") set(DUCKDB_SHA
-  # "704877e85b556640b0f20a0f07a1c1f404320210b245f51b6da0087a1c92bb76") elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^[Aa][Rr][Mm]64") # Windows arm64 set(DUCKDB_URL
-  # "https://install.duckdb.org/${DUCKDB_VERSION}/libduckdb-windows-arm64.zip") set(DUCKDB_SHA
-  # "851f0b89659f9ebfdecc99a9371942117fe4bc9fd9521af82fbe52be073534b6") else() message(FATAL_ERROR "Unsupported Windows architecture for DuckDB:
-  # ${CMAKE_SYSTEM_PROCESSOR}") endif() elseif(UNIX) if(CMAKE_SYSTEM_PROCESSOR MATCHES "^[Aa][Mm][Dd]64|^[Xx]86_64") # Linux amd64 set(DUCKDB_URL
-  # "https://install.duckdb.org/${DUCKDB_VERSION}/libduckdb-linux-amd64.zip") set(DUCKDB_SHA "ce859962fe96ca952d53571964dafa0168644283a76a2c669b3f73120d710edb")
-  # elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^[Aa][Rr][Mm]64|^[Aa][Aa][Rr][Cc][Hh]64") # Linux arm64 set(DUCKDB_URL
-  # "https://install.duckdb.org/${DUCKDB_VERSION}/libduckdb-linux-arm64.zip") set(DUCKDB_SHA "4aa05a74956b1d57f05a139623943231caeee36286c9f42ff10dc278b6df0b6e")
-  # else() message(FATAL_ERROR "Unsupported Linux architecture for DuckDB: ${CMAKE_SYSTEM_PROCESSOR}") endif()
+elseif(WIN32)
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(AMD64|amd64|x86_64|X86_64)$")
+    set(DUCKDB_URL "https://install.duckdb.org/${DUCKDB_TAG}/libduckdb-windows-amd64.zip")
+    set(DUCKDB_SHA "18184f2d73bf962cb78eeefb17196d112fcd18b9411b16a3b47cd718693e004c")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(ARM64|arm64|aarch64|AARCH64)$")
+    set(DUCKDB_URL "https://install.duckdb.org/${DUCKDB_TAG}/libduckdb-windows-arm64.zip")
+    set(DUCKDB_SHA "f5d3507e611fdab7e972b13edde62205ffc39333f68ac9010e93bf1aa2983ab7")
+  else()
+    message(FATAL_ERROR "Unsupported Windows architecture for DuckDB: ${CMAKE_SYSTEM_PROCESSOR}")
+  endif()
+elseif(UNIX)
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(AMD64|amd64|x86_64|X86_64)$")
+    set(DUCKDB_URL "https://install.duckdb.org/${DUCKDB_TAG}/libduckdb-linux-amd64.zip")
+    set(DUCKDB_SHA "09cc288295964d897b47665d1898e16e8ef176cae9ea615797fc136eae15bd5d")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(ARM64|arm64|aarch64|AARCH64)$")
+    set(DUCKDB_URL "https://install.duckdb.org/${DUCKDB_TAG}/libduckdb-linux-arm64.zip")
+    set(DUCKDB_SHA "768f66e0b40838d567a5524ae3901daa4823f4829fd1e6f3615d75ae55562b52")
+  else()
+    message(FATAL_ERROR "Unsupported Linux architecture for DuckDB: ${CMAKE_SYSTEM_PROCESSOR}")
+  endif()
 else()
   message(FATAL_ERROR "Unsupported platform for DuckDB")
 endif()
@@ -77,10 +87,12 @@ FetchContent_Declare(
   URL_HASH "SHA256=${DUCKDB_SHA}")
 FetchContent_MakeAvailable(libduckdb)
 
-# Determine DuckDB library filename and location per-platform
 if(APPLE)
   set(_duckdb_lib_name "libduckdb.dylib")
-  # elseif(WIN32) set(_duckdb_lib_name "duckdb.dll") else() # Assume generic Unix (Linux, etc.) set(_duckdb_lib_name "libduckdb.so")
+elseif(WIN32)
+  set(_duckdb_lib_name "duckdb.dll")
+else()
+  set(_duckdb_lib_name "libduckdb.so")
 endif()
 
 set(_duckdb_lib "${libduckdb_SOURCE_DIR}/${_duckdb_lib_name}")
