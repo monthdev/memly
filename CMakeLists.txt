@@ -193,7 +193,7 @@ target_compile_options(test-memly PRIVATE -Wall -Wextra -Wunused -pedantic -Werr
 
 target_link_options(test-memly PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
 
-target_link_libraries(test-memly PRIVATE GTest::gtest_main Qt6::Quick Qt6::Qml Qt6::Network Qt6::Core duckdb)
+target_link_libraries(test-memly PRIVATE GTest::gtest Qt6::Core duckdb)
 
 set_target_properties(test-memly PROPERTIES BUILD_RPATH "${_duckdb_rpath_dirs}")
 
