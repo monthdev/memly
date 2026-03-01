@@ -13,6 +13,6 @@ static std::string SqlResourceFileToString(const QString& QtResourcePath) {
     return QTextStream{ &File }.readAll().toStdString();
 }
 
-std::string App::SqlResource::InitializeSchemaSql() {
+std::string Qt::App::SqlResource::InitializeSchemaSql() {
     return SqlResourceFileToString(":/Memly/Migrations/Schema.sql");
 }

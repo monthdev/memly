@@ -8,16 +8,16 @@ static std::string EnsureDirectory(const std::string& Directory) {
     return Directory;
 }
 
-std::string App::SupportData::BaseDirectoryPath() {
+std::string Qt::App::SupportData::BaseDirectoryPath() {
     return EnsureDirectory(
         QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
             .toStdString());
 }
 
-std::string App::SupportData::DatabaseFilePath() {
+std::string Qt::App::SupportData::DatabaseFilePath() {
     return App::SupportData::BaseDirectoryPath() + "/memly.duckdb";
 }
 
-std::string App::SupportData::AudioDirectoryPath() {
+std::string Qt::App::SupportData::AudioDirectoryPath() {
     return EnsureDirectory(App::SupportData::BaseDirectoryPath() + "/Audio");
 }

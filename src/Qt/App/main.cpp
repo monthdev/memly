@@ -21,13 +21,13 @@ int main(int argc, char* argv[]) {
             QCoreApplication::instance(),
             [] { QCoreApplication::exit(-1); },
             Qt::QueuedConnection);
-        AppEngine.load(App::QmlResource::MainWindow());
+        AppEngine.load(Qt::App::QmlResource::MainWindow());
 
-        std::cout << App::SupportData::DatabaseFilePath() << "\n";
-        duckdb::DuckDB Database{ App::SupportData::DatabaseFilePath() };
+        std::cout << Qt::App::SupportData::DatabaseFilePath() << "\n";
+        duckdb::DuckDB Database{ Qt::App::SupportData::DatabaseFilePath() };
         duckdb::Connection Connection{ Database };
         auto Result{ Connection.Query(
-            App::SqlResource::InitializeSchemaSql()) };
+            Qt::App::SqlResource::InitializeSchemaSql()) };
         auto ErrorType{ Result->GetErrorType() };
         std::cout << static_cast<int>(ErrorType) << "\n";
         auto ErrorObject{ Result->GetErrorObject() };
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
         return App.exec();
     } catch (const std::exception& Exception) {
         Q_ASSERT_X(false, "", Exception.what());
-        App::Error::Exit(std::format(
+        Qt::App::Error::Exit(std::format(
             "Caught unrecoverable exception from \"{}\"", Exception.what()));
     }
 }
