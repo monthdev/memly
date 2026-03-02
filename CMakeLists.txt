@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 project(memly LANGUAGES C CXX)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
@@ -9,13 +12,12 @@ find_package(Qt6 REQUIRED COMPONENTS Quick Qml Network Core)
 qt_standard_project_setup(REQUIRES 6.9)
 
 # App
-file(GLOB_RECURSE APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.cpp")
-file(GLOB_RECURSE APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.[Hh]*")
-list(REMOVE_ITEM APP_CPP "${CMAKE_SOURCE_DIR}/src/Qt/App/main.cpp")
+file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.cpp")
+file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.[Hh]*")
 
 # Utility
-file(GLOB_RECURSE UTIL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Utility/*.cpp")
-file(GLOB_RECURSE UTIL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Utility/*.[Hh]*")
+file(GLOB UTIL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Utility/*.cpp")
+file(GLOB UTIL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Utility/*.[Hh]*")
 
 # QML files
 set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Qt/Qml")
@@ -29,12 +31,12 @@ endforeach()
 file(GLOB SQL_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/Migrations/*.sql" "${CMAKE_SOURCE_DIR}/src/Sql/Statements/*.sql")
 
 # Core
-file(GLOB_RECURSE CORE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.cpp")
-file(GLOB_RECURSE CORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.[Hh]*")
+file(GLOB CORE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.cpp")
+file(GLOB CORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.[Hh]*")
 
 # TransactionScripts
-file(GLOB_RECURSE TS_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/TransactionScripts/*.cpp")
-file(GLOB_RECURSE TS_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/TransactionScripts/*.[Hh]*")
+file(GLOB TS_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/TransactionScripts/*.cpp")
+file(GLOB TS_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/TransactionScripts/*.[Hh]*")
 
 set(ALL_SOURCES
     ${APP_CPP}
@@ -118,7 +120,7 @@ set_target_properties(duckdb PROPERTIES IMPORTED_LOCATION "${_duckdb_lib}" INTER
 get_filename_component(_duckdb_libdir "${_duckdb_lib}" DIRECTORY)
 set(_duckdb_rpath_dirs "${_duckdb_libdir}")
 
-qt_add_executable(memly MANUAL_FINALIZATION ${ALL_SOURCES} ${CMAKE_SOURCE_DIR}/src/Qt/App/main.cpp)
+qt_add_executable(memly MANUAL_FINALIZATION ${ALL_SOURCES} ${CMAKE_SOURCE_DIR}/src/Qt/App/Main/main.cpp)
 
 if(COMMAND qt_policy)
   qt_policy(SET QTP0004 NEW)
@@ -147,18 +149,7 @@ qt_add_resources(
 
 target_include_directories(memly PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
-target_compile_features(memly PUBLIC cxx_std_23)
-set_target_properties(memly PROPERTIES CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-
-target_compile_options(
-  memly
-  PRIVATE -Wall
-          -Wextra
-          -Wunused
-          -pedantic
-          -Werror
-          $<$<CONFIG:Debug>:-fsanitize=address;
-          -fno-omit-frame-pointer>)
+target_compile_options(memly PRIVATE -Wall -Wextra -Wunused -pedantic -Werror $<$<CONFIG:Debug>:-fsanitize=address;-fno-omit-frame-pointer>)
 
 target_link_options(memly PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
 
@@ -174,20 +165,19 @@ include(CTest)
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/*.cpp")
-file(GLOB TEST_MACOS_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/MacOS/*.cpp")
+file(GLOB TEST_APP_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Qt/App/*.cpp")
+file(GLOB TEST_APP_MACOS_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Qt/App/MacOS/*.cpp")
 
 set(CORE_SOURCES ${UTIL_CPP} ${CORE_CPP} ${TS_CPP} ${APP_CPP})
 
-add_executable(test-memly ${CORE_SOURCES} ${TEST_SOURCES})
+add_executable(test-memly ${CORE_SOURCES} ${TEST_APP_SOURCES} ${CMAKE_SOURCE_DIR}/test/Qt/App/Main/TestMain.cpp)
 
 # Add macOS-only test sources
-target_sources(test-memly PRIVATE $<$<PLATFORM_ID:Darwin>:${TEST_MACOS_SOURCES}>)
+target_sources(test-memly PRIVATE $<$<PLATFORM_ID:Darwin>:${TEST_APP_MACOS_SOURCES}>)
 
 target_compile_definitions(test-memly PRIVATE CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
 target_include_directories(test-memly PRIVATE "${CMAKE_SOURCE_DIR}/src")
-target_compile_features(test-memly PUBLIC cxx_std_23)
 
 target_compile_options(test-memly PRIVATE -Wall -Wextra -Wunused -pedantic -Werror $<$<CONFIG:Debug>:-fsanitize=address;-fno-omit-frame-pointer>)
 
