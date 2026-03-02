@@ -9,11 +9,8 @@ on:
 jobs:
   clang-tidy:
     runs-on: ubuntu-latest
-
-    # Newer Ubuntu userspace (Qt from apt will be newer than 24.04’s Qt 6.4.x)
-    # GitHub Actions supports job containers.  [oai_citation:4‡GitHub Docs](https://docs.github.com/actions/using-jobs/running-jobs-in-a-container?utm_source=chatgpt.com)
     container:
-      image: ubuntu:25.04
+      image: ubuntu:25.10
 
     env:
       CMAKE_BUILD_TYPE: Debug
@@ -27,23 +24,22 @@ jobs:
             qt6-base-dev qt6-declarative-dev qt6-tools-dev \
             qt6-base-dev-tools qt6-qmltooling-plugins \
             libgl1-mesa-dev \
-            libgtest-dev
+            libgtest-dev \
+            libxkbcommon-dev
 
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure (CMake, generate compile_commands.json)
+      - name: Configure (CMake + Ninja, generate compile_commands.json)
         run: |
           cmake -S . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-      # Workflow improvement: actually build first.
-      # This catches missing headers/libs and guarantees compile_commands.json matches reality.
-      - name: Build
+      - name: Build (Ninja)
         run: |
-          cmake --build build
+          ninja -C build
 
       - name: Run clang-tidy
         run: |
