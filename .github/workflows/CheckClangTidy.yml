@@ -11,7 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ubuntu:25.10
-
+    defaults:
+      run:
+        shell: bash
     env:
       CMAKE_BUILD_TYPE: Debug
       CC: clang
