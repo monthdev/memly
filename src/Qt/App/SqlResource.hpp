@@ -5,7 +5,7 @@
 namespace Qt {
 namespace App {
 namespace SqlResource {
-std::string InitializeSchemaSql();
+std::string SchemaSql();
 }
 }
 }

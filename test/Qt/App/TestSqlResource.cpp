@@ -18,8 +18,8 @@ static std::string FileContentsToString(const std::string& FilePath) {
     return Buffer.str();
 }
 
-TEST(SqlResource, InitializeSchemaSql) {
+TEST(SqlResource, SchemaSql) {
     EXPECT_EQ(
-        Qt::App::SqlResource::InitializeSchemaSql(),
+        Qt::App::SqlResource::SchemaSql(),
         FileContentsToString(SqlDirectoryPath + "/Migrations/Schema.sql"));
 }

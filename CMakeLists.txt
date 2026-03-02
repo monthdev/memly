@@ -148,8 +148,6 @@ qt_add_qml_module(
   Memly
   VERSION
   1.0
-  RESOURCE_PREFIX
-  "/"
   QML_FILES
   ${QT_QML})
 

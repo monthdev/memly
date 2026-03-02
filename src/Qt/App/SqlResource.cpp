@@ -1,18 +1,18 @@
 #include "SqlResource.hpp"
 
-#include <QFile>
-#include <QTextStream>
+#include <QResource>
 
 #include "Utility/Unrecoverable.hpp"
 
-static std::string SqlResourceFileToString(const QString& QtResourcePath) {
-    QFile File{ QtResourcePath };
-    if (!File.open(QIODevice::ReadOnly)) {
+static std::string ReadResourceBytes(const char* ResourcePath) {
+    QResource Resource{ ResourcePath };
+    if (!Resource.isValid()) {
         Unrecoverable::Throw();
     }
-    return QTextStream{ &File }.readAll().toStdString();
+    return std::string{ reinterpret_cast<const char*>(Resource.data()),
+                        static_cast<size_t>(Resource.size()) };
 }
 
-std::string Qt::App::SqlResource::InitializeSchemaSql() {
-    return SqlResourceFileToString(":/Sql/Migrations/Schema.sql");
+std::string Qt::App::SqlResource::SchemaSql() {
+    return ReadResourceBytes(":/Sql/Migrations/Schema.sql");
 }
