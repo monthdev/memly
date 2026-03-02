@@ -14,5 +14,5 @@ static std::string SqlResourceFileToString(const QString& QtResourcePath) {
 }
 
 std::string Qt::App::SqlResource::InitializeSchemaSql() {
-    return SqlResourceFileToString(":/Memly/Migrations/Schema.sql");
+    return SqlResourceFileToString(":/Sql/Migrations/Schema.sql");
 }

@@ -8,10 +8,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Qml Network Core)
-
 qt_standard_project_setup(REQUIRES 6.9)
 
-# App
+# App (excluding main.cpp, which lives in src/Qt/App/Main/main.cpp)
 file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.cpp")
 file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.[Hh]*")
 
@@ -50,8 +49,7 @@ set(ALL_SOURCES
 
 include(FetchContent)
 
-# ====================== DuckDB: platform-specific binaries
-# ======================
+# ====================== DuckDB: platform-specific binaries ======================
 
 set(DUCKDB_VERSION "1.4.4")
 set(DUCKDB_TAG "v${DUCKDB_VERSION}")
@@ -108,7 +106,7 @@ if(NOT EXISTS "${_duckdb_inc}/duckdb.hpp")
 endif()
 
 if(NOT EXISTS "${_duckdb_lib}")
-  message(FATAL_ERROR "DuckDB dylib not found in ${libduckdb_SOURCE_DIR}")
+  message(FATAL_ERROR "DuckDB library not found in ${libduckdb_SOURCE_DIR}")
 endif()
 if(NOT EXISTS "${_duckdb_inc}/duckdb.hpp")
   message(FATAL_ERROR "duckdb.hpp not found in ${libduckdb_SOURCE_DIR}")
@@ -120,7 +118,25 @@ set_target_properties(duckdb PROPERTIES IMPORTED_LOCATION "${_duckdb_lib}" INTER
 get_filename_component(_duckdb_libdir "${_duckdb_lib}" DIRECTORY)
 set(_duckdb_rpath_dirs "${_duckdb_libdir}")
 
-qt_add_executable(memly MANUAL_FINALIZATION ${ALL_SOURCES} ${CMAKE_SOURCE_DIR}/src/Qt/App/Main/main.cpp)
+# ====================== Shared SQL resources (one definition) ===================
+# qt_add_resources is target-based; resources are compiled into that target.  [oai_citation:2‡Qt
+# Documentation](https://doc.qt.io/qt-6/qt-add-resources.html?utm_source=chatgpt.com) Use an OBJECT library so the generated resource object is always linked
+# into each executable.
+add_library(memly_sql_resources OBJECT)
+
+qt_add_resources(
+  memly_sql_resources
+  "Sql"
+  PREFIX
+  "/Sql"
+  BASE
+  "${CMAKE_SOURCE_DIR}/src/Sql"
+  FILES
+  ${SQL_FILES})
+
+# ============================== App executable =================================
+
+qt_add_executable(memly MANUAL_FINALIZATION ${ALL_SOURCES} ${CMAKE_SOURCE_DIR}/src/Qt/App/Main/main.cpp $<TARGET_OBJECTS:memly_sql_resources>)
 
 if(COMMAND qt_policy)
   qt_policy(SET QTP0004 NEW)
@@ -137,16 +153,6 @@ qt_add_qml_module(
   QML_FILES
   ${QT_QML})
 
-qt_add_resources(
-  memly
-  "Sql"
-  PREFIX
-  "/Memly"
-  BASE
-  "${CMAKE_SOURCE_DIR}/src/Sql"
-  FILES
-  ${SQL_FILES})
-
 target_include_directories(memly PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 target_compile_options(memly PRIVATE -Wall -Wextra -Wunused -pedantic -Werror $<$<CONFIG:Debug>:-fsanitize=address;-fno-omit-frame-pointer>)
@@ -154,12 +160,15 @@ target_compile_options(memly PRIVATE -Wall -Wextra -Wunused -pedantic -Werror $<
 target_link_options(memly PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
 
 target_link_libraries(memly PRIVATE Qt6::Quick Qt6::Qml Qt6::Network Qt6::Core duckdb)
+
 set_target_properties(memly PROPERTIES BUILD_RPATH "${_duckdb_rpath_dirs}")
 
 qt_import_qml_plugins(memly)
 qt_finalize_executable(memly)
 
-# ======================== Tests: CTest + GoogleTest ===========================
+# ======================== Tests: CTest + GoogleTest ============================
+# gtest_discover_tests runs the test executable with --gtest_list_tests.
+# [oai_citation:3‡CMake](https://cmake.org/cmake/help/latest/module/GoogleTest.html?utm_source=chatgpt.com)
 
 include(CTest)
 find_package(GTest REQUIRED)
@@ -170,9 +179,8 @@ file(GLOB TEST_APP_MACOS_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Qt/
 
 set(CORE_SOURCES ${UTIL_CPP} ${CORE_CPP} ${TS_CPP} ${APP_CPP})
 
-add_executable(test-memly ${CORE_SOURCES} ${TEST_APP_SOURCES} ${CMAKE_SOURCE_DIR}/test/Qt/App/Main/TestMain.cpp)
+add_executable(test-memly ${CORE_SOURCES} ${TEST_APP_SOURCES} ${CMAKE_SOURCE_DIR}/test/Qt/App/Main/TestMain.cpp $<TARGET_OBJECTS:memly_sql_resources>)
 
-# Add macOS-only test sources
 target_sources(test-memly PRIVATE $<$<PLATFORM_ID:Darwin>:${TEST_APP_MACOS_SOURCES}>)
 
 target_compile_definitions(test-memly PRIVATE CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
