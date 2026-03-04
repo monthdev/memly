@@ -3,8 +3,6 @@
 #include <QCoreApplication>
 #include <utility>
 
-namespace App::Bridge {
-
 FatalErrorBridge& FatalErrorBridge::Instance() {
     static FatalErrorBridge s_Instance;
     return s_Instance;
@@ -24,5 +22,3 @@ void FatalErrorBridge::RequestFatalError(QString Message, int ExitCode) {
 void FatalErrorBridge::AcknowledgeAndExit() {
     QCoreApplication::exit(m_ExitCode);
 }
-
-} // namespace App::Bridge

@@ -3,8 +3,6 @@
 #include <QObject>
 #include <QTimer>
 
-namespace App::Bridge {
-
 class FatalErrorBridge final : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString message READ Message NOTIFY messageChanged)
@@ -31,5 +29,3 @@ private:
     QString m_Message;
     int m_ExitCode{ 1 };
 };
-
-} // namespace App::Bridge

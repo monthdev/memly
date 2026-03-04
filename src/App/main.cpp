@@ -15,9 +15,9 @@ int main(int argc, char* argv[]) {
         App.setApplicationName(AppName.c_str());
         App.setApplicationDisplayName(AppName.c_str());
         QQmlApplicationEngine AppEngine{};
-        App::Bridge::FatalErrorBridge::Instance().moveToThread(App.thread());
+        FatalErrorBridge::Instance().moveToThread(App.thread());
         AppEngine.rootContext()->setContextProperty(
-            "FatalErrorBridge", &App::Bridge::FatalErrorBridge::Instance());
+            "FatalErrorBridge", &FatalErrorBridge::Instance());
         QObject::connect(
             &AppEngine,
             &QQmlApplicationEngine::objectCreationFailed,
@@ -47,8 +47,8 @@ int main(int argc, char* argv[]) {
             std::cout << Key << ": " << Value << "\n";
         }
         QTimer::singleShot(0, [] {
-            App::Bridge::FatalErrorBridge::Instance().RequestFatalError(
-                "Test fatal dialog", 1);
+            FatalErrorBridge::Instance().RequestFatalError("Test fatal dialog",
+                                                           1);
         });
         return App.exec();
     } catch (const std::exception& Exception) {
