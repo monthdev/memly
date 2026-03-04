@@ -3,15 +3,14 @@
 #include <fstream>
 
 #include "Qt/App/SqlResource.hpp"
-#include "Utility/Unrecoverable.hpp"
 
 static const std::string ProjectRootPath{ CMAKE_GENERATED_PROJECT_ROOT_DIR };
 static const std::string SqlDirectoryPath{ ProjectRootPath + "/src/Sql" };
 
 static std::string FileContentsToString(const std::string& FilePath) {
     std::ifstream File(FilePath, std::ios::binary);
-    if (!File) {
-        Unrecoverable::Throw();
+    if (File.fail()) {
+        return {};
     }
     std::ostringstream Buffer{};
     Buffer << File.rdbuf();
@@ -20,6 +19,6 @@ static std::string FileContentsToString(const std::string& FilePath) {
 
 TEST(SqlResource, SchemaSql) {
     EXPECT_EQ(
-        Qt::App::SqlResource::SchemaSql(),
+        App::SqlResource::SchemaSql(),
         FileContentsToString(SqlDirectoryPath + "/Migrations/Schema.sql"));
 }

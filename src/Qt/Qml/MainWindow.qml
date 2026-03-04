@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 
 ApplicationWindow {
+    id: window
     width: 960
     height: 600
     minimumWidth: 400
@@ -9,10 +10,15 @@ ApplicationWindow {
     visible: true
     title: "Memly"
     color: "#121212"
+
     Text {
         anchors.centerIn: parent
         text: "Hello"
         color: "white"
         font.pixelSize: 28
+    }
+
+    FatalDialogPopup {
+        id: fatalDialog
     }
 }

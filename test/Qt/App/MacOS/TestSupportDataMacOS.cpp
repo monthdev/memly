@@ -9,16 +9,16 @@ static const std::string EXPECTED_BASE_DIRECTORY_PATH{
 };
 
 TEST(SupportDataMacOS, BaseDirectoryPath) {
-    EXPECT_EQ(Qt::App::SupportData::BaseDirectoryPath(),
+    EXPECT_EQ(App::SupportData::BaseDirectoryPath(),
               EXPECTED_BASE_DIRECTORY_PATH);
 }
 
 TEST(SupportDataMacOS, AudioDirectoryPath) {
-    EXPECT_EQ(Qt::App::SupportData::AudioDirectoryPath(),
+    EXPECT_EQ(App::SupportData::AudioDirectoryPath(),
               EXPECTED_BASE_DIRECTORY_PATH + "/Audio");
 }
 
 TEST(SupportDataMacOS, DatabaseFilePath) {
-    EXPECT_EQ(Qt::App::SupportData::DatabaseFilePath(),
+    EXPECT_EQ(App::SupportData::DatabaseFilePath(),
               EXPECTED_BASE_DIRECTORY_PATH + "/memly.duckdb");
 }

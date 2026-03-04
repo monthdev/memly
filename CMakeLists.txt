@@ -14,10 +14,6 @@ qt_standard_project_setup(REQUIRES 6.9)
 file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.cpp")
 file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.[Hh]*")
 
-# Utility
-file(GLOB UTIL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Utility/*.cpp")
-file(GLOB UTIL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Utility/*.[Hh]*")
-
 # QML files
 set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Qt/Qml")
 file(GLOB_RECURSE QT_QML CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
@@ -37,15 +33,19 @@ file(GLOB CORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.[Hh]*")
 file(GLOB TS_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/TransactionScripts/*.cpp")
 file(GLOB TS_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/TransactionScripts/*.[Hh]*")
 
+# Bridge
+file(GLOB BRIDGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/Bridge/*.cpp")
+file(GLOB BRIDGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/Bridge/*.[Hh]*")
+
 set(ALL_SOURCES
     ${APP_CPP}
     ${APP_HDR}
-    ${UTIL_CPP}
-    ${UTIL_HDR}
     ${TS_CPP}
     ${TS_HDR}
     ${CORE_CPP}
-    ${CORE_HDR})
+    ${CORE_HDR}
+    ${BRIDGE_CPP}
+    ${BRIDGE_HDR})
 
 include(FetchContent)
 

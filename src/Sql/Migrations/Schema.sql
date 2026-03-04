@@ -35,7 +35,6 @@ CREATE TABLE
         back_text VARCHAR NOT NULL CHECK (string_length_ok (back_text)),
         back_norm_text VARCHAR NOT NULL CHECK (string_length_ok (back_norm_text)),
         audio_path VARCHAR,
-        image_path VARCHAR,
         UNIQUE (deck_id, front_text)
     );
 

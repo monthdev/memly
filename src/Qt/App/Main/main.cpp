@@ -2,17 +2,22 @@
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 
 #include "Qt/App/SqlResource.hpp"
 #include "Qt/App/SupportData.hpp"
+#include "Qt/Bridge/FatalErrorBridge.hpp"
 
 int main(int argc, char* argv[]) {
     try {
         QGuiApplication App{ argc, argv };
-        std::string AppName{ "Memly" };
+        const std::string AppName{ "Memly" };
         App.setApplicationName(AppName.c_str());
         App.setApplicationDisplayName(AppName.c_str());
         QQmlApplicationEngine AppEngine{};
+        App::Bridge::FatalErrorBridge::Instance().moveToThread(App.thread());
+        AppEngine.rootContext()->setContextProperty(
+            "FatalErrorBridge", &App::Bridge::FatalErrorBridge::Instance());
         QObject::connect(
             &AppEngine,
             &QQmlApplicationEngine::objectCreationFailed,
@@ -21,10 +26,10 @@ int main(int argc, char* argv[]) {
             Qt::QueuedConnection);
         AppEngine.loadFromModule("Memly", "MainWindow");
 
-        std::cout << Qt::App::SupportData::DatabaseFilePath() << "\n";
-        duckdb::DuckDB Database{ Qt::App::SupportData::DatabaseFilePath() };
+        std::cout << App::SupportData::DatabaseFilePath() << "\n";
+        duckdb::DuckDB Database{ App::SupportData::DatabaseFilePath() };
         duckdb::Connection Connection{ Database };
-        auto Result{ Connection.Query(Qt::App::SqlResource::SchemaSql()) };
+        auto Result{ Connection.Query(App::SqlResource::SchemaSql()) };
         auto ErrorType{ Result->GetErrorType() };
         std::cout << static_cast<int>(ErrorType) << "\n";
         auto ErrorObject{ Result->GetErrorObject() };
@@ -41,30 +46,16 @@ int main(int argc, char* argv[]) {
         for (const auto& [Key, Value] : ErrorObject1.ExtraInfo()) {
             std::cout << Key << ": " << Value << "\n";
         }
-
+        QTimer::singleShot(0, [] {
+            App::Bridge::FatalErrorBridge::Instance().RequestFatalError(
+                "Test fatal dialog", 1);
+        });
         return App.exec();
     } catch (const std::exception& Exception) {
         Q_ASSERT_X(false, "", Exception.what());
-        if (QCoreApplication::instance() != nullptr) {
-            // Emit on the GUI thread to open the popup
-            // QMetaObject::invokeMethod(
-            //     &GuiErrorBridge::Instance(),
-            //     [QtMessage]() {
-            //         emit GuiErrorBridge::Instance().FatalErrorOccurred(QtMessage);
-            //     },
-            //     Qt::QueuedConnection);
-
-            // Let the event loop process the dialog, then quit.
-            // Hard-quit from here to guarantee exit after user closes dialog.
-            QMetaObject::invokeMethod(
-                QCoreApplication::instance(),
-                []() { QCoreApplication::exit(1); },
-                Qt::QueuedConnection);
-
-            // Block forever; control never returns.
-            // QThread::currentThread()->eventDispatcher()->processEvents(
-            //     QEventLoop::AllEvents);
-        }
-        std::abort();
+        return EXIT_FAILURE;
+    } catch (...) {
+        Q_ASSERT_X(false, "", "Unknown exception");
+        return EXIT_FAILURE;
     }
 }

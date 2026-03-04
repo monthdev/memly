@@ -2,10 +2,6 @@
 
 #include <string>
 
-namespace Qt {
-namespace App {
-namespace SqlResource {
+namespace App::SqlResource {
 std::string SchemaSql();
-}
-}
 }

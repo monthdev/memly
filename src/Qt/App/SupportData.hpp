@@ -2,12 +2,8 @@
 
 #include <string>
 
-namespace Qt {
-namespace App {
-namespace SupportData {
+namespace App::SupportData {
 std::string BaseDirectoryPath();
 std::string DatabaseFilePath();
 std::string AudioDirectoryPath();
-}
-}
 }
