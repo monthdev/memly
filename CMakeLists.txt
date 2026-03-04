@@ -29,23 +29,11 @@ file(GLOB SQL_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/Migrations/*.
 file(GLOB CORE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.cpp")
 file(GLOB CORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.[Hh]*")
 
-# TransactionScripts
-file(GLOB TS_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/TransactionScripts/*.cpp")
-file(GLOB TS_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/TransactionScripts/*.[Hh]*")
-
 # Bridge
 file(GLOB BRIDGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/Bridge/*.cpp")
 file(GLOB BRIDGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/Bridge/*.[Hh]*")
 
-set(ALL_SOURCES
-    ${APP_CPP}
-    ${APP_HDR}
-    ${TS_CPP}
-    ${TS_HDR}
-    ${CORE_CPP}
-    ${CORE_HDR}
-    ${BRIDGE_CPP}
-    ${BRIDGE_HDR})
+set(ALL_SOURCES ${APP_CPP} ${APP_HDR} ${CORE_CPP} ${CORE_HDR} ${BRIDGE_CPP} ${BRIDGE_HDR})
 
 include(FetchContent)
 
