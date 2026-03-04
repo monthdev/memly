@@ -11,6 +11,6 @@ static std::string ReadResourceBytes(const char* ResourcePath) {
                         static_cast<size_t>(Resource.size()) };
 }
 
-std::string App::SqlResource::SchemaSql() {
+std::string SchemaSql() {
     return ReadResourceBytes(":/Sql/Migrations/Schema.sql");
 }

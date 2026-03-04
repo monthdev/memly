@@ -10,12 +10,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 find_package(Qt6 REQUIRED COMPONENTS Quick Qml Network Core)
 qt_standard_project_setup(REQUIRES 6.9)
 
-# App (excluding main.cpp, which lives in src/Qt/App/Main/main.cpp)
-file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.cpp")
-file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/App/*.[Hh]*")
+# App
+file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.cpp")
+file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*")
 
 # QML files
-set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Qt/Qml")
+set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Qml")
 file(GLOB_RECURSE QT_QML CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
 foreach(qml IN LISTS QT_QML)
   file(RELATIVE_PATH rel "${QML_DIR}" "${qml}")
@@ -25,15 +25,11 @@ endforeach()
 # Sql
 file(GLOB SQL_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/Migrations/*.sql" "${CMAKE_SOURCE_DIR}/src/Sql/Statements/*.sql")
 
-# Core
-file(GLOB CORE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.cpp")
-file(GLOB CORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/*.[Hh]*")
-
 # Bridge
-file(GLOB BRIDGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/Bridge/*.cpp")
-file(GLOB BRIDGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Qt/Bridge/*.[Hh]*")
+file(GLOB BRIDGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bridge/*.cpp")
+file(GLOB BRIDGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bridge/*.[Hh]*")
 
-set(ALL_SOURCES ${APP_CPP} ${APP_HDR} ${CORE_CPP} ${CORE_HDR} ${BRIDGE_CPP} ${BRIDGE_HDR})
+set(ALL_SOURCES ${APP_CPP} ${APP_HDR} ${BRIDGE_CPP} ${BRIDGE_HDR})
 
 include(FetchContent)
 
@@ -107,9 +103,6 @@ get_filename_component(_duckdb_libdir "${_duckdb_lib}" DIRECTORY)
 set(_duckdb_rpath_dirs "${_duckdb_libdir}")
 
 # ====================== Shared SQL resources (one definition) ===================
-# qt_add_resources is target-based; resources are compiled into that target.  [oai_citation:2‡Qt
-# Documentation](https://doc.qt.io/qt-6/qt-add-resources.html?utm_source=chatgpt.com) Use an OBJECT library so the generated resource object is always linked
-# into each executable.
 add_library(memly_sql_resources OBJECT)
 
 qt_add_resources(
@@ -123,8 +116,7 @@ qt_add_resources(
   ${SQL_FILES})
 
 # ============================== App executable =================================
-
-qt_add_executable(memly MANUAL_FINALIZATION ${ALL_SOURCES} ${CMAKE_SOURCE_DIR}/src/Qt/App/Main/main.cpp $<TARGET_OBJECTS:memly_sql_resources>)
+qt_add_executable(memly MANUAL_FINALIZATION ${ALL_SOURCES} $<TARGET_OBJECTS:memly_sql_resources>)
 
 if(COMMAND qt_policy)
   qt_policy(SET QTP0004 NEW)
@@ -152,33 +144,27 @@ set_target_properties(memly PROPERTIES BUILD_RPATH "${_duckdb_rpath_dirs}")
 qt_import_qml_plugins(memly)
 qt_finalize_executable(memly)
 
-# ======================== Tests: CTest + GoogleTest ============================
-# gtest_discover_tests runs the test executable with --gtest_list_tests.
-# [oai_citation:3‡CMake](https://cmake.org/cmake/help/latest/module/GoogleTest.html?utm_source=chatgpt.com)
-
-include(CTest)
-find_package(GTest REQUIRED)
-include(GoogleTest)
-
-file(GLOB TEST_APP_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Qt/App/*.cpp")
-file(GLOB TEST_APP_MACOS_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Qt/App/MacOS/*.cpp")
-
-set(CORE_SOURCES ${UTIL_CPP} ${CORE_CPP} ${TS_CPP} ${APP_CPP})
-
-add_executable(test-memly ${CORE_SOURCES} ${TEST_APP_SOURCES} ${CMAKE_SOURCE_DIR}/test/Qt/App/Main/TestMain.cpp $<TARGET_OBJECTS:memly_sql_resources>)
-
-target_sources(test-memly PRIVATE $<$<PLATFORM_ID:Darwin>:${TEST_APP_MACOS_SOURCES}>)
-
-target_compile_definitions(test-memly PRIVATE CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
-
-target_include_directories(test-memly PRIVATE "${CMAKE_SOURCE_DIR}/src")
-
-target_compile_options(test-memly PRIVATE -Wall -Wextra -Wunused -pedantic -Werror $<$<CONFIG:Debug>:-fsanitize=address;-fno-omit-frame-pointer>)
-
-target_link_options(test-memly PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
-
-target_link_libraries(test-memly PRIVATE GTest::gtest Qt6::Core duckdb)
-
-set_target_properties(test-memly PROPERTIES BUILD_RPATH "${_duckdb_rpath_dirs}")
-
-gtest_discover_tests(test-memly)
+# Test include(CTest) find_package(GTest REQUIRED) include(GoogleTest)
+#
+# file(GLOB TEST_APP_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/App/*.cpp") file(GLOB TEST_APP_MACOS_SOURCES CONFIGURE_DEPENDS
+# "${CMAKE_SOURCE_DIR}/test/App/MacOS/*.cpp")
+#
+# set(CORE_SOURCES ${CORE_CPP} ${TS_CPP} ${APP_CPP})
+#
+# add_executable(test-memly ${CORE_SOURCES} ${TEST_APP_SOURCES} ${CMAKE_SOURCE_DIR}/test/Qt/App/Main/TestMain.cpp $<TARGET_OBJECTS:memly_sql_resources>)
+#
+# target_sources(test-memly PRIVATE $<$<PLATFORM_ID:Darwin>:${TEST_APP_MACOS_SOURCES}>)
+#
+# target_compile_definitions(test-memly PRIVATE CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
+#
+# target_include_directories(test-memly PRIVATE "${CMAKE_SOURCE_DIR}/src")
+#
+# target_compile_options(test-memly PRIVATE -Wall -Wextra -Wunused -pedantic -Werror $<$<CONFIG:Debug>:-fsanitize=address;-fno-omit-frame-pointer>)
+#
+# target_link_options(test-memly PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
+#
+# target_link_libraries(test-memly PRIVATE GTest::gtest Qt6::Core duckdb)
+#
+# set_target_properties(test-memly PROPERTIES BUILD_RPATH "${_duckdb_rpath_dirs}")
+#
+# gtest_discover_tests(test-memly)

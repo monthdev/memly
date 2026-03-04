@@ -4,9 +4,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "Qt/App/SqlResource.hpp"
-#include "Qt/App/SupportData.hpp"
-#include "Qt/Bridge/FatalErrorBridge.hpp"
+#include "Bridge/FatalErrorBridge.hpp"
+#include "Bridge/SqlResource.hpp"
+#include "Bridge/SupportData.hpp"
 
 int main(int argc, char* argv[]) {
     try {
@@ -26,10 +26,10 @@ int main(int argc, char* argv[]) {
             Qt::QueuedConnection);
         AppEngine.loadFromModule("Memly", "MainWindow");
 
-        std::cout << App::SupportData::DatabaseFilePath() << "\n";
-        duckdb::DuckDB Database{ App::SupportData::DatabaseFilePath() };
+        std::cout << DatabaseFilePath() << "\n";
+        duckdb::DuckDB Database{ DatabaseFilePath() };
         duckdb::Connection Connection{ Database };
-        auto Result{ Connection.Query(App::SqlResource::SchemaSql()) };
+        auto Result{ Connection.Query(SchemaSql()) };
         auto ErrorType{ Result->GetErrorType() };
         std::cout << static_cast<int>(ErrorType) << "\n";
         auto ErrorObject{ Result->GetErrorObject() };
