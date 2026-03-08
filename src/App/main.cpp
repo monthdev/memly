@@ -9,6 +9,7 @@
 #include "Bridge/SupportData.hpp"
 
 int main(int argc, char* argv[]) {
+    Q_INIT_RESOURCE(Sql);
     try {
         QGuiApplication App{ argc, argv };
         const std::string AppName{ "Memly" };
@@ -29,7 +30,7 @@ int main(int argc, char* argv[]) {
         std::cout << DatabaseFilePath() << "\n";
         duckdb::DuckDB Database{ DatabaseFilePath() };
         duckdb::Connection Connection{ Database };
-        auto Result{ Connection.Query(SchemaSql()) };
+        auto Result{ Connection.Query(InitialSchemaSql()) };
         auto ErrorType{ Result->GetErrorType() };
         std::cout << static_cast<int>(ErrorType) << "\n";
         auto ErrorObject{ Result->GetErrorObject() };
@@ -52,10 +53,6 @@ int main(int argc, char* argv[]) {
         });
         return App.exec();
     } catch (const std::exception& Exception) {
-        Q_ASSERT_X(false, "", Exception.what());
-        return EXIT_FAILURE;
-    } catch (...) {
-        Q_ASSERT_X(false, "", "Unknown exception");
-        return EXIT_FAILURE;
-    }
+        qFatal("%s", Exception.what());
+    } catch (...) { qFatal("Unknown exception"); }
 }

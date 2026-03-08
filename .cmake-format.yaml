@@ -1,1 +1,16 @@
-line_width: 160
+format:
+  line_width: 80
+  tab_size: 2
+  dangle_parens: true
+  max_subgroups_hwrap: 3
+  always_wrap:
+    - set_source_files_properties
+    - set_target_properties
+    - target_compile_options
+    - target_link_options
+    - target_link_libraries
+    - set_target_properties
+
+lint:
+  argument_var_pattern: "[A-Za-z][A-Za-z0-9_]*"
+  local_var_pattern: "[A-Za-z][A-Za-z0-9_]*"
