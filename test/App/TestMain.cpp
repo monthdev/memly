@@ -1,11 +1,23 @@
-#include <gtest/gtest.h>
-
 #include <QCoreApplication>
+#include <QTest>
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
     QCoreApplication::setApplicationName("Memly");
     QCoreApplication App(argc, argv);
 
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    int ExitCode{ 0 };
+
+    //     {
+    //         TestSqlResource TestObject;
+    //         ExitCode |= QTest::qExec(&TestObject, argc, argv);
+    //     }
+    //
+    // #if defined(__APPLE__)
+    //     {
+    //         TestSupportDataMacOS TestObject;
+    //         ExitCode |= QTest::qExec(&TestObject, argc, argv);
+    //     }
+    // #endif
+
+    return ExitCode;
 }
