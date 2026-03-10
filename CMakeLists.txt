@@ -28,6 +28,31 @@ list(REMOVE_ITEM APP_CPP "${APP_MAIN_CPP}")
 file(GLOB BRIDGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bridge/*.cpp")
 file(GLOB BRIDGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bridge/*.[Hh]*")
 
+file(GLOB LANGUAGE_CPP CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/src/Language/*.cpp"
+)
+file(GLOB LANGUAGE_HDR CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/src/Language/*.[Hh]*"
+)
+
+file(GLOB MEDIA_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Media/*.cpp")
+file(GLOB MEDIA_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Media/*.[Hh]*")
+
+file(GLOB SCHEDULING_CPP CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/src/Scheduling/*.cpp"
+)
+file(GLOB SCHEDULING_HDR CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/src/Scheduling/*.[Hh]*"
+)
+
+file(GLOB SQL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/*.cpp")
+file(GLOB SQL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/*.[Hh]*")
+
+file(GLOB SUPPORT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/*.cpp")
+file(GLOB SUPPORT_HDR CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/src/Support/*.[Hh]*"
+)
+
 set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Qml")
 file(GLOB_RECURSE QT_QML CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
 foreach(qml_file IN LISTS QT_QML)
@@ -46,8 +71,20 @@ file(GLOB TEST_APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/App/*.cpp")
 file(GLOB TEST_BRIDGE_CPP CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/test/Bridge/*.cpp"
 )
+file(GLOB TEST_LANGUAGE_CPP CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/test/Language/*.cpp"
+)
+file(GLOB TEST_MEDIA_CPP CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/test/Media/*.cpp"
+)
 file(GLOB TEST_QML_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Qml/*.cpp")
+file(GLOB TEST_SCHEDULING_CPP CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/test/Scheduling/*.cpp"
+)
 file(GLOB TEST_SQL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Sql/*.cpp")
+file(GLOB TEST_SUPPORT_CPP CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/test/Support/*.cpp"
+)
 
 set(TEST_MAIN_CPP "${CMAKE_SOURCE_DIR}/test/App/TestMain.cpp")
 list(REMOVE_ITEM TEST_APP_CPP "${TEST_MAIN_CPP}")
@@ -58,9 +95,9 @@ set(TEST_SUPPORT_DATA_MACOS_CPP
     "${CMAKE_SOURCE_DIR}/test/Bridge/TestSupportDataMacOS.cpp"
 )
 # set(TEST_SUPPORT_DATA_WINDOWS_CPP
-# "${CMAKE_SOURCE_DIR}/test/Bridge/TestSupportDataWindows.cpp" )
+# "${CMAKE_SOURCE_DIR}/test/Bridge/TestSupportDataWindows.cpp")
 # set(TEST_SUPPORT_DATA_LINUX_CPP
-# "${CMAKE_SOURCE_DIR}/test/Bridge/TestSupportDataLinux.cpp" )
+# "${CMAKE_SOURCE_DIR}/test/Bridge/TestSupportDataLinux.cpp")
 
 list(REMOVE_ITEM TEST_BRIDGE_CPP "${TEST_SUPPORT_DATA_MACOS_CPP}"
      # "${TEST_SUPPORT_DATA_WINDOWS_CPP}" "${TEST_SUPPORT_DATA_LINUX_CPP}"
@@ -208,8 +245,22 @@ qt_add_resources(
 # ============================= Shared core library ============================
 
 add_library(
-  memly_core STATIC ${APP_CPP} ${APP_HDR} ${BRIDGE_CPP} ${BRIDGE_HDR}
-                    $<TARGET_OBJECTS:memly_sql_resources>
+  memly_core STATIC
+  ${APP_CPP}
+  ${APP_HDR}
+  ${BRIDGE_CPP}
+  ${BRIDGE_HDR}
+  ${LANGUAGE_CPP}
+  ${LANGUAGE_HDR}
+  ${MEDIA_CPP}
+  ${MEDIA_HDR}
+  ${SCHEDULING_CPP}
+  ${SCHEDULING_HDR}
+  ${SQL_CPP}
+  ${SQL_HDR}
+  ${SUPPORT_CPP}
+  ${SUPPORT_HDR}
+  $<TARGET_OBJECTS:memly_sql_resources>
 )
 
 target_include_directories(memly_core PUBLIC "${CMAKE_SOURCE_DIR}/src")
@@ -277,8 +328,12 @@ if(BUILD_TESTING)
     ${TEST_MAIN_CPP}
     ${TEST_APP_CPP}
     ${TEST_BRIDGE_CPP}
+    ${TEST_LANGUAGE_CPP}
+    ${TEST_MEDIA_CPP}
     ${TEST_QML_CPP}
+    ${TEST_SCHEDULING_CPP}
     ${TEST_SQL_CPP}
+    ${TEST_SUPPORT_CPP}
     ${TEST_PLATFORM_CPP}
   )
 

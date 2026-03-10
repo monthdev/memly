@@ -1,32 +1,12 @@
 #include <duckdb.hpp>
 
-#include <QDir>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QStandardPaths>
 
+#include "App/AppData.hpp"
 #include "Bridge/FatalErrorBridge.hpp"
-#include "Bridge/SqlResource.hpp"
-
-static std::string EnsureDirectory(const std::string& Directory) {
-    QDir().mkpath(Directory.c_str());
-    return Directory;
-}
-
-static std::string BaseDirectoryPath() {
-    return EnsureDirectory(
-        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
-            .toStdString());
-}
-
-static std::string DatabaseFilePath() {
-    return BaseDirectoryPath() + "/memly.duckdb";
-}
-
-// static std::string AudioDirectoryPath() {
-//     return EnsureDirectory(BaseDirectoryPath() + "/Audio");
-// }
+#include "Sql/SqlResource.hpp"
 
 int main(int argc, char* argv[]) {
     try {
@@ -47,10 +27,10 @@ int main(int argc, char* argv[]) {
             Qt::QueuedConnection);
         AppEngine.loadFromModule("Memly", "MainWindow");
 
-        std::cout << DatabaseFilePath() << "\n";
-        duckdb::DuckDB Database{ DatabaseFilePath() };
+        std::cout << App::DatabaseFilePath() << "\n";
+        duckdb::DuckDB Database{ App::DatabaseFilePath() };
         duckdb::Connection Connection{ Database };
-        auto Result{ Connection.Query(InitialSchemaSql()) };
+        auto Result{ Connection.Query(Sql::InitialSchema()) };
         auto ErrorType{ Result->GetErrorType() };
         std::cout << static_cast<int>(ErrorType) << "\n";
         auto ErrorObject{ Result->GetErrorObject() };

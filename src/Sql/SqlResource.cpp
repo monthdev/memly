@@ -2,17 +2,19 @@
 
 #include <QResource>
 
-#include "Bridge/Throw.hpp"
+#include "Support/ThrowRuntimeError.hpp"
 
+namespace Sql {
 static std::string ReadResourceBytes(const char* ResourcePath) {
     QResource Resource{ ResourcePath };
     if (!Resource.isValid()) {
-        Throw();
+        Support::ThrowRuntimeError();
     }
     return std::string{ reinterpret_cast<const char*>(Resource.data()),
                         static_cast<size_t>(Resource.size()) };
 }
 
-std::string InitialSchemaSql() {
+std::string InitialSchema() {
     return ReadResourceBytes(":/Sql/Migrations/1_InitialSchema.sql");
+}
 }
