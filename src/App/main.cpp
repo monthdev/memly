@@ -1,12 +1,32 @@
 #include <duckdb.hpp>
 
+#include <QDir>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QStandardPaths>
 
 #include "Bridge/FatalErrorBridge.hpp"
 #include "Bridge/SqlResource.hpp"
-#include "Bridge/SupportData.hpp"
+
+static std::string EnsureDirectory(const std::string& Directory) {
+    QDir().mkpath(Directory.c_str());
+    return Directory;
+}
+
+static std::string BaseDirectoryPath() {
+    return EnsureDirectory(
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+            .toStdString());
+}
+
+static std::string DatabaseFilePath() {
+    return BaseDirectoryPath() + "/memly.duckdb";
+}
+
+// static std::string AudioDirectoryPath() {
+//     return EnsureDirectory(BaseDirectoryPath() + "/Audio");
+// }
 
 int main(int argc, char* argv[]) {
     Q_INIT_RESOURCE(Sql);
