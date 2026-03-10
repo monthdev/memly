@@ -29,8 +29,8 @@ static std::string DatabaseFilePath() {
 // }
 
 int main(int argc, char* argv[]) {
-    Q_INIT_RESOURCE(Sql);
     try {
+        Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };
         const std::string AppName{ "Memly" };
         App.setApplicationName(AppName.c_str());
