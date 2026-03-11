@@ -30,6 +30,9 @@ int main(int argc, char* argv[]) {
         std::cout << App::DatabaseFilePath() << "\n";
         duckdb::DuckDB Database{ App::DatabaseFilePath() };
         duckdb::Connection Connection{ Database };
+
+        // TODO: schema migrator here before databasebridge object
+
         auto Result{ Connection.Query(Sql::InitialSchema()) };
         auto ErrorType{ Result->GetErrorType() };
         std::cout << static_cast<int>(ErrorType) << "\n";
