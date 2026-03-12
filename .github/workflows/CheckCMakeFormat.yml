@@ -3,20 +3,8 @@ name: Check CMake Format
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "**/CMakeLists.txt"
-      - "**/*.cmake"
-      - "**/*.cmake.in"
-      - ".cmake-format.yaml"
-      - ".cmakelintrc"
   push:
     branches: [main]
-    paths:
-      - "**/CMakeLists.txt"
-      - "**/*.cmake"
-      - "**/*.cmake.in"
-      - ".cmake-format.yaml"
-      - ".cmakelintrc"
 
 jobs:
   cmake-format:
