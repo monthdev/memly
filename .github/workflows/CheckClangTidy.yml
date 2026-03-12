@@ -20,8 +20,77 @@ jobs:
             CXX: clang++
 
         steps:
-            - name: Install toolchain and Qt
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Determine diff base
+              id: base
               run: |
+                  set -euo pipefail
+
+                  if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+                    git fetch origin "${GITHUB_BASE_REF}" --depth=1
+                    MB="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
+                  else
+                    MB="${GITHUB_EVENT_BEFORE:-}"
+                    if [[ -z "$MB" || "$MB" == "0000000000000000000000000000000000000000" ]]; then
+                      MB="$(git rev-parse HEAD~1)"
+                    fi
+                  fi
+
+                  echo "mb=$MB" >> "$GITHUB_OUTPUT"
+
+            - name: Collect changed C++ files
+              id: files
+              run: |
+                  set -euo pipefail
+
+                  MB="${{ steps.base.outputs.mb }}"
+
+                  mapfile -t ChangedSources < <(
+                    git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
+                    | grep -E '\.(cpp|cxx|cc)$' || true
+                  )
+
+                  mapfile -t ChangedHeaders < <(
+                    git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
+                    | grep -E '\.(h|hh|hpp|hxx)$' || true
+                  )
+
+                  if [[ ${#ChangedSources[@]} -eq 0 && ${#ChangedHeaders[@]} -eq 0 ]]; then
+                    echo "No changed C++ source or header files."
+                    echo "has_files=false" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+
+                  printf '%s\n' "${ChangedSources[@]}" > /tmp/changed_sources.txt
+                  printf '%s\n' "${ChangedHeaders[@]}" > /tmp/changed_headers.txt
+
+                  if [[ ${#ChangedSources[@]} -gt 0 ]]; then
+                    echo "source_count=${#ChangedSources[@]}" >> "$GITHUB_OUTPUT"
+                    echo "Changed source files:"
+                    cat /tmp/changed_sources.txt
+                  else
+                    echo "source_count=0" >> "$GITHUB_OUTPUT"
+                  fi
+
+                  if [[ ${#ChangedHeaders[@]} -gt 0 ]]; then
+                    echo "header_count=${#ChangedHeaders[@]}" >> "$GITHUB_OUTPUT"
+                    echo "Changed header files:"
+                    cat /tmp/changed_headers.txt
+                  else
+                    echo "header_count=0" >> "$GITHUB_OUTPUT"
+                  fi
+
+                  echo "has_files=true" >> "$GITHUB_OUTPUT"
+
+            - name: Install toolchain and Qt
+              if: steps.files.outputs.has_files == 'true'
+              run: |
+                  set -euo pipefail
+
                   apt-get update
                   DEBIAN_FRONTEND=noninteractive apt-get install -y \
                     build-essential \
@@ -32,27 +101,53 @@ jobs:
                     libxkbcommon-dev \
                     libgtest-dev
 
-            - name: Checkout
-              uses: actions/checkout@v4
-
-            - name: Configure (CMake + Ninja, generate compile_commands.json)
+            - name: Configure (generate compile_commands.json)
+              if: steps.files.outputs.has_files == 'true'
               run: |
+                  set -euo pipefail
+
                   cmake -S . -B build \
                     -G Ninja \
-                    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+                    -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
                     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-            - name: Build (Ninja)
+            - name: Select clang-tidy targets
+              if: steps.files.outputs.has_files == 'true'
               run: |
-                  ninja -C build
+                  set -euo pipefail
+
+                  SourceCount="${{ steps.files.outputs.source_count }}"
+                  HeaderCount="${{ steps.files.outputs.header_count }}"
+
+                  if [[ "$SourceCount" -gt 0 ]]; then
+                    cp /tmp/changed_sources.txt /tmp/clang_tidy_targets.txt
+                    echo "Using changed source files as clang-tidy targets."
+                  elif [[ "$HeaderCount" -gt 0 ]]; then
+                    find . \
+                      -path ./build -prune -o \
+                      \( -name '*.cpp' -o -name '*.cxx' -o -name '*.cc' \) \
+                      -print \
+                      | sort > /tmp/clang_tidy_targets.txt
+
+                    echo "Header-only edit detected; using all translation units as clang-tidy targets."
+                  fi
+
+                  echo "clang-tidy targets:"
+                  cat /tmp/clang_tidy_targets.txt
 
             - name: Run clang-tidy
+              if: steps.files.outputs.has_files == 'true'
               run: |
-                  mapfile -t Files < <(find . -path ./build -prune -o -name '*.cpp' -print)
+                  set -euo pipefail
 
-                  if [ ${#Files[@]} -eq 0 ]; then
-                    echo "No .cpp files found."
+                  mapfile -t Files < /tmp/clang_tidy_targets.txt
+
+                  if [[ ${#Files[@]} -eq 0 ]]; then
+                    echo "No clang-tidy targets selected."
                     exit 0
                   fi
 
-                  clang-tidy -p build "${Files[@]}"
+                  clang-tidy \
+                    -p build \
+                    --header-filter='.*' \
+                    "${Files[@]}"
