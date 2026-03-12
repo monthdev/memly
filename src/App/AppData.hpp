@@ -10,8 +10,8 @@ std::string AudioDirectoryPath();
 std::string DatabaseFilePath();
 }
 
-static void Test() {
-    if (0) {
-        return;
-    }
-}
+// static void Test() {
+//     if (0) {
+//         return;
+//     }
+// }
