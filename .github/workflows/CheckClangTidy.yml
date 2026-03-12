@@ -58,7 +58,7 @@ jobs:
                   fi
 
                   mapfile -t Files < <(
-                    git diff --name-only "$MergeBase" HEAD -- '*.cpp' '*.hpp'
+                     git diff --name-only "$MergeBase" HEAD -- '*.cpp' '*.hpp' '*.cc' '*.cxx' '*.h' '*.hh' '*.hxx'
                   )
 
                   if [[ ${#Files[@]} -eq 0 ]]; then
