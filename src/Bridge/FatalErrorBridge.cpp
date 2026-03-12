@@ -1,18 +1,18 @@
 #include "FatalErrorBridge.hpp"
 
 #include <QCoreApplication>
-#include <utility>
 
-FatalErrorBridge& FatalErrorBridge::Instance() {
-    static FatalErrorBridge s_Instance;
-    return s_Instance;
-}
+namespace Bridge {
 
 FatalErrorBridge::FatalErrorBridge(QObject* Parent)
     : QObject(Parent) {
 }
 
-void FatalErrorBridge::RequestFatalError(QString Message, int ExitCode) {
+QString FatalErrorBridge::Message() const {
+    return m_Message;
+}
+
+void FatalErrorBridge::RequestFatalError(QString&& Message, int ExitCode) {
     m_Message = std::move(Message);
     m_ExitCode = ExitCode;
     emit messageChanged();
@@ -21,4 +21,6 @@ void FatalErrorBridge::RequestFatalError(QString Message, int ExitCode) {
 
 void FatalErrorBridge::AcknowledgeAndExit() {
     QCoreApplication::exit(m_ExitCode);
+}
+
 }

@@ -1,4 +1,3 @@
-// FatalDialogPopup.qml
 import QtQuick
 import QtQuick.Dialogs
 
@@ -13,6 +12,8 @@ MessageDialog {
 
     Connections {
         target: FatalErrorBridge
-        function onShowFatalDialog() { fatalDialog.open() }
+        function onShowFatalDialog() {
+            fatalDialog.open();
+        }
     }
 }

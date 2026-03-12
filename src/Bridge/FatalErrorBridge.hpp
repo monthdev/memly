@@ -1,31 +1,29 @@
 #pragma once
 
 #include <QObject>
-#include <QTimer>
+
+namespace Bridge {
 
 class FatalErrorBridge final : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString message READ Message NOTIFY messageChanged)
 
 public:
-    static FatalErrorBridge& Instance();
+    explicit FatalErrorBridge(QObject* Parent = nullptr);
 
-    void RequestFatalError(QString Message, int ExitCode);
-
-    QString Message() const {
-        return m_Message;
-    }
+    QString Message() const;
+    void RequestFatalError(QString&& Message, int ExitCode);
 
 public slots:
     void AcknowledgeAndExit();
 
 signals:
-    void showFatalDialog();
     void messageChanged();
+    void showFatalDialog();
 
 private:
-    explicit FatalErrorBridge(QObject* Parent = nullptr);
-
     QString m_Message;
     int m_ExitCode{ 1 };
 };
+
+}
