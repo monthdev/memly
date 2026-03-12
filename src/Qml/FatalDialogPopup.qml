@@ -16,4 +16,4 @@ MessageDialog {
             fatalDialog.open();
         }
     }
-} 
+}
