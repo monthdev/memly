@@ -1,58 +1,58 @@
 name: Check Clang Tidy
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+    pull_request:
+        branches: [main]
+    push:
+        branches: [main]
 
 jobs:
-  clang-tidy:
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:25.10
-    defaults:
-      run:
-        shell: bash
-    env:
-      CMAKE_BUILD_TYPE: Debug
-      CC: clang
-      CXX: clang++
+    clang-tidy:
+        runs-on: ubuntu-latest
+        container:
+            image: ubuntu:25.10
+        defaults:
+            run:
+                shell: bash
+        env:
+            CMAKE_BUILD_TYPE: Debug
+            CC: clang
+            CXX: clang++
 
-    steps:
-      - name: Install toolchain and Qt
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            build-essential \
-            clang clang-tidy cmake ninja-build \
-            qt6-base-dev qt6-declarative-dev qt6-tools-dev \
-            qt6-base-dev-tools qt6-qmltooling-plugins \
-            libgl1-mesa-dev \
-            libxkbcommon-dev \
-            libgtest-dev
+        steps:
+            - name: Install toolchain and Qt
+              run: |
+                  apt-get update
+                  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+                    build-essential \
+                    clang clang-tidy cmake ninja-build \
+                    qt6-base-dev qt6-declarative-dev qt6-tools-dev \
+                    qt6-base-dev-tools qt6-qmltooling-plugins \
+                    libgl1-mesa-dev \
+                    libxkbcommon-dev \
+                    libgtest-dev
 
-      - name: Checkout
-        uses: actions/checkout@v4
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Configure (CMake + Ninja, generate compile_commands.json)
-        run: |
-          cmake -S . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+            - name: Configure (CMake + Ninja, generate compile_commands.json)
+              run: |
+                  cmake -S . -B build \
+                    -G Ninja \
+                    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+                    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-      - name: Build (Ninja)
-        run: |
-          ninja -C build
+            - name: Build (Ninja)
+              run: |
+                  ninja -C build
 
-      - name: Run clang-tidy
-        run: |
-          mapfile -t Files < <(find . -path ./build -prune -o -name '*.cpp' -print)
+            - name: Run clang-tidy
+              run: |
+                  mapfile -t Files < <(find . -path ./build -prune -o -name '*.cpp' -print)
 
-          if [ ${#Files[@]} -eq 0 ]; then
-            echo "No .cpp files found."
-            exit 0
-          fi
+                  if [ ${#Files[@]} -eq 0 ]; then
+                    echo "No .cpp files found."
+                    exit 0
+                  fi
 
-          clang-tidy -p build "${Files[@]}"
+                  clang-tidy -p build "${Files[@]}"
