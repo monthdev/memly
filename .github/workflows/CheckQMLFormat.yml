@@ -1,0 +1,79 @@
+name: Check QML Format
+
+on:
+    pull_request:
+        branches: [main]
+    push:
+        branches: [main]
+
+jobs:
+    qml-format:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Install qmlformat
+              shell: bash
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y qt6-declarative-dev-tools
+
+                  QMLFORMAT_BIN="/usr/lib/qt6/bin/qmlformat"
+                  if [[ ! -x "$QMLFORMAT_BIN" ]]; then
+                    echo "::error::qmlformat not found at $QMLFORMAT_BIN"
+                    exit 1
+                  fi
+
+                  echo "QMLFORMAT_BIN=$QMLFORMAT_BIN" >> "$GITHUB_ENV"
+                  "$QMLFORMAT_BIN" --version
+
+            - name: Determine diff base
+              id: base
+              shell: bash
+              run: |
+                  if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+                    git fetch origin "${GITHUB_BASE_REF}" --depth=1
+                    MB=$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")
+                  else
+                    MB=$(git rev-parse HEAD~1)
+                  fi
+                  echo "mb=$MB" >> "$GITHUB_OUTPUT"
+
+            - name: Run qmlformat on changed files
+              shell: bash
+              run: |
+                  MB="${{ steps.base.outputs.mb }}"
+                  mapfile -t FILES < <(git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
+                    | grep -E '\.qml$' || true)
+
+                  if [[ ${#FILES[@]} -eq 0 ]]; then
+                    echo "No QML files changed."
+                    exit 0
+                  fi
+
+                  : "${QMLFORMAT_BIN:?QMLFORMAT_BIN not set}"
+                  "$QMLFORMAT_BIN" --version
+
+                  FAIL=0
+                  TMP_DIR="$(mktemp -d)"
+                  trap 'rm -rf "$TMP_DIR"' EXIT
+
+                  for f in "${FILES[@]}"; do
+                    OUT="$TMP_DIR/$(basename "$f")"
+                    "$QMLFORMAT_BIN" "$f" > "$OUT"
+
+                    if ! diff -u "$f" "$OUT" > /dev/null; then
+                      echo "::error file=$f::File is not properly formatted with qmlformat"
+                      FAIL=1
+                    fi
+                  done
+
+                  if [[ $FAIL -ne 0 ]]; then
+                    echo "::error::Some files are not formatted. Run: qmlformat -i <file>..."
+                    echo "Changed files checked:"
+                    printf '%s\n' "${FILES[@]}"
+                    exit 1
+                  fi
