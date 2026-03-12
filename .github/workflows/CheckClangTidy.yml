@@ -9,8 +9,6 @@ on:
 jobs:
     clang-tidy:
         runs-on: ubuntu-latest
-        container:
-            image: ubuntu:25.10
         defaults:
             run:
                 shell: bash
@@ -68,22 +66,8 @@ jobs:
                   printf '%s\n' "${ChangedSources[@]}" > /tmp/changed_sources.txt
                   printf '%s\n' "${ChangedHeaders[@]}" > /tmp/changed_headers.txt
 
-                  if [[ ${#ChangedSources[@]} -gt 0 ]]; then
-                    echo "source_count=${#ChangedSources[@]}" >> "$GITHUB_OUTPUT"
-                    echo "Changed source files:"
-                    cat /tmp/changed_sources.txt
-                  else
-                    echo "source_count=0" >> "$GITHUB_OUTPUT"
-                  fi
-
-                  if [[ ${#ChangedHeaders[@]} -gt 0 ]]; then
-                    echo "header_count=${#ChangedHeaders[@]}" >> "$GITHUB_OUTPUT"
-                    echo "Changed header files:"
-                    cat /tmp/changed_headers.txt
-                  else
-                    echo "header_count=0" >> "$GITHUB_OUTPUT"
-                  fi
-
+                  echo "source_count=${#ChangedSources[@]}" >> "$GITHUB_OUTPUT"
+                  echo "header_count=${#ChangedHeaders[@]}" >> "$GITHUB_OUTPUT"
                   echo "has_files=true" >> "$GITHUB_OUTPUT"
 
             - name: Install toolchain and Qt
@@ -91,12 +75,18 @@ jobs:
               run: |
                   set -euo pipefail
 
-                  apt-get update
-                  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+                  sudo apt-get update
+                  DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
                     build-essential \
-                    clang clang-tidy cmake ninja-build \
-                    qt6-base-dev qt6-declarative-dev qt6-tools-dev \
-                    qt6-base-dev-tools qt6-qmltooling-plugins \
+                    clang \
+                    clang-tidy \
+                    cmake \
+                    ninja-build \
+                    qt6-base-dev \
+                    qt6-declarative-dev \
+                    qt6-tools-dev \
+                    qt6-base-dev-tools \
+                    qt6-qmltooling-plugins \
                     libgl1-mesa-dev \
                     libxkbcommon-dev \
                     libgtest-dev
@@ -128,7 +118,6 @@ jobs:
                       \( -name '*.cpp' -o -name '*.cxx' -o -name '*.cc' \) \
                       -print \
                       | sort > /tmp/clang_tidy_targets.txt
-
                     echo "Header-only edit detected; using all translation units as clang-tidy targets."
                   fi
 
