@@ -4,22 +4,25 @@
 #include <QStandardPaths>
 
 namespace App {
-static std::string EnsureDirectory(const std::string& Directory) {
-    QDir().mkpath(Directory.c_str());
+static QString EnsureDirectory(const QString& Directory) {
+    QDir().mkpath(Directory);
     return Directory;
 }
 
-std::string BaseDirectoryPath() {
+static QString BaseDirectoryPath() {
     return EnsureDirectory(
-        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
-            .toStdString());
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 }
 
-std::string AudioDirectoryPath() {
+QString AudioDirectoryPath() {
     return EnsureDirectory(BaseDirectoryPath() + "/Audio");
 }
 
-std::string DatabaseFilePath() {
+QString CrashLogFilePath() {
+    return BaseDirectoryPath() + "/crash.log";
+}
+
+QString DatabaseFilePath() {
     return BaseDirectoryPath() + "/memly.duckdb";
 }
 }

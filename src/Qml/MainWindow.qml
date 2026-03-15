@@ -17,8 +17,4 @@ ApplicationWindow {
         color: "white"
         font.pixelSize: 28
     }
-
-    FatalDialogPopup {
-        id: fatalDialog
-    }
 }

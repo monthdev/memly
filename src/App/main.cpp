@@ -5,20 +5,19 @@
 #include <QQmlContext>
 
 #include "App/AppData.hpp"
-#include "Bridge/FatalErrorBridge.hpp"
 #include "Sql/SqlResource.hpp"
+#include "Support/Fatal.hpp"
 
 int main(int argc, char* argv[]) {
-    try {
+    return Support::TryCatchWrapper([&] {
         Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };
-        const std::string AppName{ "Memly" };
-        App.setApplicationName(AppName.c_str());
-        App.setApplicationDisplayName(AppName.c_str());
+        const QString AppName{ "Memly" };
+        App.setApplicationName(AppName);
+        App.setApplicationDisplayName(AppName);
         QQmlApplicationEngine AppEngine{};
-        Bridge::FatalErrorBridge FatalErrorBridge{ &App };
-        AppEngine.rootContext()->setContextProperty("FatalErrorBridge",
-                                                    &FatalErrorBridge);
+        // AppEngine.rootContext()->setContextProperty("FatalErrorBridge",
+        //                                             &FatalErrorBridge);
         QObject::connect(
             &AppEngine,
             &QQmlApplicationEngine::objectCreationFailed,
@@ -27,8 +26,7 @@ int main(int argc, char* argv[]) {
             Qt::QueuedConnection);
         AppEngine.loadFromModule("Memly", "MainWindow");
 
-        std::cout << App::DatabaseFilePath() << "\n";
-        duckdb::DuckDB Database{ App::DatabaseFilePath() };
+        duckdb::DuckDB Database{ App::DatabaseFilePath().toStdString() };
         duckdb::Connection Connection{ Database };
 
         // TODO: schema migrator here before databasebridge object
@@ -51,10 +49,8 @@ int main(int argc, char* argv[]) {
             std::cout << Key << ": " << Value << "\n";
         }
 
-        FatalErrorBridge.RequestFatalError("Fatal error", 1);
+        Support::ThrowError("Test throw error");
 
         return App.exec();
-    } catch (const std::exception& Exception) {
-        qFatal("%s", Exception.what());
-    } catch (...) { qFatal("Unknown exception"); }
+    });
 }

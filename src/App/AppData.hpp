@@ -1,11 +1,11 @@
 #pragma once
 
-#include <string>
+#include <QString>
 
 namespace App {
-std::string BaseDirectoryPath();
+QString AudioDirectoryPath();
 
-std::string AudioDirectoryPath();
+QString CrashLogFilePath();
 
-std::string DatabaseFilePath();
+QString DatabaseFilePath();
 }

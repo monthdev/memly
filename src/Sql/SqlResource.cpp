@@ -2,13 +2,13 @@
 
 #include <QResource>
 
-#include "Support/ThrowRuntimeError.hpp"
+#include "Support/Fatal.hpp"
 
 namespace Sql {
 static std::string ReadResourceBytes(const char* ResourcePath) {
     QResource Resource{ ResourcePath };
     if (!Resource.isValid()) {
-        Support::ThrowRuntimeError();
+        Support::ThrowError();
     }
     return std::string{ reinterpret_cast<const char*>(Resource.data()),
                         static_cast<size_t>(Resource.size()) };
