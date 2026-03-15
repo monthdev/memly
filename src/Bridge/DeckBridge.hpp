@@ -5,17 +5,13 @@
 #include <QObject>
 #include <QString>
 
-#include "Bridge/FatalErrorBridge.hpp"
-
 namespace Bridge {
 class DeckBridge final : public QObject {
     Q_OBJECT
 
 public:
-    explicit DeckBridge(duckdb::Connection& Connection,
-                        Bridge::FatalErrorBridge& FatalErrorBridge) noexcept
-        : m_Connection{ Connection }
-        , m_FatalErrorBridge{ FatalErrorBridge } {
+    explicit DeckBridge(duckdb::Connection& Connection) noexcept
+        : m_Connection{ Connection } {
     }
 
     Q_INVOKABLE QString AddDeck(const QString& Name);
@@ -25,6 +21,5 @@ public:
 
 private:
     duckdb::Connection& m_Connection;
-    Bridge::FatalErrorBridge& m_FatalErrorBridge;
 };
 }
