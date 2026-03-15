@@ -1,7 +1,5 @@
 BEGIN TRANSACTION;
 
-
-
 CREATE MACRO IF NOT EXISTS deck_name_length_ok (s) AS length(s) > 0
 AND length(s) <= 25;
 
