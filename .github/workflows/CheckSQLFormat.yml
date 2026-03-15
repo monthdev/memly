@@ -1,0 +1,51 @@
+name: Check SQL Format
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check-sql-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed SQL files
+        id: changed-sql
+        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
+        with:
+          files: |
+            **/*.sql
+          separator: "\n"
+          safe_output: false
+
+      - name: No SQL changes
+        if: steps.changed-sql.outputs.any_changed != 'true'
+        run: echo "No .sql files changed."
+
+      - name: Set up Node.js
+        if: steps.changed-sql.outputs.any_changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install sql-formatter
+        if: steps.changed-sql.outputs.any_changed == 'true'
+        run: npm install --global sql-formatter
+
+      - name: Verify SQL formatting
+        if: steps.changed-sql.outputs.any_changed == 'true'
+        env:
+          ChangedSqlFiles: ${{ steps.changed-sql.outputs.all_changed_files }}
+        run: |
+          while IFS= read -r File; do
+            [ -n "$File" ] || continue
+            sql-formatter -l duckdb --fix "$File"
+          done <<< "$ChangedSqlFiles"
+
+          git diff --exit-code -- $ChangedSqlFiles

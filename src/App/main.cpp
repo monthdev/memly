@@ -30,6 +30,8 @@ int main(int argc, char* argv[]) {
         duckdb::Connection Connection{ Database };
 
         // TODO: schema migrator here before databasebridge object
+        //
+        //
 
         auto Result{ Connection.Query(Sql::InitialSchema()) };
         auto ErrorType{ Result->GetErrorType() };
