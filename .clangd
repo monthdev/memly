@@ -1,0 +1,7 @@
+---
+If:
+  PathMatch: ^build/_deps/.*
+
+Diagnostics:
+  ClangTidy:
+    Remove: ['*']

@@ -40,8 +40,6 @@ build*
 .vscode
 .idea
 *.code-workspace
-*.clangd
-.clangd
 CMakeUserPresets.json
 
 # Generated documentation
