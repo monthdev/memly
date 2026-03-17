@@ -4,7 +4,7 @@
 #include <QString>
 #include <QVector>
 
-namespace Bridge {
+namespace Model {
 
 class DeckListModel final : public QAbstractListModel {
     Q_OBJECT
