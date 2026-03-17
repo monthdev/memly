@@ -13,9 +13,9 @@ int main(int argc, char* argv[]) {
     return Support::TryCatchWrapper([&] {
         Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };
-        const QString AppName{ "Memly" };
-        App.setApplicationName(AppName);
-        App.setApplicationDisplayName(AppName);
+        App.setApplicationName("Memly");
+        App.setApplicationDisplayName("Memly");
+        App.setOrganizationName("month");
         QQmlApplicationEngine AppEngine{};
         duckdb::DuckDB Database{ App::DatabaseFilePath().toStdString() };
         duckdb::Connection DatabaseConnection{ Database };

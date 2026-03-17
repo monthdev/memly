@@ -19,10 +19,6 @@ namespace Support {
 }
 
 void LogError(const std::string& What) {
-    // QString CrashLogFilePath{ App::CrashLogDirectoryPath() + "/" +
-    //                           QDateTime::currentDateTime().toString(
-    //                               "yyyy-MM-dd_hh-mm-ss-zzz") +
-    //                           ".log" };
     QSaveFile CrashLogFile{ App::CrashLogFilePath() };
     if (CrashLogFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         CrashLogFile.write(What.data());
