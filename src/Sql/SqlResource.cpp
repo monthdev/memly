@@ -17,4 +17,8 @@ static std::string ReadResourceBytes(const char* ResourcePath) {
 std::string InitialSchema() {
     return ReadResourceBytes(":/Sql/Migrations/1_InitialSchema.sql");
 }
+
+std::string AddDeckStatement() {
+    return ReadResourceBytes(":/Sql/Statements/AddDeck.sql");
+}
 }

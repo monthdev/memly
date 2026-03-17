@@ -1,0 +1,11 @@
+BEGIN TRANSACTION;
+
+DELETE FROM cards
+WHERE
+  deck_id = ?;
+
+DELETE FROM decks
+WHERE
+  id = ?;
+
+COMMIT;

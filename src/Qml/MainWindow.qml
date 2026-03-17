@@ -15,6 +15,6 @@ ApplicationWindow {
         anchors.centerIn: parent
         text: "Hello"
         color: "white"
-        font.pixelSize: 28
+        font.pixelSize: 48
     }
 }

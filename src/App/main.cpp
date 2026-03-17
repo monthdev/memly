@@ -5,6 +5,7 @@
 #include <QQmlContext>
 
 #include "App/AppData.hpp"
+#include "Bridge/DeckBridge.hpp"
 #include "Sql/SqlResource.hpp"
 #include "Support/Fatal.hpp"
 
@@ -16,8 +17,19 @@ int main(int argc, char* argv[]) {
         App.setApplicationName(AppName);
         App.setApplicationDisplayName(AppName);
         QQmlApplicationEngine AppEngine{};
-        // AppEngine.rootContext()->setContextProperty("FatalErrorBridge",
-        //                                             &FatalErrorBridge);
+        duckdb::DuckDB Database{ App::DatabaseFilePath().toStdString() };
+        duckdb::Connection DatabaseConnection{ Database };
+
+        // TODO: Schema migrator here
+        std::unique_ptr<duckdb::QueryResult> QueryResult{
+            DatabaseConnection.Query(Sql::InitialSchema())
+        };
+        if (QueryResult->HasError()) {
+            Support::ThrowError(QueryResult->GetError());
+        }
+
+        Bridge::DeckBridge DeckBridge{ DatabaseConnection };
+        AppEngine.rootContext()->setContextProperty("DeckBridge", &DeckBridge);
         QObject::connect(
             &AppEngine,
             &QQmlApplicationEngine::objectCreationFailed,
@@ -25,31 +37,6 @@ int main(int argc, char* argv[]) {
             [] { QCoreApplication::exit(-1); },
             Qt::QueuedConnection);
         AppEngine.loadFromModule("Memly", "MainWindow");
-
-        duckdb::DuckDB Database{ App::DatabaseFilePath().toStdString() };
-        duckdb::Connection Connection{ Database };
-
-        // TODO: schema migrator here before databasebridge object
-
-        auto Result{ Connection.Query(Sql::InitialSchema()) };
-        auto ErrorType{ Result->GetErrorType() };
-        std::cout << static_cast<int>(ErrorType) << "\n";
-        auto ErrorObject{ Result->GetErrorObject() };
-        ErrorObject.ConvertErrorToJSON();
-        std::cout << ErrorObject.Message() << "\n";
-
-        auto Result1{ Connection.Query(
-            "insert into decks (name) values('deutsch');") };
-        auto ErrorType1{ Result1->GetErrorType() };
-        std::cout << static_cast<int>(ErrorType1) << "\n";
-        auto ErrorObject1{ Result1->GetErrorObject() };
-        ErrorObject1.ConvertErrorToJSON();
-        std::cout << ErrorObject1.Message() << "\n";
-        for (const auto& [Key, Value] : ErrorObject1.ExtraInfo()) {
-            std::cout << Key << ": " << Value << "\n";
-        }
-
-        Support::ThrowError("Test throw error");
 
         return App.exec();
     });
