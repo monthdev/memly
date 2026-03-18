@@ -66,12 +66,6 @@ public:
         endResetModel();
     }
 
-    void Clear() {
-        beginResetModel();
-        m_Decks.clear();
-        endResetModel();
-    }
-
 private:
     QVector<DeckItem> m_Decks;
 };

@@ -8,6 +8,7 @@
 #include "Model/DeckListModel.hpp"
 
 namespace Bridge {
+
 class DeckBridge final : public QObject {
     Q_OBJECT
     Q_PROPERTY(Model::DeckListModel* deckList READ GetDeckList CONSTANT)

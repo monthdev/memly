@@ -20,7 +20,6 @@ Q_INVOKABLE QString DeckBridge::DuplicateErrorMessage() {
     const std::unique_ptr<duckdb::QueryResult>& QueryResult) {
     switch (QueryResult->GetErrorType()) {
     case duckdb::ExceptionType::INVALID: {
-        ReadDeckTable();
         return QString{};
     }
     case duckdb::ExceptionType::CONSTRAINT: {
@@ -46,7 +45,11 @@ Q_INVOKABLE QString DeckBridge::CreateDeck(const QString& DeckName) {
             m_DatabaseConnection.Query(Sql::CreateDeckSql(),
                                        DeckName.toStdString())
         };
-        return HandleQueryResult(QueryResult);
+        const QString Error{ HandleQueryResult(QueryResult) };
+        if (Error.isEmpty()) {
+            ReadDeckTable();
+        }
+        return Error;
     });
 }
 
@@ -58,7 +61,11 @@ DeckBridge::UpdateDeck(const Model::DeckListModel::DeckItem& DeckItem) {
                                        DeckItem.m_Id.toStdString(),
                                        DeckItem.m_Name.toStdString())
         };
-        return HandleQueryResult(QueryResult);
+        const QString Error{ HandleQueryResult(QueryResult) };
+        if (Error.isEmpty()) {
+            ReadDeckTable();
+        }
+        return Error;
     });
 }
 
@@ -71,6 +78,7 @@ Q_INVOKABLE void DeckBridge::DeleteDeck(const QString& DeckId) {
         if (QueryResult->HasError()) {
             Support::ThrowError(QueryResult->GetError());
         }
+        ReadDeckTable();
     });
 }
 
@@ -79,31 +87,19 @@ void DeckBridge::ReadDeckTable() {
         std::unique_ptr<duckdb::QueryResult> QueryResult{
             m_DatabaseConnection.Query(Sql::ReadDeckTableSql())
         };
-        switch (QueryResult->GetErrorType()) {
-        case duckdb::ExceptionType::INVALID: {
-            QVector<Model::DeckListModel::DeckItem> Decks;
-            while (true) {
-                std::unique_ptr<duckdb::DataChunk> DataChunk =
-                    QueryResult->Fetch();
-                if (!DataChunk || DataChunk->size() == 0) {
-                    break;
-                }
-                for (duckdb::idx_t Row{ 0 }; Row < DataChunk->size(); ++Row) {
-                    Decks.push_back(Model::DeckListModel::DeckItem{
-                        .m_Id = QString::fromStdString(
-                            DataChunk->GetValue(0, Row).ToString()),
-                        .m_Name = QString::fromStdString(
-                            DataChunk->GetValue(1, Row).ToString()),
-                    });
-                }
-            }
-            m_DeckList.ReplaceAll(std::move(Decks));
-            break;
-        }
-        default: {
+        if (QueryResult->HasError()) {
             Support::ThrowError(QueryResult->GetError());
         }
+        QVector<Model::DeckListModel::DeckItem> DeckList;
+        for (auto QueryResultIterator{ QueryResult->begin() };
+             QueryResultIterator != QueryResult->end();
+             ++QueryResultIterator) {
+            const auto& QueryResultRow{ *QueryResultIterator };
+            DeckList.emplace_back(
+                QString{ QueryResultRow.GetValue<std::string>(0).c_str() },
+                QString{ QueryResultRow.GetValue<std::string>(1).c_str() });
         }
+        m_DeckList.ReplaceAll(std::move(DeckList));
     });
 }
 }
