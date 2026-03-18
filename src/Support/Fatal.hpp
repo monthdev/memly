@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtLogging>
+#include <functional>
 #include <source_location>
 #include <string>
 
