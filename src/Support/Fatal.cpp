@@ -24,7 +24,7 @@ void LogError(const std::string& What) {
         CrashLogFile.write(What.data());
         CrashLogFile.commit();
     } else {
-        std::cerr << "Log error failed";
+        std::cerr << "Failed to write error to log file";
     }
 }
 }

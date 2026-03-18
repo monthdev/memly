@@ -13,8 +13,8 @@ int main(int argc, char* argv[]) {
     return Support::TryCatchWrapper([&] {
         Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };
-        constexpr const char* AppName{ "Memly" };
-        constexpr const char* OrgName{ "monthly" };
+        constexpr const char AppName[]{ "Memly" };
+        constexpr const char OrgName[]{ "monthly" };
         App.setApplicationName(AppName);
         App.setApplicationDisplayName(AppName);
         App.setOrganizationDomain(OrgName);

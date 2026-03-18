@@ -20,7 +20,7 @@ decltype(auto) TryCatchWrapper(Fn&& Function) noexcept {
         Support::LogError(Exception.what());
         qFatal("%s", Exception.what());
     } catch (...) {
-        constexpr const char* What{ "Unknown exception" };
+        constexpr const char What[]{ "Unknown exception" };
         Support::LogError(What);
         qFatal("%s", What);
     }

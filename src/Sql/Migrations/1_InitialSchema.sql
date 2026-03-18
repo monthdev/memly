@@ -11,11 +11,6 @@ CREATE TABLE IF NOT EXISTS migrations (
   applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS settings (
-  id UUID PRIMARY KEY DEFAULT uuidv7 (),
-  target_language_idx UINTEGER NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS decks (
   id UUID PRIMARY KEY DEFAULT uuidv7 (),
   name VARCHAR NOT NULL UNIQUE CHECK (deck_name_length_ok (name))
