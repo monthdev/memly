@@ -3,7 +3,14 @@
 #include <string>
 
 namespace Sql {
-std::string InitialSchema();
+std::string InitialSchemaSql();
 
-std::string AddDeckStatement();
+std::string CreateDeckSql();
+
+std::string ReadDeckTableSql();
+
+std::string UpdateDeckSql();
+
+std::string DeleteDeckSql();
+
 }

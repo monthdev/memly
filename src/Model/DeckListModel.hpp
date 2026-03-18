@@ -11,8 +11,8 @@ class DeckListModel final : public QAbstractListModel {
 
 public:
     struct DeckItem {
-        QString Id;
-        QString Name;
+        QString m_Id;
+        QString m_Name;
     };
 
     enum Role {
@@ -45,9 +45,9 @@ public:
 
         switch (Role) {
         case IdRole:
-            return Deck.Id;
+            return Deck.m_Id;
         case NameRole:
-            return Deck.Name;
+            return Deck.m_Name;
         default:
             return {};
         }

@@ -27,4 +27,19 @@ ApplicationWindow {
         color: "white"
         font.pixelSize: 28
     }
+
+    ListView {
+        anchors.fill: parent
+        model: DeckBridge.deckList
+
+        delegate: ItemDelegate {
+            required property string id
+            required property string name
+
+            text: name
+            onClicked: {
+                console.log(id, name);
+            }
+        }
+    }
 }
