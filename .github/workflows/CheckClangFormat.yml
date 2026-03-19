@@ -11,7 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   fetch-depth: 0
 
@@ -59,13 +59,11 @@ jobs:
                     exit 0
                   fi
 
-                  # Use the explicitly installed clang-format binary
                   : "${CF_BIN:?CF_BIN not set}"
                   "$CF_BIN" --version
 
                   FAIL=0
                   for f in "${FILES[@]}"; do
-                    # Fail if clang-format would change the file
                     "$CF_BIN" --dry-run -Werror -style=file "$f" || FAIL=1
                   done
 

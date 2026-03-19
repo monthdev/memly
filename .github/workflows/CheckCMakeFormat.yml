@@ -11,12 +11,12 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   fetch-depth: 0
 
             - name: Set up Python
-              uses: actions/setup-python@v5
+              uses: actions/setup-python@v6
               with:
                   python-version: '3.x'
 
@@ -43,11 +43,9 @@ jobs:
               run: |
                   set -euo pipefail
 
-                  # Detect whether config changed (if yes, lint/format all listfiles).
                   CONFIG_CHANGED="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
                     .cmake-format.yaml .cmakelintrc | sed '/^\s*$/d' || true)"
 
-                  # Collect changed listfiles (use :(glob) so ** works as expected in git pathspec).
                   CHANGED_LISTFILES="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
                     ':(glob)**/CMakeLists.txt' \
                     ':(glob)**/*.cmake' \
@@ -90,7 +88,6 @@ jobs:
                   OUTPUT="$(cmake-lint --suppress-decorations -c .cmakelintrc "${FILES[@]}" 2>&1 || true)"
                   printf '%s\n' "$OUTPUT"
 
-                  # Fail the job if any lint codes are present (e.g. C0301) or if cmake-lint exited non-zero.
                   if echo "$OUTPUT" | grep -Eq '\b[CEW][0-9]{4}\b'; then
                     exit 1
                   fi
