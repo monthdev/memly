@@ -6,14 +6,10 @@ AND length(s) <= 25;
 CREATE MACRO IF NOT EXISTS card_text_length_ok (s) AS length(s) > 0
 AND length(s) <= 100;
 
-CREATE TABLE IF NOT EXISTS migrations (
-  version UINTEGER PRIMARY KEY,
-  applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE IF NOT EXISTS decks (
   id UUID PRIMARY KEY DEFAULT uuidv7 (),
-  name VARCHAR NOT NULL UNIQUE CHECK (deck_name_length_ok (name))
+  name VARCHAR NOT NULL UNIQUE CHECK (deck_name_length_ok (name)),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS cards (

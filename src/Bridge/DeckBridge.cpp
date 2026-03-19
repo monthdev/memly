@@ -85,7 +85,7 @@ Q_INVOKABLE void DeckBridge::DeleteDeck(const QString& DeckId) {
 void DeckBridge::ReadDeckTable() {
     Support::TryCatchWrapper([&] {
         std::unique_ptr<duckdb::QueryResult> QueryResult{
-            m_DatabaseConnection.Query(Sql::ReadDeckTableSql())
+            m_DatabaseConnection.Query(Sql::ReadDecksTableSql())
         };
         if (QueryResult->HasError()) {
             Support::ThrowError(QueryResult->GetError());

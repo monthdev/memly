@@ -3,14 +3,21 @@
 #include <string>
 
 namespace Sql {
-std::string InitialSchemaSql();
 
-std::string CreateDeckSql();
+[[nodiscard]] std::string M00_MigrationsTableSql();
 
-std::string ReadDeckTableSql();
+[[nodiscard]] std::string M01_InitialSchemaSql();
 
-std::string UpdateDeckSql();
+[[nodiscard]] std::string CreateMigrationSql();
 
-std::string DeleteDeckSql();
+[[nodiscard]] std::string ReadMigrationsTableSql();
+
+[[nodiscard]] std::string CreateDeckSql();
+
+[[nodiscard]] std::string ReadDecksTableSql();
+
+[[nodiscard]] std::string UpdateDeckSql();
+
+[[nodiscard]] std::string DeleteDeckSql();
 
 }

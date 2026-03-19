@@ -17,8 +17,6 @@ if(COMMAND qt_policy)
   qt_policy(SET QTP0004 NEW)
 endif()
 
-# ============================== Source discovery ==============================
-
 file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.cpp")
 file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*")
 
@@ -51,9 +49,13 @@ foreach(qml_file IN LISTS QT_QML)
   )
 endforeach()
 
-file(GLOB SQL_FILES CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Sql/Migrations/*.sql"
-     "${CMAKE_SOURCE_DIR}/src/Sql/Statements/*.sql"
+file(
+  GLOB
+  SQL_FILES
+  CONFIGURE_DEPENDS
+  "${CMAKE_SOURCE_DIR}/src/Sql/Migration/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Sql/MigrationStatement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Sql/Statement/*.sql"
 )
 
 file(GLOB TEST_APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/App/*.cpp")
@@ -78,25 +80,12 @@ set(TEST_PLATFORM_CPP)
 set(TEST_SUPPORT_DATA_MACOS_CPP
     "${CMAKE_SOURCE_DIR}/test/Bridge/TestSupportDataMacOS.cpp"
 )
-# set(TEST_SUPPORT_DATA_WINDOWS_CPP
-# "${CMAKE_SOURCE_DIR}/test/Bridge/TestSupportDataWindows.cpp")
-# set(TEST_SUPPORT_DATA_LINUX_CPP
-# "${CMAKE_SOURCE_DIR}/test/Bridge/TestSupportDataLinux.cpp")
 
-list(REMOVE_ITEM TEST_BRIDGE_CPP "${TEST_SUPPORT_DATA_MACOS_CPP}"
-     # "${TEST_SUPPORT_DATA_WINDOWS_CPP}" "${TEST_SUPPORT_DATA_LINUX_CPP}"
-)
+list(REMOVE_ITEM TEST_BRIDGE_CPP "${TEST_SUPPORT_DATA_MACOS_CPP}")
 
 if(APPLE AND EXISTS "${TEST_SUPPORT_DATA_MACOS_CPP}")
   list(APPEND TEST_PLATFORM_CPP "${TEST_SUPPORT_DATA_MACOS_CPP}")
-  # elseif(WIN32 AND EXISTS "${TEST_SUPPORT_DATA_WINDOWS_CPP}") list(APPEND
-  # TEST_PLATFORM_CPP "${TEST_SUPPORT_DATA_WINDOWS_CPP}") elseif(UNIX AND EXISTS
-  # "${TEST_SUPPORT_DATA_LINUX_CPP}") list(APPEND TEST_PLATFORM_CPP
-  # "${TEST_SUPPORT_DATA_LINUX_CPP}") else() message(FATAL_ERROR "Unsupported
-  # target platform: ${CMAKE_SYSTEM_NAME}")
 endif()
-
-# ====================== DuckDB: platform-specific binaries ====================
 
 set(DUCKDB_VERSION "1.4.4")
 set(DUCKDB_TAG "v${DUCKDB_VERSION}")
@@ -172,9 +161,9 @@ if(NOT EXISTS "${_duckdb_lib}")
   set(_duckdb_lib "${libduckdb_SOURCE_DIR}/lib/${_duckdb_lib_name}")
 endif()
 
-set(_duckdb_inc "${libduckdb_SOURCE_DIR}")
+set(_duckdb_inc "${libduckdb_SOURCE_DIR}/include")
 if(NOT EXISTS "${_duckdb_inc}/duckdb.hpp")
-  set(_duckdb_inc "${libduckdb_SOURCE_DIR}/include")
+  set(_duckdb_inc "${libduckdb_SOURCE_DIR}")
 endif()
 
 if(NOT EXISTS "${_duckdb_lib}")
@@ -185,6 +174,12 @@ if(NOT EXISTS "${_duckdb_inc}/duckdb.hpp")
   message(FATAL_ERROR "duckdb.hpp not found in ${libduckdb_SOURCE_DIR}")
 endif()
 
+set(_duckdb_wrapper_dir "${CMAKE_BINARY_DIR}/duckdb_wrapper")
+file(MAKE_DIRECTORY "${_duckdb_wrapper_dir}")
+file(WRITE "${_duckdb_wrapper_dir}/duckdb.hpp"
+     "#pragma GCC system_header\n#include \"${_duckdb_inc}/duckdb.hpp\"\n"
+)
+
 add_library(duckdb SHARED IMPORTED GLOBAL)
 set_target_properties(
   duckdb
@@ -193,8 +188,6 @@ set_target_properties(
 )
 
 get_filename_component(_duckdb_libdir "${_duckdb_lib}" DIRECTORY)
-
-# ============================== Shared options ================================
 
 add_library(memly_warnings INTERFACE)
 target_compile_options(
@@ -211,8 +204,6 @@ target_link_options(
   memly_asan INTERFACE $<$<CONFIG:Debug>:-fsanitize=address>
 )
 
-# ============================ Shared SQL resources ============================
-
 add_library(memly_sql_resources OBJECT)
 
 qt_add_resources(
@@ -225,8 +216,6 @@ qt_add_resources(
   FILES
   ${SQL_FILES}
 )
-
-# ============================= Shared core library ============================
 
 add_library(
   memly_core STATIC
@@ -245,7 +234,11 @@ add_library(
   $<TARGET_OBJECTS:memly_sql_resources>
 )
 
-target_include_directories(memly_core PUBLIC "${CMAKE_SOURCE_DIR}/src")
+target_include_directories(
+  memly_core BEFORE PUBLIC "${CMAKE_SOURCE_DIR}/src" "${_duckdb_wrapper_dir}"
+)
+
+target_include_directories(memly_core SYSTEM PUBLIC "${_duckdb_inc}")
 
 target_link_libraries(
   memly_core
@@ -262,8 +255,6 @@ set_target_properties(
   memly_core
   PROPERTIES BUILD_RPATH "${_duckdb_libdir}"
 )
-
-# ============================== Shared QML module =============================
 
 add_library(memly_qml STATIC)
 
@@ -285,8 +276,6 @@ target_link_libraries(
   PUBLIC memly_core
 )
 
-# ============================== App executable ================================
-
 qt_add_executable(memly MANUAL_FINALIZATION "${APP_MAIN_CPP}")
 
 target_link_libraries(
@@ -300,8 +289,6 @@ set_target_properties(
 )
 
 qt_finalize_executable(memly)
-
-# ============================= Test executable ================================
 
 if(BUILD_TESTING)
   qt_add_executable(
@@ -318,7 +305,12 @@ if(BUILD_TESTING)
     ${TEST_PLATFORM_CPP}
   )
 
-  target_include_directories(memly-test PRIVATE "${CMAKE_SOURCE_DIR}/src")
+  target_include_directories(
+    memly-test BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src"
+                              "${_duckdb_wrapper_dir}"
+  )
+
+  target_include_directories(memly-test SYSTEM PRIVATE "${_duckdb_inc}")
 
   target_compile_definitions(
     memly-test PRIVATE CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}"

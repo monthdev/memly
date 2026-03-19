@@ -1,0 +1,4 @@
+SELECT
+  version
+FROM
+  migrations;
