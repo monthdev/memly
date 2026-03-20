@@ -169,7 +169,6 @@ ApplicationWindow {
             }
         }
     }
-
     RoundButton {
         id: createDeckButton
         anchors.horizontalCenter: parent.horizontalCenter
