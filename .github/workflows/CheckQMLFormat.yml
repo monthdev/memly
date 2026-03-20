@@ -21,7 +21,6 @@ jobs:
                   version: '6.10.2'
                   host: 'linux'
                   target: 'desktop'
-                  modules: 'qtdeclarative'
 
             - name: Locate qmlformat
               shell: bash
