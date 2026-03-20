@@ -16,7 +16,7 @@ Q_INVOKABLE QString DeckBridge::DuplicateErrorMessage() {
     return QString{ "Name already exists" };
 }
 
-[[nodiscard]] QString DeckBridge::HandleQueryResult(
+[[nodiscard]] QString DeckBridge::HandleQueryResultRecoverableError(
     const std::unique_ptr<duckdb::QueryResult>& QueryResult) {
     switch (QueryResult->GetErrorType()) {
     case duckdb::ExceptionType::INVALID: {
@@ -45,7 +45,7 @@ Q_INVOKABLE QString DeckBridge::CreateDeck(const QString& DeckName) {
             m_DatabaseConnection.Query(Sql::CreateDeckSql(),
                                        DeckName.toStdString())
         };
-        const QString Error{ HandleQueryResult(QueryResult) };
+        const QString Error{ HandleQueryResultRecoverableError(QueryResult) };
         if (Error.isEmpty()) {
             ReadDeckTable();
         }
@@ -61,7 +61,7 @@ DeckBridge::UpdateDeck(const Model::DeckListModel::DeckItem& DeckItem) {
                                        DeckItem.m_Id.toStdString(),
                                        DeckItem.m_Name.toStdString())
         };
-        const QString Error{ HandleQueryResult(QueryResult) };
+        const QString Error{ HandleQueryResultRecoverableError(QueryResult) };
         if (Error.isEmpty()) {
             ReadDeckTable();
         }
