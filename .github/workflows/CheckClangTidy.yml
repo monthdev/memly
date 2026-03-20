@@ -1,110 +1,110 @@
 name: Check Clang Tidy
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+    pull_request:
+        branches: [main]
+    push:
+        branches: [main]
 
 jobs:
-  clang-tidy:
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:25.10
-    defaults:
-      run:
-        shell: bash
-    env:
-      CMAKE_BUILD_TYPE: Debug
-      CC: clang
-      CXX: clang++
+    clang-tidy:
+        runs-on: ubuntu-latest
+        container:
+            image: ubuntu:25.10
+        defaults:
+            run:
+                shell: bash
+        env:
+            CMAKE_BUILD_TYPE: Debug
+            CC: clang
+            CXX: clang++
 
-    steps:
-      - name: Install toolchain and Qt
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            build-essential \
-            clang clang-tidy cmake ninja-build \
-            qt6-base-dev qt6-declarative-dev qt6-tools-dev \
-            qt6-base-dev-tools qt6-qmltooling-plugins \
-            libgl1-mesa-dev \
-            libxkbcommon-dev \
-            libgtest-dev \
-            git
+        steps:
+            - name: Install toolchain and Qt
+              run: |
+                  apt-get update
+                  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+                    build-essential \
+                    clang clang-tidy cmake ninja-build \
+                    qt6-base-dev qt6-declarative-dev qt6-tools-dev \
+                    qt6-base-dev-tools qt6-qmltooling-plugins \
+                    libgl1-mesa-dev \
+                    libxkbcommon-dev \
+                    libgtest-dev \
+                    git
 
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+            - name: Checkout
+              uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
 
-      - name: Mark workspace safe
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+            - name: Mark workspace safe
+              run: |
+                  git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Detect changed source files
-        id: changed
-        run: |
-          set -euo pipefail
+            - name: Detect changed source files
+              id: changed
+              run: |
+                  set -euo pipefail
 
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            git fetch origin "${GITHUB_BASE_REF}" --depth=1
-            MergeBase="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
-          else
-            MergeBase="${GITHUB_EVENT_BEFORE:-}"
-            if [[ -z "$MergeBase" || "$MergeBase" == "0000000000000000000000000000000000000000" ]]; then
-              MergeBase="$(git rev-parse HEAD~1)"
-            fi
-          fi
+                  if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+                    git fetch origin "${GITHUB_BASE_REF}" --depth=1
+                    MergeBase="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
+                  else
+                    MergeBase="${GITHUB_EVENT_BEFORE:-}"
+                    if [[ -z "$MergeBase" || "$MergeBase" == "0000000000000000000000000000000000000000" ]]; then
+                      MergeBase="$(git rev-parse HEAD~1)"
+                    fi
+                  fi
 
-          mapfile -t ChangedHeaders < <(
-            git diff --name-only --diff-filter=ACMR "$MergeBase" HEAD -- \
-              '*.hpp' '*.h' '*.hh' '*.hxx' \
-            | while read -r File; do
-                [[ -f "$File" ]] && printf '%s\n' "$File"
-              done
-          )
+                  mapfile -t ChangedHeaders < <(
+                    git diff --name-only --diff-filter=ACMR "$MergeBase" HEAD -- \
+                      '*.hpp' '*.h' '*.hh' '*.hxx' \
+                    | while read -r File; do
+                        [[ -f "$File" ]] && printf '%s\n' "$File"
+                      done
+                  )
 
-          mapfile -t Files < <(
-            git diff --name-only --diff-filter=ACMR "$MergeBase" HEAD -- \
-              '*.cpp' '*.cc' '*.cxx' \
-            | while read -r File; do
-                [[ -f "$File" ]] && printf '%s\n' "$File"
-              done
-          )
+                  mapfile -t Files < <(
+                    git diff --name-only --diff-filter=ACMR "$MergeBase" HEAD -- \
+                      '*.cpp' '*.cc' '*.cxx' \
+                    | while read -r File; do
+                        [[ -f "$File" ]] && printf '%s\n' "$File"
+                      done
+                  )
 
-          if [[ ${#Files[@]} -eq 0 && ${#ChangedHeaders[@]} -gt 0 ]]; then
-            mapfile -t Files < <(find src test -type f \( -name '*.cpp' -o -name '*.cc' -o -name '*.cxx' \) | sort)
-          fi
+                  if [[ ${#Files[@]} -eq 0 && ${#ChangedHeaders[@]} -gt 0 ]]; then
+                    mapfile -t Files < <(find src test -type f \( -name '*.cpp' -o -name '*.cc' -o -name '*.cxx' \) | sort)
+                  fi
 
-          if [[ ${#Files[@]} -eq 0 ]]; then
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+                  if [[ ${#Files[@]} -eq 0 ]]; then
+                    echo "has_changes=false" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
 
-          printf '%s\n' "${Files[@]}" > changed-cpp-files.txt
-          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+                  printf '%s\n' "${Files[@]}" > changed-cpp-files.txt
+                  echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
-      - name: Configure (CMake + Ninja, generate compile_commands.json)
-        if: steps.changed.outputs.has_changes == 'true'
-        run: |
-          cmake -S . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+            - name: Configure (CMake + Ninja, generate compile_commands.json)
+              if: steps.changed.outputs.has_changes == 'true'
+              run: |
+                  cmake -S . -B build \
+                    -G Ninja \
+                    -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
+                    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-      - name: Run clang-tidy
-        if: steps.changed.outputs.has_changes == 'true'
-        run: |
-          set -euo pipefail
-          mapfile -t Files < changed-cpp-files.txt
+            - name: Run clang-tidy
+              if: steps.changed.outputs.has_changes == 'true'
+              run: |
+                  set -euo pipefail
+                  mapfile -t Files < changed-cpp-files.txt
 
-          if [[ ${#Files[@]} -eq 0 ]]; then
-            echo "No source files to lint."
-            exit 0
-          fi
+                  if [[ ${#Files[@]} -eq 0 ]]; then
+                    echo "No source files to lint."
+                    exit 0
+                  fi
 
-          clang-tidy \
-            -p build \
-            -header-filter='^.*/(src|test)/.*' \
-            "${Files[@]}"
+                  clang-tidy \
+                    -p build \
+                    -header-filter='^.*/(src|test)/.*' \
+                    "${Files[@]}"
