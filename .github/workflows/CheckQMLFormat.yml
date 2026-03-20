@@ -15,39 +15,56 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - name: Install qmlformat
+            - name: Install Qt 6.10.2
+              uses: jurplel/install-qt-action@v4.3.0
+              with:
+                  version: '6.10.2'
+                  host: 'linux'
+                  target: 'desktop'
+                  modules: 'qtdeclarative'
+
+            - name: Locate qmlformat
               shell: bash
               run: |
-                  sudo apt-get update
-                  sudo apt-get install -y qt6-declarative-dev-tools
+                  set -euo pipefail
 
-                  QMLFORMAT_BIN="/usr/lib/qt6/bin/qmlformat"
-                  if [[ ! -x "$QMLFORMAT_BIN" ]]; then
-                    echo "::error::qmlformat not found at $QMLFORMAT_BIN"
+                  QMLFORMAT_BIN="$(find "$QT_ROOT_DIR" -type f -name qmlformat | sort | head -n1)"
+                  if [[ -z "$QMLFORMAT_BIN" || ! -x "$QMLFORMAT_BIN" ]]; then
+                    echo "::error::qmlformat not found under QT_ROOT_DIR=$QT_ROOT_DIR"
                     exit 1
                   fi
 
+                  echo "QT_ROOT_DIR=$QT_ROOT_DIR"
+                  echo "QMLFORMAT_BIN=$QMLFORMAT_BIN"
                   echo "QMLFORMAT_BIN=$QMLFORMAT_BIN" >> "$GITHUB_ENV"
+
                   "$QMLFORMAT_BIN" --version
 
             - name: Determine diff base
               id: base
               shell: bash
               run: |
+                  set -euo pipefail
+
                   if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
                     git fetch origin "${GITHUB_BASE_REF}" --depth=1
-                    MB=$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")
+                    MB="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
                   else
-                    MB=$(git rev-parse HEAD~1)
+                    MB="$(git rev-parse HEAD~1)"
                   fi
+
                   echo "mb=$MB" >> "$GITHUB_OUTPUT"
 
             - name: Run qmlformat on changed files
               shell: bash
               run: |
+                  set -euo pipefail
+
                   MB="${{ steps.base.outputs.mb }}"
-                  mapfile -t FILES < <(git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
-                    | grep -E '\.qml$' || true)
+                  mapfile -t FILES < <(
+                    git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
+                      | grep -E '\.qml$' || true
+                  )
 
                   if [[ ${#FILES[@]} -eq 0 ]]; then
                     echo "No QML files changed."
@@ -63,16 +80,18 @@ jobs:
 
                   for f in "${FILES[@]}"; do
                     OUT="$TMP_DIR/$(basename "$f")"
+
+                    echo "Checking $f"
                     "$QMLFORMAT_BIN" "$f" > "$OUT"
 
-                    if ! diff -u "$f" "$OUT" > /dev/null; then
+                    if ! diff -u "$f" "$OUT"; then
                       echo "::error file=$f::File is not properly formatted with qmlformat"
                       FAIL=1
                     fi
                   done
 
                   if [[ $FAIL -ne 0 ]]; then
-                    echo "::error::Some files are not formatted. Run: qmlformat -i <file>..."
+                    echo "::error::Some files are not formatted. Run qmlformat from Qt 6.10.2 and compare the diff above."
                     echo "Changed files checked:"
                     printf '%s\n' "${FILES[@]}"
                     exit 1
