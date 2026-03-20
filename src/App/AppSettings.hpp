@@ -1,5 +1,5 @@
 #pragma once
 
 namespace App {
-inline constexpr char LanguageIndexKey[]{ "App/TargetLanguageIndex" };
+inline constexpr char TargetLanguageIndexKey[]{ "App/TargetLanguageIndex" };
 }
