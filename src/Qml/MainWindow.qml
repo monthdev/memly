@@ -177,6 +177,7 @@ ApplicationWindow {
         anchors.bottomMargin: 17
 
         text: "Create Deck"
+        palette.buttonText: "white"
         width: 100
         height: 26
         radius: 20
