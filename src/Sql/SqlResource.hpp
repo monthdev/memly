@@ -19,5 +19,4 @@ namespace Sql {
 [[nodiscard]] std::string UpdateDeckSql();
 
 [[nodiscard]] std::string DeleteDeckSql();
-
 }

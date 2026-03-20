@@ -9,32 +9,58 @@ on:
 jobs:
     qml-format:
         runs-on: ubuntu-latest
+        env:
+            QT_VERSION: '6.10.2'
+            QT_ARCH: 'linux_gcc_64'
+            QT_DIR: ${{ github.workspace }}/Qt
+
         steps:
             - name: Checkout
               uses: actions/checkout@v6
               with:
                   fetch-depth: 0
 
-            - name: Install Qt 6.10.2
-              uses: jurplel/install-qt-action@v4.3.0
+            - name: Set up Python
+              uses: actions/setup-python@v6
               with:
-                  version: '6.10.2'
-                  host: 'linux'
-                  target: 'desktop'
-                  cache: true
+                  python-version: '3.x'
+
+            - name: Cache Qt
+              uses: actions/cache@v4
+              with:
+                  path: ${{ env.QT_DIR }}
+                  key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
+
+            - name: Install aqtinstall
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  python -m pip install --upgrade pip
+                  python -m pip install "aqtinstall==3.3.*"
+                  python -m aqt version
+
+            - name: Install Qt 6.10.2
+              shell: bash
+              run: |
+                  set -euo pipefail
+
+                  if [[ ! -d "${QT_DIR}/${QT_VERSION}/gcc_64" ]]; then
+                    python -m aqt install-qt linux desktop "${QT_VERSION}" "${QT_ARCH}" \
+                      --outputdir "${QT_DIR}"
+                  fi
 
             - name: Locate qmlformat
               shell: bash
               run: |
                   set -euo pipefail
 
-                  QMLFORMAT_BIN="$(find "$QT_ROOT_DIR" -type f -name qmlformat | sort | head -n1)"
+                  QMLFORMAT_BIN="$(find "$QT_DIR" -type f -name qmlformat | sort | head -n1)"
                   if [[ -z "$QMLFORMAT_BIN" || ! -x "$QMLFORMAT_BIN" ]]; then
-                    echo "::error::qmlformat not found under QT_ROOT_DIR=$QT_ROOT_DIR"
+                    echo "::error::qmlformat not found under QT_DIR=$QT_DIR"
                     exit 1
                   fi
 
-                  echo "QT_ROOT_DIR=$QT_ROOT_DIR"
+                  echo "QT_DIR=$QT_DIR"
                   echo "QMLFORMAT_BIN=$QMLFORMAT_BIN"
                   echo "QMLFORMAT_BIN=$QMLFORMAT_BIN" >> "$GITHUB_ENV"
 
