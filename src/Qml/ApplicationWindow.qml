@@ -22,7 +22,15 @@ ApplicationWindow {
     }
 
     header: TopMenuComponent {
-        onDecksClicked: stackView.replaceCurrentItem(Qt.resolvedUrl("Page/DecksPage.qml"))
+        onDecksClicked: {
+            if (stackView.currentItem && stackView.currentItem.objectName === "decksPage")
+                return;
+
+            stackView.replaceCurrentItem(Qt.resolvedUrl("Page/DecksPage.qml"), {
+                "pageColor": window.color
+            });
+        }
+
         onAddClicked: {}
         onBrowseClicked: {}
         onJournalClicked: {}
@@ -32,6 +40,8 @@ ApplicationWindow {
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: DecksPage {}
+        initialItem: DecksPage {
+            pageColor: window.color
+        }
     }
 }
