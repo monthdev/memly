@@ -1,9 +1,9 @@
 #pragma once
 
-#include <duckdb.hpp>
+namespace duckdb {
+class Connection;
+}
 
 namespace Sql {
-
-void RunMigrations(duckdb::Connection&);
-
+void RunDatabaseBootstrap(duckdb::Connection&);
 }

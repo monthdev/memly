@@ -1,5 +1,7 @@
 #include "SchemaMigrator.hpp"
 
+#include <duckdb.hpp>
+
 #include <cstdint>
 #include <functional>
 
@@ -8,7 +10,12 @@
 
 namespace Sql {
 
-void RunMigrations(duckdb::Connection& DatabaseConnection) {
+// namespace {
+// void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection);
+// void SeedTableDefaults(duckdb::Connection& DatabaseConnection);
+// }
+
+void RunDatabaseBootstrap(duckdb::Connection& DatabaseConnection) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(
         Sql::M00_MigrationsTableSql()) };
     if (QueryResult->HasError()) {
@@ -23,22 +30,20 @@ void RunMigrations(duckdb::Connection& DatabaseConnection) {
          QueryResultIterator != QueryResult->end();
          ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };
-        AppliedMigrationVersionVector.push_back(
-            QueryResultRow.GetValue<std::uint32_t>(0));
+        AppliedMigrationVersionVector.push_back(QueryResultRow.GetValue<std::uint32_t>(0));
     }
     for (std::size_t I{ 0 }; I != AppliedMigrationVersionVector.size(); ++I) {
         if (AppliedMigrationVersionVector.at(I) != I + 1) {
             Support::ThrowError("Unexpected applied migration version order");
         }
     }
-    std::array<std::reference_wrapper<std::string()>, 1>
-        MigrationSqlFunctionArray{ Sql::M01_InitialSchemaSql };
-    if (AppliedMigrationVersionVector.size() >
-        MigrationSqlFunctionArray.size()) {
+    std::array<std::reference_wrapper<std::string()>, 1> MigrationSqlFunctionArray{
+        Sql::M01_InitialSchemaSql
+    };
+    if (AppliedMigrationVersionVector.size() > MigrationSqlFunctionArray.size()) {
         Support::ThrowError("Unexpected number of applied migrations");
     }
-    for (std::size_t UnappliedMigrationVersionIndex{
-             AppliedMigrationVersionVector.size() };
+    for (std::size_t UnappliedMigrationVersionIndex{ AppliedMigrationVersionVector.size() };
          UnappliedMigrationVersionIndex != MigrationSqlFunctionArray.size();
          ++UnappliedMigrationVersionIndex) {
         const std::string& MigrationSql{ MigrationSqlFunctionArray.at(
@@ -55,5 +60,4 @@ void RunMigrations(duckdb::Connection& DatabaseConnection) {
         }
     }
 }
-
 }

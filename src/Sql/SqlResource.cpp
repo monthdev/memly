@@ -6,46 +6,51 @@
 
 namespace Sql {
 
-static std::string ReadResourceBytes(const char* ResourcePath) {
-    QResource Resource{ ResourcePath };
-    if (!Resource.isValid()) {
+namespace {
+std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
+    QResource SqlResource{ SqlResourcePath };
+    if (!SqlResource.isValid()) {
         Support::ThrowError("Error opening SQL file");
     }
-    return std::string{ reinterpret_cast<const char*>(Resource.data()),
-                        static_cast<size_t>(Resource.size()) };
+    const QByteArray SqlResourceBytes{ SqlResource.uncompressedData() };
+    if (SqlResourceBytes.isNull()) {
+        Support::ThrowError("Error reading SQL resource bytes");
+    }
+    return std::string{ SqlResourceBytes.constData(),
+                        static_cast<std::size_t>(SqlResourceBytes.size()) };
+}
 }
 
 [[nodiscard]] std::string M00_MigrationsTableSql() {
-    return ReadResourceBytes(":/Sql/Migration/M00_MigrationsTable.sql");
+    return ReadSqlResourceBytes(":/Sql/Migration/M00_MigrationsTable.sql");
 }
 
 [[nodiscard]] std::string M01_InitialSchemaSql() {
-    return ReadResourceBytes(":/Sql/Migration/M01_InitialSchema.sql");
+    return ReadSqlResourceBytes(":/Sql/Migration/M01_InitialSchema.sql");
 }
 
 [[nodiscard]] std::string CreateMigrationSql() {
-    return ReadResourceBytes(":/Sql/MigrationStatement/CreateMigration.sql");
+    return ReadSqlResourceBytes(":/Sql/MigrationStatement/CreateMigration.sql");
 }
 
 [[nodiscard]] std::string ReadMigrationsTableSql() {
-    return ReadResourceBytes(
-        ":/Sql/MigrationStatement/ReadMigrationsTable.sql");
+    return ReadSqlResourceBytes(":/Sql/MigrationStatement/ReadMigrationsTable.sql");
 }
 
 [[nodiscard]] std::string CreateDeckSql() {
-    return ReadResourceBytes(":/Sql/Statement/CreateDeck.sql");
+    return ReadSqlResourceBytes(":/Sql/Statement/CreateDeck.sql");
 }
 
 [[nodiscard]] std::string ReadDecksTableSql() {
-    return ReadResourceBytes(":/Sql/Statement/ReadDecksTable.sql");
+    return ReadSqlResourceBytes(":/Sql/Statement/ReadDecksTable.sql");
 }
 
 [[nodiscard]] std::string UpdateDeckSql() {
-    return ReadResourceBytes(":/Sql/Statement/UpdateDeck.sql");
+    return ReadSqlResourceBytes(":/Sql/Statement/UpdateDeck.sql");
 }
 
 [[nodiscard]] std::string DeleteDeckSql() {
-    return ReadResourceBytes(":/Sql/Statement/DeleteDeck.sql");
+    return ReadSqlResourceBytes(":/Sql/Statement/DeleteDeck.sql");
 }
 
 }

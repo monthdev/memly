@@ -9,12 +9,12 @@
 
 namespace Bridge {
 
-class DeckBridge final : public QObject {
+class DatabaseBridge final : public QObject {
     Q_OBJECT
     Q_PROPERTY(Model::DeckListModel* deckList READ GetDeckList CONSTANT)
 public:
-    explicit DeckBridge(duckdb::Connection& DatabaseConnection,
-                        QObject* Parent = nullptr) noexcept
+    explicit DatabaseBridge(duckdb::Connection& DatabaseConnection,
+                            QObject* Parent = nullptr) noexcept
         : QObject{ Parent }
         , m_DatabaseConnection{ DatabaseConnection }
         , m_DeckList{ this } {

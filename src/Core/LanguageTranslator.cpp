@@ -5,8 +5,9 @@
 
 namespace Core {
 std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() {
-    static constexpr std::array<TargetLanguageInfo, 66> TargetLanguages{
+    static constexpr std::array<TargetLanguageInfo, 67> TargetLanguages{
         {
+         { TargetLanguage::NoLanguage, "", "", "", "(No Language)" },
          { TargetLanguage::Afrikaans, "af", "af", "", "Afrikaans" },
          { TargetLanguage::Amharic, "am", "am", "", "Amharic" },
          { TargetLanguage::Arabic, "ar", "ar", "", "Arabic" },
@@ -45,26 +46,14 @@ std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() {
          { TargetLanguage::Malayalam, "ml", "ml", "", "Malayalam" },
          { TargetLanguage::Marathi, "mr", "mr", "", "Marathi" },
          { TargetLanguage::Malay, "ms", "ms", "", "Malay" },
-         { TargetLanguage::MyanmarBurmese,
-              "my",
-              "my",
-              "",
-              "Myanmar (Burmese)" },
+         { TargetLanguage::MyanmarBurmese, "my", "my", "", "Myanmar (Burmese)" },
          { TargetLanguage::Nepali, "ne", "ne", "", "Nepali" },
          { TargetLanguage::Dutch, "nl", "nl", "", "Dutch" },
          { TargetLanguage::Norwegian, "no", "no", "", "Norwegian" },
          { TargetLanguage::Punjabi, "pa", "pa", "", "Punjabi" },
          { TargetLanguage::Polish, "pl", "pl", "", "Polish" },
-         { TargetLanguage::PortugueseBrazil,
-              "pt",
-              "pt",
-              "com.br",
-              "Portuguese (Brazil)" },
-         { TargetLanguage::PortuguesePortugal,
-              "por",
-              "pt",
-              "pt",
-              "Portuguese (Portugal)" },
+         { TargetLanguage::PortugueseBrazil, "pt", "pt", "com.br", "Portuguese (Brazil)" },
+         { TargetLanguage::PortuguesePortugal, "por", "pt", "pt", "Portuguese (Portugal)" },
          { TargetLanguage::Romanian, "ro", "ro", "", "Romanian" },
          { TargetLanguage::Russian, "ru", "ru", "", "Russian" },
          { TargetLanguage::Sinhala, "si", "si", "", "Sinhala" },
@@ -83,19 +72,11 @@ std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() {
          { TargetLanguage::Urdu, "ur", "ur", "", "Urdu" },
          { TargetLanguage::Vietnamese, "vi", "vi", "", "Vietnamese" },
          { TargetLanguage::Cantonese, "yue", "yue", "", "Cantonese" },
-         { TargetLanguage::ChineseSimplified,
-              "zh-cn",
-              "zh-CN",
-              "",
-              "Chinese (Simplified)" },
-         { TargetLanguage::ChineseTraditional,
-              "zh-tw",
-              "zh-TW",
-              "",
-              "Chinese (Traditional)" },
+         { TargetLanguage::ChineseSimplified, "zh-cn", "zh-CN", "", "Chinese (Simplified)" },
+         { TargetLanguage::ChineseTraditional, "zh-tw", "zh-TW", "", "Chinese (Traditional)" },
          }
     };
-
+    static_assert(TargetLanguages.size() == 67);
     return TargetLanguages;
 }
 

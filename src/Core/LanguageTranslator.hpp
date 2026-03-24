@@ -6,6 +6,7 @@
 
 namespace Core {
 enum class TargetLanguage : std::uint8_t {
+    NoLanguage,
     Afrikaans,
     Amharic,
     Arabic,
@@ -75,11 +76,11 @@ enum class TargetLanguage : std::uint8_t {
 };
 
 struct TargetLanguageInfo {
-    TargetLanguage Language;
-    std::string_view GoogleTranslateCode;
-    std::string_view GoogleTtsLangCode;
-    std::string_view GoogleTtsTld;
-    std::string_view GuiName;
+    TargetLanguage m_Language;
+    std::string_view m_GoogleTranslateCode;
+    std::string_view m_GoogleTtsLangCode;
+    std::string_view m_GoogleTtsTld;
+    std::string_view m_GuiName;
 };
 
 std::span<const TargetLanguageInfo> GetSupportedTargetLanguages();

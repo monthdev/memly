@@ -1,4 +1,4 @@
-#include "Bridge/DeckBridge.hpp"
+#include "Bridge/DatabaseBridge.hpp"
 
 #include <duckdb.hpp>
 
@@ -8,15 +8,15 @@
 
 namespace Bridge {
 
-Q_INVOKABLE QString DeckBridge::NameLengthErrorMessage() {
+Q_INVOKABLE QString DatabaseBridge::NameLengthErrorMessage() {
     return QString{ "Name length error" };
 }
 
-Q_INVOKABLE QString DeckBridge::DuplicateErrorMessage() {
+Q_INVOKABLE QString DatabaseBridge::DuplicateErrorMessage() {
     return QString{ "Name already exists" };
 }
 
-[[nodiscard]] QString DeckBridge::HandleQueryResultRecoverableError(
+[[nodiscard]] QString DatabaseBridge::HandleQueryResultRecoverableError(
     const std::unique_ptr<duckdb::QueryResult>& QueryResult) {
     switch (QueryResult->GetErrorType()) {
     case duckdb::ExceptionType::INVALID: {
@@ -39,7 +39,7 @@ Q_INVOKABLE QString DeckBridge::DuplicateErrorMessage() {
     }
 }
 
-Q_INVOKABLE QString DeckBridge::CreateDeck(const QString& DeckName) {
+Q_INVOKABLE QString DatabaseBridge::CreateDeck(const QString& DeckName) {
     return Support::TryCatchWrapper([&] {
         std::unique_ptr<duckdb::QueryResult> QueryResult{
             m_DatabaseConnection.Query(Sql::CreateDeckSql(),
@@ -54,7 +54,7 @@ Q_INVOKABLE QString DeckBridge::CreateDeck(const QString& DeckName) {
 }
 
 Q_INVOKABLE QString
-DeckBridge::UpdateDeck(const Model::DeckListModel::DeckItem& DeckItem) {
+DatabaseBridge::UpdateDeck(const Model::DeckListModel::DeckItem& DeckItem) {
     return Support::TryCatchWrapper([&] {
         std::unique_ptr<duckdb::QueryResult> QueryResult{
             m_DatabaseConnection.Query(Sql::UpdateDeckSql(),
@@ -69,7 +69,7 @@ DeckBridge::UpdateDeck(const Model::DeckListModel::DeckItem& DeckItem) {
     });
 }
 
-Q_INVOKABLE void DeckBridge::DeleteDeck(const QString& DeckId) {
+Q_INVOKABLE void DatabaseBridge::DeleteDeck(const QString& DeckId) {
     Support::TryCatchWrapper([&] {
         std::unique_ptr<duckdb::QueryResult> QueryResult{
             m_DatabaseConnection.Query(Sql::DeleteDeckSql(),
@@ -82,7 +82,7 @@ Q_INVOKABLE void DeckBridge::DeleteDeck(const QString& DeckId) {
     });
 }
 
-void DeckBridge::ReadDeckTable() {
+void DatabaseBridge::ReadDeckTable() {
     Support::TryCatchWrapper([&] {
         std::unique_ptr<duckdb::QueryResult> QueryResult{
             m_DatabaseConnection.Query(Sql::ReadDecksTableSql())
