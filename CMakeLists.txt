@@ -55,6 +55,7 @@ file(
   CONFIGURE_DEPENDS
   "${CMAKE_SOURCE_DIR}/src/Sql/Migration/*.sql"
   "${CMAKE_SOURCE_DIR}/src/Sql/MigrationStatement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Sql/SeedStatement/*.sql"
   "${CMAKE_SOURCE_DIR}/src/Sql/Statement/*.sql"
 )
 
