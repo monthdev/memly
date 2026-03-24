@@ -4,13 +4,15 @@
 #include <QStandardPaths>
 
 namespace App {
-static QString EnsureDirectory(const QString& Directory) {
+namespace {
+QString EnsureDirectory(const QString& Directory) {
     QDir().mkpath(Directory);
     return Directory;
 }
 
-static QString BaseDirectoryPath() {
+QString BaseDirectoryPath() {
     return EnsureDirectory(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+}
 }
 
 QString AudioDirectoryPath() {
