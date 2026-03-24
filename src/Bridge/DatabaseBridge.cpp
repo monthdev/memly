@@ -41,10 +41,8 @@ Q_INVOKABLE QString DatabaseBridge::DuplicateErrorMessage() {
 
 Q_INVOKABLE QString DatabaseBridge::CreateDeck(const QString& DeckName) {
     return Support::TryCatchWrapper([&] {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{
-            m_DatabaseConnection.Query(Sql::CreateDeckSql(),
-                                       DeckName.toStdString())
-        };
+        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
+            Sql::CreateDeckSql(), DeckName.toStdString()) };
         const QString Error{ HandleQueryResultRecoverableError(QueryResult) };
         if (Error.isEmpty()) {
             ReadDeckTable();
@@ -53,14 +51,10 @@ Q_INVOKABLE QString DatabaseBridge::CreateDeck(const QString& DeckName) {
     });
 }
 
-Q_INVOKABLE QString
-DatabaseBridge::UpdateDeck(const Model::DeckListModel::DeckItem& DeckItem) {
+Q_INVOKABLE QString DatabaseBridge::UpdateDeck(const Model::DeckListModel::DeckItem& DeckItem) {
     return Support::TryCatchWrapper([&] {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{
-            m_DatabaseConnection.Query(Sql::UpdateDeckSql(),
-                                       DeckItem.m_Id.toStdString(),
-                                       DeckItem.m_Name.toStdString())
-        };
+        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
+            Sql::UpdateDeckSql(), DeckItem.m_Id.toStdString(), DeckItem.m_Name.toStdString()) };
         const QString Error{ HandleQueryResultRecoverableError(QueryResult) };
         if (Error.isEmpty()) {
             ReadDeckTable();
@@ -71,10 +65,8 @@ DatabaseBridge::UpdateDeck(const Model::DeckListModel::DeckItem& DeckItem) {
 
 Q_INVOKABLE void DatabaseBridge::DeleteDeck(const QString& DeckId) {
     Support::TryCatchWrapper([&] {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{
-            m_DatabaseConnection.Query(Sql::DeleteDeckSql(),
-                                       DeckId.toStdString())
-        };
+        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
+            Sql::DeleteDeckSql(), DeckId.toStdString()) };
         if (QueryResult->HasError()) {
             Support::ThrowError(QueryResult->GetError());
         }
@@ -84,9 +76,8 @@ Q_INVOKABLE void DatabaseBridge::DeleteDeck(const QString& DeckId) {
 
 void DatabaseBridge::ReadDeckTable() {
     Support::TryCatchWrapper([&] {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{
-            m_DatabaseConnection.Query(Sql::ReadDecksTableSql())
-        };
+        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
+            Sql::ReadDecksTableSql()) };
         if (QueryResult->HasError()) {
             Support::ThrowError(QueryResult->GetError());
         }
@@ -95,9 +86,8 @@ void DatabaseBridge::ReadDeckTable() {
              QueryResultIterator != QueryResult->end();
              ++QueryResultIterator) {
             const auto& QueryResultRow{ *QueryResultIterator };
-            DeckList.emplace_back(
-                QString{ QueryResultRow.GetValue<std::string>(0).c_str() },
-                QString{ QueryResultRow.GetValue<std::string>(1).c_str() });
+            DeckList.emplace_back(QString{ QueryResultRow.GetValue<std::string>(0).c_str() },
+                                  QString{ QueryResultRow.GetValue<std::string>(1).c_str() });
         }
         m_DeckList.ReplaceAll(std::move(DeckList));
     });

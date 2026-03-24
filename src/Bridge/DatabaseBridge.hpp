@@ -36,8 +36,8 @@ private:
     duckdb::Connection& m_DatabaseConnection;
     Model::DeckListModel m_DeckList;
 
-    [[nodiscard]] QString HandleQueryResultRecoverableError(
-        const std::unique_ptr<duckdb::QueryResult>&);
+    [[nodiscard]] QString
+    HandleQueryResultRecoverableError(const std::unique_ptr<duckdb::QueryResult>&);
     void ReadDeckTable();
 };
 }

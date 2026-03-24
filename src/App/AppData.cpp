@@ -10,8 +10,7 @@ static QString EnsureDirectory(const QString& Directory) {
 }
 
 static QString BaseDirectoryPath() {
-    return EnsureDirectory(
-        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+    return EnsureDirectory(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 }
 
 QString AudioDirectoryPath() {
