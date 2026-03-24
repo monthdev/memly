@@ -1,36 +1,36 @@
 BEGIN TRANSACTION;
 
-CREATE MACRO IF NOT EXISTS deck_name_is_valid (name) AS length(name) > 0
-AND length(name) <= 40;
+CREATE MACRO IF NOT EXISTS deck_name_is_valid (deck_name) AS length(deck_name) > 0
+AND length(deck_name) <= 40;
 
-CREATE MACRO IF NOT EXISTS card_front_text_is_valid (text) AS length(text) > 0
-AND length(text) <= 200;
+CREATE MACRO IF NOT EXISTS card_front_text_is_valid (card_front_text) AS length(card_front_text) > 0
+AND length(card_front_text) <= 200;
 
-CREATE MACRO IF NOT EXISTS card_back_text_is_valid (text) AS length(text) > 0
-AND length(text) <= 500;
+CREATE MACRO IF NOT EXISTS card_back_text_is_valid (card_back_text) AS length(card_back_text) > 0
+AND length(card_back_text) <= 500;
 
-CREATE MACRO IF NOT EXISTS user_flag_is_valid (flag) AS flag BETWEEN 0 AND 7;
+CREATE MACRO IF NOT EXISTS user_flag_is_valid (user_flag) AS user_flag BETWEEN 0 AND 7;
 
-CREATE MACRO IF NOT EXISTS review_state_is_valid (state) AS state BETWEEN 0 AND 3;
+CREATE MACRO IF NOT EXISTS review_state_is_valid (review_state) AS review_state BETWEEN 0 AND 3;
 
-CREATE MACRO IF NOT EXISTS target_language_code_is_valid (code) AS code BETWEEN 0 AND 66;
+CREATE MACRO IF NOT EXISTS target_language_code_is_valid (target_language_code) AS target_language_code BETWEEN 0 AND 66;
 
-CREATE MACRO IF NOT EXISTS desired_retention_is_valid (value) AS value > 0.0
-AND value < 1.0;
+CREATE MACRO IF NOT EXISTS desired_retention_is_valid (desired_retention) AS desired_retention > 0.0
+AND desired_retention < 1.0;
 
-CREATE MACRO IF NOT EXISTS maximum_interval_days_is_valid (value) AS value > 0;
+CREATE MACRO IF NOT EXISTS maximum_interval_days_is_valid (maximum_interval_days) AS maximum_interval_days > 0;
 
-CREATE MACRO IF NOT EXISTS fsrs_difficulty_is_valid (value) AS value >= 1.0
-AND value <= 10.0;
+CREATE MACRO IF NOT EXISTS fsrs_difficulty_is_valid (fsrs_difficulty) AS fsrs_difficulty >= 1.0
+AND fsrs_difficulty <= 10.0;
 
-CREATE MACRO IF NOT EXISTS fsrs_stability_is_valid (value) AS value > 0.0;
+CREATE MACRO IF NOT EXISTS fsrs_stability_is_valid (fsrs_stability) AS fsrs_stability > 0.0;
 
-CREATE MACRO IF NOT EXISTS review_rating_is_valid (value) AS value BETWEEN 1 AND 4;
+CREATE MACRO IF NOT EXISTS review_rating_is_valid (review_rating) AS review_rating BETWEEN 1 AND 4;
 
-CREATE MACRO IF NOT EXISTS elapsed_seconds_is_valid (value) AS value >= 0.0;
+CREATE MACRO IF NOT EXISTS elapsed_seconds_is_valid (elapsed_seconds) AS elapsed_seconds >= 0.0;
 
-CREATE MACRO IF NOT EXISTS scheduled_seconds_is_valid (value) AS value IS NULL
-OR value >= 0.0;
+CREATE MACRO IF NOT EXISTS scheduled_seconds_is_valid (scheduled_seconds) AS scheduled_seconds IS NULL
+OR scheduled_seconds >= 0.0;
 
 CREATE TABLE IF NOT EXISTS fsrs_configurations (
   id UUID PRIMARY KEY DEFAULT uuidv7 (),
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS decks (
   target_language_code UTINYINT NOT NULL CHECK (
     target_language_code_is_valid (target_language_code)
   ),
-  fsrs_config_id UUID NOT NULL REFERENCES fsrs_configurations (id)
+  fsrs_configuration_id UUID NOT NULL REFERENCES fsrs_configurations (id)
 );
 
 CREATE TABLE IF NOT EXISTS cards (
