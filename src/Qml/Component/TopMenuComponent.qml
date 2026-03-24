@@ -10,8 +10,11 @@ Item {
     signal journalClicked
     signal infoClicked
 
-    width: parent.width
-    height: 31
+    implicitWidth: 600
+    implicitHeight: 31
+
+    width: parent ? parent.width : implicitWidth
+    height: implicitHeight
 
     property int hoveredIndex: -1
     property int pressedIndex: -1
@@ -63,8 +66,8 @@ Item {
         anchors.top: parent.top
         anchors.topMargin: 1
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 600
-        height: 30
+        width: Math.min(root.width, root.implicitWidth)
+        height: root.height - 1
 
         readonly property int buttonCount: root.menuModel.length
         readonly property real buttonWidth: width / buttonCount

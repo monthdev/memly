@@ -10,7 +10,7 @@ ApplicationWindow {
 
     width: 800
     height: 700
-    minimumWidth: 600
+    minimumWidth: 400
     minimumHeight: 90
 
     Settings {
