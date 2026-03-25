@@ -12,6 +12,8 @@ namespace Sql {
 
 [[nodiscard]] std::string ReadMigrationsTableSql();
 
+[[nodiscard]] std::string CreateDefaultFsrsConfigurationSql();
+
 [[nodiscard]] std::string CreateDeckSql();
 
 [[nodiscard]] std::string ReadDecksTableSql();

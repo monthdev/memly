@@ -1,11 +1,14 @@
 #pragma once
 
-#include <duckdb.hpp>
-
 #include <QObject>
 #include <QString>
 
 #include "Model/DeckListModel.hpp"
+
+namespace duckdb {
+class Connection;
+class QueryResult;
+}
 
 namespace Bridge {
 

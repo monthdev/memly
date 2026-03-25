@@ -10,12 +10,8 @@
 
 namespace Sql {
 
-// namespace {
-// void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection);
-// void SeedTableDefaults(duckdb::Connection& DatabaseConnection);
-// }
-
-void RunDatabaseBootstrap(duckdb::Connection& DatabaseConnection) {
+namespace {
+void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(
         Sql::M00_MigrationsTableSql()) };
     if (QueryResult->HasError()) {
@@ -59,5 +55,19 @@ void RunDatabaseBootstrap(duckdb::Connection& DatabaseConnection) {
             Support::ThrowError(QueryResult->GetError());
         }
     }
+}
+
+void SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(
+        Sql::CreateDefaultFsrsConfigurationSql()) };
+    if (QueryResult->HasError()) {
+        Support::ThrowError(QueryResult->GetError());
+    }
+}
+}
+
+void RunDatabaseBootstrap(duckdb::Connection& DatabaseConnection) {
+    ApplySchemaMigrations(DatabaseConnection);
+    SeedTableDefaults(DatabaseConnection);
 }
 }

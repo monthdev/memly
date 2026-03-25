@@ -37,6 +37,10 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
     return ReadSqlResourceBytes(":/Sql/MigrationStatement/ReadMigrationsTable.sql");
 }
 
+[[nodiscard]] std::string CreateDefaultFsrsConfigurationSql() {
+    return ReadSqlResourceBytes(":/Sql/SeedStatement/CreateDefaultFsrsConfiguration.sql");
+}
+
 [[nodiscard]] std::string CreateDeckSql() {
     return ReadSqlResourceBytes(":/Sql/Statement/CreateDeck.sql");
 }

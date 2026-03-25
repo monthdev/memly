@@ -32,6 +32,19 @@ CREATE MACRO IF NOT EXISTS elapsed_seconds_is_valid (elapsed_seconds) AS elapsed
 CREATE MACRO IF NOT EXISTS scheduled_seconds_is_valid (scheduled_seconds) AS scheduled_seconds IS NULL
 OR scheduled_seconds >= 0.0;
 
+CREATE MACRO IF NOT EXISTS updated_at_is_valid (created_at, updated_at) AS updated_at IS NULL
+OR updated_at >= created_at;
+
+CREATE MACRO IF NOT EXISTS due_at_is_valid (review_state, due_at) AS review_state = 0
+OR due_at IS NOT NULL;
+
+CREATE MACRO IF NOT EXISTS last_reviewed_at_is_valid (review_state, last_reviewed_at) AS review_state = 0
+OR last_reviewed_at IS NOT NULL;
+
+CREATE MACRO IF NOT EXISTS due_after_last_review_is_valid (last_reviewed_at, due_at) AS last_reviewed_at IS NULL
+OR due_at IS NULL
+OR due_at >= last_reviewed_at;
+
 CREATE TABLE IF NOT EXISTS fsrs_configurations (
   id UUID PRIMARY KEY DEFAULT uuidv7 (),
   name VARCHAR NOT NULL UNIQUE,
@@ -42,17 +55,20 @@ CREATE TABLE IF NOT EXISTS fsrs_configurations (
   ),
   parameters_json JSON NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  CHECK (updated_at_is_valid (created_at, updated_at))
 );
 
 CREATE TABLE IF NOT EXISTS decks (
   id UUID PRIMARY KEY DEFAULT uuidv7 (),
   name VARCHAR NOT NULL UNIQUE CHECK (deck_name_is_valid (name)),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
   target_language_code UTINYINT NOT NULL CHECK (
     target_language_code_is_valid (target_language_code)
   ),
-  fsrs_configuration_id UUID NOT NULL REFERENCES fsrs_configurations (id)
+  fsrs_configuration_id UUID NOT NULL REFERENCES fsrs_configurations (id),
+  CHECK (updated_at_is_valid (created_at, updated_at))
 );
 
 CREATE TABLE IF NOT EXISTS cards (
@@ -71,7 +87,15 @@ CREATE TABLE IF NOT EXISTS cards (
   back_normalized_text VARCHAR GENERATED ALWAYS AS (lower(strip_accents(nfc_normalize(back_text)))),
   audio_path VARCHAR,
   user_flag UTINYINT NOT NULL DEFAULT 0 CHECK (user_flag_is_valid (user_flag)),
-  UNIQUE (deck_id, front_text)
+  UNIQUE (deck_id, front_text),
+  CHECK (updated_at_is_valid (created_at, updated_at)),
+  CHECK (
+    last_reviewed_at_is_valid (review_state, last_reviewed_at)
+  ),
+  CHECK (due_at_is_valid (review_state, due_at)),
+  CHECK (
+    due_after_last_review_is_valid (last_reviewed_at, due_at)
+  )
 );
 
 CREATE TABLE IF NOT EXISTS card_reviews (
