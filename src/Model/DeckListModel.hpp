@@ -10,15 +10,14 @@ class DeckListModel final : public QAbstractListModel {
     Q_OBJECT
 
 public:
-    struct DeckItem {
+    struct DeckListRow {
         QString m_Id;
         QString m_Name;
+        quint32 m_Due;
+        quint32 m_Total;
     };
 
-    enum Role {
-        IdRole = Qt::UserRole + 1,
-        NameRole,
-    };
+    enum Role { IdRole = Qt::UserRole + 1, NameRole, DueRole, TotalRole };
 
     explicit DeckListModel(QObject* Parent = nullptr) noexcept
         : QAbstractListModel{ Parent } {
@@ -28,7 +27,7 @@ public:
         if (Parent.isValid()) {
             return 0;
         }
-        return static_cast<int>(m_Decks.size());
+        return static_cast<int>(m_DeckList.size());
     }
 
     QVariant data(const QModelIndex& Index, int Role) const override {
@@ -37,17 +36,21 @@ public:
         }
 
         const int Row{ Index.row() };
-        if (Row < 0 || Row >= static_cast<int>(m_Decks.size())) {
+        if (Row < 0 || Row >= static_cast<int>(m_DeckList.size())) {
             return {};
         }
 
-        const DeckItem& Deck{ m_Decks[static_cast<qsizetype>(Row)] };
+        const DeckListRow& DeckListRow{ m_DeckList[static_cast<qsizetype>(Row)] };
 
         switch (Role) {
         case IdRole:
-            return Deck.m_Id;
+            return DeckListRow.m_Id;
         case NameRole:
-            return Deck.m_Name;
+            return DeckListRow.m_Name;
+        case DueRole:
+            return DeckListRow.m_Due;
+        case TotalRole:
+            return DeckListRow.m_Total;
         default:
             return {};
         }
@@ -55,19 +58,21 @@ public:
 
     QHash<int, QByteArray> roleNames() const override {
         return {
-            {   IdRole,   "id" },
-            { NameRole, "name" },
+            {    IdRole,    "id" },
+            {  NameRole,  "name" },
+            {   DueRole,   "due" },
+            { TotalRole, "total" },
         };
     }
 
-    void ReplaceAll(QVector<DeckItem> Decks) {
+    void ReplaceAll(QVector<DeckListRow> DeckList) {
         beginResetModel();
-        m_Decks = std::move(Decks);
+        m_DeckList = std::move(DeckList);
         endResetModel();
     }
 
 private:
-    QVector<DeckItem> m_Decks;
+    QVector<DeckListRow> m_DeckList;
 };
 
 }

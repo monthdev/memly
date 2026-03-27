@@ -45,12 +45,12 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
     return ReadSqlResourceBytes(":/Sql/Statement/CreateDeck.sql");
 }
 
-[[nodiscard]] std::string ReadDecksTableSql() {
-    return ReadSqlResourceBytes(":/Sql/Statement/ReadDecksTable.sql");
+[[nodiscard]] std::string ReadDeckListViewSql() {
+    return ReadSqlResourceBytes(":/Sql/Statement/ReadDeckListView.sql");
 }
 
-[[nodiscard]] std::string UpdateDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Statement/UpdateDeck.sql");
+[[nodiscard]] std::string UpdateDeckNameSql() {
+    return ReadSqlResourceBytes(":/Sql/Statement/UpdateDeckName.sql");
 }
 
 [[nodiscard]] std::string DeleteDeckSql() {

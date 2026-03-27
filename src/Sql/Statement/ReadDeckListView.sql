@@ -1,7 +1,9 @@
 SELECT
   id::VARCHAR,
-  name
+  name,
+  due,
+  total
 FROM
-  decks
+  deck_list_view
 ORDER BY
   name;

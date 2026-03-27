@@ -5,7 +5,7 @@
 #include <QQmlContext>
 
 #include "App/AppData.hpp"
-#include "Bridge/DatabaseBridge.hpp"
+#include "Bridge/DeckListBridge.hpp"
 #include "Sql/SchemaMigrator.hpp"
 #include "Support/Fatal.hpp"
 
@@ -22,8 +22,8 @@ int main(int argc, char* argv[]) {
         duckdb::DuckDB Database{ App::DatabaseFilePath().toStdString() };
         duckdb::Connection DatabaseConnection{ Database };
         Sql::RunDatabaseBootstrap(DatabaseConnection);
-        Bridge::DatabaseBridge DatabaseBridge{ DatabaseConnection, &App };
-        qmlRegisterSingletonInstance(AppName, 1, 0, "DatabaseBridge", &DatabaseBridge);
+        Bridge::DeckListBridge DeckListBridge{ DatabaseConnection, &App };
+        qmlRegisterSingletonInstance(AppName, 1, 0, "DeckListBridge", &DeckListBridge);
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,
