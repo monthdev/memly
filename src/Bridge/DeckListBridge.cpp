@@ -8,12 +8,16 @@
 
 namespace Bridge {
 
-Q_INVOKABLE QString DeckListBridge::NameLengthErrorMessage() {
-    return QString{ "Name length error" };
+[[nodiscard]] Q_INVOKABLE QString DeckListBridge::NameLengthErrorMessage() {
+    return QString{ "Deck name length exceeds character limit" };
 }
 
-Q_INVOKABLE QString DeckListBridge::DuplicateErrorMessage() {
-    return QString{ "Name already exists" };
+[[nodiscard]] Q_INVOKABLE QString DeckListBridge::DuplicateNameErrorMessage() {
+    return QString{ "Deck name already exists" };
+}
+
+[[nodiscard]] Q_INVOKABLE QString DeckListBridge::TargetLanguageCodeErrorMessage() {
+    return QString{ "Target language code is invalid" };
 }
 
 [[nodiscard]] QString DeckListBridge::HandleQueryResultRecoverableError(
@@ -25,11 +29,14 @@ Q_INVOKABLE QString DeckListBridge::DuplicateErrorMessage() {
     case duckdb::ExceptionType::CONSTRAINT: {
         const duckdb::ErrorData& ErrorData{ QueryResult->GetErrorObject() };
         std::string_view RawMessage{ ErrorData.RawMessage() };
-        if (RawMessage.starts_with("CHECK")) {
+        if (RawMessage.contains("(deck_name_is_valid(\"name\"))")) {
             return NameLengthErrorMessage();
         }
-        if (RawMessage.starts_with("Duplicate")) {
-            return DuplicateErrorMessage();
+        if (RawMessage.contains("(target_language_code_is_valid(target_language_code))")) {
+            return TargetLanguageCodeErrorMessage();
+        }
+        if (RawMessage.starts_with("Duplicate key \"name:")) {
+            return DuplicateNameErrorMessage();
         }
         Support::ThrowError(QueryResult->GetError());
     }
@@ -39,10 +46,11 @@ Q_INVOKABLE QString DeckListBridge::DuplicateErrorMessage() {
     }
 }
 
-Q_INVOKABLE QString DeckListBridge::CreateDeck(const QString& DeckName) {
+[[nodiscard]] Q_INVOKABLE QString DeckListBridge::CreateDeck(const QString& DeckName,
+                                                             const quint8 TargetLanguageCode) {
     return Support::TryCatchWrapper([&] {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
-            Sql::CreateDeckSql(), DeckName.toStdString()) };
+            Sql::CreateDeckSql(), DeckName.toStdString(), TargetLanguageCode) };
         const QString Error{ HandleQueryResultRecoverableError(QueryResult) };
         if (Error.isEmpty()) {
             RefreshDeckList();
@@ -51,7 +59,8 @@ Q_INVOKABLE QString DeckListBridge::CreateDeck(const QString& DeckName) {
     });
 }
 
-Q_INVOKABLE QString DeckListBridge::UpdateDeckName(const QString& DeckId, const QString& DeckName) {
+[[nodiscard]] Q_INVOKABLE QString DeckListBridge::UpdateDeckName(const QString& DeckId,
+                                                                 const QString& DeckName) {
     return Support::TryCatchWrapper([&] {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
             Sql::UpdateDeckNameSql(), DeckName.toStdString(), DeckId.toStdString()) };

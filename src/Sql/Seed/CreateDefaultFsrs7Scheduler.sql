@@ -27,7 +27,6 @@ WHERE
     FROM
       fsrs_schedulers
     WHERE
-      name = 'fsrs-7-recency (Default)'
-      AND algorithm_version = 7
+      algorithm_version = 7
       AND is_version_default = true
   );

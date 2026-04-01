@@ -27,8 +27,7 @@ WHERE
     FROM
       fsrs_settings
     WHERE
-      name = 'Default'
-      AND is_default = true
+      is_default = true
   )
 LIMIT
   1;

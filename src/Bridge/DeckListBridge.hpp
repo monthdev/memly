@@ -28,11 +28,11 @@ public:
         return &m_DeckList;
     }
 
-    Q_INVOKABLE QString NameLengthErrorMessage();
-    Q_INVOKABLE QString DuplicateErrorMessage();
-
-    Q_INVOKABLE QString CreateDeck(const QString&);
-    Q_INVOKABLE QString UpdateDeckName(const QString&, const QString&);
+    [[nodiscard]] Q_INVOKABLE QString NameLengthErrorMessage();
+    [[nodiscard]] Q_INVOKABLE QString DuplicateNameErrorMessage();
+    [[nodiscard]] Q_INVOKABLE QString TargetLanguageCodeErrorMessage();
+    [[nodiscard]] [[nodiscard]] Q_INVOKABLE QString CreateDeck(const QString&, const quint8);
+    [[nodiscard]] Q_INVOKABLE QString UpdateDeckName(const QString&, const QString&);
     Q_INVOKABLE void DeleteDeck(const QString&);
 
 private:
