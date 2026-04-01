@@ -58,10 +58,17 @@ void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
 }
 
 void SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(
-        Sql::CreateDefaultFsrsConfigurationSql()) };
-    if (QueryResult->HasError()) {
-        Support::ThrowError(QueryResult->GetError());
+    std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{
+        Sql::CreateDefaultFsrs7SchedulerSql,
+        Sql::CreateDefaultFsrs7SettingsSql,
+        Sql::CreateDefaultDeckSettingsSql
+    };
+    for (const auto& SeedSqlFunction : SeedSqlFunctionArray) {
+        std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(
+            SeedSqlFunction()) };
+        if (QueryResult->HasError()) {
+            Support::ThrowError(QueryResult->GetError());
+        }
     }
 }
 }

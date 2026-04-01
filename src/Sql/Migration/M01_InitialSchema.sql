@@ -3,6 +3,9 @@ BEGIN TRANSACTION;
 CREATE MACRO IF NOT EXISTS deck_name_is_valid (deck_name) AS length(deck_name) > 0
 AND length(deck_name) <= 40;
 
+CREATE MACRO IF NOT EXISTS settings_name_is_valid (settings_name) AS length(settings_name) > 0
+AND length(settings_name) <= 40;
+
 CREATE MACRO IF NOT EXISTS card_front_text_is_valid (card_front_text) AS length(card_front_text) > 0
 AND length(card_front_text) <= 200;
 
@@ -50,17 +53,88 @@ CREATE MACRO IF NOT EXISTS due_after_last_review_is_valid (last_reviewed_at, due
 )
 OR due_at > last_reviewed_at;
 
-CREATE TABLE IF NOT EXISTS fsrs_configurations (
+CREATE TYPE scheduler_type AS ENUM('fsrs');
+
+CREATE MACRO IF NOT EXISTS deck_settings_scheduler_combo_is_valid (scheduler_type_value, fsrs_settings_id_value) AS (
+  scheduler_type_value = 'fsrs'
+  AND fsrs_settings_id_value IS NOT NULL
+);
+
+CREATE MACRO IF NOT EXISTS card_review_scheduler_combo_is_valid (scheduler_type_value, fsrs_scheduler_id_value) AS (
+  scheduler_type_value = 'fsrs'
+  AND fsrs_scheduler_id_value IS NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS fsrs_schedulers (
   id UUID PRIMARY KEY DEFAULT uuidv7 (),
-  name VARCHAR NOT NULL UNIQUE,
-  algorithm_version VARCHAR NOT NULL,
-  desired_retention DOUBLE NOT NULL CHECK (desired_retention_is_valid (desired_retention)),
+  name VARCHAR NOT NULL UNIQUE CHECK (settings_name_is_valid (name)),
+  algorithm_version UINTEGER NOT NULL,
+  is_version_default BOOLEAN NOT NULL DEFAULT FALSE,
+  optimization_interval UINTEGER NOT NULL DEFAULT 512,
+  total_optimizations UINTEGER NOT NULL DEFAULT 0,
   maximum_interval_days UINTEGER NOT NULL CHECK (
     maximum_interval_days_is_valid (maximum_interval_days)
   ),
   parameters_json JSON NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP CHECK (updated_at_is_valid (created_at, updated_at))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS fsrs_schedulers_ensure_single_version_default_idx ON fsrs_schedulers (
+  (
+    CASE
+      WHEN is_version_default THEN algorithm_version
+      ELSE NULL
+    END
+  )
+);
+
+CREATE TABLE IF NOT EXISTS fsrs_scheduler_parameter_snapshots (
+  id UUID PRIMARY KEY DEFAULT uuidv7 (),
+  fsrs_scheduler_id UUID NOT NULL REFERENCES fsrs_schedulers (id),
+  parameters_json JSON NOT NULL,
+  recorded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (id, fsrs_scheduler_id)
+);
+
+CREATE TABLE IF NOT EXISTS fsrs_settings (
+  id UUID PRIMARY KEY DEFAULT uuidv7 (),
+  name VARCHAR NOT NULL UNIQUE CHECK (settings_name_is_valid (name)),
+  is_default BOOLEAN NOT NULL DEFAULT FALSE,
+  fsrs_scheduler_id UUID NOT NULL REFERENCES fsrs_schedulers (id),
+  desired_retention DOUBLE NOT NULL CHECK (desired_retention_is_valid (desired_retention)),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP CHECK (updated_at_is_valid (created_at, updated_at))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS fsrs_settings_ensure_single_default_idx ON fsrs_settings (
+  (
+    CASE
+      WHEN is_default THEN 1
+      ELSE NULL
+    END
+  )
+);
+
+CREATE TABLE IF NOT EXISTS deck_settings (
+  id UUID PRIMARY KEY DEFAULT uuidv7 (),
+  name VARCHAR NOT NULL UNIQUE CHECK (settings_name_is_valid (name)),
+  is_default BOOLEAN NOT NULL DEFAULT FALSE,
+  fsrs_settings_id UUID REFERENCES fsrs_settings (id),
+  scheduler_type scheduler_type NOT NULL DEFAULT 'fsrs' CHECK (
+    deck_settings_scheduler_combo_is_valid (scheduler_type, fsrs_settings_id)
+  ),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP CHECK (updated_at_is_valid (created_at, updated_at))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS deck_settings_ensure_single_default_idx ON deck_settings (
+  (
+    CASE
+      WHEN is_default THEN 1
+      ELSE NULL
+    END
+  )
 );
 
 CREATE TABLE IF NOT EXISTS decks (
@@ -71,7 +145,7 @@ CREATE TABLE IF NOT EXISTS decks (
   target_language_code UTINYINT NOT NULL CHECK (
     target_language_code_is_valid (target_language_code)
   ),
-  fsrs_configuration_id UUID NOT NULL REFERENCES fsrs_configurations (id)
+  deck_settings_id UUID NOT NULL REFERENCES deck_settings (id)
 );
 
 CREATE TABLE IF NOT EXISTS cards (
@@ -98,6 +172,21 @@ CREATE TABLE IF NOT EXISTS card_reviews (
   id UUID PRIMARY KEY DEFAULT uuidv7 (),
   card_id UUID NOT NULL REFERENCES cards (id),
   deck_id UUID NOT NULL REFERENCES decks (id),
+  scheduler_type scheduler_type NOT NULL CHECK (
+    card_review_scheduler_combo_is_valid (scheduler_type, fsrs_scheduler_id)
+  ),
+  desired_retention_snapshot DOUBLE NOT NULL CHECK (
+    desired_retention_is_valid (desired_retention_snapshot)
+  ),
+  maximum_interval_days_snapshot UINTEGER NOT NULL CHECK (
+    maximum_interval_days_is_valid (maximum_interval_days_snapshot)
+  ),
+  fsrs_scheduler_id UUID REFERENCES fsrs_schedulers (id),
+  fsrs_scheduler_parameter_snapshot_id UUID NOT NULL REFERENCES fsrs_scheduler_parameter_snapshots (id),
+  FOREIGN KEY (
+    fsrs_scheduler_parameter_snapshot_id,
+    fsrs_scheduler_id
+  ) REFERENCES fsrs_scheduler_parameter_snapshots (id, fsrs_scheduler_id),
   reviewed_at TIMESTAMP NOT NULL,
   rating UTINYINT NOT NULL CHECK (review_rating_is_valid (rating)),
   elapsed_interval_seconds DOUBLE CHECK (
