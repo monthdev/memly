@@ -13,17 +13,11 @@ Page {
     }
 
     footer: PageFooterComponent {
-        centerSlot: Component {
-            RoundButton {
-                text: "Create Deck"
-                width: 100
-                height: 26
-                radius: 20
-                palette.buttonText: "white"
+        Row {
+            anchors.centerIn: parent
 
-                HoverHandler {
-                    cursorShape: Qt.PointingHandCursor
-                }
+            PageFooterButtonComponent {
+                text: "Create Deck"
             }
         }
     }

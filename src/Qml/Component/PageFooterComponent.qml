@@ -4,90 +4,25 @@ import QtQuick.Controls.Basic
 Item {
     id: root
 
+    implicitWidth: 600
     implicitHeight: 72
+    width: parent ? parent.width : implicitWidth
+    height: implicitHeight
 
-    property Component farLeftSlot: null
-    property Component centerLeftSlot: null
-    property Component centerSlot: null
-    property Component centerRightSlot: null
-    property Component farRightSlot: null
+    property int horizontalPadding: 20
+    property int bottomPadding: 14
+    property int contentHeight: 32
+
+    default property alias content: contentItem.data
 
     Item {
-        anchors.fill: parent
-
-        Item {
-            id: farLeftAnchor
-            width: 120
-            height: 32
-            anchors.left: parent.left
-            anchors.leftMargin: 20
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 14
-        }
-
-        Item {
-            id: centerGroup
-            width: 360
-            height: 32
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 14
-        }
-
-        Item {
-            id: centerAnchor
-            width: 120
-            height: 32
-            anchors.centerIn: centerGroup
-        }
-
-        Item {
-            id: centerLeftAnchor
-            width: 120
-            height: 32
-            anchors.verticalCenter: centerAnchor.verticalCenter
-            anchors.right: centerAnchor.left
-            anchors.rightMargin: 12
-        }
-
-        Item {
-            id: centerRightAnchor
-            width: 120
-            height: 32
-            anchors.verticalCenter: centerAnchor.verticalCenter
-            anchors.left: centerAnchor.right
-            anchors.leftMargin: 12
-        }
-
-        Item {
-            id: farRightAnchor
-            width: 120
-            height: 32
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 14
-        }
-
-        Loader {
-            anchors.centerIn: farLeftAnchor
-            sourceComponent: root.farLeftSlot
-        }
-        Loader {
-            anchors.centerIn: centerLeftAnchor
-            sourceComponent: root.centerLeftSlot
-        }
-        Loader {
-            anchors.centerIn: centerAnchor
-            sourceComponent: root.centerSlot
-        }
-        Loader {
-            anchors.centerIn: centerRightAnchor
-            sourceComponent: root.centerRightSlot
-        }
-        Loader {
-            anchors.centerIn: farRightAnchor
-            sourceComponent: root.farRightSlot
-        }
+        id: contentItem
+        height: root.contentHeight
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: root.horizontalPadding
+        anchors.rightMargin: root.horizontalPadding
+        anchors.bottomMargin: root.bottomPadding
     }
 }
