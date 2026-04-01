@@ -96,7 +96,10 @@ void DeckListBridge::RefreshDeckList() {
              ++QueryResultIterator) {
             const auto& QueryResultRow{ *QueryResultIterator };
             DeckList.emplace_back(QString{ QueryResultRow.GetValue<std::string>(0).c_str() },
-                                  QString{ QueryResultRow.GetValue<std::string>(1).c_str() });
+                                  QString{ QueryResultRow.GetValue<std::string>(1).c_str() },
+                                  static_cast<quint32>(QueryResultRow.GetValue<std::uint32_t>(2)),
+                                  static_cast<quint32>(QueryResultRow.GetValue<std::uint32_t>(3)),
+                                  static_cast<quint32>(QueryResultRow.GetValue<std::uint32_t>(4)));
         }
         m_DeckList.ReplaceAll(std::move(DeckList));
     });

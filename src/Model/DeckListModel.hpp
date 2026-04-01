@@ -13,11 +13,12 @@ public:
     struct DeckListRow {
         QString m_Id;
         QString m_Name;
-        quint32 m_Due;
+        quint32 m_DueNow;
+        quint32 m_ByToday;
         quint32 m_Total;
     };
 
-    enum Role { IdRole = Qt::UserRole + 1, NameRole, DueRole, TotalRole };
+    enum Role { IdRole = Qt::UserRole + 1, NameRole, DueNowRole, ByTodayRole, TotalRole };
 
     explicit DeckListModel(QObject* Parent = nullptr) noexcept
         : QAbstractListModel{ Parent } {
@@ -47,8 +48,10 @@ public:
             return DeckListRow.m_Id;
         case NameRole:
             return DeckListRow.m_Name;
-        case DueRole:
-            return DeckListRow.m_Due;
+        case DueNowRole:
+            return DeckListRow.m_DueNow;
+        case ByTodayRole:
+            return DeckListRow.m_ByToday;
         case TotalRole:
             return DeckListRow.m_Total;
         default:
@@ -58,10 +61,11 @@ public:
 
     QHash<int, QByteArray> roleNames() const override {
         return {
-            {    IdRole,    "id" },
-            {  NameRole,  "name" },
-            {   DueRole,   "due" },
-            { TotalRole, "total" },
+            {      IdRole,      "id" },
+            {    NameRole,    "name" },
+            {  DueNowRole,  "dueNow" },
+            { ByTodayRole, "byToday" },
+            {   TotalRole,   "total" },
         };
     }
 

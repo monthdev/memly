@@ -217,7 +217,13 @@ SELECT
         cards.due_at IS NULL
         OR cards.due_at <= CURRENT_TIMESTAMP
       )
-  ) AS due,
+  ) AS due_now,
+  COUNT(*) FILTER(
+    WHERE
+      cards.id IS NOT NULL
+      AND cards.due_at > CURRENT_TIMESTAMP
+      AND cards.due_at < CAST(CURRENT_DATE + INTERVAL 1 DAY AS TIMESTAMP)
+  ) AS by_today,
   COUNT(cards.id) AS total
 FROM
   decks
