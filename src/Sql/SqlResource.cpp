@@ -57,6 +57,10 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
     return ReadSqlResourceBytes(":/Sql/Statement/ReadDeckListView.sql");
 }
 
+[[nodiscard]] std::string ReadDeckListNextRefreshDelayMillisecondsSql() {
+    return ReadSqlResourceBytes(":/Sql/Statement/ReadDeckListNextRefreshDelayMilliseconds.sql");
+}
+
 [[nodiscard]] std::string UpdateDeckNameSql() {
     return ReadSqlResourceBytes(":/Sql/Statement/UpdateDeckName.sql");
 }

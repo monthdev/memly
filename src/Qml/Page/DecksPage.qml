@@ -8,6 +8,9 @@ Page {
 
     required property color pageColor
 
+    StackView.onActivated: DeckListBridge.onDecksPageActivated()
+    StackView.onDeactivated: DeckListBridge.onDecksPageDeactivated()
+
     background: Rectangle {
         color: root.pageColor
     }

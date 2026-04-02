@@ -2,6 +2,8 @@
 
 #include <duckdb.hpp>
 
+#include <cstdint>
+
 #include "Model/DeckListModel.hpp"
 #include "Sql/SqlResource.hpp"
 #include "Support/Fatal.hpp"
@@ -72,6 +74,14 @@ namespace Bridge {
     });
 }
 
+Q_INVOKABLE void DeckListBridge::onDecksPageActivated() {
+    RefreshDeckList();
+}
+
+Q_INVOKABLE void DeckListBridge::onDecksPageDeactivated() {
+    m_DeckListRefreshTimer.stop();
+}
+
 Q_INVOKABLE void DeckListBridge::DeleteDeck(const QString& DeckId) {
     Support::TryCatchWrapper([&] {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
@@ -81,6 +91,27 @@ Q_INVOKABLE void DeckListBridge::DeleteDeck(const QString& DeckId) {
         }
         RefreshDeckList();
     });
+}
+
+void DeckListBridge::ScheduleNextDeckListRefresh() {
+    m_DeckListRefreshTimer.stop();
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
+        Sql::ReadDeckListNextRefreshDelayMillisecondsSql()) };
+    if (QueryResult->HasError()) {
+        Support::ThrowError(QueryResult->GetError());
+    }
+    auto QueryResultIterator{ QueryResult->begin() };
+    if (QueryResultIterator != QueryResult->end()) {
+        const auto& QueryResultRow{ *QueryResultIterator };
+        const std::int64_t DeckListNextRefreshDelayMilliseconds{
+            QueryResultRow.GetValue<std::int64_t>(0)
+        };
+        if (DeckListNextRefreshDelayMilliseconds < 0) {
+            return;
+        }
+        m_DeckListRefreshTimer.start(static_cast<int>(DeckListNextRefreshDelayMilliseconds));
+        return;
+    }
 }
 
 void DeckListBridge::RefreshDeckList() {
@@ -102,6 +133,7 @@ void DeckListBridge::RefreshDeckList() {
                                   static_cast<quint32>(QueryResultRow.GetValue<std::uint32_t>(4)));
         }
         m_DeckList.ReplaceAll(std::move(DeckList));
+        ScheduleNextDeckListRefresh();
     });
 }
 }

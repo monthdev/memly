@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QTimer>
 
 #include "Model/DeckListModel.hpp"
 
@@ -20,8 +21,10 @@ public:
                             QObject* Parent = nullptr) noexcept
         : QObject{ Parent }
         , m_DatabaseConnection{ DatabaseConnection }
+        , m_DeckListRefreshTimer{}
         , m_DeckList{ this } {
-        RefreshDeckList();
+        m_DeckListRefreshTimer.setSingleShot(true);
+        connect(&m_DeckListRefreshTimer, &QTimer::timeout, this, &DeckListBridge::RefreshDeckList);
     }
 
     Model::DeckListModel* GetDeckList() noexcept {
@@ -33,14 +36,18 @@ public:
     [[nodiscard]] Q_INVOKABLE QString TargetLanguageCodeErrorMessage();
     [[nodiscard]] [[nodiscard]] Q_INVOKABLE QString CreateDeck(const QString&, const quint8);
     [[nodiscard]] Q_INVOKABLE QString UpdateDeckName(const QString&, const QString&);
+    Q_INVOKABLE void onDecksPageActivated();
+    Q_INVOKABLE void onDecksPageDeactivated();
     Q_INVOKABLE void DeleteDeck(const QString&);
 
 private:
     duckdb::Connection& m_DatabaseConnection;
+    QTimer m_DeckListRefreshTimer;
     Model::DeckListModel m_DeckList;
 
     [[nodiscard]] QString
     HandleQueryResultRecoverableError(const std::unique_ptr<duckdb::QueryResult>&);
+    void ScheduleNextDeckListRefresh();
     void RefreshDeckList();
 };
 }
