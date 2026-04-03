@@ -2,7 +2,7 @@
 //
 // #include <fstream>
 //
-// #include "Bridge/SqlResource.hpp"
+// #include "Controller/SqlResource.hpp"
 
 // static const std::string ProjectRootPath{ CMAKE_GENERATED_PROJECT_ROOT_DIR };
 // static const std::string SqlDirectoryPath{ ProjectRootPath + "/src/Sql" };

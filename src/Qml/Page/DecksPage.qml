@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls.Basic
-import Memly
 
 Page {
     id: root
@@ -8,8 +7,13 @@ Page {
 
     required property color pageColor
 
-    StackView.onActivated: DeckListBridge.onDecksPageActivated()
-    StackView.onDeactivated: DeckListBridge.onDecksPageDeactivated()
+    DeckListController {
+        id: deckListController
+        deckListService: DeckListService
+    }
+
+    StackView.onActivated: deckListController.onActivated()
+    StackView.onDeactivated: deckListController.onDeactivated()
 
     background: Rectangle {
         color: root.pageColor

@@ -2,7 +2,7 @@
 //
 // #include <QDir>
 //
-// #include "Bridge/SupportData.hpp"
+// #include "Controller/SupportData.hpp"
 //
 // static const std::string EXPECTED_BASE_DIRECTORY_PATH{
 //     QDir::homePath().toStdString() + "/Library/Application Support/Memly"
