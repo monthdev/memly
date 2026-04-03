@@ -9,6 +9,8 @@ on:
 jobs:
   yml-format:
     runs-on: ubuntu-latest
+    env:
+      PRETTIER_VERSION: "3.3.3"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -45,23 +47,17 @@ jobs:
             exit 0
           fi
 
-          printf '%s\n' "${FILES[@]}" > /tmp/yml_files.txt
+          printf "%s\n" "${FILES[@]}" > /tmp/yml_files.txt
           echo "has_files=true" >> "$GITHUB_OUTPUT"
 
           echo "Changed .yml files:"
-          printf '%s\n' "${FILES[@]}"
+          printf "%s\n" "${FILES[@]}"
 
-      - name: Set up Node.js
-        if: steps.files.outputs.has_files == 'true'
-        uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-
-      - name: Install Prettier
+      - name: Show Prettier version
         if: steps.files.outputs.has_files == 'true'
         shell: bash
         run: |
-          prettier --version
+          npx --yes "prettier@${PRETTIER_VERSION}" --version
 
       - name: Verify YML formatting
         if: steps.files.outputs.has_files == 'true'
@@ -69,3 +65,4 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t FILES < /tmp/yml_files.txt
+          npx --yes "prettier@${PRETTIER_VERSION}" --no-config --check "${FILES[@]}"
