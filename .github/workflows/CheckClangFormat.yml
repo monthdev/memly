@@ -1,75 +1,75 @@
 name: Check Clang Format
 
 on:
-    pull_request:
-        branches: [main]
-    push:
-        branches: [main]
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-    clang-format:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-              with:
-                  fetch-depth: 0
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-            - name: Install latest clang-format (apt.llvm.org)
-              shell: bash
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install -y wget gnupg lsb-release software-properties-common
-                  # Add LLVM repo and metadata for latest stable (e.g., 20, 21, 22)
-                  sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-                  sudo apt-get update
-                  # Install the highest clang-format-N package available from configured repos
-                  PKG=$(apt-cache search --names-only '^clang-format-[0-9]+$' | awk '{print $1}' | sort -V | tail -1)
-                  if [[ -z "$PKG" ]]; then
-                    echo "::error::No clang-format-N package found in APT repositories"; exit 1
-                  fi
-                  sudo apt-get install -y "$PKG"
-                  CF_BIN="/usr/bin/${PKG}"
-                  echo "CF_BIN=$CF_BIN" >> "$GITHUB_ENV"
-                  "$CF_BIN" --version
-                  # Show any conflicting shims on PATH for debugging
-                  type -a clang-format || true
+      - name: Install latest clang-format (apt.llvm.org)
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release software-properties-common
+          # Add LLVM repo and metadata for latest stable (e.g., 20, 21, 22)
+          sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+          sudo apt-get update
+          # Install the highest clang-format-N package available from configured repos
+          PKG=$(apt-cache search --names-only '^clang-format-[0-9]+$' | awk '{print $1}' | sort -V | tail -1)
+          if [[ -z "$PKG" ]]; then
+            echo "::error::No clang-format-N package found in APT repositories"; exit 1
+          fi
+          sudo apt-get install -y "$PKG"
+          CF_BIN="/usr/bin/${PKG}"
+          echo "CF_BIN=$CF_BIN" >> "$GITHUB_ENV"
+          "$CF_BIN" --version
+          # Show any conflicting shims on PATH for debugging
+          type -a clang-format || true
 
-            - name: Determine diff base
-              id: base
-              shell: bash
-              run: |
-                  if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-                    git fetch origin "${GITHUB_BASE_REF}" --depth=1
-                    MB=$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")
-                  else
-                    MB=$(git rev-parse HEAD~1)
-                  fi
-                  echo "mb=$MB" >> "$GITHUB_OUTPUT"
+      - name: Determine diff base
+        id: base
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin "${GITHUB_BASE_REF}" --depth=1
+            MB=$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")
+          else
+            MB=$(git rev-parse HEAD~1)
+          fi
+          echo "mb=$MB" >> "$GITHUB_OUTPUT"
 
-            - name: Run clang-format on changed files
-              shell: bash
-              run: |
-                  MB="${{ steps.base.outputs.mb }}"
-                  mapfile -t FILES < <(git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
-                    | grep -E '\.(c|cc|cpp|cxx|h|hh|hpp|hxx|m|mm)$' || true)
+      - name: Run clang-format on changed files
+        shell: bash
+        run: |
+          MB="${{ steps.base.outputs.mb }}"
+          mapfile -t FILES < <(git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
+            | grep -E '\.(c|cc|cpp|cxx|h|hh|hpp|hxx|m|mm)$' || true)
 
-                  if [[ ${#FILES[@]} -eq 0 ]]; then
-                    echo "No C/C++ files changed."
-                    exit 0
-                  fi
+          if [[ ${#FILES[@]} -eq 0 ]]; then
+            echo "No C/C++ files changed."
+            exit 0
+          fi
 
-                  : "${CF_BIN:?CF_BIN not set}"
-                  "$CF_BIN" --version
+          : "${CF_BIN:?CF_BIN not set}"
+          "$CF_BIN" --version
 
-                  FAIL=0
-                  for f in "${FILES[@]}"; do
-                    "$CF_BIN" --dry-run -Werror -style=file "$f" || FAIL=1
-                  done
+          FAIL=0
+          for f in "${FILES[@]}"; do
+            "$CF_BIN" --dry-run -Werror -style=file "$f" || FAIL=1
+          done
 
-                  if [[ $FAIL -ne 0 ]]; then
-                    echo "::error::Some files are not formatted. Run: clang-format -i -style=file <file>..."
-                    echo "Changed files checked:"
-                    printf '%s\n' "${FILES[@]}"
-                    exit 1
-                  fi
+          if [[ $FAIL -ne 0 ]]; then
+            echo "::error::Some files are not formatted. Run: clang-format -i -style=file <file>..."
+            echo "Changed files checked:"
+            printf '%s\n' "${FILES[@]}"
+            exit 1
+          fi

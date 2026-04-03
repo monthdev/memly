@@ -1,93 +1,93 @@
 name: Check CMake Format
 
 on:
-    pull_request:
-        branches: [main]
-    push:
-        branches: [main]
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-    cmake-format:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-              with:
-                  fetch-depth: 0
+  cmake-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-            - name: Set up Python
-              uses: actions/setup-python@v6
-              with:
-                  python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
 
-            - name: Install latest cmake-format/cmake-lint (cmakelang)
-              shell: bash
-              run: |
-                  python -m pip install --upgrade pip
-                  python -m pip install --upgrade "cmakelang[YAML]"
-                  cmake-format --version
-                  cmake-lint --version
+      - name: Install latest cmake-format/cmake-lint (cmakelang)
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade "cmakelang[YAML]"
+          cmake-format --version
+          cmake-lint --version
 
-            - name: Determine diff base
-              shell: bash
-              run: |
-                  if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_ENV"
-                  else
-                    echo "BASE_SHA=${{ github.event.before }}" >> "$GITHUB_ENV"
-                  fi
+      - name: Determine diff base
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_ENV"
+          else
+            echo "BASE_SHA=${{ github.event.before }}" >> "$GITHUB_ENV"
+          fi
 
-            - name: Collect target CMake listfiles
-              id: files
-              shell: bash
-              run: |
-                  set -euo pipefail
+      - name: Collect target CMake listfiles
+        id: files
+        shell: bash
+        run: |
+          set -euo pipefail
 
-                  CONFIG_CHANGED="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
-                    .cmake-format.yaml .cmakelintrc | sed '/^\s*$/d' || true)"
+          CONFIG_CHANGED="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
+            .cmake-format.yaml .cmakelintrc | sed '/^\s*$/d' || true)"
 
-                  CHANGED_LISTFILES="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
-                    ':(glob)**/CMakeLists.txt' \
-                    ':(glob)**/*.cmake' \
-                    ':(glob)**/*.cmake.in' \
-                    | sed '/^\s*$/d' || true)"
+          CHANGED_LISTFILES="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- \
+            ':(glob)**/CMakeLists.txt' \
+            ':(glob)**/*.cmake' \
+            ':(glob)**/*.cmake.in' \
+            | sed '/^\s*$/d' || true)"
 
-                  if [[ -n "$CONFIG_CHANGED" ]]; then
-                    echo "Config changed; linting/format-checking all CMake listfiles."
-                    git ls-files \
-                      ':(glob)**/CMakeLists.txt' \
-                      ':(glob)**/*.cmake' \
-                      ':(glob)**/*.cmake.in' \
-                      > /tmp/cmake_files.txt
-                  elif [[ -n "$CHANGED_LISTFILES" ]]; then
-                    printf '%s\n' "$CHANGED_LISTFILES" > /tmp/cmake_files.txt
-                  else
-                    echo "has_files=false" >> "$GITHUB_OUTPUT"
-                    exit 0
-                  fi
+          if [[ -n "$CONFIG_CHANGED" ]]; then
+            echo "Config changed; linting/format-checking all CMake listfiles."
+            git ls-files \
+              ':(glob)**/CMakeLists.txt' \
+              ':(glob)**/*.cmake' \
+              ':(glob)**/*.cmake.in' \
+              > /tmp/cmake_files.txt
+          elif [[ -n "$CHANGED_LISTFILES" ]]; then
+            printf '%s\n' "$CHANGED_LISTFILES" > /tmp/cmake_files.txt
+          else
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
-                  echo "has_files=true" >> "$GITHUB_OUTPUT"
-                  echo "Target files:"
-                  cat /tmp/cmake_files.txt
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target files:"
+          cat /tmp/cmake_files.txt
 
-            - name: Run cmake-format --check
-              if: steps.files.outputs.has_files == 'true'
-              shell: bash
-              run: |
-                  set -euo pipefail
-                  mapfile -t FILES < /tmp/cmake_files.txt
-                  cmake-format --check "${FILES[@]}"
+      - name: Run cmake-format --check
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/cmake_files.txt
+          cmake-format --check "${FILES[@]}"
 
-            - name: Run cmake-lint (fail on any diagnostics)
-              if: steps.files.outputs.has_files == 'true'
-              shell: bash
-              run: |
-                  set -euo pipefail
-                  mapfile -t FILES < /tmp/cmake_files.txt
+      - name: Run cmake-lint (fail on any diagnostics)
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/cmake_files.txt
 
-                  OUTPUT="$(cmake-lint --suppress-decorations -c .cmakelintrc "${FILES[@]}" 2>&1 || true)"
-                  printf '%s\n' "$OUTPUT"
+          OUTPUT="$(cmake-lint --suppress-decorations -c .cmakelintrc "${FILES[@]}" 2>&1 || true)"
+          printf '%s\n' "$OUTPUT"
 
-                  if echo "$OUTPUT" | grep -Eq '\b[CEW][0-9]{4}\b'; then
-                    exit 1
-                  fi
+          if echo "$OUTPUT" | grep -Eq '\b[CEW][0-9]{4}\b'; then
+            exit 1
+          fi

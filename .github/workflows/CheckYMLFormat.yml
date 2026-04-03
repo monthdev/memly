@@ -1,73 +1,71 @@
 name: Check YML Format
 
 on:
-    pull_request:
-        branches: [main]
-    push:
-        branches: [main]
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-    yml-format:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-              with:
-                  fetch-depth: 0
+  yml-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-            - name: Collect changed YML files
-              id: files
-              env:
-                  BEFORE_SHA: ${{ github.event.before }}
-              shell: bash
-              run: |
-                  set -euo pipefail
+      - name: Collect changed YML files
+        id: files
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        shell: bash
+        run: |
+          set -euo pipefail
 
-                  if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-                    git fetch origin "${GITHUB_BASE_REF}" --depth=1
-                    BASE="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
-                    mapfile -t FILES < <(
-                      git diff --name-only --diff-filter=ACMRT "$BASE"...HEAD -- '*.yml' || true
-                    )
-                  else
-                    BASE="${BEFORE_SHA:-}"
-                    if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
-                      BASE="$(git hash-object -t tree /dev/null)"
-                    fi
-                    mapfile -t FILES < <(
-                      git diff --name-only --diff-filter=ACMRT "$BASE" HEAD -- '*.yml' || true
-                    )
-                  fi
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin "${GITHUB_BASE_REF}" --depth=1
+            BASE="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
+            mapfile -t FILES < <(
+              git diff --name-only --diff-filter=ACMRT "$BASE"...HEAD -- '*.yml' || true
+            )
+          else
+            BASE="${BEFORE_SHA:-}"
+            if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
+              BASE="$(git hash-object -t tree /dev/null)"
+            fi
+            mapfile -t FILES < <(
+              git diff --name-only --diff-filter=ACMRT "$BASE" HEAD -- '*.yml' || true
+            )
+          fi
 
-                  if [[ ${#FILES[@]} -eq 0 ]]; then
-                    echo "has_files=false" >> "$GITHUB_OUTPUT"
-                    echo "No .yml files changed."
-                    exit 0
-                  fi
+          if [[ ${#FILES[@]} -eq 0 ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No .yml files changed."
+            exit 0
+          fi
 
-                  printf '%s\n' "${FILES[@]}" > /tmp/yml_files.txt
-                  echo "has_files=true" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "${FILES[@]}" > /tmp/yml_files.txt
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
 
-                  echo "Changed .yml files:"
-                  printf '%s\n' "${FILES[@]}"
+          echo "Changed .yml files:"
+          printf '%s\n' "${FILES[@]}"
 
-            - name: Set up Node.js
-              if: steps.files.outputs.has_files == 'true'
-              uses: actions/setup-node@v6
-              with:
-                  node-version: '24'
+      - name: Set up Node.js
+        if: steps.files.outputs.has_files == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
 
-            - name: Install Prettier
-              if: steps.files.outputs.has_files == 'true'
-              shell: bash
-              run: |
-                  npm install --global prettier
-                  prettier --version
+      - name: Install Prettier
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          prettier --version
 
-            - name: Verify YML formatting
-              if: steps.files.outputs.has_files == 'true'
-              shell: bash
-              run: |
-                  set -euo pipefail
-                  mapfile -t FILES < /tmp/yml_files.txt
-                  prettier --check "${FILES[@]}"
+      - name: Verify YML formatting
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/yml_files.txt

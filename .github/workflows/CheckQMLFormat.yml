@@ -1,124 +1,124 @@
 name: Check QML Format
 
 on:
-    pull_request:
-        branches: [main]
-    push:
-        branches: [main]
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-    qml-format:
-        runs-on: ubuntu-latest
-        env:
-            QT_VERSION: '6.10.2'
-            QT_ARCH: 'linux_gcc_64'
-            QT_DIR: ${{ github.workspace }}/Qt
+  qml-format:
+    runs-on: ubuntu-latest
+    env:
+      QT_VERSION: "6.10.2"
+      QT_ARCH: "linux_gcc_64"
+      QT_DIR: ${{ github.workspace }}/Qt
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-              with:
-                  fetch-depth: 0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-            - name: Set up Python
-              uses: actions/setup-python@v6
-              with:
-                  python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
 
-            - name: Cache Qt
-              uses: actions/cache@v5
-              with:
-                  path: ${{ env.QT_DIR }}
-                  key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
+      - name: Cache Qt
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.QT_DIR }}
+          key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
 
-            - name: Install aqtinstall
-              shell: bash
-              run: |
-                  set -euo pipefail
-                  python -m pip install --upgrade pip
-                  python -m pip install "aqtinstall==3.3.*"
-                  python -m aqt version
+      - name: Install aqtinstall
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install "aqtinstall==3.3.*"
+          python -m aqt version
 
-            - name: Install Qt 6.10.2
-              shell: bash
-              run: |
-                  set -euo pipefail
+      - name: Install Qt 6.10.2
+        shell: bash
+        run: |
+          set -euo pipefail
 
-                  if [[ ! -d "${QT_DIR}/${QT_VERSION}/gcc_64" ]]; then
-                    python -m aqt install-qt linux desktop "${QT_VERSION}" "${QT_ARCH}" \
-                      --outputdir "${QT_DIR}"
-                  fi
+          if [[ ! -d "${QT_DIR}/${QT_VERSION}/gcc_64" ]]; then
+            python -m aqt install-qt linux desktop "${QT_VERSION}" "${QT_ARCH}" \
+              --outputdir "${QT_DIR}"
+          fi
 
-            - name: Locate qmlformat
-              shell: bash
-              run: |
-                  set -euo pipefail
+      - name: Locate qmlformat
+        shell: bash
+        run: |
+          set -euo pipefail
 
-                  QMLFORMAT_BIN="$(find "$QT_DIR" -type f -name qmlformat | sort | head -n1)"
-                  if [[ -z "$QMLFORMAT_BIN" || ! -x "$QMLFORMAT_BIN" ]]; then
-                    echo "::error::qmlformat not found under QT_DIR=$QT_DIR"
-                    exit 1
-                  fi
+          QMLFORMAT_BIN="$(find "$QT_DIR" -type f -name qmlformat | sort | head -n1)"
+          if [[ -z "$QMLFORMAT_BIN" || ! -x "$QMLFORMAT_BIN" ]]; then
+            echo "::error::qmlformat not found under QT_DIR=$QT_DIR"
+            exit 1
+          fi
 
-                  echo "QT_DIR=$QT_DIR"
-                  echo "QMLFORMAT_BIN=$QMLFORMAT_BIN"
-                  echo "QMLFORMAT_BIN=$QMLFORMAT_BIN" >> "$GITHUB_ENV"
+          echo "QT_DIR=$QT_DIR"
+          echo "QMLFORMAT_BIN=$QMLFORMAT_BIN"
+          echo "QMLFORMAT_BIN=$QMLFORMAT_BIN" >> "$GITHUB_ENV"
 
-                  "$QMLFORMAT_BIN" --version
+          "$QMLFORMAT_BIN" --version
 
-            - name: Determine diff base
-              id: base
-              shell: bash
-              run: |
-                  set -euo pipefail
+      - name: Determine diff base
+        id: base
+        shell: bash
+        run: |
+          set -euo pipefail
 
-                  if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-                    git fetch origin "${GITHUB_BASE_REF}" --depth=1
-                    MB="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
-                  else
-                    MB="$(git rev-parse HEAD~1)"
-                  fi
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin "${GITHUB_BASE_REF}" --depth=1
+            MB="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
+          else
+            MB="$(git rev-parse HEAD~1)"
+          fi
 
-                  echo "mb=$MB" >> "$GITHUB_OUTPUT"
+          echo "mb=$MB" >> "$GITHUB_OUTPUT"
 
-            - name: Run qmlformat on changed files
-              shell: bash
-              run: |
-                  set -euo pipefail
+      - name: Run qmlformat on changed files
+        shell: bash
+        run: |
+          set -euo pipefail
 
-                  MB="${{ steps.base.outputs.mb }}"
-                  mapfile -t FILES < <(
-                    git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
-                      | grep -E '\.qml$' || true
-                  )
+          MB="${{ steps.base.outputs.mb }}"
+          mapfile -t FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
+              | grep -E '\.qml$' || true
+          )
 
-                  if [[ ${#FILES[@]} -eq 0 ]]; then
-                    echo "No QML files changed."
-                    exit 0
-                  fi
+          if [[ ${#FILES[@]} -eq 0 ]]; then
+            echo "No QML files changed."
+            exit 0
+          fi
 
-                  : "${QMLFORMAT_BIN:?QMLFORMAT_BIN not set}"
-                  "$QMLFORMAT_BIN" --version
+          : "${QMLFORMAT_BIN:?QMLFORMAT_BIN not set}"
+          "$QMLFORMAT_BIN" --version
 
-                  FAIL=0
-                  TMP_DIR="$(mktemp -d)"
-                  trap 'rm -rf "$TMP_DIR"' EXIT
+          FAIL=0
+          TMP_DIR="$(mktemp -d)"
+          trap 'rm -rf "$TMP_DIR"' EXIT
 
-                  for f in "${FILES[@]}"; do
-                    OUT="$TMP_DIR/$(basename "$f")"
+          for f in "${FILES[@]}"; do
+            OUT="$TMP_DIR/$(basename "$f")"
 
-                    echo "Checking $f"
-                    "$QMLFORMAT_BIN" "$f" > "$OUT"
+            echo "Checking $f"
+            "$QMLFORMAT_BIN" "$f" > "$OUT"
 
-                    if ! diff -u "$f" "$OUT"; then
-                      echo "::error file=$f::File is not properly formatted with qmlformat"
-                      FAIL=1
-                    fi
-                  done
+            if ! diff -u "$f" "$OUT"; then
+              echo "::error file=$f::File is not properly formatted with qmlformat"
+              FAIL=1
+            fi
+          done
 
-                  if [[ $FAIL -ne 0 ]]; then
-                    echo "::error::Some files are not formatted. Run qmlformat from Qt 6.10.2 and compare the diff above."
-                    echo "Changed files checked:"
-                    printf '%s\n' "${FILES[@]}"
-                    exit 1
-                  fi
+          if [[ $FAIL -ne 0 ]]; then
+            echo "::error::Some files are not formatted. Run qmlformat from Qt 6.10.2 and compare the diff above."
+            echo "Changed files checked:"
+            printf '%s\n' "${FILES[@]}"
+            exit 1
+          fi
