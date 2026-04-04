@@ -18,13 +18,6 @@ namespace Controller {
     return QString{ "Target language code is invalid" };
 }
 
-[[nodiscard]] Service::DeckListService& DeckListController::GetRequiredDeckListService() const {
-    if (m_DeckListService == nullptr) {
-        Support::ThrowError("DeckListService is not configured");
-    }
-    return *m_DeckListService;
-}
-
 [[nodiscard]] QString DeckListController::HandleDeckMutationStatus(
     const Service::DeckListService::DeckMutationStatus DeckMutationStatus) const {
     switch (DeckMutationStatus) {
@@ -47,7 +40,7 @@ namespace Controller {
 DeckListController::CreateDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
     return Support::TryCatchWrapper([&] {
         const QString ErrorMessage{ HandleDeckMutationStatus(
-            GetRequiredDeckListService().CreateDeck(DeckName, TargetLanguageCode)) };
+            m_DeckListService.CreateDeck(DeckName, TargetLanguageCode)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckList(false);
         }
@@ -59,7 +52,7 @@ DeckListController::CreateDeck(const QString& DeckName, const quint8 TargetLangu
 DeckListController::UpdateDeckName(const QString& DeckId, const QString& DeckName) noexcept {
     return Support::TryCatchWrapper([&] {
         const QString ErrorMessage{ HandleDeckMutationStatus(
-            GetRequiredDeckListService().UpdateDeckName(DeckId, DeckName)) };
+            m_DeckListService.UpdateDeckName(DeckId, DeckName)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckList(false);
         }
@@ -77,7 +70,7 @@ Q_INVOKABLE void DeckListController::onDeactivated() {
 
 Q_INVOKABLE void DeckListController::DeleteDeck(const QString& DeckId) noexcept {
     Support::TryCatchWrapper([&] {
-        GetRequiredDeckListService().DeleteDeck(DeckId);
+        m_DeckListService.DeleteDeck(DeckId);
         RefreshDeckList(true);
     });
 }
@@ -86,7 +79,7 @@ void DeckListController::ScheduleNextDeckListRefresh() noexcept {
     Support::TryCatchWrapper([&] {
         m_DeckListRefreshTimer.stop();
         const std::optional<std::int64_t> DeckListNextRefreshDelayMilliseconds{
-            GetRequiredDeckListService().ReadDeckListNextRefreshDelayMilliseconds()
+            m_DeckListService.ReadDeckListNextRefreshDelayMilliseconds()
         };
         if (!DeckListNextRefreshDelayMilliseconds.has_value()) {
             return;
@@ -99,7 +92,7 @@ void DeckListController::ScheduleNextDeckListRefresh() noexcept {
 void DeckListController::RefreshDeckList(bool NeedScheduledNextDeckListRefresh) noexcept {
     Support::TryCatchWrapper([&] {
         const QVector<Service::DeckListService::DeckListRowData> DeckListRowDataVector{
-            GetRequiredDeckListService().ReadDeckList()
+            m_DeckListService.ReadDeckList()
         };
         QVector<Model::DeckListModel::DeckListRow> DeckList;
         DeckList.reserve(DeckListRowDataVector.size());

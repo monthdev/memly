@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QObject>
 #include <QString>
 #include <QVector>
 #include <cstdint>
@@ -14,9 +13,7 @@ class QueryResult;
 
 namespace Service {
 
-class DeckListService final : public QObject {
-    Q_OBJECT
-
+class DeckListService final {
 public:
     struct DeckListRowData {
         QString m_Id;
@@ -33,10 +30,8 @@ public:
         TargetLanguageCodeError
     };
 
-    explicit DeckListService(duckdb::Connection& DatabaseConnection,
-                             QObject* Parent = nullptr) noexcept
-        : QObject{ Parent }
-        , m_DatabaseConnection{ DatabaseConnection } {
+    explicit DeckListService(duckdb::Connection& DatabaseConnection) noexcept
+        : m_DatabaseConnection{ DatabaseConnection } {
     }
 
     [[nodiscard]] QVector<DeckListRowData> ReadDeckList();

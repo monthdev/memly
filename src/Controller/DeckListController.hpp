@@ -12,12 +12,12 @@ namespace Controller {
 class DeckListController : public QObject {
     Q_OBJECT
     Q_PROPERTY(Model::DeckListModel* deckList READ GetDeckList CONSTANT)
-    Q_PROPERTY(Service::DeckListService* deckListService MEMBER m_DeckListService REQUIRED)
 
 public:
-    explicit DeckListController(QObject* Parent = nullptr) noexcept
+    explicit DeckListController(Service::DeckListService& DeckListService,
+                                QObject* Parent = nullptr) noexcept
         : QObject{ Parent }
-        , m_DeckListService{ nullptr }
+        , m_DeckListService{ DeckListService }
         , m_DeckListRefreshTimer{}
         , m_DeckList{ this } {
         m_DeckListRefreshTimer.setSingleShot(true);
@@ -38,11 +38,10 @@ public:
     Q_INVOKABLE void DeleteDeck(const QString&) noexcept;
 
 private:
-    Service::DeckListService* m_DeckListService;
+    Service::DeckListService& m_DeckListService;
     QTimer m_DeckListRefreshTimer;
     Model::DeckListModel m_DeckList;
 
-    [[nodiscard]] Service::DeckListService& GetRequiredDeckListService() const;
     [[nodiscard]] QString
     HandleDeckMutationStatus(const Service::DeckListService::DeckMutationStatus) const;
     void ScheduleNextDeckListRefresh() noexcept;

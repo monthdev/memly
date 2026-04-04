@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls.Basic
+import Memly
 
 Page {
     id: root
@@ -9,7 +10,6 @@ Page {
 
     DeckListController {
         id: deckListController
-        deckListService: DeckListService
     }
 
     StackView.onActivated: deckListController.onActivated()

@@ -218,32 +218,29 @@ set_target_properties(
   PROPERTIES BUILD_RPATH "${_duckdb_libdir}"
 )
 
-add_library(memly_qml STATIC)
-
-qt_add_qml_module(
-  memly_qml
-  URI
-  Memly
-  VERSION
-  1.0
-  NO_PLUGIN
-  OUTPUT_DIRECTORY
-  "${CMAKE_CURRENT_BINARY_DIR}/Memly"
-  QML_FILES
-  ${QT_QML}
-)
-
-target_link_libraries(
-  memly_qml
-  PUBLIC memly_core
-)
-
 qt_add_executable(memly MANUAL_FINALIZATION "${APP_MAIN_CPP}")
 
 target_link_libraries(
   memly
-  PRIVATE memly_qml memly_warnings memly_asan
+  PRIVATE memly_core memly_warnings memly_asan
 )
+
+qt_add_qml_module(
+  memly
+  URI
+  Memly
+  VERSION
+  1.0
+  OUTPUT_DIRECTORY
+  "${CMAKE_CURRENT_BINARY_DIR}/Memly"
+  SOURCES
+  "${CMAKE_SOURCE_DIR}/src/Qml/AppServices.hpp"
+  "${CMAKE_SOURCE_DIR}/src/Qml/DeckListControllerQml.hpp"
+  QML_FILES
+  ${QT_QML}
+)
+
+target_include_directories(memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src/Qml")
 
 set_target_properties(
   memly
@@ -275,7 +272,7 @@ if(BUILD_TESTING)
 
   target_compile_definitions(memly-test PRIVATE CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
-  target_link_libraries(memly-test PRIVATE memly_qml Qt6::Test memly_warnings memly_asan)
+  target_link_libraries(memly-test PRIVATE memly_core Qt6::Test memly_warnings memly_asan)
 
   set_target_properties(memly-test PROPERTIES BUILD_RPATH "${_duckdb_libdir}")
 
