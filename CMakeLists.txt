@@ -109,7 +109,23 @@ else()
 endif()
 
 FetchContent_Declare(libduckdb URL "${DUCKDB_URL}" URL_HASH "SHA256=${DUCKDB_SHA}")
+if(DEFINED FETCHCONTENT_BASE_DIR)
+  set(_duckdb_fetchcontent_base_dir "${FETCHCONTENT_BASE_DIR}")
+else()
+  set(_duckdb_fetchcontent_base_dir "${CMAKE_BINARY_DIR}/_deps")
+endif()
+
+set(_duckdb_fetchcontent_source_dir "${_duckdb_fetchcontent_base_dir}/libduckdb-src")
+set(_duckdb_needs_download FALSE)
+if(NOT EXISTS "${_duckdb_fetchcontent_source_dir}")
+  set(_duckdb_needs_download TRUE)
+  message(STATUS "Fetching DuckDB ${DUCKDB_VERSION} from ${DUCKDB_URL}")
+endif()
+
 FetchContent_MakeAvailable(libduckdb)
+if(_duckdb_needs_download)
+  message(STATUS "Downloaded DuckDB ${DUCKDB_VERSION} to ${libduckdb_SOURCE_DIR}")
+endif()
 
 if(APPLE)
   set(_duckdb_lib_name "libduckdb.dylib")
@@ -165,6 +181,10 @@ target_link_options(
 )
 
 add_library(memly_sql_resources OBJECT)
+set_target_properties(
+  memly_sql_resources
+  PROPERTIES AUTOMOC OFF
+)
 
 qt_add_resources(
   memly_sql_resources
