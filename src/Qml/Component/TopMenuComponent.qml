@@ -1,5 +1,5 @@
+pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Controls.Basic
 
 Item {
     id: root
@@ -161,6 +161,10 @@ Item {
             model: root.menuModel
 
             delegate: Item {
+                id: menuButton
+                required property int index
+                required property var modelData
+
                 x: index * menuContainer.buttonWidth
                 y: 0
                 width: menuContainer.buttonWidth
@@ -168,7 +172,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: modelData.label
+                    text: menuButton.modelData.label
                     color: "white"
                     font.pixelSize: 15
                     font.bold: true
@@ -178,18 +182,18 @@ Item {
                     cursorShape: Qt.PointingHandCursor
 
                     onHoveredChanged: {
-                        root.hoveredIndex = hovered ? index : (root.hoveredIndex === index ? -1 : root.hoveredIndex);
+                        root.hoveredIndex = hovered ? menuButton.index : (root.hoveredIndex === menuButton.index ? -1 : root.hoveredIndex);
                         topMenuCanvas.requestPaint();
                     }
                 }
 
                 TapHandler {
                     onPressedChanged: {
-                        root.pressedIndex = pressed ? index : (root.pressedIndex === index ? -1 : root.pressedIndex);
+                        root.pressedIndex = pressed ? menuButton.index : (root.pressedIndex === menuButton.index ? -1 : root.pressedIndex);
                         topMenuCanvas.requestPaint();
                     }
 
-                    onTapped: modelData.trigger()
+                    onTapped: menuButton.modelData.trigger()
                 }
             }
         }
