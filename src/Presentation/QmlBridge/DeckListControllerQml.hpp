@@ -5,7 +5,7 @@
 #include <QObject>
 
 #include "Controller/DeckListController.hpp"
-#include "Qml/AppServices.hpp"
+#include "App/Bootstrap/AppServices.hpp"
 
 namespace Qml {
 

@@ -17,8 +17,8 @@ if(COMMAND qt_policy)
   qt_policy(SET QTP0004 NEW)
 endif()
 
-file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.cpp")
-file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*")
+file(GLOB_RECURSE APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.cpp")
+file(GLOB_RECURSE APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*")
 
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/App/main.cpp")
 list(REMOVE_ITEM APP_CPP "${APP_MAIN_CPP}")
@@ -234,13 +234,19 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_CURRENT_BINARY_DIR}/Memly"
   SOURCES
-  "${CMAKE_SOURCE_DIR}/src/Qml/AppServices.hpp"
-  "${CMAKE_SOURCE_DIR}/src/Qml/DeckListControllerQml.hpp"
+  "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/AppServices.hpp"
+  "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge/DeckListControllerQml.hpp"
   QML_FILES
   ${QT_QML}
 )
 
-target_include_directories(memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src/Qml")
+target_include_directories(
+  memly
+  BEFORE
+  PRIVATE
+  "${CMAKE_SOURCE_DIR}/src"
+  "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge"
+)
 
 set_target_properties(
   memly

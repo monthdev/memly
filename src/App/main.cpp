@@ -4,7 +4,7 @@
 #include <QQmlApplicationEngine>
 
 #include "App/AppData.hpp"
-#include "Qml/AppServices.hpp"
+#include "App/Bootstrap/AppServices.hpp"
 #include "Service/DeckListService.hpp"
 #include "Sql/SchemaMigrator.hpp"
 #include "Support/Fatal.hpp"

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtCore
+import Memly
 
 ApplicationWindow {
     id: window
@@ -26,7 +27,7 @@ ApplicationWindow {
             if (stackView.currentItem && stackView.currentItem.objectName === "decksPage")
                 return;
 
-            stackView.replaceCurrentItem(Qt.resolvedUrl("Page/DecksPage.qml"), {
+            stackView.replaceCurrentItem(Qt.resolvedUrl("../Page/DecksPage.qml"), {
                 "pageColor": window.color
             });
         }
