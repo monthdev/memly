@@ -20,8 +20,7 @@ endif()
 file(GLOB_RECURSE APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.cpp")
 file(GLOB_RECURSE APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*")
 
-set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/App/main.cpp")
-list(REMOVE_ITEM APP_CPP "${APP_MAIN_CPP}")
+set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
 set(APP_CONTEXT_CPP "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/AppContext.cpp")
 set(APP_CONTEXT_HDR "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/AppContext.hpp")

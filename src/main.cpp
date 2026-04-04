@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
             QCoreApplication::instance(),
             [] { QCoreApplication::exit(-1); },
             Qt::QueuedConnection);
-        AppEngine.loadFromModule(AppName, "ApplicationWindow");
+        AppEngine.loadFromModule(AppName, "MainWindow");
         return App.exec();
     });
 }
