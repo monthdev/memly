@@ -23,7 +23,8 @@ int main(int argc, char* argv[]) {
         duckdb::Connection DatabaseConnection{ Database };
         Sql::RunDatabaseBootstrap(DatabaseConnection);
         Service::DeckListService DeckListService{ DatabaseConnection };
-        Qml::AppServices::InitializeDeckListService(&DeckListService);
+        App::AppContext AppContext{ DeckListService };
+        Qml::AppServices::Initialize(&AppContext);
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

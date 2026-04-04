@@ -241,11 +241,7 @@ qt_add_qml_module(
 )
 
 target_include_directories(
-  memly
-  BEFORE
-  PRIVATE
-  "${CMAKE_SOURCE_DIR}/src"
-  "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge"
+  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge"
 )
 
 set_target_properties(

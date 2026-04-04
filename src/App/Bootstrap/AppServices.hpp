@@ -2,26 +2,25 @@
 
 #include <QtGlobal>
 
-#include "Service/DeckListService.hpp"
+#include "App/Bootstrap/AppContext.hpp"
 
 namespace Qml {
 
 class AppServices final {
 public:
-    static void
-    InitializeDeckListService(Service::DeckListService* DeckListServiceInstance) noexcept {
-        Q_ASSERT(DeckListServiceInstance != nullptr);
-        Q_ASSERT(s_DeckListService == nullptr);
-        s_DeckListService = DeckListServiceInstance;
+    static void Initialize(App::AppContext* AppContextInstance) noexcept {
+        Q_ASSERT(AppContextInstance != nullptr);
+        Q_ASSERT(s_AppContext == nullptr);
+        s_AppContext = AppContextInstance;
     }
 
-    static Service::DeckListService& GetRequiredDeckListService() noexcept {
-        Q_ASSERT(s_DeckListService != nullptr);
-        return *s_DeckListService;
+    static App::AppContext& GetRequired() noexcept {
+        Q_ASSERT(s_AppContext != nullptr);
+        return *s_AppContext;
     }
 
 private:
-    inline static Service::DeckListService* s_DeckListService{ nullptr };
+    inline static App::AppContext* s_AppContext{ nullptr };
 };
 
 }
