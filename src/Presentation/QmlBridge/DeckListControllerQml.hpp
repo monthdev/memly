@@ -17,7 +17,7 @@ class DeckListControllerQml : public QObject {
 public:
     explicit DeckListControllerQml(QObject* Parent = nullptr) noexcept
         : QObject{ Parent }
-        , m_DeckListController{ AppServices::GetRequired().m_DeckListService } {
+        , m_DeckListController{ AppServices::GetRequired().m_DeckListStore } {
     }
 
     [[nodiscard]] Model::DeckListModel* GetDeckList() noexcept {

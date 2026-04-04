@@ -5,8 +5,8 @@
 
 #include "App/AppData.hpp"
 #include "App/Bootstrap/AppServices.hpp"
-#include "Service/DeckListService.hpp"
 #include "Sql/SchemaMigrator.hpp"
+#include "Store/DeckListStore.hpp"
 #include "Support/Fatal.hpp"
 
 int main(int argc, char* argv[]) {
@@ -22,8 +22,8 @@ int main(int argc, char* argv[]) {
         duckdb::DuckDB Database{ App::DatabaseFilePath().toStdString() };
         duckdb::Connection DatabaseConnection{ Database };
         Sql::RunDatabaseBootstrap(DatabaseConnection);
-        Service::DeckListService DeckListService{ DatabaseConnection };
-        App::AppContext AppContext{ DeckListService };
+        Store::DeckListStore DeckListStore{ DatabaseConnection };
+        App::AppContext AppContext{ DeckListStore };
         Qml::AppServices::Initialize(&AppContext);
         QQmlApplicationEngine AppEngine{};
         QObject::connect(

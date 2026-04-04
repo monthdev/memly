@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Service/DeckListService.hpp"
+#include "Store/DeckListStore.hpp"
 
 namespace App {
 
 struct AppContext final {
-    Service::DeckListService& m_DeckListService;
+    Store::DeckListStore& m_DeckListStore;
 };
 
 }

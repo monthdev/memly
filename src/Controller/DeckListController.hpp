@@ -5,7 +5,7 @@
 #include <QTimer>
 
 #include "Model/DeckListModel.hpp"
-#include "Service/DeckListService.hpp"
+#include "Store/DeckListStore.hpp"
 
 namespace Controller {
 
@@ -14,10 +14,10 @@ class DeckListController : public QObject {
     Q_PROPERTY(Model::DeckListModel* deckList READ GetDeckList CONSTANT)
 
 public:
-    explicit DeckListController(Service::DeckListService& DeckListService,
+    explicit DeckListController(Store::DeckListStore& DeckListStore,
                                 QObject* Parent = nullptr) noexcept
         : QObject{ Parent }
-        , m_DeckListService{ DeckListService }
+        , m_DeckListStore{ DeckListStore }
         , m_DeckListRefreshTimer{}
         , m_DeckList{ this } {
         m_DeckListRefreshTimer.setSingleShot(true);
@@ -38,12 +38,12 @@ public:
     Q_INVOKABLE void DeleteDeck(const QString&) noexcept;
 
 private:
-    Service::DeckListService& m_DeckListService;
+    Store::DeckListStore& m_DeckListStore;
     QTimer m_DeckListRefreshTimer;
     Model::DeckListModel m_DeckList;
 
     [[nodiscard]] QString
-    HandleDeckMutationStatus(const Service::DeckListService::DeckMutationStatus) const;
+    HandleDeckMutationStatus(const Store::DeckListStore::DeckMutationStatus) const;
     void ScheduleNextDeckListRefresh() noexcept;
     void RefreshDeckList(bool) noexcept;
 };

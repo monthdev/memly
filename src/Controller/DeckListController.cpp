@@ -19,18 +19,18 @@ namespace Controller {
 }
 
 [[nodiscard]] QString DeckListController::HandleDeckMutationStatus(
-    const Service::DeckListService::DeckMutationStatus DeckMutationStatus) const {
+    const Store::DeckListStore::DeckMutationStatus DeckMutationStatus) const {
     switch (DeckMutationStatus) {
-    case Service::DeckListService::DeckMutationStatus::Success: {
+    case Store::DeckListStore::DeckMutationStatus::Success: {
         return QString{};
     }
-    case Service::DeckListService::DeckMutationStatus::NameLengthError: {
+    case Store::DeckListStore::DeckMutationStatus::NameLengthError: {
         return NameLengthErrorMessage();
     }
-    case Service::DeckListService::DeckMutationStatus::DuplicateNameError: {
+    case Store::DeckListStore::DeckMutationStatus::DuplicateNameError: {
         return DuplicateNameErrorMessage();
     }
-    case Service::DeckListService::DeckMutationStatus::TargetLanguageCodeError: {
+    case Store::DeckListStore::DeckMutationStatus::TargetLanguageCodeError: {
         return TargetLanguageCodeErrorMessage();
     }
     }
@@ -40,7 +40,7 @@ namespace Controller {
 DeckListController::CreateDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
     return Support::TryCatchWrapper([&] {
         const QString ErrorMessage{ HandleDeckMutationStatus(
-            m_DeckListService.CreateDeck(DeckName, TargetLanguageCode)) };
+            m_DeckListStore.CreateDeck(DeckName, TargetLanguageCode)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckList(false);
         }
@@ -52,7 +52,7 @@ DeckListController::CreateDeck(const QString& DeckName, const quint8 TargetLangu
 DeckListController::UpdateDeckName(const QString& DeckId, const QString& DeckName) noexcept {
     return Support::TryCatchWrapper([&] {
         const QString ErrorMessage{ HandleDeckMutationStatus(
-            m_DeckListService.UpdateDeckName(DeckId, DeckName)) };
+            m_DeckListStore.UpdateDeckName(DeckId, DeckName)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckList(false);
         }
@@ -70,7 +70,7 @@ Q_INVOKABLE void DeckListController::onDeactivated() {
 
 Q_INVOKABLE void DeckListController::DeleteDeck(const QString& DeckId) noexcept {
     Support::TryCatchWrapper([&] {
-        m_DeckListService.DeleteDeck(DeckId);
+        m_DeckListStore.DeleteDeck(DeckId);
         RefreshDeckList(true);
     });
 }
@@ -79,7 +79,7 @@ void DeckListController::ScheduleNextDeckListRefresh() noexcept {
     Support::TryCatchWrapper([&] {
         m_DeckListRefreshTimer.stop();
         const std::optional<std::int64_t> DeckListNextRefreshDelayMilliseconds{
-            m_DeckListService.ReadDeckListNextRefreshDelayMilliseconds()
+            m_DeckListStore.ReadDeckListNextRefreshDelayMilliseconds()
         };
         if (!DeckListNextRefreshDelayMilliseconds.has_value()) {
             return;
@@ -91,8 +91,8 @@ void DeckListController::ScheduleNextDeckListRefresh() noexcept {
 
 void DeckListController::RefreshDeckList(bool NeedScheduledNextDeckListRefresh) noexcept {
     Support::TryCatchWrapper([&] {
-        const QVector<Service::DeckListService::DeckListRowData> DeckListRowDataVector{
-            m_DeckListService.ReadDeckList()
+        const QVector<Store::DeckListStore::DeckListRowData> DeckListRowDataVector{
+            m_DeckListStore.ReadDeckList()
         };
         QVector<Model::DeckListModel::DeckListRow> DeckList;
         DeckList.reserve(DeckListRowDataVector.size());

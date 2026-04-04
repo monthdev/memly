@@ -1,4 +1,4 @@
-#include "Service/DeckListService.hpp"
+#include "Store/DeckListStore.hpp"
 
 #include <duckdb.hpp>
 
@@ -7,9 +7,9 @@
 #include "Sql/SqlResource.hpp"
 #include "Support/Fatal.hpp"
 
-namespace Service {
+namespace Store {
 
-QVector<DeckListService::DeckListRowData> DeckListService::ReadDeckList() {
+QVector<DeckListStore::DeckListRowData> DeckListStore::ReadDeckList() {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Sql::ReadDeckListViewSql()) };
     if (QueryResult->HasError()) {
@@ -30,7 +30,7 @@ QVector<DeckListService::DeckListRowData> DeckListService::ReadDeckList() {
     return DeckListRowDataVector;
 }
 
-std::optional<std::int64_t> DeckListService::ReadDeckListNextRefreshDelayMilliseconds() {
+std::optional<std::int64_t> DeckListStore::ReadDeckListNextRefreshDelayMilliseconds() {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Sql::ReadDeckListNextRefreshDelayMillisecondsSql()) };
     if (QueryResult->HasError()) {
@@ -50,21 +50,21 @@ std::optional<std::int64_t> DeckListService::ReadDeckListNextRefreshDelayMillise
     return std::nullopt;
 }
 
-DeckListService::DeckMutationStatus DeckListService::CreateDeck(const QString& DeckName,
-                                                                const quint8 TargetLanguageCode) {
+DeckListStore::DeckMutationStatus DeckListStore::CreateDeck(const QString& DeckName,
+                                                            const quint8 TargetLanguageCode) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Sql::CreateDeckSql(), DeckName.toStdString(), TargetLanguageCode) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-DeckListService::DeckMutationStatus DeckListService::UpdateDeckName(const QString& DeckId,
-                                                                    const QString& DeckName) {
+DeckListStore::DeckMutationStatus DeckListStore::UpdateDeckName(const QString& DeckId,
+                                                                const QString& DeckName) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Sql::UpdateDeckNameSql(), DeckName.toStdString(), DeckId.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-void DeckListService::DeleteDeck(const QString& DeckId) {
+void DeckListStore::DeleteDeck(const QString& DeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Sql::DeleteDeckSql(), DeckId.toStdString()) };
     if (QueryResult->HasError()) {
@@ -72,7 +72,7 @@ void DeckListService::DeleteDeck(const QString& DeckId) {
     }
 }
 
-DeckListService::DeckMutationStatus DeckListService::HandleRecoverableDeckMutationError(
+DeckListStore::DeckMutationStatus DeckListStore::HandleRecoverableDeckMutationError(
     const std::unique_ptr<duckdb::QueryResult>& QueryResult) const {
     if (!QueryResult->HasError()) {
         return DeckMutationStatus::Success;

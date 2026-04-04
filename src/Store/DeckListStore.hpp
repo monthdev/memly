@@ -11,9 +11,9 @@ class Connection;
 class QueryResult;
 }
 
-namespace Service {
+namespace Store {
 
-class DeckListService final {
+class DeckListStore final {
 public:
     struct DeckListRowData {
         QString m_Id;
@@ -30,7 +30,7 @@ public:
         TargetLanguageCodeError
     };
 
-    explicit DeckListService(duckdb::Connection& DatabaseConnection) noexcept
+    explicit DeckListStore(duckdb::Connection& DatabaseConnection) noexcept
         : m_DatabaseConnection{ DatabaseConnection } {
     }
 
