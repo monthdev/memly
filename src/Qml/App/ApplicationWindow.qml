@@ -1,7 +1,8 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtCore
-import Memly
+import "../Component"
+import "../Page"
 
 ApplicationWindow {
     id: window

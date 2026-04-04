@@ -1,12 +1,8 @@
-#include <duckdb.hpp>
-
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
 #include "App/AppData.hpp"
-#include "App/Bootstrap/AppServices.hpp"
-#include "Sql/SchemaMigrator.hpp"
-#include "Store/DeckListStore.hpp"
+#include "App/Bootstrap/AppContext.hpp"
 #include "Support/Fatal.hpp"
 
 int main(int argc, char* argv[]) {
@@ -19,12 +15,7 @@ int main(int argc, char* argv[]) {
         App.setApplicationDisplayName(AppName);
         App.setOrganizationDomain(OrgName);
         App.setOrganizationName(OrgName);
-        duckdb::DuckDB Database{ App::DatabaseFilePath().toStdString() };
-        duckdb::Connection DatabaseConnection{ Database };
-        Sql::RunDatabaseBootstrap(DatabaseConnection);
-        Store::DeckListStore DeckListStore{ DatabaseConnection };
-        App::AppContext AppContext{ DeckListStore };
-        Qml::AppServices::Initialize(&AppContext);
+        App::AppContext::Initialize(App::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

@@ -4,7 +4,7 @@
 
 #include <QObject>
 
-#include "App/Bootstrap/AppServices.hpp"
+#include "App/Bootstrap/AppContext.hpp"
 #include "Controller/DeckListController.hpp"
 
 namespace Qml {
@@ -17,7 +17,7 @@ class DeckListControllerQml : public QObject {
 public:
     explicit DeckListControllerQml(QObject* Parent = nullptr) noexcept
         : QObject{ Parent }
-        , m_DeckListController{ AppServices::GetRequired().m_DeckListStore } {
+        , m_DeckListController{ App::AppContext::GetRequiredDeckListStore() } {
     }
 
     [[nodiscard]] Model::DeckListModel* GetDeckList() noexcept {

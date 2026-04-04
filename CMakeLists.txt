@@ -23,6 +23,11 @@ file(GLOB_RECURSE APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/App/main.cpp")
 list(REMOVE_ITEM APP_CPP "${APP_MAIN_CPP}")
 
+set(APP_CONTEXT_CPP "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/AppContext.cpp")
+set(APP_CONTEXT_HDR "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/AppContext.hpp")
+list(REMOVE_ITEM APP_CPP "${APP_CONTEXT_CPP}")
+list(REMOVE_ITEM APP_HDR "${APP_CONTEXT_HDR}")
+
 file(GLOB CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Controller/*.cpp")
 file(GLOB CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Controller/*.[Hh]*")
 
@@ -243,7 +248,7 @@ set_target_properties(
   PROPERTIES BUILD_RPATH "${_duckdb_libdir}"
 )
 
-qt_add_executable(memly MANUAL_FINALIZATION "${APP_MAIN_CPP}")
+qt_add_executable(memly MANUAL_FINALIZATION "${APP_MAIN_CPP}" "${APP_CONTEXT_CPP}")
 
 target_link_libraries(
   memly
@@ -259,7 +264,6 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_CURRENT_BINARY_DIR}/Memly"
   SOURCES
-  "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/AppServices.hpp"
   "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge/DeckListControllerQml.hpp"
   QML_FILES
   ${QT_QML}
