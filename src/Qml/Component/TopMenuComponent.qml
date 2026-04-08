@@ -10,7 +10,7 @@ Item {
     signal journalClicked
     signal infoClicked
 
-    implicitWidth: 600
+    implicitWidth: 400
     implicitHeight: 31
 
     width: parent ? parent.width : implicitWidth
@@ -36,18 +36,6 @@ Item {
             label: "Browse",
             trigger: function () {
                 root.browseClicked();
-            }
-        },
-        {
-            label: "Journal",
-            trigger: function () {
-                root.journalClicked();
-            }
-        },
-        {
-            label: "Info",
-            trigger: function () {
-                root.infoClicked();
             }
         }
     ]
