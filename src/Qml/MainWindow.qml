@@ -22,16 +22,25 @@ ApplicationWindow {
     }
 
     header: TopMenuComponent {
-        currentIndex: swipeView.currentIndex
+        id: topMenu
 
-        onDecksClicked: swipeView.setCurrentIndex(0)
-        onAddClicked: swipeView.setCurrentIndex(1)
-        onBrowseClicked: swipeView.setCurrentIndex(2)
+        onCurrentIndexChanged: {
+            if (swipeView.currentIndex !== topMenu.currentIndex)
+                swipeView.setCurrentIndex(topMenu.currentIndex);
+        }
     }
 
     SwipeView {
         id: swipeView
         anchors.fill: parent
+        interactive: true
+
+        Component.onCompleted: topMenu.setCurrentIndex(swipeView.currentIndex)
+
+        onCurrentIndexChanged: {
+            if (topMenu.currentIndex !== swipeView.currentIndex)
+                topMenu.setCurrentIndex(swipeView.currentIndex);
+        }
 
         DecksPage {
             pageColor: window.color

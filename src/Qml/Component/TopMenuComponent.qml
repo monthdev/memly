@@ -4,10 +4,6 @@ import QtQuick
 Item {
     id: root
 
-    signal decksClicked
-    signal addClicked
-    signal browseClicked
-
     implicitWidth: 400
     implicitHeight: 31
 
@@ -20,25 +16,14 @@ Item {
 
     onCurrentIndexChanged: topMenuCanvas.requestPaint()
 
+    function setCurrentIndex(index) {
+        root.currentIndex = index;
+    }
+
     readonly property var menuModel: [
-        {
-            label: "Decks",
-            trigger: function () {
-                root.decksClicked();
-            }
-        },
-        {
-            label: "Add Card",
-            trigger: function () {
-                root.addClicked();
-            }
-        },
-        {
-            label: "Browse",
-            trigger: function () {
-                root.browseClicked();
-            }
-        }
+        "Decks",
+        "Add Card",
+        "Browse"
     ]
 
     Rectangle {
@@ -164,7 +149,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: menuButton.modelData.label
+                    text: menuButton.modelData
                     color: "white"
                     font.pixelSize: 15
                     font.bold: true
@@ -185,7 +170,7 @@ Item {
                         topMenuCanvas.requestPaint();
                     }
 
-                    onTapped: menuButton.modelData.trigger()
+                    onTapped: root.setCurrentIndex(menuButton.index)
                 }
             }
         }
