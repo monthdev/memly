@@ -28,7 +28,7 @@ Item {
         anchors.right: parent.right
         height: 1
         z: 10
-        color: "#3a3a3a"
+        color: "#444444"
     }
 
     Item {
@@ -51,7 +51,7 @@ Item {
 
             onPaint: {
                 const ctx = getContext("2d");
-                const stroke = "#2b2b2b";
+                const stroke = "#444444";
                 const normalFill = "#1f1f1f";
                 const activeFill = "#2e2e2e";
                 const hoverFill = "#232323";
