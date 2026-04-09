@@ -20,11 +20,7 @@ Item {
         root.currentIndex = index;
     }
 
-    readonly property var menuModel: [
-        "Decks",
-        "Add Card",
-        "Browse"
-    ]
+    readonly property var menuModel: ["Decks", "Add Card", "Browse"]
 
     Rectangle {
         anchors.top: parent.top
