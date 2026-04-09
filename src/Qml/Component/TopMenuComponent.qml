@@ -53,9 +53,10 @@ Item {
                 const ctx = getContext("2d");
                 const stroke = "#2b2b2b";
                 const normalFill = "#1f1f1f";
-                const activeFill = "#353535";
-                const hoverFill = "#303030";
-                const pressedFill = "#3a3a3a";
+                const activeFill = "#2c2c2c";
+                const hoverFill = "#232323";
+                const pressedFill = "#3f3f3f";
+                const fillOverlap = 1;
 
                 ctx.reset();
                 ctx.clearRect(0, 0, width, height);
@@ -73,8 +74,8 @@ Item {
                 function drawLeftButton(x, w, h, r, fill) {
                     ctx.beginPath();
                     ctx.moveTo(x, 0);
-                    ctx.lineTo(x + w, 0);
-                    ctx.lineTo(x + w, h);
+                    ctx.lineTo(x + w + fillOverlap, 0);
+                    ctx.lineTo(x + w + fillOverlap, h);
                     ctx.lineTo(x + r, h);
                     ctx.quadraticCurveTo(x, h, x, h - r);
                     ctx.lineTo(x, 0);
@@ -85,19 +86,19 @@ Item {
 
                 function drawMiddleButton(x, w, h, fill) {
                     ctx.beginPath();
-                    ctx.rect(x, 0, w, h);
+                    ctx.rect(x - fillOverlap, 0, w + (fillOverlap * 2), h);
                     ctx.fillStyle = fill;
                     ctx.fill();
                 }
 
                 function drawRightButton(x, w, h, r, fill) {
                     ctx.beginPath();
-                    ctx.moveTo(x, 0);
+                    ctx.moveTo(x - fillOverlap, 0);
                     ctx.lineTo(x + w, 0);
                     ctx.lineTo(x + w, h - r);
                     ctx.quadraticCurveTo(x + w, h, x + w - r, h);
-                    ctx.lineTo(x, h);
-                    ctx.lineTo(x, 0);
+                    ctx.lineTo(x - fillOverlap, h);
+                    ctx.lineTo(x - fillOverlap, 0);
                     ctx.closePath();
                     ctx.fillStyle = fill;
                     ctx.fill();
