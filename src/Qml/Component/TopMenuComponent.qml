@@ -53,7 +53,7 @@ Item {
                 const ctx = getContext("2d");
                 const stroke = "#2b2b2b";
                 const normalFill = "#1f1f1f";
-                const activeFill = "#2c2c2c";
+                const activeFill = "#2e2e2e";
                 const hoverFill = "#232323";
                 const pressedFill = "#3f3f3f";
                 const fillOverlap = 1;
