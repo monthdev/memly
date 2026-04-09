@@ -23,8 +23,8 @@ ApplicationWindow {
 
     header: TopMenuComponent {
         onDecksClicked: {
-            if (stackView.currentItem && stackView.currentItem.objectName === "decksPage")
-                return;
+            // if (stackView.currentItem && stackView.currentItem.objectName === "decksPage")
+            //     return;
 
             stackView.replaceCurrentItem(Qt.resolvedUrl("Page/DecksPage.qml"), {
                 "pageColor": window.color

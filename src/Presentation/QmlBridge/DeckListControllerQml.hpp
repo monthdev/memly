@@ -46,12 +46,12 @@ public:
         return m_DeckListController.UpdateDeckName(DeckId, DeckName);
     }
 
-    Q_INVOKABLE void onActivated() {
-        m_DeckListController.onActivated();
+    Q_INVOKABLE void OnActivated() {
+        m_DeckListController.OnActivated();
     }
 
-    Q_INVOKABLE void onDeactivated() {
-        m_DeckListController.onDeactivated();
+    Q_INVOKABLE void OnDeactivated() {
+        m_DeckListController.OnDeactivated();
     }
 
     Q_INVOKABLE void DeleteDeck(const QString& DeckId) noexcept {

@@ -33,9 +33,9 @@ public:
     [[nodiscard]] Q_INVOKABLE QString TargetLanguageCodeErrorMessage() const;
     [[nodiscard]] Q_INVOKABLE QString CreateDeck(const QString&, quint8) noexcept;
     [[nodiscard]] Q_INVOKABLE QString UpdateDeckName(const QString&, const QString&) noexcept;
-    Q_INVOKABLE void onActivated();
-    Q_INVOKABLE void onDeactivated();
     Q_INVOKABLE void DeleteDeck(const QString&) noexcept;
+    Q_INVOKABLE void OnActivated();
+    Q_INVOKABLE void OnDeactivated();
 
 private:
     Store::DeckListStore& m_DeckListStore;

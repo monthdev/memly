@@ -60,11 +60,11 @@ DeckListController::UpdateDeckName(const QString& DeckId, const QString& DeckNam
     });
 }
 
-Q_INVOKABLE void DeckListController::onActivated() {
+Q_INVOKABLE void DeckListController::OnActivated() {
     RefreshDeckList(true);
 }
 
-Q_INVOKABLE void DeckListController::onDeactivated() {
+Q_INVOKABLE void DeckListController::OnDeactivated() {
     m_DeckListRefreshTimer.stop();
 }
 

@@ -12,8 +12,8 @@ Page {
         id: deckListController
     }
 
-    StackView.onActivated: deckListController.onActivated()
-    StackView.onDeactivated: deckListController.onDeactivated()
+    StackView.onActivated: deckListController.OnActivated()
+    StackView.onDeactivated: deckListController.OnDeactivated()
 
     background: Rectangle {
         color: root.pageColor
