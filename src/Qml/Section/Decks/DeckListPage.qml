@@ -4,7 +4,7 @@ import Memly
 
 Page {
     id: root
-    objectName: "decksPage"
+    objectName: "deckListPage"
 
     required property color pageColor
 

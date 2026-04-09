@@ -42,15 +42,15 @@ ApplicationWindow {
                 topMenu.setCurrentIndex(swipeView.currentIndex);
         }
 
-        DecksPage {
+        DecksSection {
             pageColor: window.color
         }
 
-        AddCardPage {
+        AddCardSection {
             pageColor: window.color
         }
 
-        BrowsePage {
+        BrowseSection {
             pageColor: window.color
         }
     }

@@ -50,7 +50,16 @@ file(GLOB SUPPORT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/*.cpp")
 file(GLOB SUPPORT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/*.[Hh]*")
 
 set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Qml")
-file(GLOB_RECURSE QT_QML CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
+file(GLOB QML_ROOT CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
+file(GLOB_RECURSE QML_COMPONENTS CONFIGURE_DEPENDS "${QML_DIR}/Component/*.qml")
+file(GLOB_RECURSE QML_SECTIONS CONFIGURE_DEPENDS "${QML_DIR}/Section/*.qml")
+file(GLOB_RECURSE QML_SCREENS CONFIGURE_DEPENDS "${QML_DIR}/Screen/*.qml")
+set(QT_QML
+  ${QML_ROOT}
+  ${QML_COMPONENTS}
+  ${QML_SECTIONS}
+  ${QML_SCREENS}
+)
 foreach(qml_file IN LISTS QT_QML)
   file(RELATIVE_PATH rel_qml "${QML_DIR}" "${qml_file}")
   set_source_files_properties("${qml_file}" PROPERTIES QT_RESOURCE_ALIAS "${rel_qml}")
