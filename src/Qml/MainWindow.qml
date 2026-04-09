@@ -22,25 +22,26 @@ ApplicationWindow {
     }
 
     header: TopMenuComponent {
-        onDecksClicked: {
-            // if (stackView.currentItem && stackView.currentItem.objectName === "decksPage")
-            //     return;
+        currentIndex: swipeView.currentIndex
 
-            stackView.replaceCurrentItem(Qt.resolvedUrl("Page/DecksPage.qml"), {
-                "pageColor": window.color
-            });
-        }
-
-        onAddClicked: {}
-        onBrowseClicked: {}
-        onJournalClicked: {}
-        onInfoClicked: {}
+        onDecksClicked: swipeView.setCurrentIndex(0)
+        onAddClicked: swipeView.setCurrentIndex(1)
+        onBrowseClicked: swipeView.setCurrentIndex(2)
     }
 
-    StackView {
-        id: stackView
+    SwipeView {
+        id: swipeView
         anchors.fill: parent
-        initialItem: DecksPage {
+
+        DecksPage {
+            pageColor: window.color
+        }
+
+        AddCardPage {
+            pageColor: window.color
+        }
+
+        BrowsePage {
             pageColor: window.color
         }
     }

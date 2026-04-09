@@ -7,8 +7,6 @@ Item {
     signal decksClicked
     signal addClicked
     signal browseClicked
-    signal journalClicked
-    signal infoClicked
 
     implicitWidth: 400
     implicitHeight: 31
@@ -16,8 +14,11 @@ Item {
     width: parent ? parent.width : implicitWidth
     height: implicitHeight
 
+    property int currentIndex: 0
     property int hoveredIndex: -1
     property int pressedIndex: -1
+
+    onCurrentIndexChanged: topMenuCanvas.requestPaint()
 
     readonly property var menuModel: [
         {
@@ -71,6 +72,7 @@ Item {
                 const ctx = getContext("2d");
                 const stroke = "#2b2b2b";
                 const normalFill = "#1f1f1f";
+                const activeFill = "#353535";
                 const hoverFill = "#303030";
                 const pressedFill = "#3a3a3a";
 
@@ -80,6 +82,8 @@ Item {
                 function fillFor(index) {
                     if (root.pressedIndex === index)
                         return pressedFill;
+                    if (root.currentIndex === index)
+                        return activeFill;
                     if (root.hoveredIndex === index)
                         return hoverFill;
                     return normalFill;
