@@ -10,12 +10,12 @@ WITH
 SELECT
   CASE
     WHEN next_due_at IS NULL THEN -1
-    ELSE greatest(
+    ELSE GREATEST(
       0,
-      date_diff(
+      DATE_DIFF(
         'millisecond',
         CURRENT_TIMESTAMP,
-        least(
+        LEAST(
           next_due_at,
           CAST(CURRENT_DATE + INTERVAL 1 DAY AS TIMESTAMP)
         )
@@ -24,3 +24,5 @@ SELECT
   END AS next_refresh_delay_milliseconds
 FROM
   next_future_due;
+
+-- NOTE: The `GREATEST` guard is technically unnecessary as the `CURRENT_TIMESTAMP` value is taken once at the start of the current transaction.

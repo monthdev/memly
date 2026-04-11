@@ -9,9 +9,9 @@ INSERT INTO
     updated_at
   )
 SELECT
-  uuidv7 (),
+  UUIDV7 (),
   'Default',
-  true,
+  TRUE,
   id,
   'fsrs',
   CURRENT_TIMESTAMP,
@@ -19,14 +19,14 @@ SELECT
 FROM
   fsrs_settings
 WHERE
-  is_default = true
+  is_default = TRUE
   AND NOT EXISTS (
     SELECT
       1
     FROM
       deck_settings
     WHERE
-      is_default = true
+      is_default = TRUE
   )
 LIMIT
   1;

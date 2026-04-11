@@ -9,9 +9,9 @@ INSERT INTO
     updated_at
   )
 SELECT
-  uuidv7 (),
+  UUIDV7 (),
   'Default',
-  true,
+  TRUE,
   id,
   0.95,
   CURRENT_TIMESTAMP,
@@ -20,14 +20,14 @@ FROM
   fsrs_schedulers
 WHERE
   algorithm_version = 7
-  AND is_version_default = true
+  AND is_version_default = TRUE
   AND NOT EXISTS (
     SELECT
       1
     FROM
       fsrs_settings
     WHERE
-      is_default = true
+      is_default = TRUE
   )
 LIMIT
   1;
