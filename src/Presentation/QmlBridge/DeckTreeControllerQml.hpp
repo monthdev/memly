@@ -60,16 +60,16 @@ public:
         return m_DeckTreeController.UpdateDeckName(DeckId, DeckName);
     }
 
+    Q_INVOKABLE void DeleteDeck(const QString& DeckId) noexcept {
+        m_DeckTreeController.DeleteDeck(DeckId);
+    }
+
     Q_INVOKABLE void OnActivated() {
         m_DeckTreeController.OnActivated();
     }
 
     Q_INVOKABLE void OnDeactivated() {
         m_DeckTreeController.OnDeactivated();
-    }
-
-    Q_INVOKABLE void DeleteDeck(const QString& DeckId) noexcept {
-        m_DeckTreeController.DeleteDeck(DeckId);
     }
 
 private:
