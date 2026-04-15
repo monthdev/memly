@@ -50,23 +50,36 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
 }
 
 [[nodiscard]] std::string CreateDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Statement/CreateDeck.sql");
+    return ReadSqlResourceBytes(":/Sql/Mutation/CreateDeck.sql");
 }
 
-[[nodiscard]] std::string ReadDeckListViewSql() {
-    return ReadSqlResourceBytes(":/Sql/Statement/ReadDeckListView.sql");
+[[nodiscard]] std::string ReadDeckHierarchyViewSql() {
+    return ReadSqlResourceBytes(":/Sql/Query/ReadDeckHierarchyView.sql");
 }
 
-[[nodiscard]] std::string ReadDeckListNextRefreshDelayMillisecondsSql() {
-    return ReadSqlResourceBytes(":/Sql/Statement/ReadDeckListNextRefreshDelayMilliseconds.sql");
+[[nodiscard]] std::string ReadDeckHierarchyViewNextRefreshDelayMillisecondsSql() {
+    return ReadSqlResourceBytes(
+        ":/Sql/Query/ReadDeckHierarchyViewNextRefreshDelayMilliseconds.sql");
+}
+
+[[nodiscard]] std::string MoveDeckSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/MoveDeck.sql");
 }
 
 [[nodiscard]] std::string UpdateDeckNameSql() {
-    return ReadSqlResourceBytes(":/Sql/Statement/UpdateDeckName.sql");
+    return ReadSqlResourceBytes(":/Sql/Mutation/UpdateDeckName.sql");
+}
+
+[[nodiscard]] std::string DeleteDeckCardReviewsSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeckCardReviews.sql");
+}
+
+[[nodiscard]] std::string DeleteDeckCardsSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeckCards.sql");
 }
 
 [[nodiscard]] std::string DeleteDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Statement/DeleteDeck.sql");
+    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeck.sql");
 }
 
 }

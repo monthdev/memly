@@ -60,8 +60,14 @@ foreach(qml_file IN LISTS QT_QML)
   set_source_files_properties("${qml_file}" PROPERTIES QT_RESOURCE_ALIAS "${rel_qml}")
 endforeach()
 
-file(GLOB SQL_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/Migration/*.sql"
-     "${CMAKE_SOURCE_DIR}/src/Sql/Seed/*.sql" "${CMAKE_SOURCE_DIR}/src/Sql/Statement/*.sql"
+file(
+  GLOB
+  SQL_FILES
+  CONFIGURE_DEPENDS
+  "${CMAKE_SOURCE_DIR}/src/Sql/Migration/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Sql/Seed/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Sql/Query/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Sql/Mutation/*.sql"
 )
 
 file(GLOB TEST_APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/App/*.cpp")
@@ -265,7 +271,7 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_CURRENT_BINARY_DIR}/Memly"
   SOURCES
-  "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge/DeckListControllerQml.hpp"
+  "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge/DeckTreeControllerQml.hpp"
   QML_FILES
   ${QT_QML}
 )

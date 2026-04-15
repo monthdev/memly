@@ -13,10 +13,11 @@ class QueryResult;
 
 namespace Store {
 
-class DeckListStore final {
+class DeckHierarchyStore final {
 public:
-    struct DeckListRowData {
+    struct DeckHierarchyRow {
         QString m_Id;
+        QString m_ParentId;
         QString m_Name;
         quint32 m_DueNow;
         quint32 m_ByToday;
@@ -27,16 +28,19 @@ public:
         Success,
         NameLengthError,
         DuplicateNameError,
-        TargetLanguageCodeError
+        TargetLanguageCodeError,
+        ParentDeckError,
+        CycleDetectionError
     };
 
-    explicit DeckListStore(duckdb::Connection& DatabaseConnection) noexcept
+    explicit DeckHierarchyStore(duckdb::Connection& DatabaseConnection) noexcept
         : m_DatabaseConnection{ DatabaseConnection } {
     }
 
-    [[nodiscard]] QVector<DeckListRowData> ReadDeckList();
-    [[nodiscard]] std::optional<std::int64_t> ReadDeckListNextRefreshDelayMilliseconds();
-    [[nodiscard]] DeckMutationStatus CreateDeck(const QString&, quint8);
+    [[nodiscard]] QVector<DeckHierarchyRow> ReadDeckHierarchyView();
+    [[nodiscard]] std::optional<std::int64_t> ReadDeckHierarchyViewNextRefreshDelayMilliseconds();
+    [[nodiscard]] DeckMutationStatus CreateDeck(const QString&, quint8, const QString& = {});
+    [[nodiscard]] DeckMutationStatus MoveDeck(const QString&, const QString& = {});
     [[nodiscard]] DeckMutationStatus UpdateDeckName(const QString&, const QString&);
     void DeleteDeck(const QString&);
 

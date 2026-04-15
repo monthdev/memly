@@ -9,7 +9,7 @@ class DuckDB;
 }
 
 namespace Store {
-class DeckListStore;
+class DeckHierarchyStore;
 }
 
 namespace App {
@@ -17,12 +17,12 @@ namespace App {
 class AppContext final {
 public:
     static void Initialize(const QString& DatabaseFilePath);
-    static Store::DeckListStore& GetRequiredDeckListStore() noexcept;
+    static Store::DeckHierarchyStore& GetRequiredDeckHierarchyStore() noexcept;
 
 private:
     static std::unique_ptr<duckdb::DuckDB> s_Database;
     static std::unique_ptr<duckdb::Connection> s_DatabaseConnection;
-    static std::unique_ptr<Store::DeckListStore> s_DeckListStore;
+    static std::unique_ptr<Store::DeckHierarchyStore> s_DeckHierarchyStore;
 };
 
 }

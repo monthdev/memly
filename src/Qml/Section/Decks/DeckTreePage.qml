@@ -4,16 +4,16 @@ import Memly
 
 Page {
     id: root
-    objectName: "deckListPage"
+    objectName: "deckTreePage"
 
     required property color pageColor
 
-    DeckListController {
-        id: deckListController
+    DeckTreeController {
+        id: deckTreeController
     }
 
-    StackView.onActivated: deckListController.OnActivated()
-    StackView.onDeactivated: deckListController.OnDeactivated()
+    StackView.onActivated: deckTreeController.OnActivated()
+    StackView.onDeactivated: deckTreeController.OnDeactivated()
 
     background: Rectangle {
         color: root.pageColor
