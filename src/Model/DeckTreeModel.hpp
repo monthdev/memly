@@ -71,12 +71,12 @@ public:
 
     QHash<int, QByteArray> roleNames() const override {
         return {
-            {        IdRole,        "id" },
-            {  ParentIdRole,  "parentId" },
-            {      NameRole,      "name" },
-            {    DueNowRole,    "dueNow" },
-            {   ByTodayRole,   "byToday" },
-            {     TotalRole,     "total" },
+            {       IdRole,       "id" },
+            { ParentIdRole, "parentId" },
+            {     NameRole,     "name" },
+            {   DueNowRole,   "dueNow" },
+            {  ByTodayRole,  "byToday" },
+            {    TotalRole,    "total" },
         };
     }
 
