@@ -271,7 +271,7 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_CURRENT_BINARY_DIR}/Memly"
   SOURCES
-  "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge/DeckTreeControllerQml.hpp"
+  "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge/DeckTreeTableControllerQml.hpp"
   QML_FILES
   ${QT_QML}
 )

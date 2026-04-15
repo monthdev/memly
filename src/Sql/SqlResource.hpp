@@ -20,9 +20,7 @@ namespace Sql {
 
 [[nodiscard]] std::string CreateDeckSql();
 
-[[nodiscard]] std::string ReadDeckHierarchyViewSql();
-
-[[nodiscard]] std::string ReadDeckHierarchyViewNextRefreshDelayMillisecondsSql();
+[[nodiscard]] std::string ReadDeckHierarchyViewSnapshotSql();
 
 [[nodiscard]] std::string MoveDeckSql();
 
