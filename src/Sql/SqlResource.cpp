@@ -9,15 +9,14 @@ namespace Sql {
 namespace {
 std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
     QResource SqlResource{ SqlResourcePath };
-    if (!SqlResource.isValid()) {
+    if (not SqlResource.isValid()) {
         Support::ThrowError("Error opening SQL file");
     }
     const QByteArray SqlResourceBytes{ SqlResource.uncompressedData() };
     if (SqlResourceBytes.isNull()) {
         Support::ThrowError("Error reading SQL resource bytes");
     }
-    return std::string{ SqlResourceBytes.constData(),
-                        static_cast<std::size_t>(SqlResourceBytes.size()) };
+    return std::string{ SqlResourceBytes.constData(), static_cast<std::size_t>(SqlResourceBytes.size()) };
 }
 }
 
@@ -53,13 +52,8 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
     return ReadSqlResourceBytes(":/Sql/Mutation/CreateDeck.sql");
 }
 
-[[nodiscard]] std::string ReadDeckHierarchyViewSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ReadDeckHierarchyView.sql");
-}
-
-[[nodiscard]] std::string ReadDeckHierarchyViewNextRefreshDelayMillisecondsSql() {
-    return ReadSqlResourceBytes(
-        ":/Sql/Query/ReadDeckHierarchyViewNextRefreshDelayMilliseconds.sql");
+[[nodiscard]] std::string ReadDeckHierarchyViewSnapshotSql() {
+    return ReadSqlResourceBytes(":/Sql/Query/ReadDeckHierarchyViewSnapshot.sql");
 }
 
 [[nodiscard]] std::string MoveDeckSql() {

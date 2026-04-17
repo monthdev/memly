@@ -22,6 +22,12 @@ public:
         quint32 m_DueNow;
         quint32 m_ByToday;
         quint32 m_Total;
+        quint8 m_TargetLanguageCode;
+    };
+
+    struct DeckHierarchyViewSnapshot {
+        QVector<DeckHierarchyRow> m_DeckHierarchyRowQVector;
+        std::optional<std::int64_t> m_NextRefreshAtMillisecondsSinceEpoch;
     };
 
     enum class DeckMutationStatus {
@@ -37,17 +43,15 @@ public:
         : m_DatabaseConnection{ DatabaseConnection } {
     }
 
-    [[nodiscard]] QVector<DeckHierarchyRow> ReadDeckHierarchyView();
-    [[nodiscard]] std::optional<std::int64_t> ReadDeckHierarchyViewNextRefreshDelayMilliseconds();
-    [[nodiscard]] DeckMutationStatus CreateDeck(const QString&, quint8, const QString& = {});
-    [[nodiscard]] DeckMutationStatus MoveDeck(const QString&, const QString& = {});
+    [[nodiscard]] DeckHierarchyViewSnapshot ReadDeckHierarchyViewSnapshot();
+    [[nodiscard]] DeckMutationStatus CreateDeck(const QString&, quint8, const QString& = QString{});
+    [[nodiscard]] DeckMutationStatus MoveDeck(const QString&, const QString& = QString{});
     [[nodiscard]] DeckMutationStatus UpdateDeckName(const QString&, const QString&);
     void DeleteDeck(const QString&);
 
 private:
     duckdb::Connection& m_DatabaseConnection;
 
-    [[nodiscard]] DeckMutationStatus
-    HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
+    [[nodiscard]] DeckMutationStatus HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
 };
 }

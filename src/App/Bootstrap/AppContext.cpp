@@ -14,7 +14,7 @@ std::unique_ptr<duckdb::Connection> AppContext::s_DatabaseConnection{};
 std::unique_ptr<Store::DeckHierarchyStore> AppContext::s_DeckHierarchyStore{};
 
 void AppContext::Initialize(const QString& DatabaseFilePath) {
-    Q_ASSERT(!DatabaseFilePath.isEmpty());
+    Q_ASSERT(not DatabaseFilePath.isEmpty());
     Q_ASSERT(s_Database == nullptr);
     Q_ASSERT(s_DatabaseConnection == nullptr);
     Q_ASSERT(s_DeckHierarchyStore == nullptr);

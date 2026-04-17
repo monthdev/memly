@@ -1,10 +1,18 @@
 Checks: >
   -*,
+  cppcoreguidelines-pro-type-member-init,
+  modernize-return-braced-init-list,
+  modernize-use-default-member-init,
   readability-implicit-bool-conversion,
   readability-isolate-declaration,
-  readability-braces-around-statements
+  readability-braces-around-statements,
+  readability-operators-representation
 WarningsAsErrors: "*"
 CheckOptions:
+  - {
+      key: cppcoreguidelines-pro-type-member-init.UseAssignment,
+      value: "false",
+    }
   - {
       key: readability-implicit-bool-conversion.AllowIntegerConditions,
       value: "false",
@@ -13,7 +21,17 @@ CheckOptions:
       key: readability-implicit-bool-conversion.AllowPointerConditions,
       value: "false",
     }
+  - { key: modernize-use-default-member-init.UseAssignment, value: "false" }
   - {
       key: readability-braces-around-statements.ShortStatementLines,
       value: "0",
+    }
+  - { key: modernize-use-default-member-init.IgnoreMacros, value: "true" }
+  - {
+      key: readability-operators-representation.BinaryOperators,
+      value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
+    }
+  - {
+      key: readability-operators-representation.OverloadedOperators,
+      value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
     }
