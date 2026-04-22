@@ -18,11 +18,7 @@ int main(int argc, char* argv[]) {
         App::Bootstrap::AppContext::Initialize(App::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
-            &AppEngine,
-            &QQmlApplicationEngine::objectCreationFailed,
-            QCoreApplication::instance(),
-            [] { QCoreApplication::exit(-1); },
-            Qt::QueuedConnection);
+            &AppEngine, &QQmlApplicationEngine::objectCreationFailed, QCoreApplication::instance(), [] { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
         AppEngine.loadFromModule(AppName, "MainWindow");
         return App.exec();
     });

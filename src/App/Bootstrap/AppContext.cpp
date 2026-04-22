@@ -3,8 +3,8 @@
 #include <QtGlobal>
 
 #include "App/Bootstrap/DatabaseContext.hpp"
-#include "Store/DeckStore.hpp"
 #include "Store/DeckHierarchyStore.hpp"
+#include "Store/DeckStore.hpp"
 
 namespace App::Bootstrap {
 
