@@ -6,7 +6,7 @@
 
 #include "Sql/SchemaMigrator.hpp"
 
-namespace App {
+namespace App::Bootstrap {
 
 DatabaseContext::DatabaseContext(const QString& DatabaseFilePath)
     : m_Database{}

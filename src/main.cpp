@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
         App.setApplicationDisplayName(AppName);
         App.setOrganizationDomain(OrgName);
         App.setOrganizationName(OrgName);
-        App::AppContext::Initialize(App::DatabaseFilePath());
+        App::Bootstrap::AppContext::Initialize(App::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

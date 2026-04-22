@@ -6,7 +6,7 @@
 #include "Store/DeckStore.hpp"
 #include "Store/DeckHierarchyStore.hpp"
 
-namespace App {
+namespace App::Bootstrap {
 
 std::unique_ptr<DatabaseContext> AppContext::s_DatabaseContext{};
 std::unique_ptr<Store::DeckHierarchyStore> AppContext::s_DeckHierarchyStore{};

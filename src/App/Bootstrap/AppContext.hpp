@@ -8,7 +8,7 @@ class DeckStore;
 class DeckHierarchyStore;
 }
 
-namespace App {
+namespace App::Bootstrap {
 
 class DatabaseContext;
 
