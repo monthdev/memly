@@ -19,6 +19,26 @@ WITH
       END AS parent_deck_id
     FROM
       requested_parent
+  ),
+  deck_creation_context AS (
+    SELECT
+      validated_parent.parent_deck_id,
+      COALESCE(
+        parent_deck.deck_settings_id,
+        (
+          SELECT
+            id
+          FROM
+            deck_settings
+          WHERE
+            is_default = TRUE
+          LIMIT
+            1
+        )
+      ) AS deck_settings_id
+    FROM
+      validated_parent
+      LEFT JOIN decks AS parent_deck ON parent_deck.id = validated_parent.parent_deck_id
   )
 INSERT INTO
   decks (
@@ -29,17 +49,8 @@ INSERT INTO
   )
 SELECT
   ?,
-  validated_parent.parent_deck_id,
+  deck_creation_context.parent_deck_id,
   ?,
-  (
-    SELECT
-      id
-    FROM
-      deck_settings
-    WHERE
-      is_default = TRUE
-    LIMIT
-      1
-  )
+  deck_creation_context.deck_settings_id
 FROM
-  validated_parent;
+  deck_creation_context;

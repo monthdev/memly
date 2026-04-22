@@ -2,7 +2,7 @@ WITH RECURSIVE
   requested_move AS (
     SELECT
       CAST(CAST(? AS VARCHAR) AS UUID) AS deck_id,
-      NULLIF(CAST(? AS VARCHAR), '')::UUID AS parent_deck_id
+      NULLIF(CAST(? AS VARCHAR), '')::UUID AS new_parent_deck_id
   ),
   validated_request AS (
     SELECT
@@ -18,17 +18,17 @@ WITH RECURSIVE
         ELSE ERROR('Deck does not exist')
       END AS deck_id,
       CASE
-        WHEN requested_move.parent_deck_id IS NULL THEN NULL
+        WHEN requested_move.new_parent_deck_id IS NULL THEN NULL
         WHEN EXISTS (
           SELECT
             1
           FROM
             decks
           WHERE
-            id = requested_move.parent_deck_id
-        ) THEN requested_move.parent_deck_id
+            id = requested_move.new_parent_deck_id
+        ) THEN requested_move.new_parent_deck_id
         ELSE ERROR('Parent deck does not exist')
-      END AS parent_deck_id
+      END AS new_parent_deck_id
     FROM
       requested_move
   ),
@@ -48,24 +48,24 @@ WITH RECURSIVE
     SELECT
       validated_request.deck_id,
       CASE
-        WHEN validated_request.parent_deck_id IS NULL THEN NULL
-        WHEN validated_request.parent_deck_id = validated_request.deck_id THEN ERROR('Deck cannot move into itself')
+        WHEN validated_request.new_parent_deck_id IS NULL THEN NULL
+        WHEN validated_request.new_parent_deck_id = validated_request.deck_id THEN ERROR('Deck cannot move into itself')
         WHEN EXISTS (
           SELECT
             1
           FROM
             deck_subtree
           WHERE
-            id = validated_request.parent_deck_id
+            id = validated_request.new_parent_deck_id
         ) THEN ERROR('Deck move would create a cycle')
-        ELSE validated_request.parent_deck_id
-      END AS parent_deck_id
+        ELSE validated_request.new_parent_deck_id
+      END AS new_parent_deck_id
     FROM
       validated_request
   )
 UPDATE decks
 SET
-  parent_deck_id = validated_move.parent_deck_id,
+  parent_deck_id = validated_move.new_parent_deck_id,
   updated_at = CURRENT_TIMESTAMP
 FROM
   validated_move

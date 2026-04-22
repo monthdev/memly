@@ -8,12 +8,12 @@ Page {
 
     required property color pageColor
 
-    DeckTreeController {
-        id: deckTreeController
+    DeckTreeTableController {
+        id: deckTreeTableController
     }
 
-    StackView.onActivated: deckTreeController.OnActivated()
-    StackView.onDeactivated: deckTreeController.OnDeactivated()
+    StackView.onActivated: deckTreeTableController.OnActivated()
+    StackView.onDeactivated: deckTreeTableController.OnDeactivated()
 
     background: Rectangle {
         color: root.pageColor

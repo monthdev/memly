@@ -50,7 +50,7 @@ OR updated_at > created_at;
 CREATE MACRO IF NOT EXISTS deck_parent_is_valid (deck_id, parent_deck_id) AS parent_deck_id IS NULL
 OR parent_deck_id <> deck_id;
 
-CREATE MACRO IF NOT EXISTS due_after_last_review_is_valid (last_reviewed_at, due_at) AS (
+CREATE MACRO IF NOT EXISTS due_time_after_last_review_time_is_valid (last_reviewed_at, due_at) AS (
   last_reviewed_at IS NULL
   AND due_at IS NULL
 )
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS cards (
   updated_at TIMESTAMP CHECK (updated_at_time_is_valid (created_at, updated_at)),
   last_reviewed_at TIMESTAMP,
   due_at TIMESTAMP CHECK (
-    due_after_last_review_is_valid (last_reviewed_at, due_at)
+    due_time_after_last_review_time_is_valid (last_reviewed_at, due_at)
   ),
   difficulty DOUBLE NOT NULL DEFAULT 0.0 CHECK (fsrs_difficulty_before_is_valid (difficulty)),
   stability DOUBLE NOT NULL DEFAULT 0.0 CHECK (fsrs_stability_before_is_valid (stability)),
@@ -236,7 +236,7 @@ WITH RECURSIVE
               OR cards.due_at <= CURRENT_TIMESTAMP
             )
         ) AS UINTEGER
-      ) AS own_due_now,
+      ) AS own_due_now_count,
       CAST(
         COUNT(*) FILTER(
           WHERE
@@ -244,8 +244,8 @@ WITH RECURSIVE
             AND cards.due_at > CURRENT_TIMESTAMP
             AND cards.due_at < CAST(CURRENT_DATE + INTERVAL 1 DAY AS TIMESTAMP)
         ) AS UINTEGER
-      ) AS own_by_today,
-      CAST(COUNT(cards.id) AS UINTEGER) AS own_total
+      ) AS own_by_today_count,
+      CAST(COUNT(cards.id) AS UINTEGER) AS own_total_count
     FROM
       decks
       LEFT JOIN cards ON decks.id = cards.deck_id
@@ -269,29 +269,23 @@ WITH RECURSIVE
   aggregate_counts AS (
     SELECT
       deck_descendants.ancestor_id AS deck_id,
-      CAST(
-        COALESCE(SUM(own_counts.own_due_now), 0) AS UINTEGER
-      ) AS due_now,
-      CAST(
-        COALESCE(SUM(own_counts.own_by_today), 0) AS UINTEGER
-      ) AS by_today,
-      CAST(
-        COALESCE(SUM(own_counts.own_total), 0) AS UINTEGER
-      ) AS total
+      CAST(SUM(own_counts.own_due_now_count) AS UINTEGER) AS due_now_count,
+      CAST(SUM(own_counts.own_by_today_count) AS UINTEGER) AS by_today_count,
+      CAST(SUM(own_counts.own_total_count) AS UINTEGER) AS total_count
     FROM
       deck_descendants
       INNER JOIN own_counts ON own_counts.id = deck_descendants.descendant_id
     GROUP BY
       deck_descendants.ancestor_id
-      -- NOTE: `COALESCE` guard is technically unnecessary as `own_counts` fields are never `NULL`.
   )
 SELECT
   decks.id,
   decks.parent_deck_id AS parent_id,
   decks.name,
-  aggregate_counts.due_now,
-  aggregate_counts.by_today,
-  aggregate_counts.total
+  aggregate_counts.due_now_count,
+  aggregate_counts.by_today_count,
+  aggregate_counts.total_count,
+  decks.target_language_code
 FROM
   decks
   INNER JOIN aggregate_counts ON aggregate_counts.deck_id = decks.id;

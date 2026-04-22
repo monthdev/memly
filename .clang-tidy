@@ -1,8 +1,10 @@
 Checks: >
   -*,
+  modernize-return-braced-init-list,
   readability-implicit-bool-conversion,
   readability-isolate-declaration,
-  readability-braces-around-statements
+  readability-braces-around-statements,
+  readability-operators-representation
 WarningsAsErrors: "*"
 CheckOptions:
   - {
@@ -16,4 +18,12 @@ CheckOptions:
   - {
       key: readability-braces-around-statements.ShortStatementLines,
       value: "0",
+    }
+  - {
+      key: readability-operators-representation.BinaryOperators,
+      value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
+    }
+  - {
+      key: readability-operators-representation.OverloadedOperators,
+      value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
     }
