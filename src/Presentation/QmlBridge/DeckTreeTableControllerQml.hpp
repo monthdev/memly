@@ -17,7 +17,7 @@ class DeckTreeTableControllerQml : public QObject {
 public:
     explicit DeckTreeTableControllerQml(QObject* Parent = nullptr)
         : QObject{ Parent }
-        , m_DeckTreeTableController{ App::AppContext::GetRequiredDeckHierarchyStore() } {
+        , m_DeckTreeTableController{ App::AppContext::GetRequiredDeckHierarchyStore(), App::AppContext::GetRequiredDeckStore() } {
     }
 
     [[nodiscard]] Model::DeckTreeTableModel* GetDeckTreeTable() noexcept {

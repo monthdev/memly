@@ -5,7 +5,7 @@
 #include <iostream>
 #include <source_location>
 
-#include "App/AppData.hpp"
+#include "App/AppPath.hpp"
 
 namespace Support {
 [[noreturn]] void ThrowError(const std::string& Message,

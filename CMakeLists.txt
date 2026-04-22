@@ -19,11 +19,10 @@ endif()
 
 file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.cpp")
 file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*")
+file(GLOB BOOTSTRAP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/*.cpp")
+file(GLOB BOOTSTRAP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/*.[Hh]*")
 
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
-
-set(APP_CONTEXT_CPP "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/AppContext.cpp")
-set(APP_CONTEXT_HDR "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/AppContext.hpp")
 
 file(GLOB CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Controller/*.cpp")
 file(GLOB CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Controller/*.[Hh]*")
@@ -255,7 +254,7 @@ set_target_properties(
   PROPERTIES BUILD_RPATH "${_duckdb_libdir}"
 )
 
-qt_add_executable(memly MANUAL_FINALIZATION "${APP_MAIN_CPP}" "${APP_CONTEXT_CPP}")
+qt_add_executable(memly MANUAL_FINALIZATION "${APP_MAIN_CPP}" ${BOOTSTRAP_CPP} ${BOOTSTRAP_HDR})
 
 target_link_libraries(
   memly

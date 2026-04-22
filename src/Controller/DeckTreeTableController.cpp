@@ -28,24 +28,24 @@ namespace Controller {
     return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
 }
 
-[[nodiscard]] QString DeckTreeTableController::HandleDeckMutationStatus(const Store::DeckHierarchyStore::DeckMutationStatus DeckMutationStatus) const {
+[[nodiscard]] QString DeckTreeTableController::HandleDeckMutationStatus(const Store::DeckStore::DeckMutationStatus DeckMutationStatus) const {
     switch (DeckMutationStatus) {
-    case Store::DeckHierarchyStore::DeckMutationStatus::Success: {
+    case Store::DeckStore::DeckMutationStatus::Success: {
         return QString{};
     }
-    case Store::DeckHierarchyStore::DeckMutationStatus::NameLengthError: {
+    case Store::DeckStore::DeckMutationStatus::NameLengthError: {
         return GetNameLengthErrorMessage();
     }
-    case Store::DeckHierarchyStore::DeckMutationStatus::DuplicateNameError: {
+    case Store::DeckStore::DeckMutationStatus::DuplicateNameError: {
         return GetDuplicateNameErrorMessage();
     }
-    case Store::DeckHierarchyStore::DeckMutationStatus::TargetLanguageCodeError: {
+    case Store::DeckStore::DeckMutationStatus::TargetLanguageCodeError: {
         return GetTargetLanguageCodeErrorMessage();
     }
-    case Store::DeckHierarchyStore::DeckMutationStatus::ParentDeckError: {
+    case Store::DeckStore::DeckMutationStatus::ParentDeckError: {
         return GetParentDeckErrorMessage();
     }
-    case Store::DeckHierarchyStore::DeckMutationStatus::CycleDetectionError: {
+    case Store::DeckStore::DeckMutationStatus::CycleDetectionError: {
         return GetCycleDetectionErrorMessage();
     }
     default:
@@ -60,7 +60,7 @@ namespace Controller {
         if (m_DeckTreeTable.WouldCreateDeckHaveDuplicateSiblingName(DeckName, ParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckHierarchyStore.CreateDeck(DeckName, TargetLanguageCode, ParentDeckId)) };
+        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.CreateDeck(DeckName, TargetLanguageCode, ParentDeckId)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }
@@ -76,7 +76,7 @@ namespace Controller {
         if (m_DeckTreeTable.WouldMoveDeckHaveDuplicateSiblingName(DeckId, NewParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckHierarchyStore.MoveDeck(DeckId, NewParentDeckId)) };
+        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }
@@ -89,7 +89,7 @@ namespace Controller {
         if (m_DeckTreeTable.WouldUpdateDeckNameHaveDuplicateSiblingName(DeckId, DeckName)) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckHierarchyStore.UpdateDeckName(DeckId, DeckName)) };
+        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.UpdateDeckName(DeckId, DeckName)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }
@@ -107,7 +107,7 @@ Q_INVOKABLE void DeckTreeTableController::OnDeactivated() {
 
 Q_INVOKABLE void DeckTreeTableController::DeleteDeck(const QString& DeckId) noexcept {
     Support::TryCatchWrapper([&] {
-        m_DeckHierarchyStore.DeleteDeck(DeckId);
+        m_DeckStore.DeleteDeck(DeckId);
         RefreshDeckTreeTable(true);
     });
 }

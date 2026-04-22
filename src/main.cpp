@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "App/AppData.hpp"
+#include "App/AppPath.hpp"
 #include "App/Bootstrap/AppContext.hpp"
 #include "Support/Fatal.hpp"
 

@@ -6,6 +6,7 @@
 
 #include "Model/DeckTreeTableModel.hpp"
 #include "Store/DeckHierarchyStore.hpp"
+#include "Store/DeckStore.hpp"
 
 namespace Controller {
 
@@ -14,9 +15,10 @@ class DeckTreeTableController : public QObject {
     Q_PROPERTY(Model::DeckTreeTableModel* deckTreeTable READ GetDeckTreeTable CONSTANT)
 
 public:
-    explicit DeckTreeTableController(Store::DeckHierarchyStore& DeckHierarchyStore, QObject* Parent = nullptr)
+    explicit DeckTreeTableController(Store::DeckHierarchyStore& DeckHierarchyStore, Store::DeckStore& DeckStore, QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_DeckHierarchyStore{ DeckHierarchyStore }
+        , m_DeckStore{ DeckStore }
         , m_DeckTreeRefreshQTimer{}
         , m_DeckTreeTable{ this } {
         m_DeckTreeRefreshQTimer.setSingleShot(true);
@@ -37,6 +39,7 @@ public:
 
 private:
     Store::DeckHierarchyStore& m_DeckHierarchyStore;
+    Store::DeckStore& m_DeckStore;
     QTimer m_DeckTreeRefreshQTimer;
     Model::DeckTreeTableModel m_DeckTreeTable;
 
@@ -45,7 +48,7 @@ private:
     [[nodiscard]] QString GetTargetLanguageCodeErrorMessage() const;
     [[nodiscard]] QString GetParentDeckErrorMessage() const;
     [[nodiscard]] QString GetCycleDetectionErrorMessage() const;
-    [[nodiscard]] QString HandleDeckMutationStatus(const Store::DeckHierarchyStore::DeckMutationStatus) const;
+    [[nodiscard]] QString HandleDeckMutationStatus(const Store::DeckStore::DeckMutationStatus) const;
     void ScheduleNextDeckTreeTableRefresh(const std::optional<std::int64_t>&);
     void RefreshDeckTreeTable(bool) noexcept;
 };

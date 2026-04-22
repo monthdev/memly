@@ -1,4 +1,4 @@
-#include "App/AppData.hpp"
+#include "App/AppPath.hpp"
 
 #include <QDir>
 #include <QStandardPaths>
