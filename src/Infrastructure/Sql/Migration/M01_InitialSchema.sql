@@ -140,7 +140,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS deck_settings_ensure_single_default_idx ON dec
   )
 );
 
--- NOTE: There is nothing enforcing non-existant `parent_deck_id`s in the schema due to limitations of DuckDB.
+-- NOTE: There is nothing enforcing non-existent `parent_deck_id`s in the schema due to limitations of DuckDB.
 CREATE TABLE IF NOT EXISTS decks (
   id UUID PRIMARY KEY DEFAULT UUIDV7 (),
   parent_deck_id UUID CHECK (deck_parent_is_valid (id, parent_deck_id)),

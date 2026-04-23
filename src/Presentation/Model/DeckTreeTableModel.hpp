@@ -98,30 +98,30 @@ public:
         case Qt::DisplayRole:
             switch (Index.column()) {
             case NameColumn:
-                return CurrentDeckNode->m_Data.m_Name;
+                return CurrentDeckNode->m_DeckNodeData.m_Name;
             case DueNowCountColumn:
-                return CurrentDeckNode->m_Data.m_DueNowCount;
+                return CurrentDeckNode->m_DeckNodeData.m_DueNowCount;
             case ByTodayCountColumn:
-                return CurrentDeckNode->m_Data.m_ByTodayCount;
+                return CurrentDeckNode->m_DeckNodeData.m_ByTodayCount;
             case TotalCountColumn:
-                return CurrentDeckNode->m_Data.m_TotalCount;
+                return CurrentDeckNode->m_DeckNodeData.m_TotalCount;
             default:
                 return QVariant{};
             }
         case IdRole:
-            return CurrentDeckNode->m_Data.m_Id;
+            return CurrentDeckNode->m_DeckNodeData.m_Id;
         case ParentIdRole:
-            return CurrentDeckNode->m_Data.m_ParentId;
+            return CurrentDeckNode->m_DeckNodeData.m_ParentId;
         case NameRole:
-            return CurrentDeckNode->m_Data.m_Name;
+            return CurrentDeckNode->m_DeckNodeData.m_Name;
         case DueNowCountRole:
-            return CurrentDeckNode->m_Data.m_DueNowCount;
+            return CurrentDeckNode->m_DeckNodeData.m_DueNowCount;
         case ByTodayCountRole:
-            return CurrentDeckNode->m_Data.m_ByTodayCount;
+            return CurrentDeckNode->m_DeckNodeData.m_ByTodayCount;
         case TotalCountRole:
-            return CurrentDeckNode->m_Data.m_TotalCount;
+            return CurrentDeckNode->m_DeckNodeData.m_TotalCount;
         case TargetLanguageCodeRole:
-            return static_cast<quint32>(CurrentDeckNode->m_Data.m_TargetLanguageCode);
+            return static_cast<quint32>(CurrentDeckNode->m_DeckNodeData.m_TargetLanguageCode);
         default:
             return QVariant{};
         }
@@ -189,7 +189,7 @@ public:
 
 private:
     struct DeckNode {
-        DeckNodeData m_Data;
+        DeckNodeData m_DeckNodeData;
         qsizetype m_ParentDeckNodeIndex;
         qsizetype m_RowInParentIndex;
         QVector<qsizetype> m_ChildDeckNodeIndexesQVector;
