@@ -27,6 +27,7 @@ if(MEMLY_ENABLE_CLANG_TIDY)
   set(MEMLY_CLANG_TIDY_COMMAND "${CLANG_TIDY_EXE};--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
 endif()
 
+# Enables clang-tidy for the given target when MEMLY_ENABLE_CLANG_TIDY is ON.
 function(memly_enable_clang_tidy target_name)
   if(MEMLY_ENABLE_CLANG_TIDY)
     set_target_properties("${target_name}" PROPERTIES CXX_CLANG_TIDY "${MEMLY_CLANG_TIDY_COMMAND}")
