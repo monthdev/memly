@@ -211,6 +211,7 @@ private:
     void UpdateSiblingRowIndexes(qsizetype = s_RootDeckNodeIndex) noexcept;
     [[nodiscard]] int CompareDeckNodes(qsizetype, qsizetype) const noexcept;
     void ValidateNoDeckNodeCycles(const QVector<DeckNode>&) const;
+    void ValidateParentDeckNodeTargetLanguageCodes(const QVector<DeckNode>&) const;
     void ValidateUniqueSiblingDeckNodeNames(const QVector<DeckNode>&, const QVector<qsizetype>&) const;
 };
 }

@@ -167,6 +167,18 @@ void DeckTreeTableModel::ValidateNoDeckNodeCycles(const QVector<DeckNode>& DeckN
     }
 }
 
+void DeckTreeTableModel::ValidateParentDeckNodeTargetLanguageCodes(const QVector<DeckNode>& DeckNodesQVector) const {
+    for (const DeckNode& CurrentDeckNode : DeckNodesQVector) {
+        if (CurrentDeckNode.m_ParentDeckNodeIndex == s_RootDeckNodeIndex) {
+            continue;
+        }
+        const DeckNode& ParentDeckNode{ DeckNodesQVector.at(CurrentDeckNode.m_ParentDeckNodeIndex) };
+        if (CurrentDeckNode.m_Data.m_TargetLanguageCode not_eq ParentDeckNode.m_Data.m_TargetLanguageCode) {
+            Support::ThrowError("Parent and child deck target language mismatch in deck hierarchy snapshot");
+        }
+    }
+}
+
 void DeckTreeTableModel::ValidateUniqueSiblingDeckNodeNames(const QVector<DeckNode>& DeckNodesQVector,
                                                             const QVector<qsizetype>& SiblingDeckNodeIndexesQVector) const {
     QHash<QString, qsizetype> DeckNodeIndexByNameQHash;
@@ -212,6 +224,7 @@ void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
         DeckNodesQVector[CurrentDeckNode.m_ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector.push_back(DeckNodeIndex);
     }
     ValidateNoDeckNodeCycles(DeckNodesQVector);
+    ValidateParentDeckNodeTargetLanguageCodes(DeckNodesQVector);
     ValidateUniqueSiblingDeckNodeNames(DeckNodesQVector, RootDeckNodeIndexesQVector);
     for (const DeckNode& DeckNode : DeckNodesQVector) { ValidateUniqueSiblingDeckNodeNames(DeckNodesQVector, DeckNode.m_ChildDeckNodeIndexesQVector); }
     beginResetModel();
