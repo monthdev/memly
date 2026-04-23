@@ -1,7 +1,7 @@
 #include "Presentation/Model/DeckTreeTableModel.hpp"
 
-#include <algorithm>
 #include <QSet>
+#include <algorithm>
 
 #include "Support/Fatal.hpp"
 
