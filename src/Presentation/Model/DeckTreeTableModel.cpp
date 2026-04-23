@@ -1,6 +1,7 @@
 #include "Presentation/Model/DeckTreeTableModel.hpp"
 
 #include <algorithm>
+#include <QSet>
 
 #include "Support/Fatal.hpp"
 
@@ -181,14 +182,14 @@ void DeckTreeTableModel::ValidateParentDeckNodeTargetLanguageCodes(const QVector
 
 void DeckTreeTableModel::ValidateUniqueSiblingDeckNodeNames(const QVector<DeckNode>& DeckNodesQVector,
                                                             const QVector<qsizetype>& SiblingDeckNodeIndexesQVector) const {
-    QHash<QString, qsizetype> DeckNodeIndexByNameQHash;
-    DeckNodeIndexByNameQHash.reserve(SiblingDeckNodeIndexesQVector.size());
+    QSet<QString> DeckNamesQSet;
+    DeckNamesQSet.reserve(SiblingDeckNodeIndexesQVector.size());
     for (const qsizetype SiblingDeckNodeIndex : SiblingDeckNodeIndexesQVector) {
         const QString& DeckName{ DeckNodesQVector.at(SiblingDeckNodeIndex).m_DeckNodeData.m_Name };
-        if (DeckNodeIndexByNameQHash.contains(DeckName)) {
+        if (DeckNamesQSet.contains(DeckName)) {
             Support::ThrowError("Duplicate sibling deck name in deck hierarchy snapshot");
         }
-        DeckNodeIndexByNameQHash.insert(DeckName, SiblingDeckNodeIndex);
+        DeckNamesQSet.insert(DeckName);
     }
 }
 
