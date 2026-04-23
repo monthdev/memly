@@ -48,8 +48,12 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
     return ReadSqlResourceBytes(":/Sql/Seed/CreateDefaultDeckSettings.sql");
 }
 
-[[nodiscard]] std::string CreateDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/CreateDeck.sql");
+[[nodiscard]] std::string CreateRootDeckSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/CreateRootDeck.sql");
+}
+
+[[nodiscard]] std::string CreateChildDeckSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/CreateChildDeck.sql");
 }
 
 [[nodiscard]] std::string ReadDeckHierarchyViewSnapshotSql() {

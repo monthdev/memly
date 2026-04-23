@@ -19,6 +19,7 @@ public:
         DuplicateNameError,
         TargetLanguageCodeError,
         ParentDeckError,
+        ParentDeckTargetLanguageMismatchError,
         CycleDetectionError
     };
 
@@ -26,7 +27,8 @@ public:
         : m_DatabaseConnection{ DatabaseConnection } {
     }
 
-    [[nodiscard]] DeckMutationStatus CreateDeck(const QString&, quint8, const QString& = QString{});
+    [[nodiscard]] DeckMutationStatus CreateRootDeck(const QString&, quint8);
+    [[nodiscard]] DeckMutationStatus CreateChildDeck(const QString&, const QString&);
     [[nodiscard]] DeckMutationStatus MoveDeck(const QString&, const QString& = QString{});
     [[nodiscard]] DeckMutationStatus UpdateDeckName(const QString&, const QString&);
     void DeleteDeck(const QString&);

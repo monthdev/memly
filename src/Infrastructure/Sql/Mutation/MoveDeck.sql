@@ -44,24 +44,38 @@ WITH RECURSIVE
       decks AS child
       INNER JOIN deck_subtree ON child.parent_deck_id = deck_subtree.id
   ),
-  validated_move AS (
+  move_language_context AS (
     SELECT
       validated_request.deck_id,
+      validated_request.new_parent_deck_id,
+      moved_deck.target_language_code AS deck_target_language_code,
+      new_parent_deck.target_language_code AS parent_deck_target_language_code
+    FROM
+      validated_request
+      INNER JOIN decks AS moved_deck ON moved_deck.id = validated_request.deck_id
+      LEFT JOIN decks AS new_parent_deck ON new_parent_deck.id = validated_request.new_parent_deck_id
+  ),
+  validated_move AS (
+    SELECT
+      move_language_context.deck_id,
       CASE
-        WHEN validated_request.new_parent_deck_id IS NULL THEN NULL
-        WHEN validated_request.new_parent_deck_id = validated_request.deck_id THEN ERROR('Deck cannot move into itself')
+        WHEN move_language_context.new_parent_deck_id IS NULL THEN NULL
+        WHEN move_language_context.new_parent_deck_id = move_language_context.deck_id THEN ERROR('Deck cannot move into itself')
         WHEN EXISTS (
           SELECT
             1
           FROM
             deck_subtree
           WHERE
-            id = validated_request.new_parent_deck_id
+            id = move_language_context.new_parent_deck_id
         ) THEN ERROR('Deck move would create a cycle')
-        ELSE validated_request.new_parent_deck_id
+        WHEN move_language_context.parent_deck_target_language_code <> move_language_context.deck_target_language_code THEN ERROR(
+          'Deck target language does not match parent deck'
+        )
+        ELSE move_language_context.new_parent_deck_id
       END AS new_parent_deck_id
     FROM
-      validated_request
+      move_language_context
   )
 UPDATE decks
 SET
@@ -70,6 +84,4 @@ SET
 FROM
   validated_move
 WHERE
-  decks.id = validated_move.deck_id
-RETURNING
-  decks.id;
+  decks.id = validated_move.deck_id;

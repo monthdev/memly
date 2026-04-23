@@ -31,7 +31,8 @@ public:
         return &m_DeckTreeTable;
     }
 
-    [[nodiscard]] Q_INVOKABLE QString CreateDeck(const QString&, quint8, const QString& = QString{}) noexcept;
+    [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString&, quint8) noexcept;
+    [[nodiscard]] Q_INVOKABLE QString CreateChildDeck(const QString&, const QString&) noexcept;
     [[nodiscard]] Q_INVOKABLE QString MoveDeck(const QString&, const QString& = QString{}) noexcept;
     [[nodiscard]] Q_INVOKABLE QString UpdateDeckName(const QString&, const QString&) noexcept;
     Q_INVOKABLE void DeleteDeck(const QString&) noexcept;
@@ -49,6 +50,7 @@ private:
     [[nodiscard]] QString GetDuplicateNameErrorMessage() const;
     [[nodiscard]] QString GetTargetLanguageCodeErrorMessage() const;
     [[nodiscard]] QString GetParentDeckErrorMessage() const;
+    [[nodiscard]] QString GetParentDeckTargetLanguageMismatchErrorMessage() const;
     [[nodiscard]] QString GetCycleDetectionErrorMessage() const;
     [[nodiscard]] QString HandleDeckMutationStatus(const Infrastructure::Store::DeckStore::DeckMutationStatus) const;
     void ScheduleNextDeckTreeTableRefresh(const std::optional<std::int64_t>&);

@@ -6,7 +6,7 @@ WITH
   validated_parent AS (
     SELECT
       CASE
-        WHEN requested_parent.parent_deck_id IS NULL THEN NULL
+        WHEN requested_parent.parent_deck_id IS NULL THEN ERROR('Parent deck does not exist')
         WHEN EXISTS (
           SELECT
             1
@@ -20,25 +20,14 @@ WITH
     FROM
       requested_parent
   ),
-  deck_creation_context AS (
+  child_creation_context AS (
     SELECT
       validated_parent.parent_deck_id,
-      COALESCE(
-        parent_deck.deck_settings_id,
-        (
-          SELECT
-            id
-          FROM
-            deck_settings
-          WHERE
-            is_default = TRUE
-          LIMIT
-            1
-        )
-      ) AS deck_settings_id
+      parent_deck.target_language_code,
+      parent_deck.deck_settings_id
     FROM
       validated_parent
-      LEFT JOIN decks AS parent_deck ON parent_deck.id = validated_parent.parent_deck_id
+      INNER JOIN decks AS parent_deck ON parent_deck.id = validated_parent.parent_deck_id
   )
 INSERT INTO
   decks (
@@ -49,8 +38,8 @@ INSERT INTO
   )
 SELECT
   ?,
-  deck_creation_context.parent_deck_id,
-  ?,
-  deck_creation_context.deck_settings_id
+  child_creation_context.parent_deck_id,
+  child_creation_context.target_language_code,
+  child_creation_context.deck_settings_id
 FROM
-  deck_creation_context;
+  child_creation_context;

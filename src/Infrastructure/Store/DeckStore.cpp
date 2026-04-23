@@ -9,9 +9,18 @@
 
 namespace Infrastructure::Store {
 
-DeckStore::DeckMutationStatus DeckStore::CreateDeck(const QString& DeckName, const quint8 TargetLanguageCode, const QString& ParentDeckId) {
+DeckStore::DeckMutationStatus DeckStore::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
-        Infrastructure::Sql::CreateDeckSql(), ParentDeckId.toStdString(), DeckName.toStdString(), TargetLanguageCode) };
+        Infrastructure::Sql::CreateRootDeckSql(), DeckName.toStdString(), TargetLanguageCode) };
+    return HandleRecoverableDeckMutationError(QueryResult);
+}
+
+DeckStore::DeckMutationStatus DeckStore::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
+    if (ParentDeckId.isEmpty()) {
+        return DeckMutationStatus::ParentDeckError;
+    }
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
+        Infrastructure::Sql::CreateChildDeckSql(), ParentDeckId.toStdString(), DeckName.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
@@ -60,6 +69,9 @@ DeckStore::DeckMutationStatus DeckStore::HandleRecoverableDeckMutationError(cons
     }
     if (ErrorMessage.contains("target_language_code_is_valid(target_language_code)")) {
         return DeckMutationStatus::TargetLanguageCodeError;
+    }
+    if (ErrorMessage.starts_with("Invalid Input Error: Deck target language does not match parent deck")) {
+        return DeckMutationStatus::ParentDeckTargetLanguageMismatchError;
     }
     if (ErrorMessage.starts_with("Invalid Input Error: parent deck does not exist") or
         ErrorMessage.contains("Violates foreign key constraint because key \"id: ")) {

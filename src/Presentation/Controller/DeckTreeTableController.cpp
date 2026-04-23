@@ -24,6 +24,10 @@ namespace Presentation::Controller {
     return QString{ "Parent deck does not exist" };
 }
 
+[[nodiscard]] QString DeckTreeTableController::GetParentDeckTargetLanguageMismatchErrorMessage() const {
+    return QString{ "Deck target language does not match parent deck" };
+}
+
 [[nodiscard]] QString DeckTreeTableController::GetCycleDetectionErrorMessage() const {
     return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
 }
@@ -45,6 +49,9 @@ namespace Presentation::Controller {
     case Infrastructure::Store::DeckStore::DeckMutationStatus::ParentDeckError: {
         return GetParentDeckErrorMessage();
     }
+    case Infrastructure::Store::DeckStore::DeckMutationStatus::ParentDeckTargetLanguageMismatchError: {
+        return GetParentDeckTargetLanguageMismatchErrorMessage();
+    }
     case Infrastructure::Store::DeckStore::DeckMutationStatus::CycleDetectionError: {
         return GetCycleDetectionErrorMessage();
     }
@@ -53,14 +60,25 @@ namespace Presentation::Controller {
     }
 }
 
-[[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::CreateDeck(const QString& DeckName,
-                                                                      const quint8 TargetLanguageCode,
-                                                                      const QString& ParentDeckId) noexcept {
+[[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
+    return Support::TryCatchWrapper([&] {
+        if (m_DeckTreeTable.WouldCreateDeckHaveDuplicateSiblingName(DeckName, QString{})) {
+            return GetDuplicateNameErrorMessage();
+        }
+        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
+        if (ErrorMessage.isEmpty()) {
+            RefreshDeckTreeTable(false);
+        }
+        return ErrorMessage;
+    });
+}
+
+[[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
     return Support::TryCatchWrapper([&] {
         if (m_DeckTreeTable.WouldCreateDeckHaveDuplicateSiblingName(DeckName, ParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.CreateDeck(DeckName, TargetLanguageCode, ParentDeckId)) };
+        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }

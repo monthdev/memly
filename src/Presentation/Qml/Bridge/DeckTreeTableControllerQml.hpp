@@ -24,8 +24,12 @@ public:
         return m_DeckTreeTableController.GetDeckTreeTable();
     }
 
-    [[nodiscard]] Q_INVOKABLE QString CreateDeck(const QString& DeckName, const quint8 TargetLanguageCode, const QString& ParentDeckId = QString{}) noexcept {
-        return m_DeckTreeTableController.CreateDeck(DeckName, TargetLanguageCode, ParentDeckId);
+    [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
+        return m_DeckTreeTableController.CreateRootDeck(DeckName, TargetLanguageCode);
+    }
+
+    [[nodiscard]] Q_INVOKABLE QString CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
+        return m_DeckTreeTableController.CreateChildDeck(DeckName, ParentDeckId);
     }
 
     [[nodiscard]] Q_INVOKABLE QString MoveDeck(const QString& DeckId, const QString& NewParentDeckId = QString{}) noexcept {

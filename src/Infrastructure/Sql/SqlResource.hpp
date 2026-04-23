@@ -18,7 +18,9 @@ namespace Infrastructure::Sql {
 
 [[nodiscard]] std::string CreateDefaultDeckSettingsSql();
 
-[[nodiscard]] std::string CreateDeckSql();
+[[nodiscard]] std::string CreateRootDeckSql();
+
+[[nodiscard]] std::string CreateChildDeckSql();
 
 [[nodiscard]] std::string ReadDeckHierarchyViewSnapshotSql();
 
