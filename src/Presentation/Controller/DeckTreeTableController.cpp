@@ -124,7 +124,9 @@ void DeckTreeTableController::ScheduleNextDeckTreeTableRefresh(const std::option
 
 void DeckTreeTableController::RefreshDeckTreeTable(bool NeedNextDeckTreeTableRefreshScheduled) noexcept {
     Support::TryCatchWrapper([&] {
-        const Infrastructure::Store::DeckHierarchyStore::DeckHierarchyViewSnapshot DeckHierarchyViewSnapshot{ m_DeckHierarchyStore.ReadDeckHierarchyViewSnapshot() };
+        const Infrastructure::Store::DeckHierarchyStore::DeckHierarchyViewSnapshot DeckHierarchyViewSnapshot{
+            m_DeckHierarchyStore.ReadDeckHierarchyViewSnapshot()
+        };
         QVector<Model::DeckTreeTableModel::DeckNodeData> DeckNodeDataQVector;
         DeckNodeDataQVector.reserve(DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector.size());
         for (const auto& DeckHierarchyRow : DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector) {

@@ -16,25 +16,21 @@ DeckStore::DeckMutationStatus DeckStore::CreateDeck(const QString& DeckName, con
 }
 
 DeckStore::DeckMutationStatus DeckStore::MoveDeck(const QString& DeckId, const QString& NewParentDeckId) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{
-        m_DatabaseConnection.Query(Infrastructure::Sql::MoveDeckSql(), DeckId.toStdString(), NewParentDeckId.toStdString())
-    };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
+        Infrastructure::Sql::MoveDeckSql(), DeckId.toStdString(), NewParentDeckId.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
 DeckStore::DeckMutationStatus DeckStore::UpdateDeckName(const QString& DeckId, const QString& DeckName) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{
-        m_DatabaseConnection.Query(Infrastructure::Sql::UpdateDeckNameSql(), DeckName.toStdString(), DeckId.toStdString())
-    };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
+        Infrastructure::Sql::UpdateDeckNameSql(), DeckName.toStdString(), DeckId.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
 void DeckStore::DeleteDeck(const QString& DeckId) {
     m_DatabaseConnection.BeginTransaction();
     try {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{
-            m_DatabaseConnection.Query(Infrastructure::Sql::DeleteDeckCardReviewsSql(), DeckId.toStdString())
-        };
+        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::DeleteDeckCardReviewsSql(), DeckId.toStdString()) };
         if (QueryResult->HasError()) {
             Support::ThrowError(QueryResult->GetError());
         }

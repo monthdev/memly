@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QtGlobal>
 #include <QString>
+#include <QtGlobal>
 #include <memory>
 
 namespace duckdb {
