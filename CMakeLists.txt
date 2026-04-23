@@ -17,6 +17,22 @@ if(COMMAND qt_policy)
   qt_policy(SET QTP0004 NEW)
 endif()
 
+option(MEMLY_ENABLE_CLANG_TIDY "Run clang-tidy during builds" ON)
+
+if(MEMLY_ENABLE_CLANG_TIDY)
+  find_program(CLANG_TIDY_EXE NAMES clang-tidy HINTS "/opt/homebrew/opt/llvm/bin" "/usr/local/opt/llvm/bin")
+  if(NOT CLANG_TIDY_EXE)
+    message(FATAL_ERROR "MEMLY_ENABLE_CLANG_TIDY is ON, but clang-tidy was not found")
+  endif()
+  set(MEMLY_CLANG_TIDY_COMMAND "${CLANG_TIDY_EXE};--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
+endif()
+
+function(memly_enable_clang_tidy target_name)
+  if(MEMLY_ENABLE_CLANG_TIDY)
+    set_target_properties("${target_name}" PROPERTIES CXX_CLANG_TIDY "${MEMLY_CLANG_TIDY_COMMAND}")
+  endif()
+endfunction()
+
 file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.cpp")
 file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*")
 
@@ -234,6 +250,7 @@ add_library(
   ${SUPPORT_HDR}
   $<TARGET_OBJECTS:memly_sql_resources>
 )
+memly_enable_clang_tidy(memly_core)
 
 target_include_directories(memly_core BEFORE PUBLIC "${CMAKE_SOURCE_DIR}/src" "${_duckdb_wrapper_dir}")
 
@@ -256,6 +273,7 @@ set_target_properties(
 )
 
 qt_add_executable(memly MANUAL_FINALIZATION "${APP_MAIN_CPP}" ${BOOTSTRAP_CPP} ${BOOTSTRAP_HDR})
+memly_enable_clang_tidy(memly)
 
 target_link_libraries(
   memly
@@ -303,6 +321,7 @@ if(BUILD_TESTING)
     ${TEST_SUPPORT_CPP}
     ${TEST_PLATFORM_CPP}
   )
+  memly_enable_clang_tidy(memly-test)
 
   target_include_directories(memly-test BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${_duckdb_wrapper_dir}")
 
