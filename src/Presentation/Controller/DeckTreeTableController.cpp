@@ -62,7 +62,7 @@ namespace Presentation::Controller {
 
 [[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
     return Support::TryCatchWrapper([&] {
-        if (m_DeckTreeTable.WouldCreateDeckHaveDuplicateSiblingName(DeckName, QString{})) {
+        if (m_DeckTreeTable.HasDuplicateSiblingName(DeckName, QString{})) {
             return GetDuplicateNameErrorMessage();
         }
         const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
@@ -75,7 +75,7 @@ namespace Presentation::Controller {
 
 [[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
     return Support::TryCatchWrapper([&] {
-        if (m_DeckTreeTable.WouldCreateDeckHaveDuplicateSiblingName(DeckName, ParentDeckId)) {
+        if (m_DeckTreeTable.HasDuplicateSiblingName(DeckName, ParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
         const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
@@ -88,10 +88,14 @@ namespace Presentation::Controller {
 
 [[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::MoveDeck(const QString& DeckId, const QString& NewParentDeckId) noexcept {
     return Support::TryCatchWrapper([&] {
-        if (m_DeckTreeTable.WouldMoveDeckCreateCycle(DeckId, NewParentDeckId)) {
+        if (m_DeckTreeTable.WouldReparentCreateCycle(DeckId, NewParentDeckId)) {
             return GetCycleDetectionErrorMessage();
         }
-        if (m_DeckTreeTable.WouldMoveDeckHaveDuplicateSiblingName(DeckId, NewParentDeckId)) {
+        if (m_DeckTreeTable.WouldReparentCreateTargetLanguageMismatch(DeckId, NewParentDeckId)) {
+            return GetParentDeckTargetLanguageMismatchErrorMessage();
+        }
+        const auto CurrentDeckNodeData{ m_DeckTreeTable.TryGetDeckNodeData(DeckId) };
+        if (CurrentDeckNodeData.has_value() and m_DeckTreeTable.HasDuplicateSiblingName(CurrentDeckNodeData->get().m_Name, NewParentDeckId, DeckId)) {
             return GetDuplicateNameErrorMessage();
         }
         const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
@@ -102,12 +106,13 @@ namespace Presentation::Controller {
     });
 }
 
-[[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::UpdateDeckName(const QString& DeckId, const QString& DeckName) noexcept {
+[[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::UpdateDeckName(const QString& DeckId, const QString& NewDeckName) noexcept {
     return Support::TryCatchWrapper([&] {
-        if (m_DeckTreeTable.WouldUpdateDeckNameHaveDuplicateSiblingName(DeckId, DeckName)) {
+        const auto CurrentDeckNodeData{ m_DeckTreeTable.TryGetDeckNodeData(DeckId) };
+        if (CurrentDeckNodeData.has_value() and m_DeckTreeTable.HasDuplicateSiblingName(NewDeckName, CurrentDeckNodeData->get().m_ParentId, DeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.UpdateDeckName(DeckId, DeckName)) };
+        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.UpdateDeckName(DeckId, NewDeckName)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }

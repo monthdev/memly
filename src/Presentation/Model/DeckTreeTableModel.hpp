@@ -6,6 +6,7 @@
 #include <QString>
 #include <QVariant>
 #include <QVector>
+#include <optional>
 
 namespace Presentation::Model {
 
@@ -179,10 +180,10 @@ public:
         };
     }
 
-    [[nodiscard]] bool WouldCreateDeckHaveDuplicateSiblingName(const QString&, const QString&) const noexcept;
-    [[nodiscard]] bool WouldMoveDeckCreateCycle(const QString&, const QString&) const noexcept;
-    [[nodiscard]] bool WouldMoveDeckHaveDuplicateSiblingName(const QString&, const QString&) const noexcept;
-    [[nodiscard]] bool WouldUpdateDeckNameHaveDuplicateSiblingName(const QString&, const QString&) const noexcept;
+    [[nodiscard]] std::optional<std::reference_wrapper<const DeckNodeData>> TryGetDeckNodeData(const QString&) const noexcept;
+    [[nodiscard]] bool HasDuplicateSiblingName(const QString&, const QString&, const QString& = QString{}) const noexcept;
+    [[nodiscard]] bool WouldReparentCreateCycle(const QString&, const QString&) const noexcept;
+    [[nodiscard]] bool WouldReparentCreateTargetLanguageMismatch(const QString&, const QString&) const noexcept;
 
     void ReplaceAll(QVector<DeckNodeData>);
 
@@ -205,7 +206,6 @@ private:
     [[nodiscard]] const DeckNode* TryGetDeckNode(const QModelIndex&) const noexcept;
     [[nodiscard]] const DeckNode* TryGetDeckNode(const QString&) const noexcept;
     [[nodiscard]] const QVector<qsizetype>& GetChildDeckNodeIndexes(const QModelIndex&) const noexcept;
-    [[nodiscard]] bool HasDuplicateSiblingName(const QString&, const QString&, const QString& = {}) const noexcept;
     void ApplyCurrentSort() noexcept;
     void SortSiblingDeckNodeIndexes(QVector<qsizetype>&) noexcept;
     void UpdateSiblingRowIndexes(qsizetype = s_RootDeckNodeIndex) noexcept;

@@ -30,9 +30,9 @@ DeckStore::DeckMutationStatus DeckStore::MoveDeck(const QString& DeckId, const Q
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-DeckStore::DeckMutationStatus DeckStore::UpdateDeckName(const QString& DeckId, const QString& DeckName) {
+DeckStore::DeckMutationStatus DeckStore::UpdateDeckName(const QString& DeckId, const QString& NewDeckName) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
-        Infrastructure::Sql::UpdateDeckNameSql(), DeckName.toStdString(), DeckId.toStdString()) };
+        Infrastructure::Sql::UpdateDeckNameSql(), NewDeckName.toStdString(), DeckId.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 

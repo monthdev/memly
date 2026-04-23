@@ -36,8 +36,8 @@ public:
         return m_DeckTreeTableController.MoveDeck(DeckId, NewParentDeckId);
     }
 
-    [[nodiscard]] Q_INVOKABLE QString UpdateDeckName(const QString& DeckId, const QString& DeckName) noexcept {
-        return m_DeckTreeTableController.UpdateDeckName(DeckId, DeckName);
+    [[nodiscard]] Q_INVOKABLE QString UpdateDeckName(const QString& DeckId, const QString& NewDeckName) noexcept {
+        return m_DeckTreeTableController.UpdateDeckName(DeckId, NewDeckName);
     }
 
     Q_INVOKABLE void DeleteDeck(const QString& DeckId) noexcept {

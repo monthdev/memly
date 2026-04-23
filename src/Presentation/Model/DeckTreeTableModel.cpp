@@ -36,6 +36,14 @@ const QVector<qsizetype>& DeckTreeTableModel::GetChildDeckNodeIndexes(const QMod
     return ParentDeckNode->m_ChildDeckNodeIndexesQVector;
 }
 
+std::optional<std::reference_wrapper<const DeckTreeTableModel::DeckNodeData>> DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
+    const DeckNode* DeckNode{ TryGetDeckNode(DeckId) };
+    if (DeckNode == nullptr) {
+        return std::nullopt;
+    }
+    return DeckNode->m_Data;
+}
+
 bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const QString& ParentDeckId, const QString& DeckId) const noexcept {
     const QVector<qsizetype>* SiblingDeckNodeIndexes{ &m_RootDeckNodeIndexesQVector };
     if (not ParentDeckId.isEmpty()) {
@@ -54,11 +62,7 @@ bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const 
     return false;
 }
 
-bool DeckTreeTableModel::WouldCreateDeckHaveDuplicateSiblingName(const QString& DeckName, const QString& ParentDeckId) const noexcept {
-    return HasDuplicateSiblingName(DeckName, ParentDeckId);
-}
-
-bool DeckTreeTableModel::WouldMoveDeckCreateCycle(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
+bool DeckTreeTableModel::WouldReparentCreateCycle(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
     const DeckNode* CurrentDeckNode{ TryGetDeckNode(NewParentDeckId) };
     while (CurrentDeckNode not_eq nullptr) {
         if (CurrentDeckNode->m_Data.m_Id == DeckId) {
@@ -72,20 +76,16 @@ bool DeckTreeTableModel::WouldMoveDeckCreateCycle(const QString& DeckId, const Q
     return false;
 }
 
-bool DeckTreeTableModel::WouldMoveDeckHaveDuplicateSiblingName(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
-    const DeckNode* CurrentDeckNode{ TryGetDeckNode(DeckId) };
-    if (CurrentDeckNode == nullptr) {
+bool DeckTreeTableModel::WouldReparentCreateTargetLanguageMismatch(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
+    if (NewParentDeckId.isEmpty()) {
         return false;
     }
-    return HasDuplicateSiblingName(CurrentDeckNode->m_Data.m_Name, NewParentDeckId, DeckId);
-}
-
-bool DeckTreeTableModel::WouldUpdateDeckNameHaveDuplicateSiblingName(const QString& DeckId, const QString& DeckName) const noexcept {
     const DeckNode* CurrentDeckNode{ TryGetDeckNode(DeckId) };
-    if (CurrentDeckNode == nullptr) {
+    const DeckNode* NewParentDeckNode{ TryGetDeckNode(NewParentDeckId) };
+    if (CurrentDeckNode == nullptr or NewParentDeckNode == nullptr) {
         return false;
     }
-    return HasDuplicateSiblingName(DeckName, CurrentDeckNode->m_Data.m_ParentId, DeckId);
+    return CurrentDeckNode->m_Data.m_TargetLanguageCode not_eq NewParentDeckNode->m_Data.m_TargetLanguageCode;
 }
 
 int DeckTreeTableModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
