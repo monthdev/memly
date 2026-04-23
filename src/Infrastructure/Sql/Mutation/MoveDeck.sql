@@ -69,9 +69,7 @@ WITH RECURSIVE
           WHERE
             id = move_language_context.new_parent_deck_id
         ) THEN ERROR('Deck move would create a cycle')
-        WHEN move_language_context.parent_deck_target_language_code <> move_language_context.deck_target_language_code THEN ERROR(
-          'Deck target language does not match parent deck'
-        )
+        WHEN move_language_context.parent_deck_target_language_code <> move_language_context.deck_target_language_code THEN ERROR('Deck target language does not match parent deck')
         ELSE move_language_context.new_parent_deck_id
       END AS new_parent_deck_id
     FROM
