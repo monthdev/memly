@@ -4,7 +4,7 @@
 #include <span>
 #include <string_view>
 
-namespace Language {
+namespace Domain::Language {
 enum class TargetLanguage : std::uint8_t {
     NoLanguage,
     Afrikaans,

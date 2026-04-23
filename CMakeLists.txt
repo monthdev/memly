@@ -28,8 +28,8 @@ set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
 file(GLOB CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.cpp")
 file(GLOB CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.[Hh]*")
 
-file(GLOB LANGUAGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Language/*.cpp")
-file(GLOB LANGUAGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Language/*.[Hh]*")
+file(GLOB LANGUAGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/Language/*.cpp")
+file(GLOB LANGUAGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/Language/*.[Hh]*")
 
 file(GLOB MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.cpp")
 file(GLOB MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.[Hh]*")
@@ -37,8 +37,8 @@ file(GLOB MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Mode
 file(GLOB CLIENT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Client/*.cpp")
 file(GLOB CLIENT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Client/*.[Hh]*")
 
-file(GLOB SCHEDULER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Scheduler/*.cpp")
-file(GLOB SCHEDULER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Scheduler/*.[Hh]*")
+file(GLOB SCHEDULER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/Scheduler/*.cpp")
+file(GLOB SCHEDULER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/Scheduler/*.[Hh]*")
 
 file(GLOB STORE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/*.cpp")
 file(GLOB STORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/*.[Hh]*")
