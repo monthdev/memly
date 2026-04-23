@@ -34,17 +34,17 @@ file(GLOB LANGUAGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Language/*.[Hh
 file(GLOB MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.cpp")
 file(GLOB MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.[Hh]*")
 
-file(GLOB CLIENT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Client/*.cpp")
-file(GLOB CLIENT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Client/*.[Hh]*")
+file(GLOB CLIENT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Client/*.cpp")
+file(GLOB CLIENT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Client/*.[Hh]*")
 
 file(GLOB SCHEDULER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Scheduler/*.cpp")
 file(GLOB SCHEDULER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Scheduler/*.[Hh]*")
 
-file(GLOB STORE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Store/*.cpp")
-file(GLOB STORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Store/*.[Hh]*")
+file(GLOB STORE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/*.cpp")
+file(GLOB STORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/*.[Hh]*")
 
-file(GLOB SQL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/*.cpp")
-file(GLOB SQL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/*.[Hh]*")
+file(GLOB SQL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/*.cpp")
+file(GLOB SQL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/*.[Hh]*")
 
 file(GLOB SUPPORT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/*.cpp")
 file(GLOB SUPPORT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/*.[Hh]*")
@@ -64,10 +64,10 @@ file(
   GLOB
   SQL_FILES
   CONFIGURE_DEPENDS
-  "${CMAKE_SOURCE_DIR}/src/Sql/Migration/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Sql/Seed/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Sql/Query/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Sql/Mutation/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Migration/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/*.sql"
 )
 
 file(GLOB TEST_APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/App/*.cpp")
@@ -207,7 +207,7 @@ qt_add_resources(
   PREFIX
   "/Sql"
   BASE
-  "${CMAKE_SOURCE_DIR}/src/Sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql"
   FILES
   ${SQL_FILES}
 )

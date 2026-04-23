@@ -4,7 +4,7 @@
 
 #include <QtGlobal>
 
-#include "Sql/SchemaMigrator.hpp"
+#include "Infrastructure/Sql/SchemaMigrator.hpp"
 
 namespace App::Bootstrap {
 
@@ -14,7 +14,7 @@ DatabaseContext::DatabaseContext(const QString& DatabaseFilePath)
     Q_ASSERT(not DatabaseFilePath.isEmpty());
     m_Database = std::make_unique<duckdb::DuckDB>(DatabaseFilePath.toStdString());
     m_DatabaseConnection = std::make_unique<duckdb::Connection>(*m_Database);
-    Sql::RunDatabaseBootstrap(*m_DatabaseConnection);
+    Infrastructure::Sql::RunDatabaseBootstrap(*m_DatabaseConnection);
 }
 
 DatabaseContext::~DatabaseContext() = default;

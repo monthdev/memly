@@ -9,7 +9,7 @@ namespace duckdb {
 class Connection;
 }
 
-namespace Store {
+namespace Infrastructure::Store {
 
 class DeckHierarchyStore final {
 public:

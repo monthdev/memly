@@ -28,24 +28,24 @@ namespace Presentation::Controller {
     return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
 }
 
-[[nodiscard]] QString DeckTreeTableController::HandleDeckMutationStatus(const Store::DeckStore::DeckMutationStatus DeckMutationStatus) const {
+[[nodiscard]] QString DeckTreeTableController::HandleDeckMutationStatus(const Infrastructure::Store::DeckStore::DeckMutationStatus DeckMutationStatus) const {
     switch (DeckMutationStatus) {
-    case Store::DeckStore::DeckMutationStatus::Success: {
+    case Infrastructure::Store::DeckStore::DeckMutationStatus::Success: {
         return QString{};
     }
-    case Store::DeckStore::DeckMutationStatus::NameLengthError: {
+    case Infrastructure::Store::DeckStore::DeckMutationStatus::NameLengthError: {
         return GetNameLengthErrorMessage();
     }
-    case Store::DeckStore::DeckMutationStatus::DuplicateNameError: {
+    case Infrastructure::Store::DeckStore::DeckMutationStatus::DuplicateNameError: {
         return GetDuplicateNameErrorMessage();
     }
-    case Store::DeckStore::DeckMutationStatus::TargetLanguageCodeError: {
+    case Infrastructure::Store::DeckStore::DeckMutationStatus::TargetLanguageCodeError: {
         return GetTargetLanguageCodeErrorMessage();
     }
-    case Store::DeckStore::DeckMutationStatus::ParentDeckError: {
+    case Infrastructure::Store::DeckStore::DeckMutationStatus::ParentDeckError: {
         return GetParentDeckErrorMessage();
     }
-    case Store::DeckStore::DeckMutationStatus::CycleDetectionError: {
+    case Infrastructure::Store::DeckStore::DeckMutationStatus::CycleDetectionError: {
         return GetCycleDetectionErrorMessage();
     }
     default:
@@ -124,7 +124,7 @@ void DeckTreeTableController::ScheduleNextDeckTreeTableRefresh(const std::option
 
 void DeckTreeTableController::RefreshDeckTreeTable(bool NeedNextDeckTreeTableRefreshScheduled) noexcept {
     Support::TryCatchWrapper([&] {
-        const Store::DeckHierarchyStore::DeckHierarchyViewSnapshot DeckHierarchyViewSnapshot{ m_DeckHierarchyStore.ReadDeckHierarchyViewSnapshot() };
+        const Infrastructure::Store::DeckHierarchyStore::DeckHierarchyViewSnapshot DeckHierarchyViewSnapshot{ m_DeckHierarchyStore.ReadDeckHierarchyViewSnapshot() };
         QVector<Model::DeckTreeTableModel::DeckNodeData> DeckNodeDataQVector;
         DeckNodeDataQVector.reserve(DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector.size());
         for (const auto& DeckHierarchyRow : DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector) {

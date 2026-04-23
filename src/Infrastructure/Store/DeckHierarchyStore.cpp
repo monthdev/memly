@@ -1,16 +1,16 @@
-#include "Store/DeckHierarchyStore.hpp"
+#include "Infrastructure/Store/DeckHierarchyStore.hpp"
 
 #include <duckdb.hpp>
 
 #include <memory>
 
-#include "Sql/SqlResource.hpp"
+#include "Infrastructure/Sql/SqlResource.hpp"
 #include "Support/Fatal.hpp"
 
-namespace Store {
+namespace Infrastructure::Store {
 
 DeckHierarchyStore::DeckHierarchyViewSnapshot DeckHierarchyStore::ReadDeckHierarchyViewSnapshot() {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Sql::ReadDeckHierarchyViewSnapshotSql()) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::ReadDeckHierarchyViewSnapshotSql()) };
     if (QueryResult->HasError()) {
         Support::ThrowError(QueryResult->GetError());
     }

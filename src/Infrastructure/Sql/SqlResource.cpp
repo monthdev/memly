@@ -4,7 +4,7 @@
 
 #include "Support/Fatal.hpp"
 
-namespace Sql {
+namespace Infrastructure::Sql {
 
 namespace {
 std::string ReadSqlResourceBytes(const char* SqlResourcePath) {

@@ -5,7 +5,7 @@
 // #include "Controller/SqlResource.hpp"
 
 // static const std::string ProjectRootPath{ CMAKE_GENERATED_PROJECT_ROOT_DIR };
-// static const std::string SqlDirectoryPath{ ProjectRootPath + "/src/Sql" };
+// static const std::string SqlDirectoryPath{ ProjectRootPath + "/src/Infrastructure/Sql" };
 //
 // static std::string FileContentsToString(const std::string& FilePath) {
 //     std::ifstream File(FilePath, std::ios::binary);

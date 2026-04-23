@@ -9,7 +9,7 @@ class Connection;
 class QueryResult;
 }
 
-namespace Store {
+namespace Infrastructure::Store {
 
 class DeckStore final {
 public:
