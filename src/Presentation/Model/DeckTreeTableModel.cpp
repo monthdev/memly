@@ -201,7 +201,7 @@ void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
     DeckNodeIndexByIdQHash.reserve(DeckNodeDataQVector.size());
     for (DeckNodeData& DeckNodeData : DeckNodeDataQVector) {
         const qsizetype DeckNodeIndex{ DeckNodesQVector.size() };
-        DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, {} });
+        DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
         if (DeckNodeIndexByIdQHash.contains(DeckNodeData.m_Id)) {
             Support::ThrowError("Duplicate deck id in deck hierarchy snapshot");
         }
