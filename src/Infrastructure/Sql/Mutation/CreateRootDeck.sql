@@ -12,13 +12,11 @@ WITH
 INSERT INTO
   decks (
     name,
-    parent_deck_id,
     target_language_code,
     deck_settings_id
   )
 SELECT
   ?,
-  NULL,
   ?,
   default_deck_settings.deck_settings_id
 FROM
