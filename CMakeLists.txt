@@ -25,14 +25,14 @@ file(GLOB BOOTSTRAP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/Bootstrap
 
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
-file(GLOB CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Controller/*.cpp")
-file(GLOB CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Controller/*.[Hh]*")
+file(GLOB CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.cpp")
+file(GLOB CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.[Hh]*")
 
 file(GLOB LANGUAGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Language/*.cpp")
 file(GLOB LANGUAGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Language/*.[Hh]*")
 
-file(GLOB MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Model/*.cpp")
-file(GLOB MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Model/*.[Hh]*")
+file(GLOB MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.cpp")
+file(GLOB MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.[Hh]*")
 
 file(GLOB CLIENT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Client/*.cpp")
 file(GLOB CLIENT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Client/*.[Hh]*")
@@ -49,7 +49,7 @@ file(GLOB SQL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Sql/*.[Hh]*")
 file(GLOB SUPPORT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/*.cpp")
 file(GLOB SUPPORT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/*.[Hh]*")
 
-set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Qml")
+set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/View")
 file(GLOB QML_ROOT CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
 file(GLOB_RECURSE QML_COMPONENTS CONFIGURE_DEPENDS "${QML_DIR}/Component/*.qml")
 file(GLOB_RECURSE QML_SECTIONS CONFIGURE_DEPENDS "${QML_DIR}/Section/*.qml")
@@ -271,13 +271,13 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_CURRENT_BINARY_DIR}/Memly"
   SOURCES
-  "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge/DeckTreeTableControllerQml.hpp"
+  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/DeckTreeTableControllerQml.hpp"
   QML_FILES
   ${QT_QML}
 )
 
 target_include_directories(
-  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Presentation/QmlBridge"
+  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge"
 )
 
 set_target_properties(

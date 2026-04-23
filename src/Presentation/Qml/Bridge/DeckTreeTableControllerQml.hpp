@@ -5,13 +5,13 @@
 #include <QObject>
 
 #include "App/Bootstrap/AppContext.hpp"
-#include "Controller/DeckTreeTableController.hpp"
+#include "Presentation/Controller/DeckTreeTableController.hpp"
 
-namespace Presentation::QmlBridge {
+namespace Presentation::Qml::Bridge {
 
 class DeckTreeTableControllerQml : public QObject {
     Q_OBJECT
-    Q_PROPERTY(Model::DeckTreeTableModel* deckTreeTable READ GetDeckTreeTable CONSTANT)
+    Q_PROPERTY(Presentation::Model::DeckTreeTableModel* deckTreeTable READ GetDeckTreeTable CONSTANT)
     QML_NAMED_ELEMENT(DeckTreeTableController)
 
 public:

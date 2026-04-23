@@ -7,7 +7,7 @@
 #include <QVariant>
 #include <QVector>
 
-namespace Model {
+namespace Presentation::Model {
 
 class DeckTreeTableModel final : public QAbstractItemModel {
     Q_OBJECT

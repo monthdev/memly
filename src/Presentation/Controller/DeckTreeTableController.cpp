@@ -1,4 +1,4 @@
-#include "Controller/DeckTreeTableController.hpp"
+#include "Presentation/Controller/DeckTreeTableController.hpp"
 
 #include <QDateTime>
 #include <algorithm>
@@ -6,7 +6,7 @@
 
 #include "Support/Fatal.hpp"
 
-namespace Controller {
+namespace Presentation::Controller {
 
 [[nodiscard]] QString DeckTreeTableController::GetNameLengthErrorMessage() const {
     return QString{ "Deck name length exceeds character limit" };

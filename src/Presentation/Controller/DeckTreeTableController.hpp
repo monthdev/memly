@@ -4,15 +4,15 @@
 #include <QString>
 #include <QTimer>
 
-#include "Model/DeckTreeTableModel.hpp"
+#include "Presentation/Model/DeckTreeTableModel.hpp"
 #include "Store/DeckHierarchyStore.hpp"
 #include "Store/DeckStore.hpp"
 
-namespace Controller {
+namespace Presentation::Controller {
 
 class DeckTreeTableController : public QObject {
     Q_OBJECT
-    Q_PROPERTY(Model::DeckTreeTableModel* deckTreeTable READ GetDeckTreeTable CONSTANT)
+    Q_PROPERTY(Presentation::Model::DeckTreeTableModel* deckTreeTable READ GetDeckTreeTable CONSTANT)
 
 public:
     explicit DeckTreeTableController(Store::DeckHierarchyStore& DeckHierarchyStore, Store::DeckStore& DeckStore, QObject* Parent = nullptr)

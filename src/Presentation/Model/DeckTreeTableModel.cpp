@@ -1,10 +1,10 @@
-#include "Model/DeckTreeTableModel.hpp"
+#include "Presentation/Model/DeckTreeTableModel.hpp"
 
 #include <algorithm>
 
 #include "Support/Fatal.hpp"
 
-namespace Model {
+namespace Presentation::Model {
 
 const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {
