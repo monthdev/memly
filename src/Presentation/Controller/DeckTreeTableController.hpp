@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <QTimer>
+#include <optional>
 
 #include "Infrastructure/Store/DeckHierarchyStore.hpp"
 #include "Infrastructure/Store/DeckStore.hpp"
@@ -52,7 +53,7 @@ private:
     [[nodiscard]] QString GetParentDeckErrorMessage() const;
     [[nodiscard]] QString GetParentDeckTargetLanguageMismatchErrorMessage() const;
     [[nodiscard]] QString GetCycleDetectionErrorMessage() const;
-    [[nodiscard]] QString HandleDeckMutationStatus(const Infrastructure::Store::DeckStore::DeckMutationStatus) const;
+    [[nodiscard]] QString HandleDeckMutationError(const std::optional<Infrastructure::Store::DeckStore::DeckMutationErrorEnum>) const;
     void ScheduleNextDeckTreeTableRefresh(const std::optional<std::int64_t>&);
     void RefreshDeckTreeTable(bool) noexcept;
 };

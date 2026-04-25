@@ -3,6 +3,7 @@
 #include <QString>
 #include <QtGlobal>
 #include <memory>
+#include <optional>
 
 namespace duckdb {
 class Connection;
@@ -13,8 +14,7 @@ namespace Infrastructure::Store {
 
 class DeckStore final {
 public:
-    enum class DeckMutationStatus {
-        Success,
+    enum class DeckMutationErrorEnum {
         NameLengthError,
         DuplicateNameError,
         TargetLanguageCodeError,
@@ -27,16 +27,16 @@ public:
         : m_DatabaseConnection{ DatabaseConnection } {
     }
 
-    [[nodiscard]] DeckMutationStatus CreateRootDeck(const QString&, quint8);
-    [[nodiscard]] DeckMutationStatus CreateChildDeck(const QString&, const QString&);
-    [[nodiscard]] DeckMutationStatus MoveDeck(const QString&, const QString& = QString{});
-    [[nodiscard]] DeckMutationStatus UpdateDeckName(const QString&, const QString&);
+    [[nodiscard]] std::optional<DeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
+    [[nodiscard]] std::optional<DeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);
+    [[nodiscard]] std::optional<DeckMutationErrorEnum> MoveDeck(const QString&, const QString& = QString{});
+    [[nodiscard]] std::optional<DeckMutationErrorEnum> UpdateDeckName(const QString&, const QString&);
     void DeleteDeck(const QString&);
 
 private:
     duckdb::Connection& m_DatabaseConnection;
 
-    [[nodiscard]] DeckMutationStatus HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
+    [[nodiscard]] std::optional<DeckMutationErrorEnum> HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
 };
 
 }

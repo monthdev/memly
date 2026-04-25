@@ -9,28 +9,28 @@
 
 namespace Infrastructure::Store {
 
-DeckStore::DeckMutationStatus DeckStore::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
+std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Infrastructure::Sql::CreateRootDeckSql(), DeckName.toStdString(), TargetLanguageCode) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-DeckStore::DeckMutationStatus DeckStore::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
+std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
     if (ParentDeckId.isEmpty()) {
-        return DeckMutationStatus::ParentDeckError;
+        return DeckMutationErrorEnum::ParentDeckError;
     }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Infrastructure::Sql::CreateChildDeckSql(), ParentDeckId.toStdString(), DeckName.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-DeckStore::DeckMutationStatus DeckStore::MoveDeck(const QString& DeckId, const QString& NewParentDeckId) {
+std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::MoveDeck(const QString& DeckId, const QString& NewParentDeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Infrastructure::Sql::MoveDeckSql(), DeckId.toStdString(), NewParentDeckId.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-DeckStore::DeckMutationStatus DeckStore::UpdateDeckName(const QString& DeckId, const QString& NewDeckName) {
+std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::UpdateDeckName(const QString& DeckId, const QString& NewDeckName) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Infrastructure::Sql::UpdateDeckNameSql(), NewDeckName.toStdString(), DeckId.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
@@ -59,29 +59,29 @@ void DeckStore::DeleteDeck(const QString& DeckId) {
 }
 
 // TODO: Fix error message string checks and use switch case logic
-DeckStore::DeckMutationStatus DeckStore::HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& QueryResult) const {
+std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& QueryResult) const {
     if (not QueryResult->HasError()) {
-        return DeckMutationStatus::Success;
+        return std::nullopt;
     }
     const std::string_view ErrorMessage{ QueryResult->GetError() };
     if (ErrorMessage.contains("deck_name_length_is_valid(\"name\")")) {
-        return DeckMutationStatus::NameLengthError;
+        return DeckMutationErrorEnum::NameLengthError;
     }
     if (ErrorMessage.contains("target_language_code_is_valid(target_language_code)")) {
-        return DeckMutationStatus::TargetLanguageCodeError;
+        return DeckMutationErrorEnum::TargetLanguageCodeError;
     }
     if (ErrorMessage.starts_with("Invalid Input Error: Deck target language does not match parent deck")) {
-        return DeckMutationStatus::ParentDeckTargetLanguageMismatchError;
+        return DeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError;
     }
     if (ErrorMessage.starts_with("Invalid Input Error: parent deck does not exist") or
         ErrorMessage.contains("Violates foreign key constraint because key \"id: ")) {
-        return DeckMutationStatus::ParentDeckError;
+        return DeckMutationErrorEnum::ParentDeckError;
     }
     if (ErrorMessage.starts_with("Invalid Input Error: deck move would create a cycle")) {
-        return DeckMutationStatus::CycleDetectionError;
+        return DeckMutationErrorEnum::CycleDetectionError;
     }
     if (ErrorMessage.contains("Duplicate key \"")) {
-        return DeckMutationStatus::DuplicateNameError;
+        return DeckMutationErrorEnum::DuplicateNameError;
     }
     Support::ThrowError(QueryResult->GetError());
 }

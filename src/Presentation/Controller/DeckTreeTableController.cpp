@@ -32,31 +32,31 @@ namespace Presentation::Controller {
     return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
 }
 
-[[nodiscard]] QString DeckTreeTableController::HandleDeckMutationStatus(const Infrastructure::Store::DeckStore::DeckMutationStatus DeckMutationStatus) const {
-    switch (DeckMutationStatus) {
-    case Infrastructure::Store::DeckStore::DeckMutationStatus::Success: {
+[[nodiscard]] QString DeckTreeTableController::HandleDeckMutationError(const std::optional<Infrastructure::Store::DeckStore::DeckMutationErrorEnum> DeckMutationError) const {
+    if (not DeckMutationError.has_value()) {
         return QString{};
     }
-    case Infrastructure::Store::DeckStore::DeckMutationStatus::NameLengthError: {
+    switch (DeckMutationError.value()) {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::NameLengthError: {
         return GetNameLengthErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationStatus::DuplicateNameError: {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::DuplicateNameError: {
         return GetDuplicateNameErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationStatus::TargetLanguageCodeError: {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::TargetLanguageCodeError: {
         return GetTargetLanguageCodeErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationStatus::ParentDeckError: {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::ParentDeckError: {
         return GetParentDeckErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationStatus::ParentDeckTargetLanguageMismatchError: {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
         return GetParentDeckTargetLanguageMismatchErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationStatus::CycleDetectionError: {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::CycleDetectionError: {
         return GetCycleDetectionErrorMessage();
     }
     default:
-        Support::ThrowError("Unknown deck mutation status failure");
+        Support::ThrowError("Unknown deck mutation error failure");
     }
 }
 
@@ -65,7 +65,7 @@ namespace Presentation::Controller {
         if (m_DeckTreeTable.HasDuplicateSiblingName(DeckName, QString{})) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
+        const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }
@@ -78,7 +78,7 @@ namespace Presentation::Controller {
         if (m_DeckTreeTable.HasDuplicateSiblingName(DeckName, ParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
+        const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }
@@ -98,7 +98,7 @@ namespace Presentation::Controller {
         if (CurrentDeckNodeData.has_value() and m_DeckTreeTable.HasDuplicateSiblingName(CurrentDeckNodeData->get().m_Name, NewParentDeckId, DeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
+        const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }
@@ -112,7 +112,7 @@ namespace Presentation::Controller {
         if (CurrentDeckNodeData.has_value() and m_DeckTreeTable.HasDuplicateSiblingName(NewDeckName, CurrentDeckNodeData->get().m_ParentId, DeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const QString ErrorMessage{ HandleDeckMutationStatus(m_DeckStore.UpdateDeckName(DeckId, NewDeckName)) };
+        const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.UpdateDeckName(DeckId, NewDeckName)) };
         if (ErrorMessage.isEmpty()) {
             RefreshDeckTreeTable(false);
         }
