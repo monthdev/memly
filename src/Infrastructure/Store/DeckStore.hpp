@@ -14,7 +14,7 @@ namespace Infrastructure::Store {
 
 class DeckStore final {
 public:
-    enum class DeckMutationErrorEnum {
+    enum class DeckMutationErrorEnum : std::uint8_t {
         NameLengthError,
         DuplicateNameError,
         TargetLanguageCodeError,

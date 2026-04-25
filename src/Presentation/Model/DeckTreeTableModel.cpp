@@ -56,7 +56,7 @@ bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const 
     }
     for (const qsizetype SiblingDeckNodeIndex : *SiblingDeckNodeIndexes) {
         const DeckNode& SiblingDeckNode{ m_DeckNodesQVector.at(SiblingDeckNodeIndex) };
-        if (SiblingDeckNode.m_DeckNodeData.m_Name == DeckName and SiblingDeckNode.m_DeckNodeData.m_Id != DeckId) {
+        if (SiblingDeckNode.m_DeckNodeData.m_Name == DeckName and SiblingDeckNode.m_DeckNodeData.m_DeckId != DeckId) {
             return true;
         }
     }
@@ -66,7 +66,7 @@ bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const 
 bool DeckTreeTableModel::WouldReparentCreateCycle(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
     const DeckNode* CurrentDeckNode{ TryGetDeckNode(NewParentDeckId) };
     while (CurrentDeckNode not_eq nullptr) {
-        if (CurrentDeckNode->m_DeckNodeData.m_Id == DeckId) {
+        if (CurrentDeckNode->m_DeckNodeData.m_DeckId == DeckId) {
             return true;
         }
         if (CurrentDeckNode->m_ParentDeckNodeIndex == s_RootDeckNodeIndex) {
@@ -96,13 +96,13 @@ int DeckTreeTableModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, cons
         return static_cast<int>(LeftDeckNodeCount > RightDeckNodeCount) - static_cast<int>(LeftDeckNodeCount < RightDeckNodeCount);
     } };
     switch (m_SortColumn) {
-    case NameColumn:
+    case static_cast<int>(ColumnEnum::NameColumn):
         return QString::compare(LeftDeckNode.m_DeckNodeData.m_Name, RightDeckNode.m_DeckNodeData.m_Name, Qt::CaseSensitive);
-    case DueNowCountColumn:
+    case static_cast<int>(ColumnEnum::DueNowCountColumn):
         return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_DueNowCount, RightDeckNode.m_DeckNodeData.m_DueNowCount);
-    case ByTodayCountColumn:
+    case static_cast<int>(ColumnEnum::ByTodayCountColumn):
         return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_ByTodayCount, RightDeckNode.m_DeckNodeData.m_ByTodayCount);
-    case TotalCountColumn:
+    case static_cast<int>(ColumnEnum::TotalCountColumn):
         return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_TotalCount, RightDeckNode.m_DeckNodeData.m_TotalCount);
     default:
         return 0;
@@ -132,7 +132,7 @@ void DeckTreeTableModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeI
 }
 
 void DeckTreeTableModel::ApplyCurrentSort() noexcept {
-    if (m_SortColumn < NameColumn or m_SortColumn > TotalCountColumn) {
+    if (m_SortColumn < static_cast<int>(ColumnEnum::NameColumn) or m_SortColumn > static_cast<int>(ColumnEnum::TotalCountColumn)) {
         return;
     }
     SortSiblingDeckNodeIndexes(m_RootDeckNodeIndexesQVector);
@@ -203,14 +203,14 @@ void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
     for (DeckNodeData& DeckNodeData : DeckNodeDataQVector) {
         const qsizetype DeckNodeIndex{ DeckNodesQVector.size() };
         DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
-        if (DeckNodeIndexByIdQHash.contains(DeckNodeData.m_Id)) {
+        if (DeckNodeIndexByIdQHash.contains(DeckNodeData.m_DeckId)) {
             Support::ThrowError("Duplicate deck id in deck hierarchy snapshot");
         }
-        DeckNodeIndexByIdQHash.insert(DeckNodesQVector.back().m_DeckNodeData.m_Id, DeckNodeIndex);
+        DeckNodeIndexByIdQHash.insert(DeckNodesQVector.back().m_DeckNodeData.m_DeckId, DeckNodeIndex);
     }
     for (qsizetype DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesQVector.size(); ++DeckNodeIndex) {
         DeckNode& CurrentDeckNode{ DeckNodesQVector[DeckNodeIndex] };
-        const QString& ParentId{ CurrentDeckNode.m_DeckNodeData.m_ParentId };
+        const QString& ParentId{ CurrentDeckNode.m_DeckNodeData.m_ParentDeckId };
         if (ParentId.isEmpty()) {
             CurrentDeckNode.m_RowInParentIndex = RootDeckNodeIndexesQVector.size();
             RootDeckNodeIndexesQVector.push_back(DeckNodeIndex);

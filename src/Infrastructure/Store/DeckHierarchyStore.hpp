@@ -14,8 +14,8 @@ namespace Infrastructure::Store {
 class DeckHierarchyStore final {
 public:
     struct DeckHierarchyRow {
-        QString m_Id;
-        QString m_ParentId;
+        QString m_DeckId;
+        QString m_ParentDeckId;
         QString m_Name;
         quint32 m_DueNowCount;
         quint32 m_ByTodayCount;

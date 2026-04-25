@@ -110,7 +110,7 @@ DeckTreeTableController::HandleDeckMutationError(const std::optional<Infrastruct
 [[nodiscard]] Q_INVOKABLE QString DeckTreeTableController::UpdateDeckName(const QString& DeckId, const QString& NewDeckName) noexcept {
     return Support::TryCatchWrapper([&] {
         const auto CurrentDeckNodeData{ m_DeckTreeTable.TryGetDeckNodeData(DeckId) };
-        if (CurrentDeckNodeData.has_value() and m_DeckTreeTable.HasDuplicateSiblingName(NewDeckName, CurrentDeckNodeData->get().m_ParentId, DeckId)) {
+        if (CurrentDeckNodeData.has_value() and m_DeckTreeTable.HasDuplicateSiblingName(NewDeckName, CurrentDeckNodeData->get().m_ParentDeckId, DeckId)) {
             return GetDuplicateNameErrorMessage();
         }
         const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.UpdateDeckName(DeckId, NewDeckName)) };
@@ -154,8 +154,8 @@ void DeckTreeTableController::RefreshDeckTreeTable(bool NeedNextDeckTreeTableRef
         QVector<Model::DeckTreeTableModel::DeckNodeData> DeckNodeDataQVector;
         DeckNodeDataQVector.reserve(DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector.size());
         for (const auto& DeckHierarchyRow : DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector) {
-            DeckNodeDataQVector.emplace_back(DeckHierarchyRow.m_Id,
-                                             DeckHierarchyRow.m_ParentId,
+            DeckNodeDataQVector.emplace_back(DeckHierarchyRow.m_DeckId,
+                                             DeckHierarchyRow.m_ParentDeckId,
                                              DeckHierarchyRow.m_Name,
                                              DeckHierarchyRow.m_DueNowCount,
                                              DeckHierarchyRow.m_ByTodayCount,

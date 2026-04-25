@@ -15,8 +15,8 @@ class DeckTreeTableModel final : public QAbstractItemModel {
 
 public:
     struct DeckNodeData {
-        QString m_Id;
-        QString m_ParentId;
+        QString m_DeckId;
+        QString m_ParentDeckId;
         QString m_Name;
         quint32 m_DueNowCount;
         quint32 m_ByTodayCount;
@@ -24,7 +24,7 @@ public:
         quint8 m_TargetLanguageCode;
     };
 
-    enum Role {
+    enum class RoleEnum : int {
         IdRole = Qt::UserRole + 1,
         ParentIdRole,
         NameRole,
@@ -34,7 +34,7 @@ public:
         TargetLanguageCodeRole
     };
 
-    enum Column {
+    enum class ColumnEnum : int {
         NameColumn = 0,
         DueNowCountColumn,
         ByTodayCountColumn,
@@ -86,7 +86,7 @@ public:
         if (Parent.isValid() and Parent.column() > 0) {
             return 0;
         }
-        return TotalCountColumn + 1;
+        return static_cast<int>(ColumnEnum::TotalCountColumn) + 1;
     }
 
     [[nodiscard]] QVariant data(const QModelIndex& Index, int Role) const override {
@@ -97,30 +97,30 @@ public:
         switch (Role) {
         case Qt::DisplayRole:
             switch (Index.column()) {
-            case NameColumn:
+            case static_cast<int>(ColumnEnum::NameColumn):
                 return CurrentDeckNode->m_DeckNodeData.m_Name;
-            case DueNowCountColumn:
+            case static_cast<int>(ColumnEnum::DueNowCountColumn):
                 return CurrentDeckNode->m_DeckNodeData.m_DueNowCount;
-            case ByTodayCountColumn:
+            case static_cast<int>(ColumnEnum::ByTodayCountColumn):
                 return CurrentDeckNode->m_DeckNodeData.m_ByTodayCount;
-            case TotalCountColumn:
+            case static_cast<int>(ColumnEnum::TotalCountColumn):
                 return CurrentDeckNode->m_DeckNodeData.m_TotalCount;
             default:
                 return QVariant{};
             }
-        case IdRole:
-            return CurrentDeckNode->m_DeckNodeData.m_Id;
-        case ParentIdRole:
-            return CurrentDeckNode->m_DeckNodeData.m_ParentId;
-        case NameRole:
+        case static_cast<int>(RoleEnum::IdRole):
+            return CurrentDeckNode->m_DeckNodeData.m_DeckId;
+        case static_cast<int>(RoleEnum::ParentIdRole):
+            return CurrentDeckNode->m_DeckNodeData.m_ParentDeckId;
+        case static_cast<int>(RoleEnum::NameRole):
             return CurrentDeckNode->m_DeckNodeData.m_Name;
-        case DueNowCountRole:
+        case static_cast<int>(RoleEnum::DueNowCountRole):
             return CurrentDeckNode->m_DeckNodeData.m_DueNowCount;
-        case ByTodayCountRole:
+        case static_cast<int>(RoleEnum::ByTodayCountRole):
             return CurrentDeckNode->m_DeckNodeData.m_ByTodayCount;
-        case TotalCountRole:
+        case static_cast<int>(RoleEnum::TotalCountRole):
             return CurrentDeckNode->m_DeckNodeData.m_TotalCount;
-        case TargetLanguageCodeRole:
+        case static_cast<int>(RoleEnum::TargetLanguageCodeRole):
             return static_cast<quint32>(CurrentDeckNode->m_DeckNodeData.m_TargetLanguageCode);
         default:
             return QVariant{};
@@ -135,7 +135,7 @@ public:
     }
 
     void sort(int Column, Qt::SortOrder Order = Qt::AscendingOrder) override {
-        if (Column < NameColumn or Column > TotalCountColumn) {
+        if (Column < static_cast<int>(ColumnEnum::NameColumn) or Column > static_cast<int>(ColumnEnum::TotalCountColumn)) {
             return;
         }
         m_SortColumn = Column;
@@ -150,13 +150,13 @@ public:
             return {};
         }
         switch (Section) {
-        case NameColumn:
+        case static_cast<int>(ColumnEnum::NameColumn):
             return QStringLiteral("Deck");
-        case DueNowCountColumn:
+        case static_cast<int>(ColumnEnum::DueNowCountColumn):
             return QStringLiteral("Due Now");
-        case ByTodayCountColumn:
+        case static_cast<int>(ColumnEnum::ByTodayCountColumn):
             return QStringLiteral("By Today");
-        case TotalCountColumn:
+        case static_cast<int>(ColumnEnum::TotalCountColumn):
             return QStringLiteral("Total");
         default:
             return {};
@@ -169,14 +169,14 @@ public:
 
     [[nodiscard]] QHash<int, QByteArray> roleNames() const override {
         return {
-            {        Qt::DisplayRole,            "display" },
-            {                 IdRole,                 "id" },
-            {           ParentIdRole,           "parentId" },
-            {               NameRole,               "name" },
-            {        DueNowCountRole,        "dueNowCount" },
-            {       ByTodayCountRole,       "byTodayCount" },
-            {         TotalCountRole,         "totalCount" },
-            { TargetLanguageCodeRole, "targetLanguageCode" },
+            {                                    Qt::DisplayRole,            "display" },
+            {                 static_cast<int>(RoleEnum::IdRole),                 "id" },
+            {           static_cast<int>(RoleEnum::ParentIdRole),           "parentId" },
+            {               static_cast<int>(RoleEnum::NameRole),               "name" },
+            {        static_cast<int>(RoleEnum::DueNowCountRole),        "dueNowCount" },
+            {       static_cast<int>(RoleEnum::ByTodayCountRole),       "byTodayCount" },
+            {         static_cast<int>(RoleEnum::TotalCountRole),         "totalCount" },
+            { static_cast<int>(RoleEnum::TargetLanguageCodeRole), "targetLanguageCode" },
         };
     }
 
