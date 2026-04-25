@@ -32,7 +32,8 @@ namespace Presentation::Controller {
     return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
 }
 
-[[nodiscard]] QString DeckTreeTableController::HandleDeckMutationError(const std::optional<Infrastructure::Store::DeckStore::DeckMutationErrorEnum> DeckMutationError) const {
+[[nodiscard]] QString
+DeckTreeTableController::HandleDeckMutationError(const std::optional<Infrastructure::Store::DeckStore::DeckMutationErrorEnum> DeckMutationError) const {
     if (not DeckMutationError.has_value()) {
         return QString{};
     }
