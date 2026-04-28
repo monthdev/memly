@@ -18,7 +18,7 @@ const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QMo
 }
 
 const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QString& DeckId) const noexcept {
-    const auto DeckNodeIdIndexIterator{ m_DeckNodeIndexByIdQHash.constFind(DeckId) };
+    const auto& DeckNodeIdIndexIterator{ m_DeckNodeIndexByIdQHash.constFind(DeckId) };
     if (DeckNodeIdIndexIterator == m_DeckNodeIndexByIdQHash.cend()) {
         return nullptr;
     }
@@ -190,7 +190,7 @@ void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
             RootDeckNodeIndexesQVector.push_back(DeckNodeIndex);
             continue;
         }
-        const auto ParentDeckNodeIdIndexIterator{ DeckNodeIndexByIdQHash.constFind(ParentId) };
+        const auto& ParentDeckNodeIdIndexIterator{ DeckNodeIndexByIdQHash.constFind(ParentId) };
         if (ParentDeckNodeIdIndexIterator == DeckNodeIndexByIdQHash.cend() or ParentDeckNodeIdIndexIterator.value() == DeckNodeIndex) {
             Support::ThrowError("Invalid parent deck id in deck hierarchy snapshot");
         }
