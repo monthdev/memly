@@ -8,7 +8,7 @@ class Connection;
 class DuckDB;
 }
 
-namespace App::Bootstrap {
+namespace Bootstrap {
 
 class DatabaseContext final {
 public:

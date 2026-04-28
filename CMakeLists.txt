@@ -34,11 +34,8 @@ function(memly_enable_clang_tidy target_name)
   endif()
 endfunction()
 
-file(GLOB APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.cpp")
-file(GLOB APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/*.[Hh]*")
-
-file(GLOB BOOTSTRAP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/*.cpp")
-file(GLOB BOOTSTRAP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App/Bootstrap/*.[Hh]*")
+file(GLOB BOOTSTRAP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bootstrap/*.cpp")
+file(GLOB BOOTSTRAP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bootstrap/*.[Hh]*")
 
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
@@ -231,8 +228,6 @@ qt_add_resources(
 
 add_library(
   memly_core STATIC
-  ${APP_CPP}
-  ${APP_HDR}
   ${CONTROLLER_CPP}
   ${CONTROLLER_HDR}
   ${LANGUAGE_CPP}

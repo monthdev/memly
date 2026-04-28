@@ -1,9 +1,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "App/AppPath.hpp"
-#include "App/Bootstrap/AppContext.hpp"
+#include "Bootstrap/AppContext.hpp"
 #include "Support/Fatal.hpp"
+#include "Support/AppStoragePath.hpp"
 
 int main(int argc, char* argv[]) {
     return Support::TryCatchWrapper([&] {
@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
         App.setApplicationDisplayName(AppName);
         App.setOrganizationDomain(OrgName);
         App.setOrganizationName(OrgName);
-        App::Bootstrap::AppContext::Initialize(App::DatabaseFilePath());
+        Bootstrap::AppContext::Initialize(Support::AppStoragePath::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine, &QQmlApplicationEngine::objectCreationFailed, QCoreApplication::instance(), [] { QCoreApplication::exit(-1); }, Qt::QueuedConnection);

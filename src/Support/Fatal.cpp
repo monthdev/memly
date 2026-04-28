@@ -5,7 +5,7 @@
 #include <iostream>
 #include <source_location>
 
-#include "App/AppPath.hpp"
+#include "Support/AppStoragePath.hpp"
 
 namespace Support {
 [[noreturn]] void ThrowError(const std::string& Message, const std::source_location& SourceLocation) {
@@ -15,7 +15,7 @@ namespace Support {
 }
 
 void LogError(const std::string& What) {
-    QSaveFile CrashLogFile{ App::CrashLogFilePath() };
+    QSaveFile CrashLogFile{ Support::AppStoragePath::CrashLogFilePath() };
     if (CrashLogFile.open(QIODevice::WriteOnly bitor QIODevice::Text)) {
         CrashLogFile.write(What.data());
         CrashLogFile.commit();

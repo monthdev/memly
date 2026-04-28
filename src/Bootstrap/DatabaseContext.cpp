@@ -1,4 +1,4 @@
-#include "App/Bootstrap/DatabaseContext.hpp"
+#include "Bootstrap/DatabaseContext.hpp"
 
 #include <duckdb.hpp>
 
@@ -6,7 +6,7 @@
 
 #include "Infrastructure/Sql/SchemaMigrator.hpp"
 
-namespace App::Bootstrap {
+namespace Bootstrap {
 
 DatabaseContext::DatabaseContext(const QString& DatabaseFilePath)
     : m_Database{}

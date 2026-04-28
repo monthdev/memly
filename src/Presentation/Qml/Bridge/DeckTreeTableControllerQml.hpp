@@ -4,7 +4,7 @@
 
 #include <QObject>
 
-#include "App/Bootstrap/AppContext.hpp"
+#include "Bootstrap/AppContext.hpp"
 #include "Presentation/Controller/DeckTreeTableController.hpp"
 
 namespace Presentation::Qml::Bridge {
@@ -17,7 +17,7 @@ class DeckTreeTableControllerQml : public QObject {
 public:
     explicit DeckTreeTableControllerQml(QObject* Parent = nullptr)
         : QObject{ Parent }
-        , m_DeckTreeTableController{ App::Bootstrap::AppContext::GetRequiredDeckHierarchyStore(), App::Bootstrap::AppContext::GetRequiredDeckStore() } {
+        , m_DeckTreeTableController{ Bootstrap::AppContext::GetRequiredDeckHierarchyStore(), Bootstrap::AppContext::GetRequiredDeckStore() } {
     }
 
     [[nodiscard]] Model::DeckTreeTableModel* GetDeckTreeTable() noexcept {

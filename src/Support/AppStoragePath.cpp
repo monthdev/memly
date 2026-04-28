@@ -1,9 +1,9 @@
-#include "App/AppPath.hpp"
+#include "Support/AppStoragePath.hpp"
 
 #include <QDir>
 #include <QStandardPaths>
 
-namespace App {
+namespace Support::AppStoragePath {
 namespace {
 QString EnsureDirectory(const QString& Directory) {
     QDir().mkpath(Directory);

@@ -1,12 +1,12 @@
-#include "App/Bootstrap/AppContext.hpp"
+#include "Bootstrap/AppContext.hpp"
 
 #include <QtGlobal>
 
-#include "App/Bootstrap/DatabaseContext.hpp"
+#include "Bootstrap/DatabaseContext.hpp"
 #include "Infrastructure/Store/DeckHierarchyStore.hpp"
 #include "Infrastructure/Store/DeckStore.hpp"
 
-namespace App::Bootstrap {
+namespace Bootstrap {
 
 std::unique_ptr<DatabaseContext> AppContext::s_DatabaseContext{};
 std::unique_ptr<Infrastructure::Store::DeckHierarchyStore> AppContext::s_DeckHierarchyStore{};

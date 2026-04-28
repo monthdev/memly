@@ -2,7 +2,7 @@
 
 #include <QString>
 
-namespace App {
+namespace Support::AppStoragePath {
 QString AudioDirectoryPath();
 
 QString CrashLogFilePath();
