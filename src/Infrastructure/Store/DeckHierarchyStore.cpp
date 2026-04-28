@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Infrastructure/Sql/SqlResource.hpp"
+#include "Infrastructure/Store/PreTreeDeckHierarchyValidation.hpp"
 #include "Support/Fatal.hpp"
 
 namespace Infrastructure::Store {
@@ -33,6 +34,7 @@ DeckHierarchyStore::DeckHierarchyViewSnapshot DeckHierarchyStore::ReadDeckHierar
             NextRefreshAtMillisecondsSinceEpochValueSeen = true;
         }
     }
+    ValidatePreTreeDeckHierarchy(DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector);
     return DeckHierarchyViewSnapshot;
 }
 }

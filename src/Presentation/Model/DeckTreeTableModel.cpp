@@ -1,6 +1,5 @@
 #include "Presentation/Model/DeckTreeTableModel.hpp"
 
-#include <QSet>
 #include <algorithm>
 
 #include "Support/Fatal.hpp"
@@ -168,31 +167,6 @@ void DeckTreeTableModel::ValidateNoDeckNodeCycles(const QVector<DeckNode>& DeckN
     }
 }
 
-void DeckTreeTableModel::ValidateParentDeckNodeTargetLanguageCodes(const QVector<DeckNode>& DeckNodesQVector) const {
-    for (const DeckNode& CurrentDeckNode : DeckNodesQVector) {
-        if (CurrentDeckNode.m_ParentDeckNodeIndex == s_RootDeckNodeIndex) {
-            continue;
-        }
-        const DeckNode& ParentDeckNode{ DeckNodesQVector.at(CurrentDeckNode.m_ParentDeckNodeIndex) };
-        if (CurrentDeckNode.m_DeckNodeData.m_TargetLanguageCode not_eq ParentDeckNode.m_DeckNodeData.m_TargetLanguageCode) {
-            Support::ThrowError("Parent and child deck target language mismatch in deck hierarchy snapshot");
-        }
-    }
-}
-
-void DeckTreeTableModel::ValidateUniqueSiblingDeckNodeNames(const QVector<DeckNode>& DeckNodesQVector,
-                                                            const QVector<qsizetype>& SiblingDeckNodeIndexesQVector) const {
-    QSet<QString> DeckNamesQSet;
-    DeckNamesQSet.reserve(SiblingDeckNodeIndexesQVector.size());
-    for (const qsizetype SiblingDeckNodeIndex : SiblingDeckNodeIndexesQVector) {
-        const QString& DeckName{ DeckNodesQVector.at(SiblingDeckNodeIndex).m_DeckNodeData.m_Name };
-        if (DeckNamesQSet.contains(DeckName)) {
-            Support::ThrowError("Duplicate sibling deck name in deck hierarchy snapshot");
-        }
-        DeckNamesQSet.insert(DeckName);
-    }
-}
-
 void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
     QVector<DeckNode> DeckNodesQVector;
     QVector<qsizetype> RootDeckNodeIndexesQVector;
@@ -225,9 +199,6 @@ void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
         DeckNodesQVector[CurrentDeckNode.m_ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector.push_back(DeckNodeIndex);
     }
     ValidateNoDeckNodeCycles(DeckNodesQVector);
-    ValidateParentDeckNodeTargetLanguageCodes(DeckNodesQVector);
-    ValidateUniqueSiblingDeckNodeNames(DeckNodesQVector, RootDeckNodeIndexesQVector);
-    for (const DeckNode& DeckNode : DeckNodesQVector) { ValidateUniqueSiblingDeckNodeNames(DeckNodesQVector, DeckNode.m_ChildDeckNodeIndexesQVector); }
     beginResetModel();
     m_DeckNodesQVector = std::move(DeckNodesQVector);
     m_RootDeckNodeIndexesQVector = std::move(RootDeckNodeIndexesQVector);
