@@ -1,4 +1,4 @@
-#include "SchemaMigrator.hpp"
+#include "DatabaseBootstrap.hpp"
 
 #include <duckdb.hpp>
 

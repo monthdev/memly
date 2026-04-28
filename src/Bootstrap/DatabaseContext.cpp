@@ -4,7 +4,7 @@
 
 #include <QtGlobal>
 
-#include "Infrastructure/Sql/SchemaMigrator.hpp"
+#include "Infrastructure/Sql/DatabaseBootstrap.hpp"
 
 namespace Bootstrap {
 
