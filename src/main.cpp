@@ -2,8 +2,8 @@
 #include <QQmlApplicationEngine>
 
 #include "Bootstrap/AppContext.hpp"
-#include "Support/Fatal.hpp"
 #include "Support/AppStoragePath.hpp"
+#include "Support/Fatal.hpp"
 
 int main(int argc, char* argv[]) {
     return Support::TryCatchWrapper([&] {
