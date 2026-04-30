@@ -36,7 +36,8 @@ namespace Presentation::Model {
     return ParentDeckNode->m_ChildDeckNodeIndexesQVector;
 }
 
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeTableModel::DeckNodeData>> DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeTableModel::DeckNodeData>>
+DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
     const DeckNode* DeckNode{ TryGetDeckNode(DeckId) };
     if (DeckNode == nullptr) {
         return std::nullopt;

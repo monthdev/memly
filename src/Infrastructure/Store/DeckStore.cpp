@@ -59,7 +59,8 @@ void DeckStore::DeleteDeck(const QString& DeckId) {
 }
 
 // TODO: Fix error message string checks and use switch case logic
-[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& QueryResult) const {
+[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum>
+DeckStore::HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& QueryResult) const {
     if (not QueryResult->HasError()) {
         return std::nullopt;
     }
@@ -85,5 +86,4 @@ void DeckStore::DeleteDeck(const QString& DeckId) {
     }
     Support::ThrowError(QueryResult->GetError());
 }
-
 }
