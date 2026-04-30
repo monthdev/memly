@@ -22,7 +22,9 @@ namespace Infrastructure::Sql {
 
 [[nodiscard]] std::string CreateChildDeckSql();
 
-[[nodiscard]] std::string ReadDeckHierarchyViewSnapshotSql();
+[[nodiscard]] std::string ReadDeckTreeSnapshotSql();
+
+[[nodiscard]] std::string ReadNextLibraryRefreshAtMillisecondsSinceEpochSql();
 
 [[nodiscard]] std::string MoveDeckSql();
 

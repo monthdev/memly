@@ -1,9 +1,5 @@
 #include "Presentation/Controller/DeckTreeTableController.hpp"
 
-#include <QDateTime>
-#include <algorithm>
-#include <cstdint>
-
 #include "Support/Fatal.hpp"
 
 namespace Presentation::Controller {
@@ -68,7 +64,7 @@ DeckTreeTableController::HandleDeckMutationError(const std::optional<Infrastruct
         }
         const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
         if (ErrorMessage.isEmpty()) {
-            RefreshDeckTreeTable(false);
+            m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
         return ErrorMessage;
     });
@@ -81,7 +77,7 @@ DeckTreeTableController::HandleDeckMutationError(const std::optional<Infrastruct
         }
         const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
         if (ErrorMessage.isEmpty()) {
-            RefreshDeckTreeTable(false);
+            m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
         return ErrorMessage;
     });
@@ -96,12 +92,12 @@ DeckTreeTableController::HandleDeckMutationError(const std::optional<Infrastruct
             return GetParentDeckTargetLanguageMismatchErrorMessage();
         }
         const auto CurrentDeckNodeData{ m_DeckTreeTable.TryGetDeckNodeData(DeckId) };
-        if (CurrentDeckNodeData.has_value() and m_DeckTreeTable.HasDuplicateSiblingName(CurrentDeckNodeData->get().m_Name, NewParentDeckId, DeckId)) {
+        if (CurrentDeckNodeData.has_value() and m_DeckTreeTable.HasDuplicateSiblingName(CurrentDeckNodeData->get().m_DeckName, NewParentDeckId, DeckId)) {
             return GetDuplicateNameErrorMessage();
         }
         const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
         if (ErrorMessage.isEmpty()) {
-            RefreshDeckTreeTable(false);
+            m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
         return ErrorMessage;
     });
@@ -115,57 +111,34 @@ DeckTreeTableController::HandleDeckMutationError(const std::optional<Infrastruct
         }
         const QString ErrorMessage{ HandleDeckMutationError(m_DeckStore.UpdateDeckName(DeckId, NewDeckName)) };
         if (ErrorMessage.isEmpty()) {
-            RefreshDeckTreeTable(false);
+            m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
         return ErrorMessage;
     });
 }
 
-Q_INVOKABLE void DeckTreeTableController::OnActivated() noexcept {
-    RefreshDeckTreeTable(true);
-}
-
-Q_INVOKABLE void DeckTreeTableController::OnDeactivated() {
-    m_DeckTreeRefreshQTimer.stop();
-}
-
 Q_INVOKABLE void DeckTreeTableController::DeleteDeck(const QString& DeckId) noexcept {
     Support::TryCatchWrapper([&] {
         m_DeckStore.DeleteDeck(DeckId);
-        RefreshDeckTreeTable(true);
+        m_LibraryRefreshCoordinator.NotifyLibraryMutated(true);
     });
 }
 
-void DeckTreeTableController::ScheduleNextDeckTreeTableRefresh(const std::optional<std::int64_t>& NextRefreshAtMillisecondsSinceEpoch) {
-    m_DeckTreeRefreshQTimer.stop();
-    if (not NextRefreshAtMillisecondsSinceEpoch.has_value()) {
-        return;
-    }
-    const std::int64_t NextRefreshDelayMilliseconds{ std::max<std::int64_t>(
-        0, NextRefreshAtMillisecondsSinceEpoch.value() - QDateTime::currentMSecsSinceEpoch()) };
-    m_DeckTreeRefreshQTimer.start(static_cast<int>(NextRefreshDelayMilliseconds));
-}
-
-void DeckTreeTableController::RefreshDeckTreeTable(bool NeedNextDeckTreeTableRefreshScheduled) noexcept {
+void DeckTreeTableController::RefreshDeckTreeTable(const qint64 AsOfMillisecondsSinceEpoch) noexcept {
     Support::TryCatchWrapper([&] {
-        const Infrastructure::Store::DeckHierarchyStore::DeckHierarchyViewSnapshot DeckHierarchyViewSnapshot{
-            m_DeckHierarchyStore.ReadDeckHierarchyViewSnapshot()
-        };
-        QVector<Model::DeckTreeTableModel::DeckNodeData> DeckNodeDataQVector;
-        DeckNodeDataQVector.reserve(DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector.size());
-        for (const auto& DeckHierarchyRow : DeckHierarchyViewSnapshot.m_DeckHierarchyRowQVector) {
-            DeckNodeDataQVector.emplace_back(DeckHierarchyRow.m_DeckId,
-                                             DeckHierarchyRow.m_ParentDeckId,
-                                             DeckHierarchyRow.m_Name,
-                                             DeckHierarchyRow.m_DueNowCount,
-                                             DeckHierarchyRow.m_ByTodayCount,
-                                             DeckHierarchyRow.m_TotalCount,
-                                             DeckHierarchyRow.m_TargetLanguageCode);
+        const QVector<Infrastructure::Store::DeckTreeStore::DeckTreeRow> DeckTreeRowQVector{ m_DeckTreeStore.ReadDeckTreeSnapshot(AsOfMillisecondsSinceEpoch) };
+        QVector<Model::DeckTreeTableModel::DeckNodeData> DeckNodeDataQVector{};
+        DeckNodeDataQVector.reserve(DeckTreeRowQVector.size());
+        for (const auto& DeckTreeRow : DeckTreeRowQVector) {
+            DeckNodeDataQVector.emplace_back(DeckTreeRow.m_DeckId,
+                                             DeckTreeRow.m_ParentDeckId,
+                                             DeckTreeRow.m_DeckName,
+                                             DeckTreeRow.m_DueNowCount,
+                                             DeckTreeRow.m_ByTodayCount,
+                                             DeckTreeRow.m_TotalCount,
+                                             DeckTreeRow.m_TargetLanguageCode);
         }
         m_DeckTreeTable.ReplaceAll(std::move(DeckNodeDataQVector));
-        if (NeedNextDeckTreeTableRefreshScheduled) {
-            ScheduleNextDeckTreeTableRefresh(DeckHierarchyViewSnapshot.m_NextRefreshAtMillisecondsSinceEpoch);
-        }
     });
 }
 }

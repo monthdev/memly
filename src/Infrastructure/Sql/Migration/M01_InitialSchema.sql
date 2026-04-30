@@ -47,6 +47,11 @@ CREATE MACRO IF NOT EXISTS answer_time_milliseconds_is_valid (answer_time_millis
 CREATE MACRO IF NOT EXISTS updated_at_time_is_valid (created_at, updated_at) AS updated_at IS NULL
 OR updated_at > created_at;
 
+CREATE MACRO IF NOT EXISTS review_session_name_length_is_valid (review_session_name) AS LENGTH(review_session_name) > 0
+AND LENGTH(review_session_name) <= 40;
+
+CREATE MACRO IF NOT EXISTS review_session_definition_key_is_valid (review_session_definition_key) AS LENGTH(review_session_definition_key) > 0;
+
 CREATE MACRO IF NOT EXISTS deck_parent_is_valid (deck_id, parent_deck_id) AS parent_deck_id IS NULL
 OR parent_deck_id <> deck_id;
 
@@ -58,6 +63,8 @@ OR due_at > last_reviewed_at;
 
 CREATE TYPE scheduler_type AS ENUM('fsrs');
 
+CREATE TYPE review_session_deck_selection_type AS ENUM('self', 'subtree');
+
 CREATE MACRO IF NOT EXISTS deck_settings_scheduler_combo_is_valid (scheduler_type_value, fsrs_settings_id_value) AS (
   scheduler_type_value = 'fsrs'
   AND fsrs_settings_id_value IS NOT NULL
@@ -67,6 +74,8 @@ CREATE MACRO IF NOT EXISTS card_review_scheduler_combo_is_valid (scheduler_type_
   scheduler_type_value = 'fsrs'
   AND fsrs_scheduler_id_value IS NOT NULL
 );
+
+CREATE MACRO IF NOT EXISTS review_session_deck_selection_type_is_subtree (review_session_deck_selection_type_value) AS review_session_deck_selection_type_value = 'subtree';
 
 CREATE TABLE IF NOT EXISTS fsrs_schedulers (
   id UUID PRIMARY KEY DEFAULT UUIDV7 (),
@@ -223,37 +232,41 @@ CREATE TABLE IF NOT EXISTS card_reviews (
   difficulty_after DOUBLE NOT NULL CHECK (fsrs_difficulty_after_is_valid (difficulty_after))
 );
 
-CREATE VIEW IF NOT EXISTS deck_hierarchy_view AS
-WITH RECURSIVE
-  own_counts AS (
-    SELECT
-      decks.id,
-      CAST(
-        COUNT(*) FILTER(
-          WHERE
-            cards.id IS NOT NULL
-            AND (
-              cards.due_at IS NULL
-              OR cards.due_at <= CURRENT_TIMESTAMP
-            )
-        ) AS UINTEGER
-      ) AS own_due_now_count,
-      CAST(
-        COUNT(*) FILTER(
-          WHERE
-            cards.id IS NOT NULL
-            AND cards.due_at > CURRENT_TIMESTAMP
-            AND cards.due_at < CAST(CURRENT_DATE + INTERVAL 1 DAY AS TIMESTAMP)
-        ) AS UINTEGER
-      ) AS own_by_today_count,
-      CAST(COUNT(cards.id) AS UINTEGER) AS own_total_count
-    FROM
-      decks
-      LEFT JOIN cards ON decks.id = cards.deck_id
-    GROUP BY
-      decks.id
+CREATE TABLE IF NOT EXISTS review_sessions (
+  id UUID PRIMARY KEY DEFAULT UUIDV7 (),
+  name VARCHAR NOT NULL CHECK (review_session_name_length_is_valid (name)),
+  definition_key VARCHAR NOT NULL UNIQUE CHECK (
+    review_session_definition_key_is_valid (definition_key)
   ),
-  deck_descendants (ancestor_id, descendant_id) AS (
+  active_card_id UUID REFERENCES cards (id),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_opened_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP CHECK (updated_at_time_is_valid (created_at, updated_at))
+);
+
+CREATE TABLE IF NOT EXISTS review_session_deck_selections (
+  review_session_id UUID NOT NULL REFERENCES review_sessions (id),
+  deck_id UUID NOT NULL REFERENCES decks (id),
+  selection_type review_session_deck_selection_type NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (review_session_id, deck_id, selection_type)
+);
+
+CREATE INDEX IF NOT EXISTS review_session_deck_selections_deck_id_idx ON review_session_deck_selections (deck_id);
+
+CREATE TABLE IF NOT EXISTS default_review_session_deck_bindings (
+  root_deck_id UUID PRIMARY KEY REFERENCES decks (id),
+  review_session_id UUID NOT NULL UNIQUE REFERENCES review_sessions (id),
+  selection_type review_session_deck_selection_type NOT NULL DEFAULT 'subtree' CHECK (
+    review_session_deck_selection_type_is_subtree (selection_type)
+  ),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (review_session_id, root_deck_id, selection_type) REFERENCES review_session_deck_selections (review_session_id, deck_id, selection_type)
+);
+
+CREATE VIEW IF NOT EXISTS deck_subtree_membership_view AS
+WITH RECURSIVE
+  deck_subtree_membership (subtree_root_deck_id, member_deck_id) AS (
     SELECT
       id,
       id
@@ -261,34 +274,34 @@ WITH RECURSIVE
       decks
     UNION ALL
     SELECT
-      deck_descendants.ancestor_id,
-      child.id
+      deck_subtree_membership.subtree_root_deck_id,
+      member_deck.id
     FROM
-      deck_descendants
-      INNER JOIN decks AS child ON child.parent_deck_id = deck_descendants.descendant_id
-  ),
-  aggregate_counts AS (
-    SELECT
-      deck_descendants.ancestor_id AS deck_id,
-      CAST(SUM(own_counts.own_due_now_count) AS UINTEGER) AS due_now_count,
-      CAST(SUM(own_counts.own_by_today_count) AS UINTEGER) AS by_today_count,
-      CAST(SUM(own_counts.own_total_count) AS UINTEGER) AS total_count
-    FROM
-      deck_descendants
-      INNER JOIN own_counts ON own_counts.id = deck_descendants.descendant_id
-    GROUP BY
-      deck_descendants.ancestor_id
+      deck_subtree_membership
+      INNER JOIN decks AS member_deck ON member_deck.parent_deck_id = deck_subtree_membership.member_deck_id
   )
 SELECT
-  decks.id,
-  decks.parent_deck_id AS parent_id,
-  decks.name,
-  aggregate_counts.due_now_count,
-  aggregate_counts.by_today_count,
-  aggregate_counts.total_count,
-  decks.target_language_code
+  subtree_root_deck_id,
+  member_deck_id
 FROM
-  decks
-  INNER JOIN aggregate_counts ON aggregate_counts.deck_id = decks.id;
+  deck_subtree_membership;
+
+CREATE VIEW IF NOT EXISTS review_session_resolved_decks_view AS
+SELECT
+  review_session_deck_selections.review_session_id,
+  review_session_deck_selections.deck_id
+FROM
+  review_session_deck_selections
+WHERE
+  review_session_deck_selections.selection_type = 'self'
+UNION
+SELECT
+  review_session_deck_selections.review_session_id,
+  deck_subtree_membership_view.member_deck_id AS deck_id
+FROM
+  review_session_deck_selections
+  INNER JOIN deck_subtree_membership_view ON deck_subtree_membership_view.subtree_root_deck_id = review_session_deck_selections.deck_id
+WHERE
+  review_session_deck_selections.selection_type = 'subtree';
 
 COMMIT;

@@ -17,7 +17,7 @@ public:
     struct DeckNodeData {
         QString m_DeckId;
         QString m_ParentDeckId;
-        QString m_Name;
+        QString m_DeckName;
         quint32 m_DueNowCount;
         quint32 m_ByTodayCount;
         quint32 m_TotalCount;
@@ -98,7 +98,7 @@ public:
         case Qt::DisplayRole:
             switch (Index.column()) {
             case static_cast<int>(ColumnEnum::NameColumn):
-                return CurrentDeckNode->m_DeckNodeData.m_Name;
+                return CurrentDeckNode->m_DeckNodeData.m_DeckName;
             case static_cast<int>(ColumnEnum::DueNowCountColumn):
                 return CurrentDeckNode->m_DeckNodeData.m_DueNowCount;
             case static_cast<int>(ColumnEnum::ByTodayCountColumn):
@@ -113,7 +113,7 @@ public:
         case static_cast<int>(RoleEnum::ParentIdRole):
             return CurrentDeckNode->m_DeckNodeData.m_ParentDeckId;
         case static_cast<int>(RoleEnum::NameRole):
-            return CurrentDeckNode->m_DeckNodeData.m_Name;
+            return CurrentDeckNode->m_DeckNodeData.m_DeckName;
         case static_cast<int>(RoleEnum::DueNowCountRole):
             return CurrentDeckNode->m_DeckNodeData.m_DueNowCount;
         case static_cast<int>(RoleEnum::ByTodayCountRole):

@@ -4,7 +4,7 @@
 
 #include <QObject>
 
-#include "Bootstrap/AppContext.hpp"
+#include "Bootstrap/RuntimeContext.hpp"
 #include "Presentation/Controller/DeckTreeTableController.hpp"
 
 namespace Presentation::Qml::Bridge {
@@ -17,7 +17,9 @@ class DeckTreeTableControllerQml : public QObject {
 public:
     explicit DeckTreeTableControllerQml(QObject* Parent = nullptr)
         : QObject{ Parent }
-        , m_DeckTreeTableController{ Bootstrap::AppContext::GetRequiredDeckHierarchyStore(), Bootstrap::AppContext::GetRequiredDeckStore() } {
+        , m_DeckTreeTableController{ Bootstrap::RuntimeContext::GetRequiredLibraryRefreshCoordinator(),
+                                     Bootstrap::RuntimeContext::GetRequiredDeckStore(),
+                                     Bootstrap::RuntimeContext::GetRequiredDeckTreeStore() } {
     }
 
     [[nodiscard]] Model::DeckTreeTableModel* GetDeckTreeTable() noexcept {
@@ -42,14 +44,6 @@ public:
 
     Q_INVOKABLE void DeleteDeck(const QString& DeckId) noexcept {
         m_DeckTreeTableController.DeleteDeck(DeckId);
-    }
-
-    Q_INVOKABLE void OnActivated() noexcept {
-        m_DeckTreeTableController.OnActivated();
-    }
-
-    Q_INVOKABLE void OnDeactivated() {
-        m_DeckTreeTableController.OnDeactivated();
     }
 
 private:

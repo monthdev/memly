@@ -55,7 +55,7 @@ bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const 
     }
     for (const qsizetype SiblingDeckNodeIndex : *SiblingDeckNodeIndexes) {
         const DeckNode& SiblingDeckNode{ m_DeckNodesQVector.at(SiblingDeckNodeIndex) };
-        if (SiblingDeckNode.m_DeckNodeData.m_Name == DeckName and SiblingDeckNode.m_DeckNodeData.m_DeckId != DeckId) {
+        if (SiblingDeckNode.m_DeckNodeData.m_DeckName == DeckName and SiblingDeckNode.m_DeckNodeData.m_DeckId != DeckId) {
             return true;
         }
     }
@@ -96,7 +96,7 @@ int DeckTreeTableModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, cons
     } };
     switch (m_SortColumn) {
     case static_cast<int>(ColumnEnum::NameColumn):
-        return QString::compare(LeftDeckNode.m_DeckNodeData.m_Name, RightDeckNode.m_DeckNodeData.m_Name, Qt::CaseSensitive);
+        return QString::compare(LeftDeckNode.m_DeckNodeData.m_DeckName, RightDeckNode.m_DeckNodeData.m_DeckName, Qt::CaseSensitive);
     case static_cast<int>(ColumnEnum::DueNowCountColumn):
         return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_DueNowCount, RightDeckNode.m_DeckNodeData.m_DueNowCount);
     case static_cast<int>(ColumnEnum::ByTodayCountColumn):
@@ -157,7 +157,7 @@ void DeckTreeTableModel::ValidateNoDeckNodeCycles(const QVector<DeckNode>& DeckN
                 break;
             }
             if (CurrentDeckNodeVisitState == Visiting) {
-                Support::ThrowError("Cycle detected in deck hierarchy snapshot");
+                Support::ThrowError("Cycle detected in deck tree snapshot");
             }
             DeckNodeVisitStateQVector[CurrentDeckNodeIndex] = Visiting;
             CurrentDeckNodePathQVector.push_back(CurrentDeckNodeIndex);
@@ -178,7 +178,7 @@ void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
         const qsizetype DeckNodeIndex{ DeckNodesQVector.size() };
         DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
         if (DeckNodeIndexByIdQHash.contains(DeckNodeData.m_DeckId)) {
-            Support::ThrowError("Duplicate deck id in deck hierarchy snapshot");
+            Support::ThrowError("Duplicate deck id in deck tree snapshot");
         }
         DeckNodeIndexByIdQHash.insert(DeckNodesQVector.back().m_DeckNodeData.m_DeckId, DeckNodeIndex);
     }
@@ -192,7 +192,7 @@ void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
         }
         const auto& ParentDeckNodeIdIndexIterator{ DeckNodeIndexByIdQHash.constFind(ParentId) };
         if (ParentDeckNodeIdIndexIterator == DeckNodeIndexByIdQHash.cend() or ParentDeckNodeIdIndexIterator.value() == DeckNodeIndex) {
-            Support::ThrowError("Invalid parent deck id in deck hierarchy snapshot");
+            Support::ThrowError("Invalid parent deck id in deck tree snapshot");
         }
         CurrentDeckNode.m_ParentDeckNodeIndex = ParentDeckNodeIdIndexIterator.value();
         CurrentDeckNode.m_RowInParentIndex = DeckNodesQVector.at(CurrentDeckNode.m_ParentDeckNodeIndex).m_ChildDeckNodeIndexesQVector.size();

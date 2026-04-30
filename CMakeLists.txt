@@ -36,6 +36,8 @@ endfunction()
 
 file(GLOB BOOTSTRAP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bootstrap/*.cpp")
 file(GLOB BOOTSTRAP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bootstrap/*.[Hh]*")
+file(GLOB COORDINATOR_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Coordinator/*.cpp")
+file(GLOB COORDINATOR_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Coordinator/*.[Hh]*")
 
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
@@ -228,6 +230,8 @@ qt_add_resources(
 
 add_library(
   memly_core STATIC
+  ${COORDINATOR_CPP}
+  ${COORDINATOR_HDR}
   ${CONTROLLER_CPP}
   ${CONTROLLER_HDR}
   ${LANGUAGE_CPP}

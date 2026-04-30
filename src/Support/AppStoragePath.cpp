@@ -3,7 +3,7 @@
 #include <QDir>
 #include <QStandardPaths>
 
-namespace Support::AppStoragePath {
+namespace Support {
 namespace {
 QString EnsureDirectory(const QString& Directory) {
     QDir().mkpath(Directory);

@@ -56,8 +56,12 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
     return ReadSqlResourceBytes(":/Sql/Mutation/CreateChildDeck.sql");
 }
 
-[[nodiscard]] std::string ReadDeckHierarchyViewSnapshotSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ReadDeckHierarchyViewSnapshot.sql");
+[[nodiscard]] std::string ReadDeckTreeSnapshotSql() {
+    return ReadSqlResourceBytes(":/Sql/Query/ReadDeckTreeSnapshot.sql");
+}
+
+[[nodiscard]] std::string ReadNextLibraryRefreshAtMillisecondsSinceEpochSql() {
+    return ReadSqlResourceBytes(":/Sql/Query/ReadNextLibraryRefreshAtMillisecondsSinceEpoch.sql");
 }
 
 [[nodiscard]] std::string MoveDeckSql() {

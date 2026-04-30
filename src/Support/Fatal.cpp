@@ -15,7 +15,7 @@ namespace Support {
 }
 
 void LogError(const std::string& What) {
-    QSaveFile CrashLogFile{ Support::AppStoragePath::CrashLogFilePath() };
+    QSaveFile CrashLogFile{ Support::CrashLogFilePath() };
     if (CrashLogFile.open(QIODevice::WriteOnly bitor QIODevice::Text)) {
         CrashLogFile.write(What.data());
         CrashLogFile.commit();

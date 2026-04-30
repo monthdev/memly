@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "Bootstrap/AppContext.hpp"
+#include "Bootstrap/RuntimeContext.hpp"
 #include "Support/AppStoragePath.hpp"
 #include "Support/Fatal.hpp"
 
@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
         App.setApplicationDisplayName(AppName);
         App.setOrganizationDomain(OrgName);
         App.setOrganizationName(OrgName);
-        Bootstrap::AppContext::Initialize(Support::AppStoragePath::DatabaseFilePath());
+        Bootstrap::RuntimeContext::Initialize(Support::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine, &QQmlApplicationEngine::objectCreationFailed, QCoreApplication::instance(), [] { QCoreApplication::exit(-1); }, Qt::QueuedConnection);

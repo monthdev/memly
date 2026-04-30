@@ -12,9 +12,6 @@ Page {
         id: deckTreeTableController
     }
 
-    StackView.onActivated: deckTreeTableController.OnActivated()
-    StackView.onDeactivated: deckTreeTableController.OnDeactivated()
-
     background: Rectangle {
         color: root.pageColor
     }

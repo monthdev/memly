@@ -2,11 +2,12 @@
 
 #include <QObject>
 #include <QString>
-#include <QTimer>
+#include <QtTypes>
 #include <optional>
 
-#include "Infrastructure/Store/DeckHierarchyStore.hpp"
+#include "Coordinator/LibraryRefreshCoordinator.hpp"
 #include "Infrastructure/Store/DeckStore.hpp"
+#include "Infrastructure/Store/DeckTreeStore.hpp"
 #include "Presentation/Model/DeckTreeTableModel.hpp"
 
 namespace Presentation::Controller {
@@ -16,16 +17,19 @@ class DeckTreeTableController : public QObject {
     Q_PROPERTY(Presentation::Model::DeckTreeTableModel* deckTreeTable READ GetDeckTreeTable CONSTANT)
 
 public:
-    explicit DeckTreeTableController(Infrastructure::Store::DeckHierarchyStore& DeckHierarchyStore,
+    explicit DeckTreeTableController(Coordinator::LibraryRefreshCoordinator& LibraryRefreshCoordinator,
                                      Infrastructure::Store::DeckStore& DeckStore,
+                                     Infrastructure::Store::DeckTreeStore& DeckTreeStore,
                                      QObject* Parent = nullptr)
         : QObject{ Parent }
-        , m_DeckHierarchyStore{ DeckHierarchyStore }
+        , m_LibraryRefreshCoordinator{ LibraryRefreshCoordinator }
         , m_DeckStore{ DeckStore }
-        , m_DeckTreeRefreshQTimer{}
+        , m_DeckTreeStore{ DeckTreeStore }
         , m_DeckTreeTable{ this } {
-        m_DeckTreeRefreshQTimer.setSingleShot(true);
-        connect(&m_DeckTreeRefreshQTimer, &QTimer::timeout, this, [this] { RefreshDeckTreeTable(true); });
+        connect(&m_LibraryRefreshCoordinator, &Coordinator::LibraryRefreshCoordinator::RefreshRequested, this, [this](const qint64 AsOfMillisecondsSinceEpoch) {
+            RefreshDeckTreeTable(AsOfMillisecondsSinceEpoch);
+        });
+        RefreshDeckTreeTable(m_LibraryRefreshCoordinator.GetAsOfMillisecondsSinceEpoch());
     }
 
     Model::DeckTreeTableModel* GetDeckTreeTable() noexcept {
@@ -38,13 +42,10 @@ public:
     [[nodiscard]] Q_INVOKABLE QString UpdateDeckName(const QString&, const QString&) noexcept;
     Q_INVOKABLE void DeleteDeck(const QString&) noexcept;
 
-    Q_INVOKABLE void OnActivated() noexcept;
-    Q_INVOKABLE void OnDeactivated();
-
 private:
-    Infrastructure::Store::DeckHierarchyStore& m_DeckHierarchyStore;
+    Coordinator::LibraryRefreshCoordinator& m_LibraryRefreshCoordinator;
     Infrastructure::Store::DeckStore& m_DeckStore;
-    QTimer m_DeckTreeRefreshQTimer;
+    Infrastructure::Store::DeckTreeStore& m_DeckTreeStore;
     Model::DeckTreeTableModel m_DeckTreeTable;
 
     [[nodiscard]] QString GetNameLengthErrorMessage() const;
@@ -54,7 +55,6 @@ private:
     [[nodiscard]] QString GetParentDeckTargetLanguageMismatchErrorMessage() const;
     [[nodiscard]] QString GetCycleDetectionErrorMessage() const;
     [[nodiscard]] QString HandleDeckMutationError(const std::optional<Infrastructure::Store::DeckStore::DeckMutationErrorEnum>) const;
-    void ScheduleNextDeckTreeTableRefresh(const std::optional<std::int64_t>&);
-    void RefreshDeckTreeTable(bool) noexcept;
+    void RefreshDeckTreeTable(const qint64) noexcept;
 };
 }
