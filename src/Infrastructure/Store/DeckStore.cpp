@@ -9,13 +9,13 @@
 
 namespace Infrastructure::Store {
 
-std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
+[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Infrastructure::Sql::CreateRootDeckSql(), DeckName.toStdString(), TargetLanguageCode) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
+[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
     if (ParentDeckId.isEmpty()) {
         return DeckMutationErrorEnum::ParentDeckError;
     }
@@ -24,13 +24,13 @@ std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateChildDeck(const
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::MoveDeck(const QString& DeckId, const QString& NewParentDeckId) {
+[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::MoveDeck(const QString& DeckId, const QString& NewParentDeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Infrastructure::Sql::MoveDeckSql(), DeckId.toStdString(), NewParentDeckId.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
 }
 
-std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::UpdateDeckName(const QString& DeckId, const QString& NewDeckName) {
+[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::UpdateDeckName(const QString& DeckId, const QString& NewDeckName) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
         Infrastructure::Sql::UpdateDeckNameSql(), NewDeckName.toStdString(), DeckId.toStdString()) };
     return HandleRecoverableDeckMutationError(QueryResult);
@@ -59,7 +59,7 @@ void DeckStore::DeleteDeck(const QString& DeckId) {
 }
 
 // TODO: Fix error message string checks and use switch case logic
-std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& QueryResult) const {
+[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& QueryResult) const {
     if (not QueryResult->HasError()) {
         return std::nullopt;
     }

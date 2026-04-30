@@ -14,10 +14,10 @@ void ValidateUniqueSiblingDeckNames(const QVector<DeckTreeStore::DeckTreeRow>& D
     DeckNamesQSetByParentDeckIdQHash.reserve(DeckTreeRowQVector.size());
     for (const DeckTreeStore::DeckTreeRow& DeckTreeRow : DeckTreeRowQVector) {
         QSet<QString>& DeckNamesQSet{ DeckNamesQSetByParentDeckIdQHash[DeckTreeRow.m_ParentDeckId] };
-        if (DeckNamesQSet.contains(DeckTreeRow.m_Name)) {
+        if (DeckNamesQSet.contains(DeckTreeRow.m_DeckName)) {
             Support::ThrowError("Duplicate sibling deck name in deck tree snapshot");
         }
-        DeckNamesQSet.insert(DeckTreeRow.m_Name);
+        DeckNamesQSet.insert(DeckTreeRow.m_DeckName);
     }
 }
 

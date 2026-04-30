@@ -6,7 +6,7 @@
 
 namespace Presentation::Model {
 
-const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
+[[nodiscard]] const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {
         return nullptr;
     }
@@ -17,7 +17,7 @@ const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QMo
     return &m_DeckNodesQVector.at(DeckNodeIndex);
 }
 
-const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QString& DeckId) const noexcept {
+[[nodiscard]] const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QString& DeckId) const noexcept {
     const auto& DeckNodeIdIndexIterator{ m_DeckNodeIndexByIdQHash.constFind(DeckId) };
     if (DeckNodeIdIndexIterator == m_DeckNodeIndexByIdQHash.cend()) {
         return nullptr;
@@ -25,7 +25,7 @@ const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QSt
     return &m_DeckNodesQVector.at(DeckNodeIdIndexIterator.value());
 }
 
-const QVector<qsizetype>& DeckTreeTableModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const noexcept {
+[[nodiscard]] const QVector<qsizetype>& DeckTreeTableModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const noexcept {
     if (not Parent.isValid()) {
         return m_RootDeckNodeIndexesQVector;
     }
@@ -36,7 +36,7 @@ const QVector<qsizetype>& DeckTreeTableModel::GetChildDeckNodeIndexes(const QMod
     return ParentDeckNode->m_ChildDeckNodeIndexesQVector;
 }
 
-std::optional<std::reference_wrapper<const DeckTreeTableModel::DeckNodeData>> DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeTableModel::DeckNodeData>> DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
     const DeckNode* DeckNode{ TryGetDeckNode(DeckId) };
     if (DeckNode == nullptr) {
         return std::nullopt;
@@ -44,7 +44,7 @@ std::optional<std::reference_wrapper<const DeckTreeTableModel::DeckNodeData>> De
     return DeckNode->m_DeckNodeData;
 }
 
-bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const QString& ParentDeckId, const QString& DeckId) const noexcept {
+[[nodiscard]] bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const QString& ParentDeckId, const QString& DeckId) const noexcept {
     const QVector<qsizetype>* SiblingDeckNodeIndexes{ &m_RootDeckNodeIndexesQVector };
     if (not ParentDeckId.isEmpty()) {
         const DeckNode* ParentDeckNode{ TryGetDeckNode(ParentDeckId) };
@@ -62,7 +62,7 @@ bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const 
     return false;
 }
 
-bool DeckTreeTableModel::WouldReparentCreateCycle(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
+[[nodiscard]] bool DeckTreeTableModel::WouldReparentCreateCycle(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
     const DeckNode* CurrentDeckNode{ TryGetDeckNode(NewParentDeckId) };
     while (CurrentDeckNode not_eq nullptr) {
         if (CurrentDeckNode->m_DeckNodeData.m_DeckId == DeckId) {
@@ -76,7 +76,7 @@ bool DeckTreeTableModel::WouldReparentCreateCycle(const QString& DeckId, const Q
     return false;
 }
 
-bool DeckTreeTableModel::WouldReparentCreateTargetLanguageMismatch(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
+[[nodiscard]] bool DeckTreeTableModel::WouldReparentCreateTargetLanguageMismatch(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
     if (NewParentDeckId.isEmpty()) {
         return false;
     }
@@ -88,7 +88,7 @@ bool DeckTreeTableModel::WouldReparentCreateTargetLanguageMismatch(const QString
     return CurrentDeckNode->m_DeckNodeData.m_TargetLanguageCode not_eq NewParentDeckNode->m_DeckNodeData.m_TargetLanguageCode;
 }
 
-int DeckTreeTableModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
+[[nodiscard]] int DeckTreeTableModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
     const DeckNode& LeftDeckNode{ m_DeckNodesQVector.at(LeftDeckNodeIndex) };
     const DeckNode& RightDeckNode{ m_DeckNodesQVector.at(RightDeckNodeIndex) };
     const auto CompareDeckNodeCounts{ [](const quint32 LeftDeckNodeCount, const quint32 RightDeckNodeCount) {
