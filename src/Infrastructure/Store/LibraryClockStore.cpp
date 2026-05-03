@@ -2,6 +2,7 @@
 
 #include <duckdb.hpp>
 
+#include <cstdint>
 #include <memory>
 
 #include "Infrastructure/Sql/SqlResource.hpp"
@@ -11,7 +12,7 @@ namespace Infrastructure::Store {
 
 [[nodiscard]] std::optional<qint64> LibraryClockStore::ReadNextLibraryRefreshAtMillisecondsSinceEpoch(const qint64 AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql(),
-                                                                                 AsOfMillisecondsSinceEpoch) };
+                                                                                 static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
     if (QueryResult->HasError()) {
         Support::ThrowError(QueryResult->GetError());
     }
