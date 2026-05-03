@@ -17,11 +17,10 @@ namespace Infrastructure::Store {
     }
     const auto QueryResultIterator{ QueryResult->begin() };
     const auto& QueryResultRow{ *QueryResultIterator };
-    const qint64 NextLibraryRefreshAtMillisecondsSinceEpoch{ QueryResultRow.GetValue<std::int64_t>(0) };
-    if (NextLibraryRefreshAtMillisecondsSinceEpoch < 0) {
+    if (QueryResultRow.IsNull(0)) {
         return std::nullopt;
     }
-    return NextLibraryRefreshAtMillisecondsSinceEpoch;
+    return QueryResultRow.GetValue<std::int64_t>(0);
 }
 
 }

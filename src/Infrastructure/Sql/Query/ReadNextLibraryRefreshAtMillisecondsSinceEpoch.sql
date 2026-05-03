@@ -25,6 +25,6 @@ WITH
       CROSS JOIN clock
   )
 SELECT
-  COALESCE(EPOCH_MS(next_refresh_at), -1) AS next_library_refresh_at_milliseconds_since_epoch
+  EPOCH_MS(next_refresh_at) AS next_library_refresh_at_milliseconds_since_epoch
 FROM
   next_refresh;
