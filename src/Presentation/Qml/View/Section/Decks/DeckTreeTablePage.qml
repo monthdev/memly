@@ -8,8 +8,8 @@ Page {
 
     required property color pageColor
 
-    DeckTreeTableController {
-        id: deckTreeTableController
+    DeckTreeController {
+        id: deckTreeController
     }
 
     background: Rectangle {

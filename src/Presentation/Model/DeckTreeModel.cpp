@@ -1,4 +1,4 @@
-#include "Presentation/Model/DeckTreeTableModel.hpp"
+#include "Presentation/Model/DeckTreeModel.hpp"
 
 #include <algorithm>
 
@@ -6,7 +6,7 @@
 
 namespace Presentation::Model {
 
-[[nodiscard]] const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
+[[nodiscard]] const DeckTreeModel::DeckNode* DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {
         return nullptr;
     }
@@ -17,7 +17,7 @@ namespace Presentation::Model {
     return &m_DeckNodesQVector.at(DeckNodeIndex);
 }
 
-[[nodiscard]] const DeckTreeTableModel::DeckNode* DeckTreeTableModel::TryGetDeckNode(const QString& DeckId) const noexcept {
+[[nodiscard]] const DeckTreeModel::DeckNode* DeckTreeModel::TryGetDeckNode(const QString& DeckId) const noexcept {
     const auto& DeckNodeIdIndexIterator{ m_DeckNodeIndexByIdQHash.constFind(DeckId) };
     if (DeckNodeIdIndexIterator == m_DeckNodeIndexByIdQHash.cend()) {
         return nullptr;
@@ -25,7 +25,7 @@ namespace Presentation::Model {
     return &m_DeckNodesQVector.at(DeckNodeIdIndexIterator.value());
 }
 
-[[nodiscard]] const QVector<qsizetype>& DeckTreeTableModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const noexcept {
+[[nodiscard]] const QVector<qsizetype>& DeckTreeModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const noexcept {
     if (not Parent.isValid()) {
         return m_RootDeckNodeIndexesQVector;
     }
@@ -36,8 +36,7 @@ namespace Presentation::Model {
     return ParentDeckNode->m_ChildDeckNodeIndexesQVector;
 }
 
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeTableModel::DeckNodeData>>
-DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNodeData>> DeckTreeModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
     const DeckNode* DeckNode{ TryGetDeckNode(DeckId) };
     if (DeckNode == nullptr) {
         return std::nullopt;
@@ -45,10 +44,11 @@ DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
     return DeckNode->m_DeckNodeData;
 }
 
-[[nodiscard]] bool DeckTreeTableModel::HasDuplicateSiblingName(const QString& DeckName, const QString& ParentDeckId, const QString& DeckId) const noexcept {
+[[nodiscard]] bool
+DeckTreeModel::HasDuplicateSiblingName(const QString& DeckName, const std::optional<QString>& ParentDeckId, const QString& DeckId) const noexcept {
     const QVector<qsizetype>* SiblingDeckNodeIndexes{ &m_RootDeckNodeIndexesQVector };
-    if (not ParentDeckId.isEmpty()) {
-        const DeckNode* ParentDeckNode{ TryGetDeckNode(ParentDeckId) };
+    if (ParentDeckId.has_value()) {
+        const DeckNode* ParentDeckNode{ TryGetDeckNode(ParentDeckId.value()) };
         if (ParentDeckNode == nullptr) {
             return false;
         }
@@ -63,8 +63,35 @@ DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
     return false;
 }
 
-[[nodiscard]] bool DeckTreeTableModel::WouldReparentCreateCycle(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
-    const DeckNode* CurrentDeckNode{ TryGetDeckNode(NewParentDeckId) };
+[[nodiscard]] bool DeckTreeModel::WouldCreateRootDeckDuplicateSiblingName(const QString& DeckName) const noexcept {
+    return HasDuplicateSiblingName(DeckName, std::nullopt);
+}
+
+[[nodiscard]] bool DeckTreeModel::WouldCreateChildDeckDuplicateSiblingName(const QString& DeckName, const QString& ParentDeckId) const noexcept {
+    return HasDuplicateSiblingName(DeckName, std::make_optional(ParentDeckId));
+}
+
+[[nodiscard]] bool DeckTreeModel::WouldMoveDeckDuplicateSiblingName(const QString& DeckId, const std::optional<QString>& NewParentDeckId) const noexcept {
+    const DeckNode* MovedDeckNode{ TryGetDeckNode(DeckId) };
+    if (MovedDeckNode == nullptr) {
+        return false;
+    }
+    return HasDuplicateSiblingName(MovedDeckNode->m_DeckNodeData.m_DeckName, NewParentDeckId, DeckId);
+}
+
+[[nodiscard]] bool DeckTreeModel::WouldRenameDeckDuplicateSiblingName(const QString& DeckId, const QString& NewDeckName) const noexcept {
+    const DeckNode* RenamedDeckNode{ TryGetDeckNode(DeckId) };
+    if (RenamedDeckNode == nullptr) {
+        return false;
+    }
+    return HasDuplicateSiblingName(NewDeckName, RenamedDeckNode->m_DeckNodeData.m_ParentDeckId, DeckId);
+}
+
+[[nodiscard]] bool DeckTreeModel::WouldReparentCreateCycle(const QString& DeckId, const std::optional<QString>& NewParentDeckId) const noexcept {
+    if (not NewParentDeckId.has_value()) {
+        return false;
+    }
+    const DeckNode* CurrentDeckNode{ TryGetDeckNode(NewParentDeckId.value()) };
     while (CurrentDeckNode not_eq nullptr) {
         if (CurrentDeckNode->m_DeckNodeData.m_DeckId == DeckId) {
             return true;
@@ -77,39 +104,40 @@ DeckTreeTableModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
     return false;
 }
 
-[[nodiscard]] bool DeckTreeTableModel::WouldReparentCreateTargetLanguageMismatch(const QString& DeckId, const QString& NewParentDeckId) const noexcept {
-    if (NewParentDeckId.isEmpty()) {
+[[nodiscard]] bool DeckTreeModel::WouldReparentCreateTargetLanguageMismatch(const QString& DeckId,
+                                                                            const std::optional<QString>& NewParentDeckId) const noexcept {
+    if (not NewParentDeckId.has_value()) {
         return false;
     }
     const DeckNode* CurrentDeckNode{ TryGetDeckNode(DeckId) };
-    const DeckNode* NewParentDeckNode{ TryGetDeckNode(NewParentDeckId) };
+    const DeckNode* NewParentDeckNode{ TryGetDeckNode(NewParentDeckId.value()) };
     if (CurrentDeckNode == nullptr or NewParentDeckNode == nullptr) {
         return false;
     }
     return CurrentDeckNode->m_DeckNodeData.m_TargetLanguageCode not_eq NewParentDeckNode->m_DeckNodeData.m_TargetLanguageCode;
 }
 
-[[nodiscard]] int DeckTreeTableModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
+[[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
     const DeckNode& LeftDeckNode{ m_DeckNodesQVector.at(LeftDeckNodeIndex) };
     const DeckNode& RightDeckNode{ m_DeckNodesQVector.at(RightDeckNodeIndex) };
     const auto CompareDeckNodeCounts{ [](const quint32 LeftDeckNodeCount, const quint32 RightDeckNodeCount) {
         return static_cast<int>(LeftDeckNodeCount > RightDeckNodeCount) - static_cast<int>(LeftDeckNodeCount < RightDeckNodeCount);
     } };
     switch (m_SortColumn) {
-    case static_cast<int>(ColumnEnum::NameColumn):
+    case static_cast<int>(ColumnEnum::DeckNameColumn):
         return QString::compare(LeftDeckNode.m_DeckNodeData.m_DeckName, RightDeckNode.m_DeckNodeData.m_DeckName, Qt::CaseSensitive);
-    case static_cast<int>(ColumnEnum::DueNowCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_DueNowCount, RightDeckNode.m_DeckNodeData.m_DueNowCount);
-    case static_cast<int>(ColumnEnum::ByTodayCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_ByTodayCount, RightDeckNode.m_DeckNodeData.m_ByTodayCount);
-    case static_cast<int>(ColumnEnum::TotalCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_TotalCount, RightDeckNode.m_DeckNodeData.m_TotalCount);
+    case static_cast<int>(ColumnEnum::SubtreeDueNowCountColumn):
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_SubtreeDueNowCount, RightDeckNode.m_DeckNodeData.m_SubtreeDueNowCount);
+    case static_cast<int>(ColumnEnum::SubtreeByTodayCountColumn):
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_SubtreeByTodayCount, RightDeckNode.m_DeckNodeData.m_SubtreeByTodayCount);
+    case static_cast<int>(ColumnEnum::SubtreeTotalCountColumn):
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckNodeData.m_SubtreeTotalCount, RightDeckNode.m_DeckNodeData.m_SubtreeTotalCount);
     default:
         return 0;
     }
 }
 
-void DeckTreeTableModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNodeIndexes) noexcept {
+void DeckTreeModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNodeIndexes) noexcept {
     std::stable_sort(
         SiblingDeckNodeIndexes.begin(), SiblingDeckNodeIndexes.end(), [this](const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) {
             const int DeckNodeComparison{ CompareDeckNodes(LeftDeckNodeIndex, RightDeckNodeIndex) };
@@ -120,7 +148,7 @@ void DeckTreeTableModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingD
         });
 }
 
-void DeckTreeTableModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) noexcept {
+void DeckTreeModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) noexcept {
     QVector<qsizetype>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex == s_RootDeckNodeIndex ?
                                                     m_RootDeckNodeIndexesQVector :
                                                     m_DeckNodesQVector[ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector };
@@ -131,8 +159,8 @@ void DeckTreeTableModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeI
     }
 }
 
-void DeckTreeTableModel::ApplyCurrentSort() noexcept {
-    if (m_SortColumn < static_cast<int>(ColumnEnum::NameColumn) or m_SortColumn > static_cast<int>(ColumnEnum::TotalCountColumn)) {
+void DeckTreeModel::ApplyCurrentSort() noexcept {
+    if (m_SortColumn < static_cast<int>(ColumnEnum::DeckNameColumn) or m_SortColumn > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
         return;
     }
     SortSiblingDeckNodeIndexes(m_RootDeckNodeIndexesQVector);
@@ -142,7 +170,7 @@ void DeckTreeTableModel::ApplyCurrentSort() noexcept {
     UpdateSiblingRowIndexes();
 }
 
-void DeckTreeTableModel::ValidateNoDeckNodeCycles(const QVector<DeckNode>& DeckNodesQVector) const {
+void DeckTreeModel::ValidateNoDeckNodeCycles(const QVector<DeckNode>& DeckNodesQVector) const {
     constexpr quint8 Unvisited{ 0 };
     constexpr quint8 Visiting{ 1 };
     constexpr quint8 Visited{ 2 };
@@ -168,7 +196,7 @@ void DeckTreeTableModel::ValidateNoDeckNodeCycles(const QVector<DeckNode>& DeckN
     }
 }
 
-void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
+void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
     QVector<DeckNode> DeckNodesQVector;
     QVector<qsizetype> RootDeckNodeIndexesQVector;
     QHash<QString, qsizetype> DeckNodeIndexByIdQHash;
@@ -177,21 +205,22 @@ void DeckTreeTableModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
     DeckNodeIndexByIdQHash.reserve(DeckNodeDataQVector.size());
     for (DeckNodeData& DeckNodeData : DeckNodeDataQVector) {
         const qsizetype DeckNodeIndex{ DeckNodesQVector.size() };
-        DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
-        if (DeckNodeIndexByIdQHash.contains(DeckNodeData.m_DeckId)) {
+        const QString DeckId{ DeckNodeData.m_DeckId };
+        if (DeckNodeIndexByIdQHash.contains(DeckId)) {
             Support::ThrowError("Duplicate deck id in deck tree snapshot");
         }
-        DeckNodeIndexByIdQHash.insert(DeckNodesQVector.back().m_DeckNodeData.m_DeckId, DeckNodeIndex);
+        DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
+        DeckNodeIndexByIdQHash.insert(DeckId, DeckNodeIndex);
     }
     for (qsizetype DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesQVector.size(); ++DeckNodeIndex) {
         DeckNode& CurrentDeckNode{ DeckNodesQVector[DeckNodeIndex] };
-        const QString& ParentId{ CurrentDeckNode.m_DeckNodeData.m_ParentDeckId };
-        if (ParentId.isEmpty()) {
+        const std::optional<QString>& ParentId{ CurrentDeckNode.m_DeckNodeData.m_ParentDeckId };
+        if (not ParentId.has_value()) {
             CurrentDeckNode.m_RowInParentIndex = RootDeckNodeIndexesQVector.size();
             RootDeckNodeIndexesQVector.push_back(DeckNodeIndex);
             continue;
         }
-        const auto& ParentDeckNodeIdIndexIterator{ DeckNodeIndexByIdQHash.constFind(ParentId) };
+        const auto& ParentDeckNodeIdIndexIterator{ DeckNodeIndexByIdQHash.constFind(ParentId.value()) };
         if (ParentDeckNodeIdIndexIterator == DeckNodeIndexByIdQHash.cend() or ParentDeckNodeIdIndexIterator.value() == DeckNodeIndex) {
             Support::ThrowError("Invalid parent deck id in deck tree snapshot");
         }

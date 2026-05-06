@@ -1,4 +1,4 @@
-#include "Infrastructure/Store/PreDeckTreeValidation.hpp"
+#include "Infrastructure/Store/FlatDeckTreeValidation.hpp"
 
 #include <QHash>
 #include <QSet>
@@ -13,7 +13,7 @@ void ValidateUniqueSiblingDeckNames(const QVector<DeckTreeStore::DeckTreeRow>& D
     QHash<QString, QSet<QString>> DeckNamesQSetByParentDeckIdQHash;
     DeckNamesQSetByParentDeckIdQHash.reserve(DeckTreeRowQVector.size());
     for (const DeckTreeStore::DeckTreeRow& DeckTreeRow : DeckTreeRowQVector) {
-        QSet<QString>& DeckNamesQSet{ DeckNamesQSetByParentDeckIdQHash[DeckTreeRow.m_ParentDeckId] };
+        QSet<QString>& DeckNamesQSet{ DeckNamesQSetByParentDeckIdQHash[DeckTreeRow.m_ParentDeckId.value_or(QString{})] };
         if (DeckNamesQSet.contains(DeckTreeRow.m_DeckName)) {
             Support::ThrowError("Duplicate sibling deck name in deck tree snapshot");
         }
@@ -28,10 +28,10 @@ void ValidateParentChildTargetLanguageCodes(const QVector<DeckTreeStore::DeckTre
         TargetLanguageCodeByDeckIdQHash.insert(DeckTreeRow.m_DeckId, DeckTreeRow.m_TargetLanguageCode);
     }
     for (const DeckTreeStore::DeckTreeRow& DeckTreeRow : DeckTreeRowQVector) {
-        if (DeckTreeRow.m_ParentDeckId.isEmpty()) {
+        if (not DeckTreeRow.m_ParentDeckId.has_value()) {
             continue;
         }
-        const auto& ParentTargetLanguageCodeByDeckIdQHashIterator{ TargetLanguageCodeByDeckIdQHash.constFind(DeckTreeRow.m_ParentDeckId) };
+        const auto& ParentTargetLanguageCodeByDeckIdQHashIterator{ TargetLanguageCodeByDeckIdQHash.constFind(DeckTreeRow.m_ParentDeckId.value()) };
         if (ParentTargetLanguageCodeByDeckIdQHashIterator == TargetLanguageCodeByDeckIdQHash.cend()) {
             continue;
         }
@@ -43,7 +43,7 @@ void ValidateParentChildTargetLanguageCodes(const QVector<DeckTreeStore::DeckTre
 
 }
 
-void ValidatePreDeckTree(const QVector<DeckTreeStore::DeckTreeRow>& DeckTreeRowQVector) {
+void ValidateFlatDeckTree(const QVector<DeckTreeStore::DeckTreeRow>& DeckTreeRowQVector) {
     ValidateUniqueSiblingDeckNames(DeckTreeRowQVector);
     ValidateParentChildTargetLanguageCodes(DeckTreeRowQVector);
 }

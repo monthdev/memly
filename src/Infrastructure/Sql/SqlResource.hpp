@@ -26,9 +26,13 @@ namespace Infrastructure::Sql {
 
 [[nodiscard]] std::string ReadNextLibraryRefreshAtMillisecondsSinceEpochSql();
 
+[[nodiscard]] std::string ValidateDeckExistsSql();
+
+[[nodiscard]] std::string ValidateParentDeckExistsSql();
+
 [[nodiscard]] std::string MoveDeckSql();
 
-[[nodiscard]] std::string UpdateDeckNameSql();
+[[nodiscard]] std::string RenameDeckSql();
 
 [[nodiscard]] std::string DeleteDeckCardReviewsSql();
 

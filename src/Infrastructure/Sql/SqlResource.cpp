@@ -64,12 +64,20 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
     return ReadSqlResourceBytes(":/Sql/Query/ReadNextLibraryRefreshAtMillisecondsSinceEpoch.sql");
 }
 
+[[nodiscard]] std::string ValidateDeckExistsSql() {
+    return ReadSqlResourceBytes(":/Sql/Query/ValidateDeckExists.sql");
+}
+
+[[nodiscard]] std::string ValidateParentDeckExistsSql() {
+    return ReadSqlResourceBytes(":/Sql/Query/ValidateParentDeckExists.sql");
+}
+
 [[nodiscard]] std::string MoveDeckSql() {
     return ReadSqlResourceBytes(":/Sql/Mutation/MoveDeck.sql");
 }
 
-[[nodiscard]] std::string UpdateDeckNameSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/UpdateDeckName.sql");
+[[nodiscard]] std::string RenameDeckSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/RenameDeck.sql");
 }
 
 [[nodiscard]] std::string DeleteDeckCardReviewsSql() {

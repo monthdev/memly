@@ -37,9 +37,9 @@ WITH
   subtree_counts AS (
     SELECT
       deck_subtree_membership_view.subtree_root_deck_id AS deck_id,
-      CAST(SUM(self_counts.self_due_now_count) AS UINTEGER) AS due_now_count,
-      CAST(SUM(self_counts.self_by_today_count) AS UINTEGER) AS by_today_count,
-      CAST(SUM(self_counts.self_total_count) AS UINTEGER) AS total_count
+      CAST(SUM(self_counts.self_due_now_count) AS UINTEGER) AS subtree_due_now_count,
+      CAST(SUM(self_counts.self_by_today_count) AS UINTEGER) AS subtree_by_today_count,
+      CAST(SUM(self_counts.self_total_count) AS UINTEGER) AS subtree_total_count
     FROM
       deck_subtree_membership_view
       INNER JOIN self_counts ON self_counts.deck_id = deck_subtree_membership_view.member_deck_id
@@ -47,13 +47,19 @@ WITH
       deck_subtree_membership_view.subtree_root_deck_id
   )
 SELECT
-  decks.id::VARCHAR AS id,
-  COALESCE(decks.parent_deck_id::VARCHAR, '') AS parent_id,
-  decks.name,
-  subtree_counts.due_now_count,
-  subtree_counts.by_today_count,
-  subtree_counts.total_count,
+  decks.id::VARCHAR AS deck_id,
+  decks.parent_deck_id::VARCHAR AS parent_deck_id,
+  decks.name AS deck_name,
+  EPOCH_MS(decks.created_at) AS created_at_milliseconds_since_epoch,
+  EPOCH_MS(decks.updated_at) AS updated_at_milliseconds_since_epoch,
+  self_counts.self_due_now_count,
+  self_counts.self_by_today_count,
+  self_counts.self_total_count,
+  subtree_counts.subtree_due_now_count,
+  subtree_counts.subtree_by_today_count,
+  subtree_counts.subtree_total_count,
   decks.target_language_code
 FROM
   decks
+  INNER JOIN self_counts ON self_counts.deck_id = decks.id
   INNER JOIN subtree_counts ON subtree_counts.deck_id = decks.id;

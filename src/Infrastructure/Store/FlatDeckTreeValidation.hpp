@@ -6,6 +6,6 @@
 
 namespace Infrastructure::Store {
 
-void ValidatePreDeckTree(const QVector<DeckTreeStore::DeckTreeRow>&);
+void ValidateFlatDeckTree(const QVector<DeckTreeStore::DeckTreeRow>&);
 
 }

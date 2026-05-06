@@ -3,6 +3,7 @@
 #include <QString>
 #include <QVector>
 #include <QtTypes>
+#include <optional>
 
 namespace duckdb {
 class Connection;
@@ -14,11 +15,16 @@ class DeckTreeStore final {
 public:
     struct DeckTreeRow {
         QString m_DeckId;
-        QString m_ParentDeckId;
+        std::optional<QString> m_ParentDeckId;
         QString m_DeckName;
-        quint32 m_DueNowCount;
-        quint32 m_ByTodayCount;
-        quint32 m_TotalCount;
+        qint64 m_CreatedAtMillisecondsSinceEpoch;
+        std::optional<qint64> m_UpdatedAtMillisecondsSinceEpoch;
+        quint32 m_SelfDueNowCount;
+        quint32 m_SelfByTodayCount;
+        quint32 m_SelfTotalCount;
+        quint32 m_SubtreeDueNowCount;
+        quint32 m_SubtreeByTodayCount;
+        quint32 m_SubtreeTotalCount;
         quint8 m_TargetLanguageCode;
     };
 
