@@ -1,4 +1,4 @@
-#include "Coordinator/LibraryRefreshCoordinator.hpp"
+#include "Application/Coordinator/LibraryRefreshCoordinator.hpp"
 
 #include <QDateTime>
 #include <QtGlobal>
@@ -8,7 +8,7 @@
 #include "Infrastructure/Store/LibraryClockStore.hpp"
 #include "Support/Fatal.hpp"
 
-namespace Coordinator {
+namespace Application::Coordinator {
 
 void LibraryRefreshCoordinator::NotifyLibraryMutated(const bool RescheduleNextLibraryRefresh) {
     RunLibraryRefreshCycle(RescheduleNextLibraryRefresh);

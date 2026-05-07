@@ -5,7 +5,7 @@
 #include <QtTypes>
 #include <optional>
 
-#include "Coordinator/LibraryRefreshCoordinator.hpp"
+#include "Application/Coordinator/LibraryRefreshCoordinator.hpp"
 #include "Infrastructure/Store/DeckStore.hpp"
 #include "Infrastructure/Store/DeckTreeStore.hpp"
 #include "Presentation/Model/DeckTreeModel.hpp"
@@ -17,7 +17,7 @@ class DeckTreeController : public QObject {
     Q_PROPERTY(Presentation::Model::DeckTreeModel* deckTree READ GetDeckTree CONSTANT)
 
 public:
-    explicit DeckTreeController(Coordinator::LibraryRefreshCoordinator& LibraryRefreshCoordinator,
+    explicit DeckTreeController(Application::Coordinator::LibraryRefreshCoordinator& LibraryRefreshCoordinator,
                                 Infrastructure::Store::DeckStore& DeckStore,
                                 Infrastructure::Store::DeckTreeStore& DeckTreeStore,
                                 QObject* Parent = nullptr)
@@ -26,9 +26,10 @@ public:
         , m_DeckStore{ DeckStore }
         , m_DeckTreeStore{ DeckTreeStore }
         , m_DeckTree{ this } {
-        connect(&m_LibraryRefreshCoordinator, &Coordinator::LibraryRefreshCoordinator::RefreshRequested, this, [this](const qint64 AsOfMillisecondsSinceEpoch) {
-            RefreshDeckTree(AsOfMillisecondsSinceEpoch);
-        });
+        connect(&m_LibraryRefreshCoordinator,
+                &Application::Coordinator::LibraryRefreshCoordinator::RefreshRequested,
+                this,
+                [this](const qint64 AsOfMillisecondsSinceEpoch) { RefreshDeckTree(AsOfMillisecondsSinceEpoch); });
         RefreshDeckTree(m_LibraryRefreshCoordinator.GetAsOfMillisecondsSinceEpoch());
     }
 
@@ -43,7 +44,7 @@ public:
     [[nodiscard]] std::optional<QString> DeleteDeck(const QString&) noexcept;
 
 private:
-    Coordinator::LibraryRefreshCoordinator& m_LibraryRefreshCoordinator;
+    Application::Coordinator::LibraryRefreshCoordinator& m_LibraryRefreshCoordinator;
     Infrastructure::Store::DeckStore& m_DeckStore;
     Infrastructure::Store::DeckTreeStore& m_DeckTreeStore;
     Model::DeckTreeModel m_DeckTree;

@@ -1,9 +1,9 @@
-#include "Domain/Language/LanguageTranslator.hpp"
+#include "Core/Language/LanguageTranslator.hpp"
 
 #include <array>
 #include <cstddef>
 
-namespace Domain::Language {
+namespace Core::Language {
 std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() {
     static constexpr std::array<TargetLanguageInfo, 67> TargetLanguages{
         {

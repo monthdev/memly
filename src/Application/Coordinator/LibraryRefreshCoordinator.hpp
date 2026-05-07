@@ -9,7 +9,7 @@ namespace Infrastructure::Store {
 class LibraryClockStore;
 }
 
-namespace Coordinator {
+namespace Application::Coordinator {
 
 class LibraryRefreshCoordinator final : public QObject {
     Q_OBJECT
