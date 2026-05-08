@@ -3,10 +3,12 @@
 #include <QString>
 #include <QVector>
 #include <QtTypes>
+#include <memory>
 #include <optional>
 
 namespace duckdb {
 class Connection;
+class PreparedStatement;
 }
 
 namespace Infrastructure::Store {
@@ -28,13 +30,12 @@ public:
         quint8 m_TargetLanguageCode;
     };
 
-    explicit DeckTreeStore(duckdb::Connection& DatabaseConnection) noexcept
-        : m_DatabaseConnection{ DatabaseConnection } {
-    }
+    explicit DeckTreeStore(duckdb::Connection&);
+    ~DeckTreeStore();
 
     [[nodiscard]] QVector<DeckTreeRow> ReadDeckTreeSnapshot(const qint64);
 
 private:
-    duckdb::Connection& m_DatabaseConnection;
+    std::unique_ptr<duckdb::PreparedStatement> m_ReadDeckTreeSnapshotPreparedStatement;
 };
 }

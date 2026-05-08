@@ -11,9 +11,17 @@
 
 namespace Infrastructure::Store {
 
+DeckTreeStore::DeckTreeStore(duckdb::Connection& DatabaseConnection)
+    : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReadDeckTreeSnapshotSql()) } {
+    if (m_ReadDeckTreeSnapshotPreparedStatement->HasError()) {
+        Support::ThrowError(m_ReadDeckTreeSnapshotPreparedStatement->GetError());
+    }
+}
+
+DeckTreeStore::~DeckTreeStore() = default;
+
 [[nodiscard]] QVector<DeckTreeStore::DeckTreeRow> DeckTreeStore::ReadDeckTreeSnapshot(const qint64 AsOfMillisecondsSinceEpoch) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::ReadDeckTreeSnapshotSql(),
-                                                                                 static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadDeckTreeSnapshotPreparedStatement->Execute(static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
     if (QueryResult->HasError()) {
         Support::ThrowError(QueryResult->GetError());
     }

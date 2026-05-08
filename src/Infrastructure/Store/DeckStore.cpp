@@ -9,9 +9,50 @@
 
 namespace Infrastructure::Store {
 
+DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
+    : m_DatabaseConnection{ DatabaseConnection }
+    , m_CreateRootDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::CreateRootDeckSql()) }
+    , m_CreateChildDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::CreateChildDeckSql()) }
+    , m_MoveDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::MoveDeckSql()) }
+    , m_RenameDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::RenameDeckSql()) }
+    , m_DeleteDeckCardReviewsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardReviewsSql()) }
+    , m_DeleteDeckCardsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardsSql()) }
+    , m_DeleteDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckSql()) }
+    , m_ValidateDeckExistsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::ValidateDeckExistsSql()) }
+    , m_ValidateParentDeckExistsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::ValidateParentDeckExistsSql()) } {
+    if (m_CreateRootDeckPreparedStatement->HasError()) {
+        Support::ThrowError(m_CreateRootDeckPreparedStatement->GetError());
+    }
+    if (m_CreateChildDeckPreparedStatement->HasError()) {
+        Support::ThrowError(m_CreateChildDeckPreparedStatement->GetError());
+    }
+    if (m_MoveDeckPreparedStatement->HasError()) {
+        Support::ThrowError(m_MoveDeckPreparedStatement->GetError());
+    }
+    if (m_RenameDeckPreparedStatement->HasError()) {
+        Support::ThrowError(m_RenameDeckPreparedStatement->GetError());
+    }
+    if (m_DeleteDeckCardReviewsPreparedStatement->HasError()) {
+        Support::ThrowError(m_DeleteDeckCardReviewsPreparedStatement->GetError());
+    }
+    if (m_DeleteDeckCardsPreparedStatement->HasError()) {
+        Support::ThrowError(m_DeleteDeckCardsPreparedStatement->GetError());
+    }
+    if (m_DeleteDeckPreparedStatement->HasError()) {
+        Support::ThrowError(m_DeleteDeckPreparedStatement->GetError());
+    }
+    if (m_ValidateDeckExistsPreparedStatement->HasError()) {
+        Support::ThrowError(m_ValidateDeckExistsPreparedStatement->GetError());
+    }
+    if (m_ValidateParentDeckExistsPreparedStatement->HasError()) {
+        Support::ThrowError(m_ValidateParentDeckExistsPreparedStatement->GetError());
+    }
+}
+
+DeckStore::~DeckStore() = default;
+
 [[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
-        Infrastructure::Sql::CreateRootDeckSql(), DeckName.toStdString(), TargetLanguageCode) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateRootDeckPreparedStatement->Execute(DeckName.toStdString(), TargetLanguageCode) };
     return HandleDeckMutationError(QueryResult);
 }
 
@@ -20,8 +61,7 @@ namespace Infrastructure::Store {
     if (DeckMutationError.has_value()) {
         return DeckMutationError;
     }
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
-        Infrastructure::Sql::CreateChildDeckSql(), ParentDeckId.toStdString(), DeckName.toStdString()) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateChildDeckPreparedStatement->Execute(ParentDeckId.toStdString(), DeckName.toStdString()) };
     return HandleDeckMutationError(QueryResult);
 }
 
@@ -36,10 +76,8 @@ namespace Infrastructure::Store {
             return DeckMutationError;
         }
     }
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
-        Infrastructure::Sql::MoveDeckSql(),
-        DeckId.toStdString(),
-        NewParentDeckId.has_value() ? duckdb::Value{ NewParentDeckId.value().toStdString() } : duckdb::Value{ nullptr }) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_MoveDeckPreparedStatement->Execute(
+        DeckId.toStdString(), NewParentDeckId.has_value() ? duckdb::Value{ NewParentDeckId.value().toStdString() } : duckdb::Value{ nullptr }) };
     return HandleDeckMutationError(QueryResult);
 }
 
@@ -48,8 +86,7 @@ namespace Infrastructure::Store {
     if (DeckMutationError.has_value()) {
         return DeckMutationError;
     }
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(
-        Infrastructure::Sql::RenameDeckSql(), NewDeckName.toStdString(), DeckId.toStdString()) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_RenameDeckPreparedStatement->Execute(NewDeckName.toStdString(), DeckId.toStdString()) };
     return HandleDeckMutationError(QueryResult);
 }
 
@@ -60,19 +97,19 @@ namespace Infrastructure::Store {
     }
     m_DatabaseConnection.BeginTransaction();
     try {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::DeleteDeckCardReviewsSql(), DeckId.toStdString()) };
+        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId.toStdString()) };
         DeckMutationError = HandleDeckMutationError(QueryResult);
         if (DeckMutationError.has_value()) {
             m_DatabaseConnection.Rollback();
             return DeckMutationError;
         }
-        QueryResult = m_DatabaseConnection.Query(Infrastructure::Sql::DeleteDeckCardsSql(), DeckId.toStdString());
+        QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId.toStdString());
         DeckMutationError = HandleDeckMutationError(QueryResult);
         if (DeckMutationError.has_value()) {
             m_DatabaseConnection.Rollback();
             return DeckMutationError;
         }
-        QueryResult = m_DatabaseConnection.Query(Infrastructure::Sql::DeleteDeckSql(), DeckId.toStdString());
+        QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId.toStdString());
         DeckMutationError = HandleDeckMutationError(QueryResult);
         if (DeckMutationError.has_value()) {
             m_DatabaseConnection.Rollback();
@@ -87,13 +124,12 @@ namespace Infrastructure::Store {
 }
 
 [[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::ValidateDeckExists(const QString& DeckId) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::ValidateDeckExistsSql(), DeckId.toStdString()) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ValidateDeckExistsPreparedStatement->Execute(DeckId.toStdString()) };
     return HandleDeckMutationError(QueryResult);
 }
 
 [[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::ValidateParentDeckExists(const QString& ParentDeckId) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::ValidateParentDeckExistsSql(),
-                                                                                 ParentDeckId.toStdString()) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ValidateParentDeckExistsPreparedStatement->Execute(ParentDeckId.toStdString()) };
     return HandleDeckMutationError(QueryResult);
 }
 
