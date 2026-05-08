@@ -20,76 +20,93 @@ std::string ReadSqlResourceBytes(const char* SqlResourcePath) {
 }
 }
 
-[[nodiscard]] std::string M00_MigrationsTableSql() {
-    return ReadSqlResourceBytes(":/Sql/Migration/M00_MigrationsTable.sql");
+[[nodiscard]] const std::string& M00_MigrationsTableSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Migration/M00_MigrationsTable.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string M01_InitialSchemaSql() {
-    return ReadSqlResourceBytes(":/Sql/Migration/M01_InitialSchema.sql");
+[[nodiscard]] const std::string& M01_InitialSchemaSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Migration/M01_InitialSchema.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string CreateMigrationSql() {
-    return ReadSqlResourceBytes(":/Sql/Migration/CreateMigration.sql");
+[[nodiscard]] const std::string& CreateMigrationSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Migration/CreateMigration.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string ReadMigrationsTableSql() {
-    return ReadSqlResourceBytes(":/Sql/Migration/ReadMigrationsTable.sql");
+[[nodiscard]] const std::string& ReadMigrationsTableSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Migration/ReadMigrationsTable.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string CreateDefaultFsrs7SchedulerSql() {
-    return ReadSqlResourceBytes(":/Sql/Seed/CreateDefaultFsrs7Scheduler.sql");
+[[nodiscard]] const std::string& CreateDefaultFsrs7SchedulerSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Seed/CreateDefaultFsrs7Scheduler.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string CreateDefaultFsrs7SettingsSql() {
-    return ReadSqlResourceBytes(":/Sql/Seed/CreateDefaultFsrs7Settings.sql");
+[[nodiscard]] const std::string& CreateDefaultFsrs7SettingsSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Seed/CreateDefaultFsrs7Settings.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string CreateDefaultDeckSettingsSql() {
-    return ReadSqlResourceBytes(":/Sql/Seed/CreateDefaultDeckSettings.sql");
+[[nodiscard]] const std::string& CreateDefaultDeckSettingsSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Seed/CreateDefaultDeckSettings.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string CreateRootDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/CreateRootDeck.sql");
+[[nodiscard]] const std::string& CreateRootDeckSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Mutation/CreateRootDeck.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string CreateChildDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/CreateChildDeck.sql");
+[[nodiscard]] const std::string& CreateChildDeckSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Mutation/CreateChildDeck.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string ReadDeckTreeSnapshotSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ReadDeckTreeSnapshot.sql");
+[[nodiscard]] const std::string& ReadDeckTreeSnapshotSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Query/ReadDeckTreeSnapshot.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string ReadNextLibraryRefreshAtMillisecondsSinceEpochSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ReadNextLibraryRefreshAtMillisecondsSinceEpoch.sql");
+[[nodiscard]] const std::string& ReadNextLibraryRefreshAtMillisecondsSinceEpochSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Query/ReadNextLibraryRefreshAtMillisecondsSinceEpoch.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string ValidateDeckExistsSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ValidateDeckExists.sql");
+[[nodiscard]] const std::string& ValidateDeckExistsSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Query/ValidateDeckExists.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string ValidateParentDeckExistsSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ValidateParentDeckExists.sql");
+[[nodiscard]] const std::string& ValidateParentDeckExistsSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Query/ValidateParentDeckExists.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string MoveDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/MoveDeck.sql");
+[[nodiscard]] const std::string& MoveDeckSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Mutation/MoveDeck.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string RenameDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/RenameDeck.sql");
+[[nodiscard]] const std::string& RenameDeckSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Mutation/RenameDeck.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string DeleteDeckCardReviewsSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeckCardReviews.sql");
+[[nodiscard]] const std::string& DeleteDeckCardReviewsSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeckCardReviews.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string DeleteDeckCardsSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeckCards.sql");
+[[nodiscard]] const std::string& DeleteDeckCardsSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeckCards.sql") };
+    return Sql;
 }
 
-[[nodiscard]] std::string DeleteDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeck.sql");
+[[nodiscard]] const std::string& DeleteDeckSql() {
+    static const std::string Sql{ ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeck.sql") };
+    return Sql;
 }
-
 }
