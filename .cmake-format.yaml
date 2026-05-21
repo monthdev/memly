@@ -1,6 +1,7 @@
 format:
   line_width: 120
   tab_size: 2
+  use_tabchars: false
   dangle_parens: true
   max_subgroups_hwrap: 3
   always_wrap:
