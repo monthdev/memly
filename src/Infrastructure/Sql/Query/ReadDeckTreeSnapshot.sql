@@ -1,7 +1,7 @@
 WITH
   clock AS (
     SELECT
-      EPOCH_MS(CAST(? AS BIGINT)) AS as_of_at
+      EPOCH_MS(CAST(? AS BIGINT)) AS as_of_milliseconds_since_epoch
   ),
   self_counts AS (
     SELECT
@@ -12,7 +12,7 @@ WITH
             cards.id IS NOT NULL
             AND (
               cards.due_at IS NULL
-              OR cards.due_at <= clock.as_of_at
+              OR cards.due_at <= clock.as_of_milliseconds_since_epoch
             )
         ) AS UINTEGER
       ) AS self_due_now_count,
@@ -20,9 +20,9 @@ WITH
         COUNT(*) FILTER(
           WHERE
             cards.id IS NOT NULL
-            AND cards.due_at > clock.as_of_at
+            AND cards.due_at > clock.as_of_milliseconds_since_epoch
             AND cards.due_at < CAST(
-              CAST(clock.as_of_at AS DATE) + INTERVAL 1 DAY AS TIMESTAMP
+              CAST(clock.as_of_milliseconds_since_epoch AS DATE) + INTERVAL 1 DAY AS TIMESTAMP
             )
         ) AS UINTEGER
       ) AS self_by_today_count,
