@@ -16,6 +16,8 @@ namespace Infrastructure::Store {
 class DeckStore;
 class DeckTreeStore;
 class LibraryClockStore;
+class ReviewSessionListStore;
+class ReviewSessionStore;
 }
 
 namespace Bootstrap {
@@ -27,6 +29,8 @@ public:
     static Application::Coordinator::LibraryRefreshCoordinator& GetRequiredLibraryRefreshCoordinator() noexcept;
     static Infrastructure::Store::DeckStore& GetRequiredDeckStore() noexcept;
     static Infrastructure::Store::DeckTreeStore& GetRequiredDeckTreeStore() noexcept;
+    static Infrastructure::Store::ReviewSessionListStore& GetRequiredReviewSessionListStore() noexcept;
+    static Infrastructure::Store::ReviewSessionStore& GetRequiredReviewSessionStore() noexcept;
 
 private:
     static std::unique_ptr<duckdb::DuckDB> s_Database;
@@ -35,6 +39,8 @@ private:
     static std::unique_ptr<Application::Coordinator::LibraryRefreshCoordinator> s_LibraryRefreshCoordinator;
     static std::unique_ptr<Infrastructure::Store::DeckStore> s_DeckStore;
     static std::unique_ptr<Infrastructure::Store::DeckTreeStore> s_DeckTreeStore;
+    static std::unique_ptr<Infrastructure::Store::ReviewSessionListStore> s_ReviewSessionListStore;
+    static std::unique_ptr<Infrastructure::Store::ReviewSessionStore> s_ReviewSessionStore;
 };
 
 }

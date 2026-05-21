@@ -6,7 +6,8 @@
 #include <cstdint>
 #include <functional>
 
-#include "Infrastructure/Sql/SqlResource.hpp"
+#include "Infrastructure/Sql/MigrationSqlResource.hpp"
+#include "Infrastructure/Sql/SeedSqlResource.hpp"
 #include "Support/Fatal.hpp"
 
 namespace Infrastructure::Sql {
@@ -30,7 +31,7 @@ void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
             Support::ThrowError("Unexpected applied migration version order");
         }
     }
-    std::array<std::reference_wrapper<const std::string&()>, 1> MigrationSqlFunctionArray{ M01_InitialSchemaSql };
+    std::array<std::reference_wrapper<std::string()>, 1> MigrationSqlFunctionArray{ M01_InitialSchemaSql };
     if (AppliedMigrationVersionVector.size() > MigrationSqlFunctionArray.size()) {
         Support::ThrowError("Unexpected number of applied migrations");
     }
@@ -50,9 +51,9 @@ void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
 }
 
 void SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
-    std::array<std::reference_wrapper<const std::string&()>, 3> SeedSqlFunctionArray{ CreateDefaultFsrs7SchedulerSql,
-                                                                                      CreateDefaultFsrs7SettingsSql,
-                                                                                      CreateDefaultDeckSettingsSql };
+    std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ CreateDefaultFsrs7SchedulerSql,
+                                                                               CreateDefaultFsrs7SettingsSql,
+                                                                               CreateDefaultDeckSettingsSql };
     for (const auto& SeedSqlFunction : SeedSqlFunctionArray) {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(SeedSqlFunction()) };
         if (QueryResult->HasError()) {

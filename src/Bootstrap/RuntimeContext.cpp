@@ -9,6 +9,8 @@
 #include "Infrastructure/Store/DeckStore.hpp"
 #include "Infrastructure/Store/DeckTreeStore.hpp"
 #include "Infrastructure/Store/LibraryClockStore.hpp"
+#include "Infrastructure/Store/ReviewSessionListStore.hpp"
+#include "Infrastructure/Store/ReviewSessionStore.hpp"
 
 namespace Bootstrap {
 
@@ -18,6 +20,8 @@ std::unique_ptr<Infrastructure::Store::LibraryClockStore> RuntimeContext::s_Libr
 std::unique_ptr<Application::Coordinator::LibraryRefreshCoordinator> RuntimeContext::s_LibraryRefreshCoordinator{};
 std::unique_ptr<Infrastructure::Store::DeckStore> RuntimeContext::s_DeckStore{};
 std::unique_ptr<Infrastructure::Store::DeckTreeStore> RuntimeContext::s_DeckTreeStore{};
+std::unique_ptr<Infrastructure::Store::ReviewSessionListStore> RuntimeContext::s_ReviewSessionListStore{};
+std::unique_ptr<Infrastructure::Store::ReviewSessionStore> RuntimeContext::s_ReviewSessionStore{};
 
 void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     Q_ASSERT(not DatabaseFilePath.isEmpty());
@@ -27,6 +31,8 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     Q_ASSERT(s_LibraryRefreshCoordinator == nullptr);
     Q_ASSERT(s_DeckStore == nullptr);
     Q_ASSERT(s_DeckTreeStore == nullptr);
+    Q_ASSERT(s_ReviewSessionListStore == nullptr);
+    Q_ASSERT(s_ReviewSessionStore == nullptr);
 
     s_Database = std::make_unique<duckdb::DuckDB>(DatabaseFilePath.toStdString());
     s_DatabaseConnection = std::make_unique<duckdb::Connection>(*s_Database);
@@ -35,6 +41,8 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     s_LibraryRefreshCoordinator = std::make_unique<Application::Coordinator::LibraryRefreshCoordinator>(*s_LibraryClockStore);
     s_DeckStore = std::make_unique<Infrastructure::Store::DeckStore>(*s_DatabaseConnection);
     s_DeckTreeStore = std::make_unique<Infrastructure::Store::DeckTreeStore>(*s_DatabaseConnection);
+    s_ReviewSessionListStore = std::make_unique<Infrastructure::Store::ReviewSessionListStore>(*s_DatabaseConnection);
+    s_ReviewSessionStore = std::make_unique<Infrastructure::Store::ReviewSessionStore>(*s_DatabaseConnection);
 }
 
 Application::Coordinator::LibraryRefreshCoordinator& RuntimeContext::GetRequiredLibraryRefreshCoordinator() noexcept {
@@ -50,6 +58,16 @@ Infrastructure::Store::DeckStore& RuntimeContext::GetRequiredDeckStore() noexcep
 Infrastructure::Store::DeckTreeStore& RuntimeContext::GetRequiredDeckTreeStore() noexcept {
     Q_ASSERT(s_DeckTreeStore not_eq nullptr);
     return *s_DeckTreeStore;
+}
+
+Infrastructure::Store::ReviewSessionListStore& RuntimeContext::GetRequiredReviewSessionListStore() noexcept {
+    Q_ASSERT(s_ReviewSessionListStore not_eq nullptr);
+    return *s_ReviewSessionListStore;
+}
+
+Infrastructure::Store::ReviewSessionStore& RuntimeContext::GetRequiredReviewSessionStore() noexcept {
+    Q_ASSERT(s_ReviewSessionStore not_eq nullptr);
+    return *s_ReviewSessionStore;
 }
 
 }

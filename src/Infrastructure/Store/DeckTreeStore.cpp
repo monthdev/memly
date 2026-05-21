@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "Infrastructure/Sql/SqlResource.hpp"
+#include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Infrastructure/Store/FlatDeckTreeValidation.hpp"
 #include "Support/Fatal.hpp"
 

@@ -4,7 +4,8 @@
 
 #include <string_view>
 
-#include "Infrastructure/Sql/SqlResource.hpp"
+#include "Infrastructure/Sql/MutationSqlResource.hpp"
+#include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Support/Fatal.hpp"
 
 namespace Infrastructure::Store {
