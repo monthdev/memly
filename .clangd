@@ -2,6 +2,12 @@
 If:
   PathMatch: ^build/_deps/.*
 
+CompileFlags:
+  Remove: [-Wall, -Wextra, -Wunused, -Werror, -pedantic]
+
 Diagnostics:
+  Suppress: ['*']
   ClangTidy:
     Remove: ['*']
+  UnusedIncludes: None
+  MissingIncludes: None
