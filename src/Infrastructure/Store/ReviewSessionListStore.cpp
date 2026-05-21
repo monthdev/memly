@@ -27,10 +27,9 @@ ReviewSessionListStore::~ReviewSessionListStore() = default;
     QVector<ReviewSessionListRow> ReviewSessionListRowQVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };
-        ReviewSessionListRowQVector.emplace_back(
-            QString{ QueryResultRow.GetValue<std::string>(0).c_str() },
-            QString{ QueryResultRow.GetValue<std::string>(1).c_str() },
-            static_cast<qint64>(QueryResultRow.GetValue<std::int64_t>(2)));
+        ReviewSessionListRowQVector.emplace_back(QString{ QueryResultRow.GetValue<std::string>(0).c_str() },
+                                                 QString{ QueryResultRow.GetValue<std::string>(1).c_str() },
+                                                 static_cast<qint64>(QueryResultRow.GetValue<std::int64_t>(2)));
     }
     return ReviewSessionListRowQVector;
 }
