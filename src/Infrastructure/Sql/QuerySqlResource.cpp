@@ -27,12 +27,4 @@ namespace Infrastructure::Sql {
 [[nodiscard]] std::string ReadDefaultReviewSessionIdByRootDeckIdSql() {
     return ReadSqlResourceBytes(":/Sql/Query/ReadDefaultReviewSessionIdByRootDeckId.sql");
 }
-
-[[nodiscard]] std::string ValidateDeckExistsSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ValidateDeckExists.sql");
-}
-
-[[nodiscard]] std::string ValidateParentDeckExistsSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ValidateParentDeckExists.sql");
-}
 }

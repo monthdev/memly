@@ -21,6 +21,7 @@ WITH RECURSIVE
       requested_move.deck_id AS moved_deck_id,
       requested_move.new_parent_deck_id,
       moved_deck.target_language_code AS moved_deck_target_language_code,
+      new_parent_deck.id AS existing_new_parent_deck_id,
       new_parent_deck.target_language_code AS new_parent_deck_target_language_code
     FROM
       requested_move
@@ -46,6 +47,9 @@ WITH RECURSIVE
       END AS new_parent_deck_id
     FROM
       move_context
+    WHERE
+      move_context.new_parent_deck_id IS NULL
+      OR move_context.existing_new_parent_deck_id IS NOT NULL
   )
 UPDATE decks
 SET
@@ -54,4 +58,6 @@ SET
 FROM
   validated_move
 WHERE
-  decks.id = validated_move.moved_deck_id;
+  decks.id = validated_move.moved_deck_id
+RETURNING
+  id;

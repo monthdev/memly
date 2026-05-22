@@ -6,7 +6,7 @@
 #include <string>
 
 namespace Support {
-[[noreturn]] void ThrowError(const std::string& = {}, const std::source_location& = std::source_location::current());
+[[noreturn]] void ThrowError(const std::string_view = std::string_view{}, const std::source_location& = std::source_location::current());
 
 void LogError(const std::string&);
 

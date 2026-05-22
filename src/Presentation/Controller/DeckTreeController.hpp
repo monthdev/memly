@@ -52,8 +52,6 @@ private:
     [[nodiscard]] QString GetNameLengthErrorMessage() const;
     [[nodiscard]] QString GetDuplicateNameErrorMessage() const;
     [[nodiscard]] QString GetTargetLanguageCodeErrorMessage() const;
-    [[nodiscard]] QString GetParentDeckNotFoundErrorMessage() const;
-    [[nodiscard]] QString GetDeckNotFoundErrorMessage() const;
     [[nodiscard]] QString GetParentDeckTargetLanguageMismatchErrorMessage() const;
     [[nodiscard]] QString GetDeckTreeCycleDetectionErrorMessage() const;
     [[nodiscard]] std::optional<QString> DeckMutationErrorToQString(const std::optional<Infrastructure::Store::DeckStore::DeckMutationErrorEnum>) const;

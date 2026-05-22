@@ -5,7 +5,6 @@
 #include <string_view>
 
 #include "Infrastructure/Sql/MutationSqlResource.hpp"
-#include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Support/Fatal.hpp"
 
 namespace Infrastructure::Store {
@@ -18,9 +17,7 @@ DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
     , m_RenameDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::RenameDeckSql()) }
     , m_DeleteDeckCardReviewsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardReviewsSql()) }
     , m_DeleteDeckCardsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardsSql()) }
-    , m_DeleteDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckSql()) }
-    , m_ValidateDeckExistsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::ValidateDeckExistsSql()) }
-    , m_ValidateParentDeckExistsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::ValidateParentDeckExistsSql()) } {
+    , m_DeleteDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckSql()) } {
     if (m_CreateRootDeckPreparedStatement->HasError()) {
         Support::ThrowError(m_CreateRootDeckPreparedStatement->GetError());
     }
@@ -42,12 +39,6 @@ DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
     if (m_DeleteDeckPreparedStatement->HasError()) {
         Support::ThrowError(m_DeleteDeckPreparedStatement->GetError());
     }
-    if (m_ValidateDeckExistsPreparedStatement->HasError()) {
-        Support::ThrowError(m_ValidateDeckExistsPreparedStatement->GetError());
-    }
-    if (m_ValidateParentDeckExistsPreparedStatement->HasError()) {
-        Support::ThrowError(m_ValidateParentDeckExistsPreparedStatement->GetError());
-    }
 }
 
 DeckStore::~DeckStore() = default;
@@ -58,48 +49,26 @@ DeckStore::~DeckStore() = default;
 }
 
 [[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
-    std::optional<DeckMutationErrorEnum> DeckMutationError{ ValidateParentDeckExists(ParentDeckId) };
-    if (DeckMutationError.has_value()) {
-        return DeckMutationError;
-    }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateChildDeckPreparedStatement->Execute(ParentDeckId.toStdString(), DeckName.toStdString()) };
-    return HandleDeckMutationError(QueryResult);
+    return HandleRequiredDeckMutation(QueryResult, "Child deck creation did not insert a deck");
 }
 
 [[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::MoveDeck(const QString& DeckId, const std::optional<QString>& NewParentDeckId) {
-    std::optional<DeckMutationErrorEnum> DeckMutationError{ ValidateDeckExists(DeckId) };
-    if (DeckMutationError.has_value()) {
-        return DeckMutationError;
-    }
-    if (NewParentDeckId.has_value()) {
-        DeckMutationError = ValidateParentDeckExists(NewParentDeckId.value());
-        if (DeckMutationError.has_value()) {
-            return DeckMutationError;
-        }
-    }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_MoveDeckPreparedStatement->Execute(
         DeckId.toStdString(), NewParentDeckId.has_value() ? duckdb::Value{ NewParentDeckId.value().toStdString() } : duckdb::Value{ nullptr }) };
-    return HandleDeckMutationError(QueryResult);
+    return HandleRequiredDeckMutation(QueryResult, "Deck move did not update a deck");
 }
 
 [[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::RenameDeck(const QString& DeckId, const QString& NewDeckName) {
-    std::optional<DeckMutationErrorEnum> DeckMutationError{ ValidateDeckExists(DeckId) };
-    if (DeckMutationError.has_value()) {
-        return DeckMutationError;
-    }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_RenameDeckPreparedStatement->Execute(NewDeckName.toStdString(), DeckId.toStdString()) };
-    return HandleDeckMutationError(QueryResult);
+    return HandleRequiredDeckMutation(QueryResult, "Deck rename did not update a deck");
 }
 
 [[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::DeleteDeck(const QString& DeckId) {
-    std::optional<DeckMutationErrorEnum> DeckMutationError{ ValidateDeckExists(DeckId) };
-    if (DeckMutationError.has_value()) {
-        return DeckMutationError;
-    }
     m_DatabaseConnection.BeginTransaction();
     try {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId.toStdString()) };
-        DeckMutationError = HandleDeckMutationError(QueryResult);
+        std::optional<DeckMutationErrorEnum> DeckMutationError{ HandleDeckMutationError(QueryResult) };
         if (DeckMutationError.has_value()) {
             m_DatabaseConnection.Rollback();
             return DeckMutationError;
@@ -111,7 +80,7 @@ DeckStore::~DeckStore() = default;
             return DeckMutationError;
         }
         QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId.toStdString());
-        DeckMutationError = HandleDeckMutationError(QueryResult);
+        DeckMutationError = HandleRequiredDeckMutation(QueryResult, "Deck delete did not delete a deck");
         if (DeckMutationError.has_value()) {
             m_DatabaseConnection.Rollback();
             return DeckMutationError;
@@ -124,14 +93,16 @@ DeckStore::~DeckStore() = default;
     }
 }
 
-[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::ValidateDeckExists(const QString& DeckId) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ValidateDeckExistsPreparedStatement->Execute(DeckId.toStdString()) };
-    return HandleDeckMutationError(QueryResult);
-}
-
-[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::ValidateParentDeckExists(const QString& ParentDeckId) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ValidateParentDeckExistsPreparedStatement->Execute(ParentDeckId.toStdString()) };
-    return HandleDeckMutationError(QueryResult);
+[[nodiscard]] std::optional<DeckStore::DeckMutationErrorEnum> DeckStore::HandleRequiredDeckMutation(const std::unique_ptr<duckdb::QueryResult>& QueryResult,
+                                                                                                    const std::string_view EmptyResultMessage) const {
+    std::optional<DeckMutationErrorEnum> DeckMutationError{ HandleDeckMutationError(QueryResult) };
+    if (DeckMutationError.has_value()) {
+        return DeckMutationError;
+    }
+    if (QueryResult->begin() not_eq QueryResult->end()) {
+        return std::nullopt;
+    }
+    Support::ThrowError(EmptyResultMessage);
 }
 
 // TODO: Fix error message string checks and use switch case logic
@@ -149,14 +120,6 @@ DeckStore::HandleDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& Q
     }
     if (ErrorMessage.starts_with("Invalid Input Error: Deck target language does not match parent deck")) {
         return DeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError;
-    }
-    if (ErrorMessage.starts_with("Invalid Input Error: Deck does not exist")) {
-        return DeckMutationErrorEnum::DeckNotFoundError;
-    }
-    if (ErrorMessage.starts_with("Invalid Input Error: Parent deck does not exist") or
-        ErrorMessage.starts_with("Invalid Input Error: parent deck does not exist") or
-        ErrorMessage.contains("Violates foreign key constraint because key \"id: ")) {
-        return DeckMutationErrorEnum::ParentDeckNotFoundError;
     }
     if (ErrorMessage.starts_with("Invalid Input Error: Deck cannot move into itself") or
         ErrorMessage.starts_with("Invalid Input Error: Deck move would create a cycle") or

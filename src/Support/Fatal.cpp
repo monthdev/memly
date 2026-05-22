@@ -8,7 +8,7 @@
 #include "Support/AppStoragePath.hpp"
 
 namespace Support {
-[[noreturn]] void ThrowError(const std::string& Message, const std::source_location& SourceLocation) {
+[[noreturn]] void ThrowError(const std::string_view Message, const std::source_location& SourceLocation) {
     std::string What{ std::format(
         "Exception thrown in {}, {}, line {}:\n\t{}", SourceLocation.file_name(), SourceLocation.function_name(), SourceLocation.line(), Message) };
     throw std::runtime_error(What);

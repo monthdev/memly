@@ -19,8 +19,6 @@ public:
         DeckNameLengthError,
         DuplicateDeckNameError,
         InvalidTargetLanguageCodeError,
-        ParentDeckNotFoundError,
-        DeckNotFoundError,
         ParentDeckTargetLanguageMismatchError,
         DeckTreeCycleDetectionError
     };
@@ -43,11 +41,8 @@ private:
     std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckCardReviewsPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckCardsPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_ValidateDeckExistsPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_ValidateParentDeckExistsPreparedStatement;
 
-    [[nodiscard]] std::optional<DeckMutationErrorEnum> ValidateDeckExists(const QString&);
-    [[nodiscard]] std::optional<DeckMutationErrorEnum> ValidateParentDeckExists(const QString&);
+    [[nodiscard]] std::optional<DeckMutationErrorEnum> HandleRequiredDeckMutation(const std::unique_ptr<duckdb::QueryResult>&, const std::string_view) const;
     [[nodiscard]] std::optional<DeckMutationErrorEnum> HandleDeckMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
 };
 

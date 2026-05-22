@@ -3,4 +3,6 @@ SET
   name = ?,
   updated_at = CURRENT_TIMESTAMP
 WHERE
-  id = ?;
+  id = CAST(CAST(? AS VARCHAR) AS UUID)
+RETURNING
+  id;

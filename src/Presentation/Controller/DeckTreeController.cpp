@@ -16,14 +16,6 @@ namespace Presentation::Controller {
     return QString{ "Target language code is invalid" };
 }
 
-[[nodiscard]] QString DeckTreeController::GetParentDeckNotFoundErrorMessage() const {
-    return QString{ "Parent deck does not exist" };
-}
-
-[[nodiscard]] QString DeckTreeController::GetDeckNotFoundErrorMessage() const {
-    return QString{ "Deck does not exist" };
-}
-
 [[nodiscard]] QString DeckTreeController::GetParentDeckTargetLanguageMismatchErrorMessage() const {
     return QString{ "Deck target language does not match parent deck" };
 }
@@ -46,12 +38,6 @@ DeckTreeController::DeckMutationErrorToQString(const std::optional<Infrastructur
     }
     case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
         return GetTargetLanguageCodeErrorMessage();
-    }
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::ParentDeckNotFoundError: {
-        return GetParentDeckNotFoundErrorMessage();
-    }
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::DeckNotFoundError: {
-        return GetDeckNotFoundErrorMessage();
     }
     case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
         return GetParentDeckTargetLanguageMismatchErrorMessage();
