@@ -142,10 +142,10 @@ DeckStore::HandleDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& Q
     }
     const std::string_view ErrorMessage{ QueryResult->GetError() };
     if (ErrorMessage.contains("deck_name_length_is_valid(\"name\")")) {
-        return DeckMutationErrorEnum::NameLengthError;
+        return DeckMutationErrorEnum::DeckNameLengthError;
     }
     if (ErrorMessage.contains("target_language_code_is_valid(target_language_code)")) {
-        return DeckMutationErrorEnum::TargetLanguageCodeError;
+        return DeckMutationErrorEnum::InvalidTargetLanguageCodeError;
     }
     if (ErrorMessage.starts_with("Invalid Input Error: Deck target language does not match parent deck")) {
         return DeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError;
@@ -164,7 +164,7 @@ DeckStore::HandleDeckMutationError(const std::unique_ptr<duckdb::QueryResult>& Q
         return DeckMutationErrorEnum::DeckTreeCycleDetectionError;
     }
     if (ErrorMessage.contains("Duplicate key \"")) {
-        return DeckMutationErrorEnum::DuplicateNameError;
+        return DeckMutationErrorEnum::DuplicateDeckNameError;
     }
     Support::ThrowError(QueryResult->GetError());
 }

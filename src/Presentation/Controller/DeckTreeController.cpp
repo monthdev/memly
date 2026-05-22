@@ -38,13 +38,13 @@ DeckTreeController::DeckMutationErrorToQString(const std::optional<Infrastructur
         return std::nullopt;
     }
     switch (DeckMutationError.value()) {
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::NameLengthError: {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::DeckNameLengthError: {
         return GetNameLengthErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::DuplicateNameError: {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::DuplicateDeckNameError: {
         return GetDuplicateNameErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::TargetLanguageCodeError: {
+    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
         return GetTargetLanguageCodeErrorMessage();
     }
     case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::ParentDeckNotFoundError: {

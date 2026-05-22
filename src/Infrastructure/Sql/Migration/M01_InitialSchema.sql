@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS card_reviews (
 
 CREATE TABLE IF NOT EXISTS review_sessions (
   id UUID PRIMARY KEY DEFAULT UUIDV7 (),
-  name VARCHAR NOT NULL CHECK (review_session_name_length_is_valid (name)),
+  name VARCHAR NOT NULL UNIQUE CHECK (review_session_name_length_is_valid (name)),
   definition_key VARCHAR NOT NULL UNIQUE CHECK (
     review_session_definition_key_is_valid (definition_key)
   ),
