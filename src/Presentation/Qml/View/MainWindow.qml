@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls.Basic
 import QtCore
+import Memly
 
 ApplicationWindow {
     id: window

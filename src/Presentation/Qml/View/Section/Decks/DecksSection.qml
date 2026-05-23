@@ -6,7 +6,7 @@ StackView {
 
     required property color pageColor
 
-    initialItem: DeckTreeTablePage {
+    initialItem: DeckTreePage {
         pageColor: root.pageColor
     }
 }
