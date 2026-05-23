@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QtTypes>
 #include <memory>
+#include <optional>
 
 namespace duckdb {
 class Connection;
@@ -17,7 +18,8 @@ public:
     struct ReviewSessionListRow {
         QString m_ReviewSessionId;
         QString m_ReviewSessionName;
-        qint64 m_LastOpenedAtMillisecondsSinceEpoch;
+        qint64 m_CreatedAtMillisecondsSinceEpoch;
+        std::optional<qint64> m_LastCardReviewAtMillisecondsSinceEpoch;
     };
 
     explicit ReviewSessionListStore(duckdb::Connection&);

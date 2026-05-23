@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS review_sessions (
   ),
   active_card_id UUID REFERENCES cards (id),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  last_opened_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_card_review_at TIMESTAMP,
   last_updated_at TIMESTAMP CHECK (
     last_updated_at_time_is_valid (created_at, last_updated_at)
   )

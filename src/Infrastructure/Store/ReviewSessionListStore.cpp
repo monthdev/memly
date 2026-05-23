@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Support/Fatal.hpp"
@@ -29,7 +30,9 @@ ReviewSessionListStore::~ReviewSessionListStore() = default;
         const auto& QueryResultRow{ *QueryResultIterator };
         ReviewSessionListRowQVector.emplace_back(QString{ QueryResultRow.GetValue<std::string>(0).c_str() },
                                                  QString{ QueryResultRow.GetValue<std::string>(1).c_str() },
-                                                 static_cast<qint64>(QueryResultRow.GetValue<std::int64_t>(2)));
+                                                 static_cast<qint64>(QueryResultRow.GetValue<std::int64_t>(2)),
+                                                 QueryResultRow.IsNull(3) ? std::nullopt :
+                                                                            std::make_optional(static_cast<qint64>(QueryResultRow.GetValue<std::int64_t>(3))));
     }
     return ReviewSessionListRowQVector;
 }
