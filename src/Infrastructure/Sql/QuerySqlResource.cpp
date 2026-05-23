@@ -20,10 +20,6 @@ namespace Infrastructure::Sql {
     return ReadSqlResourceBytes(":/Sql/Query/ReadReviewSessionIdByDefinitionKey.sql");
 }
 
-[[nodiscard]] std::string ReadReviewSessionNameAndDefinitionKeyByIdSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/ReadReviewSessionNameAndDefinitionKeyById.sql");
-}
-
 [[nodiscard]] std::string ReadDefaultReviewSessionIdByRootDeckIdSql() {
     return ReadSqlResourceBytes(":/Sql/Query/ReadDefaultReviewSessionIdByRootDeckId.sql");
 }

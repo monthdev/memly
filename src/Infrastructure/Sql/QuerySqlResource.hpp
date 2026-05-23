@@ -12,7 +12,5 @@ namespace Infrastructure::Sql {
 
 [[nodiscard]] std::string ReadReviewSessionIdByDefinitionKeySql();
 
-[[nodiscard]] std::string ReadReviewSessionNameAndDefinitionKeyByIdSql();
-
 [[nodiscard]] std::string ReadDefaultReviewSessionIdByRootDeckIdSql();
 }
