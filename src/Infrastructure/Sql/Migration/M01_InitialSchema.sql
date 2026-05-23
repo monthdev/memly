@@ -44,13 +44,13 @@ OR scheduled_interval_seconds > 0.0;
 
 CREATE MACRO IF NOT EXISTS answer_time_milliseconds_is_valid (answer_time_milliseconds) AS answer_time_milliseconds > 0;
 
-CREATE MACRO IF NOT EXISTS updated_at_time_is_valid (created_at, updated_at) AS updated_at IS NULL
-OR updated_at > created_at;
+CREATE MACRO IF NOT EXISTS last_updated_at_time_is_valid (created_at, last_updated_at) AS last_updated_at IS NULL
+OR last_updated_at > created_at;
 
 CREATE MACRO IF NOT EXISTS review_session_name_length_is_valid (review_session_name) AS LENGTH(review_session_name) > 0
 AND LENGTH(review_session_name) <= 40;
 
-CREATE MACRO IF NOT EXISTS review_session_definition_key_is_valid (review_session_definition_key) AS LENGTH(review_session_definition_key) > 0;
+CREATE MACRO IF NOT EXISTS review_session_definition_key_length_is_valid (review_session_definition_key) AS LENGTH(review_session_definition_key) > 0;
 
 CREATE MACRO IF NOT EXISTS deck_parent_is_valid (deck_id, parent_deck_id) AS parent_deck_id IS NULL
 OR parent_deck_id <> deck_id;
@@ -63,7 +63,12 @@ OR due_at > last_reviewed_at;
 
 CREATE TYPE scheduler_type AS ENUM('fsrs');
 
-CREATE TYPE review_session_deck_selection_type AS ENUM('self', 'subtree');
+CREATE TYPE review_session_deck_selection_type AS ENUM(
+  'self',
+  'subtree',
+  'exclude_self',
+  'exclude_subtree'
+);
 
 CREATE MACRO IF NOT EXISTS deck_settings_scheduler_combo_is_valid (scheduler_type_value, fsrs_settings_id_value) AS (
   scheduler_type_value = 'fsrs'
@@ -89,7 +94,9 @@ CREATE TABLE IF NOT EXISTS fsrs_schedulers (
   ),
   parameters_json JSON NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP CHECK (updated_at_time_is_valid (created_at, updated_at))
+  last_updated_at TIMESTAMP CHECK (
+    last_updated_at_time_is_valid (created_at, last_updated_at)
+  )
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS fsrs_schedulers_ensure_single_version_default_idx ON fsrs_schedulers (
@@ -116,7 +123,9 @@ CREATE TABLE IF NOT EXISTS fsrs_settings (
   fsrs_scheduler_id UUID NOT NULL REFERENCES fsrs_schedulers (id),
   desired_retention DOUBLE NOT NULL CHECK (desired_retention_is_valid (desired_retention)),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP CHECK (updated_at_time_is_valid (created_at, updated_at))
+  last_updated_at TIMESTAMP CHECK (
+    last_updated_at_time_is_valid (created_at, last_updated_at)
+  )
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS fsrs_settings_ensure_single_default_idx ON fsrs_settings (
@@ -137,7 +146,9 @@ CREATE TABLE IF NOT EXISTS deck_settings (
     deck_settings_scheduler_combo_is_valid (scheduler_type, fsrs_settings_id)
   ),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP CHECK (updated_at_time_is_valid (created_at, updated_at))
+  last_updated_at TIMESTAMP CHECK (
+    last_updated_at_time_is_valid (created_at, last_updated_at)
+  )
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS deck_settings_ensure_single_default_idx ON deck_settings (
@@ -155,7 +166,9 @@ CREATE TABLE IF NOT EXISTS decks (
   parent_deck_id UUID DEFAULT NULL CHECK (deck_parent_is_valid (id, parent_deck_id)),
   name VARCHAR NOT NULL CHECK (deck_name_length_is_valid (name)),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP CHECK (updated_at_time_is_valid (created_at, updated_at)),
+  last_updated_at TIMESTAMP CHECK (
+    last_updated_at_time_is_valid (created_at, last_updated_at)
+  ),
   target_language_code UTINYINT NOT NULL CHECK (
     target_language_code_is_valid (target_language_code)
   ),
@@ -178,7 +191,9 @@ CREATE TABLE IF NOT EXISTS cards (
   id UUID PRIMARY KEY DEFAULT UUIDV7 (),
   deck_id UUID NOT NULL REFERENCES decks (id),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP CHECK (updated_at_time_is_valid (created_at, updated_at)),
+  last_updated_at TIMESTAMP CHECK (
+    last_updated_at_time_is_valid (created_at, last_updated_at)
+  ),
   last_reviewed_at TIMESTAMP,
   due_at TIMESTAMP CHECK (
     due_time_after_last_review_time_is_valid (last_reviewed_at, due_at)
@@ -234,14 +249,16 @@ CREATE TABLE IF NOT EXISTS card_reviews (
 
 CREATE TABLE IF NOT EXISTS review_sessions (
   id UUID PRIMARY KEY DEFAULT UUIDV7 (),
-  name VARCHAR NOT NULL UNIQUE CHECK (review_session_name_length_is_valid (name)),
+  name VARCHAR NOT NULL CHECK (review_session_name_length_is_valid (name)),
   definition_key VARCHAR NOT NULL UNIQUE CHECK (
-    review_session_definition_key_is_valid (definition_key)
+    review_session_definition_key_length_is_valid (definition_key)
   ),
   active_card_id UUID REFERENCES cards (id),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_opened_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP CHECK (updated_at_time_is_valid (created_at, updated_at))
+  last_updated_at TIMESTAMP CHECK (
+    last_updated_at_time_is_valid (created_at, last_updated_at)
+  )
 );
 
 CREATE TABLE IF NOT EXISTS review_session_deck_selections (
@@ -287,21 +304,53 @@ FROM
   deck_subtree_membership;
 
 CREATE VIEW IF NOT EXISTS review_session_resolved_decks_view AS
+WITH
+  included_review_session_decks AS (
+    SELECT
+      review_session_deck_selections.review_session_id,
+      review_session_deck_selections.deck_id
+    FROM
+      review_session_deck_selections
+    WHERE
+      review_session_deck_selections.selection_type = 'self'
+    UNION
+    SELECT
+      review_session_deck_selections.review_session_id,
+      deck_subtree_membership_view.member_deck_id AS deck_id
+    FROM
+      review_session_deck_selections
+      INNER JOIN deck_subtree_membership_view ON deck_subtree_membership_view.subtree_root_deck_id = review_session_deck_selections.deck_id
+    WHERE
+      review_session_deck_selections.selection_type = 'subtree'
+  ),
+  excluded_review_session_decks AS (
+    SELECT
+      review_session_deck_selections.review_session_id,
+      review_session_deck_selections.deck_id
+    FROM
+      review_session_deck_selections
+    WHERE
+      review_session_deck_selections.selection_type = 'exclude_self'
+    UNION
+    SELECT
+      review_session_deck_selections.review_session_id,
+      deck_subtree_membership_view.member_deck_id AS deck_id
+    FROM
+      review_session_deck_selections
+      INNER JOIN deck_subtree_membership_view ON deck_subtree_membership_view.subtree_root_deck_id = review_session_deck_selections.deck_id
+    WHERE
+      review_session_deck_selections.selection_type = 'exclude_subtree'
+  )
 SELECT
-  review_session_deck_selections.review_session_id,
-  review_session_deck_selections.deck_id
+  included_review_session_decks.review_session_id,
+  included_review_session_decks.deck_id
 FROM
-  review_session_deck_selections
-WHERE
-  review_session_deck_selections.selection_type = 'self'
-UNION
+  included_review_session_decks
+EXCEPT
 SELECT
-  review_session_deck_selections.review_session_id,
-  deck_subtree_membership_view.member_deck_id AS deck_id
+  excluded_review_session_decks.review_session_id,
+  excluded_review_session_decks.deck_id
 FROM
-  review_session_deck_selections
-  INNER JOIN deck_subtree_membership_view ON deck_subtree_membership_view.subtree_root_deck_id = review_session_deck_selections.deck_id
-WHERE
-  review_session_deck_selections.selection_type = 'subtree';
+  excluded_review_session_decks;
 
 COMMIT;

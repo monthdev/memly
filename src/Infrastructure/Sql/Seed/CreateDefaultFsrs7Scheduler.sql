@@ -7,7 +7,7 @@ INSERT INTO
     maximum_interval_days,
     parameters_json,
     created_at,
-    updated_at
+    last_updated_at
   )
 SELECT
   UUIDV7 (),

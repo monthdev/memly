@@ -6,7 +6,7 @@ INSERT INTO
     fsrs_settings_id,
     scheduler_type,
     created_at,
-    updated_at
+    last_updated_at
   )
 SELECT
   UUIDV7 (),

@@ -6,7 +6,7 @@ INSERT INTO
     fsrs_scheduler_id,
     desired_retention,
     created_at,
-    updated_at
+    last_updated_at
   )
 SELECT
   UUIDV7 (),

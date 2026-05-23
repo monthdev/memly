@@ -54,7 +54,7 @@ WITH RECURSIVE
 UPDATE decks
 SET
   parent_deck_id = validated_move.new_parent_deck_id,
-  updated_at = CURRENT_TIMESTAMP
+  last_updated_at = CURRENT_TIMESTAMP
 FROM
   validated_move
 WHERE

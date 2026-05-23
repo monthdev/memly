@@ -51,7 +51,7 @@ SELECT
   decks.parent_deck_id::VARCHAR AS parent_deck_id,
   decks.name AS deck_name,
   EPOCH_MS(decks.created_at) AS created_at_milliseconds_since_epoch,
-  EPOCH_MS(decks.updated_at) AS updated_at_milliseconds_since_epoch,
+  EPOCH_MS(decks.last_updated_at) AS last_updated_at_milliseconds_since_epoch,
   self_counts.self_due_now_count,
   self_counts.self_by_today_count,
   self_counts.self_total_count,
