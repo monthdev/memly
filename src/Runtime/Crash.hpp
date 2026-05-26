@@ -3,12 +3,12 @@
 #include <QtLogging>
 #include <functional>
 #include <source_location>
-#include <string>
+#include <string_view>
 
 namespace Runtime {
 [[noreturn]] void ThrowError(const std::string_view = std::string_view{}, const std::source_location& = std::source_location::current());
 
-void LogError(const std::string&);
+void LogError(const std::string_view);
 
 template <typename Fn>
 decltype(auto) TryCatchWrapper(Fn&& Function) noexcept {

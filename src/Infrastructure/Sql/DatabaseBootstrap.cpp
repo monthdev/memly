@@ -8,19 +8,16 @@
 
 #include "Infrastructure/Sql/MigrationSqlResource.hpp"
 #include "Infrastructure/Sql/SeedSqlResource.hpp"
+#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Sql {
 namespace {
 void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(M00_MigrationsTableSql()) };
-    if (QueryResult->HasError()) {
-        Runtime::ThrowError(QueryResult->GetError());
-    }
+    ThrowOnQueryResultError(*QueryResult);
     QueryResult = DatabaseConnection.Query(ReadMigrationsTableSql());
-    if (QueryResult->HasError()) {
-        Runtime::ThrowError(QueryResult->GetError());
-    }
+    ThrowOnQueryResultError(*QueryResult);
     std::vector<std::size_t> AppliedMigrationVersionVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };
@@ -40,13 +37,9 @@ void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
          ++UnappliedMigrationVersionIndex) {
         const std::string& MigrationSql{ MigrationSqlFunctionArray.at(UnappliedMigrationVersionIndex)() };
         QueryResult = DatabaseConnection.Query(MigrationSql);
-        if (QueryResult->HasError()) {
-            Runtime::ThrowError(QueryResult->GetError());
-        }
+        ThrowOnQueryResultError(*QueryResult);
         QueryResult = DatabaseConnection.Query(CreateMigrationSql(), static_cast<std::uint32_t>(UnappliedMigrationVersionIndex + 1));
-        if (QueryResult->HasError()) {
-            Runtime::ThrowError(QueryResult->GetError());
-        }
+        ThrowOnQueryResultError(*QueryResult);
     }
 }
 
@@ -56,9 +49,7 @@ void SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
                                                                                CreateDefaultDeckSettingsSql };
     for (const auto& SeedSqlFunction : SeedSqlFunctionArray) {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(SeedSqlFunction()) };
-        if (QueryResult->HasError()) {
-            Runtime::ThrowError(QueryResult->GetError());
-        }
+        ThrowOnQueryResultError(*QueryResult);
     }
 }
 }

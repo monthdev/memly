@@ -6,17 +6,14 @@
 #include <memory>
 
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
-#include "Infrastructure/Store/QueryResultGuard.hpp"
-#include "Runtime/Crash.hpp"
+#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store {
 
 LibraryClockStore::LibraryClockStore(duckdb::Connection& DatabaseConnection)
     : m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
           Infrastructure::Sql::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql()) } {
-    if (m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->HasError()) {
-        Runtime::ThrowError(m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->GetError());
-    }
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement);
 }
 
 LibraryClockStore::~LibraryClockStore() = default;
@@ -24,7 +21,7 @@ LibraryClockStore::~LibraryClockStore() = default;
 [[nodiscard]] std::optional<qint64> LibraryClockStore::ReadNextLibraryRefreshAtMillisecondsSinceEpoch(const qint64 AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->Execute(
         static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
-    ThrowOnQueryResultError(QueryResult);
+    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     const auto QueryResultIterator{ QueryResult->begin() };
     const auto& QueryResultRow{ *QueryResultIterator };
     if (QueryResultRow.IsNull(0)) {

@@ -42,7 +42,7 @@ private:
     std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckCardsPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckPreparedStatement;
 
-    [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
+    [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> HandleRecoverableDeckMutationError(duckdb::QueryResult&) const;
 };
 
 }

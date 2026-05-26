@@ -64,7 +64,7 @@ private:
     CreateReviewSessionDeckSelection(const QString&, const QString&, ReviewSessionDeckSelectionTypeEnum);
     void DeleteReviewSessionInCurrentTransaction(const QString&);
     [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum>
-    HandleRecoverableReviewSessionMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
+    HandleRecoverableReviewSessionMutationError(duckdb::QueryResult&) const;
 };
 
 }
