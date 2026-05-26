@@ -10,12 +10,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 include(CTest)
 include(FetchContent)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network Qml Quick Test)
-qt_standard_project_setup(REQUIRES 6.9)
+set(MEMLY_QT_MIN_VERSION 6.11)
 
-if(COMMAND qt_policy)
-  qt_policy(SET QTP0004 NEW)
-endif()
+find_package(Qt6 ${MEMLY_QT_MIN_VERSION} REQUIRED COMPONENTS Core Network Qml Quick Test)
+qt_standard_project_setup(REQUIRES ${MEMLY_QT_MIN_VERSION})
 
 option(MEMLY_ENABLE_CLANG_TIDY "Run clang-tidy during builds" ON)
 

@@ -10,7 +10,7 @@ jobs:
   qml-format:
     runs-on: ubuntu-latest
     env:
-      QT_VERSION: "6.10.2"
+      QT_VERSION: "6.11.1"
       QT_ARCH: "linux_gcc_64"
       QT_DIR: ${{ github.workspace }}/Qt
 
@@ -39,7 +39,7 @@ jobs:
           python -m pip install "aqtinstall==3.3.*"
           python -m aqt version
 
-      - name: Install Qt 6.10.2
+      - name: Install Qt ${{ env.QT_VERSION }}
         shell: bash
         run: |
           set -euo pipefail
@@ -117,7 +117,7 @@ jobs:
           done
 
           if [[ $FAIL -ne 0 ]]; then
-            echo "::error::Some files are not formatted. Run qmlformat from Qt 6.10.2 and compare the diff above."
+            echo "::error::Some files are not formatted. Run qmlformat from Qt ${QT_VERSION} and compare the diff above."
             echo "Changed files checked:"
             printf '%s\n' "${FILES[@]}"
             exit 1
