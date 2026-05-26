@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
         Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };
         constexpr char AppName[]{ "Memly" };
-        constexpr char OrgName[]{ "monthly" };
+        constexpr char OrgName[]{ "MemlyProject" };
         App.setApplicationName(AppName);
         App.setApplicationDisplayName(AppName);
         App.setOrganizationDomain(OrgName);
