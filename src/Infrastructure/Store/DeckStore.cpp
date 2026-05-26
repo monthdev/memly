@@ -6,7 +6,7 @@
 
 #include "Infrastructure/Sql/MutationSqlResource.hpp"
 #include "Infrastructure/Store/QueryResultGuard.hpp"
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store {
 
@@ -20,25 +20,25 @@ DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
     , m_DeleteDeckCardsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardsSql()) }
     , m_DeleteDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckSql()) } {
     if (m_CreateRootDeckPreparedStatement->HasError()) {
-        Support::ThrowError(m_CreateRootDeckPreparedStatement->GetError());
+        Runtime::ThrowError(m_CreateRootDeckPreparedStatement->GetError());
     }
     if (m_CreateChildDeckPreparedStatement->HasError()) {
-        Support::ThrowError(m_CreateChildDeckPreparedStatement->GetError());
+        Runtime::ThrowError(m_CreateChildDeckPreparedStatement->GetError());
     }
     if (m_MoveDeckPreparedStatement->HasError()) {
-        Support::ThrowError(m_MoveDeckPreparedStatement->GetError());
+        Runtime::ThrowError(m_MoveDeckPreparedStatement->GetError());
     }
     if (m_RenameDeckPreparedStatement->HasError()) {
-        Support::ThrowError(m_RenameDeckPreparedStatement->GetError());
+        Runtime::ThrowError(m_RenameDeckPreparedStatement->GetError());
     }
     if (m_DeleteDeckCardReviewsPreparedStatement->HasError()) {
-        Support::ThrowError(m_DeleteDeckCardReviewsPreparedStatement->GetError());
+        Runtime::ThrowError(m_DeleteDeckCardReviewsPreparedStatement->GetError());
     }
     if (m_DeleteDeckCardsPreparedStatement->HasError()) {
-        Support::ThrowError(m_DeleteDeckCardsPreparedStatement->GetError());
+        Runtime::ThrowError(m_DeleteDeckCardsPreparedStatement->GetError());
     }
     if (m_DeleteDeckPreparedStatement->HasError()) {
-        Support::ThrowError(m_DeleteDeckPreparedStatement->GetError());
+        Runtime::ThrowError(m_DeleteDeckPreparedStatement->GetError());
     }
 }
 
@@ -123,6 +123,6 @@ DeckStore::HandleRecoverableDeckMutationError(const std::unique_ptr<duckdb::Quer
     if (ErrorMessage.contains("Duplicate key \"")) {
         return RecoverableDeckMutationErrorEnum::DuplicateDeckNameError;
     }
-    Support::ThrowError(QueryResult->GetError());
+    Runtime::ThrowError(QueryResult->GetError());
 }
 }

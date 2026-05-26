@@ -3,7 +3,7 @@
 #include <QHash>
 #include <QSet>
 
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store {
 
@@ -15,7 +15,7 @@ void ValidateUniqueSiblingDeckNames(const QVector<DeckTreeStore::DeckTreeRow>& D
     for (const DeckTreeStore::DeckTreeRow& DeckTreeRow : DeckTreeRowQVector) {
         QSet<QString>& DeckNamesQSet{ DeckNamesQSetByParentDeckIdQHash[DeckTreeRow.m_ParentDeckId.value_or(QString{})] };
         if (DeckNamesQSet.contains(DeckTreeRow.m_DeckName)) {
-            Support::ThrowError("Duplicate sibling deck name in deck tree snapshot");
+            Runtime::ThrowError("Duplicate sibling deck name in deck tree snapshot");
         }
         DeckNamesQSet.insert(DeckTreeRow.m_DeckName);
     }
@@ -36,7 +36,7 @@ void ValidateParentChildTargetLanguageCodes(const QVector<DeckTreeStore::DeckTre
             continue;
         }
         if (DeckTreeRow.m_TargetLanguageCode not_eq ParentTargetLanguageCodeByDeckIdQHashIterator.value()) {
-            Support::ThrowError("Parent and child deck target language mismatch in deck tree snapshot");
+            Runtime::ThrowError("Parent and child deck target language mismatch in deck tree snapshot");
         }
     }
 }

@@ -8,14 +8,14 @@
 
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Infrastructure/Store/QueryResultGuard.hpp"
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store {
 
 ReviewSessionListStore::ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
     : m_ReadReviewSessionListPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReadReviewSessionListSql()) } {
     if (m_ReadReviewSessionListPreparedStatement->HasError()) {
-        Support::ThrowError(m_ReadReviewSessionListPreparedStatement->GetError());
+        Runtime::ThrowError(m_ReadReviewSessionListPreparedStatement->GetError());
     }
 }
 

@@ -2,13 +2,13 @@
 
 #include <duckdb.hpp>
 
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store {
 
 void ThrowOnQueryResultError(const std::unique_ptr<duckdb::QueryResult>& QueryResult) {
     if (QueryResult->HasError()) {
-        Support::ThrowError(QueryResult->GetError());
+        Runtime::ThrowError(QueryResult->GetError());
     }
 }
 
@@ -16,7 +16,7 @@ void ThrowOnMutationNoOp(const std::unique_ptr<duckdb::QueryResult>& QueryResult
     if (QueryResult->begin() not_eq QueryResult->end()) {
         return;
     }
-    Support::ThrowError(ErrorMessage);
+    Runtime::ThrowError(ErrorMessage);
 }
 
 }

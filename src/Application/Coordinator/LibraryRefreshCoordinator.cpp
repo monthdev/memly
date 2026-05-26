@@ -6,7 +6,7 @@
 #include <optional>
 
 #include "Infrastructure/Store/LibraryClockStore.hpp"
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Application::Coordinator {
 
@@ -23,7 +23,7 @@ void LibraryRefreshCoordinator::RunLibraryRefreshCycle(const bool RescheduleNext
 }
 
 void LibraryRefreshCoordinator::ScheduleNextLibraryRefresh() {
-    Support::TryCatchWrapper([&] {
+    Runtime::TryCatchWrapper([&] {
         m_LibraryRefreshQTimer.stop();
         const std::optional<qint64> NextLibraryRefreshAtMillisecondsSinceEpoch{ m_LibraryClockStore.ReadNextLibraryRefreshAtMillisecondsSinceEpoch(
             m_AsOfMillisecondsSinceEpoch) };

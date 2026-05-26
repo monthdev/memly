@@ -8,14 +8,14 @@
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Infrastructure/Store/FlatDeckTreeValidation.hpp"
 #include "Infrastructure/Store/QueryResultGuard.hpp"
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store {
 
 DeckTreeStore::DeckTreeStore(duckdb::Connection& DatabaseConnection)
     : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReadDeckTreeSnapshotSql()) } {
     if (m_ReadDeckTreeSnapshotPreparedStatement->HasError()) {
-        Support::ThrowError(m_ReadDeckTreeSnapshotPreparedStatement->GetError());
+        Runtime::ThrowError(m_ReadDeckTreeSnapshotPreparedStatement->GetError());
     }
 }
 

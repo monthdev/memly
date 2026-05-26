@@ -9,7 +9,7 @@
 #include "Infrastructure/Sql/MutationSqlResource.hpp"
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Infrastructure/Store/QueryResultGuard.hpp"
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store {
 
@@ -25,7 +25,6 @@ std::string_view ReviewSessionDeckSelectionTypeToString(const ReviewSessionStore
     case ReviewSessionStore::ReviewSessionDeckSelectionTypeEnum::ExcludeSubtree:
         return "exclude_subtree";
     }
-    Support::ThrowError("Invalid review session deck selection type");
 }
 
 }
@@ -41,22 +40,22 @@ ReviewSessionStore::ReviewSessionStore(duckdb::Connection& DatabaseConnection)
     , m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{ m_DatabaseConnection.Prepare(
           Infrastructure::Sql::ReadReviewSessionIdByReviewSessionDefinitionKeySql()) } {
     if (m_CreateReviewSessionPreparedStatement->HasError()) {
-        Support::ThrowError(m_CreateReviewSessionPreparedStatement->GetError());
+        Runtime::ThrowError(m_CreateReviewSessionPreparedStatement->GetError());
     }
     if (m_CreateReviewSessionDeckSelectionPreparedStatement->HasError()) {
-        Support::ThrowError(m_CreateReviewSessionDeckSelectionPreparedStatement->GetError());
+        Runtime::ThrowError(m_CreateReviewSessionDeckSelectionPreparedStatement->GetError());
     }
     if (m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement->HasError()) {
-        Support::ThrowError(m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement->GetError());
+        Runtime::ThrowError(m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement->GetError());
     }
     if (m_DeleteReviewSessionDeckSelectionsPreparedStatement->HasError()) {
-        Support::ThrowError(m_DeleteReviewSessionDeckSelectionsPreparedStatement->GetError());
+        Runtime::ThrowError(m_DeleteReviewSessionDeckSelectionsPreparedStatement->GetError());
     }
     if (m_DeleteReviewSessionPreparedStatement->HasError()) {
-        Support::ThrowError(m_DeleteReviewSessionPreparedStatement->GetError());
+        Runtime::ThrowError(m_DeleteReviewSessionPreparedStatement->GetError());
     }
     if (m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement->HasError()) {
-        Support::ThrowError(m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement->GetError());
+        Runtime::ThrowError(m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement->GetError());
     }
 }
 
@@ -211,7 +210,7 @@ ReviewSessionStore::HandleRecoverableReviewSessionMutationError(const std::uniqu
     if (ErrorMessage.contains("exclude_selection_conflict")) {
         return RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckExcludeSelectionError;
     }
-    Support::ThrowError(QueryResult->GetError());
+    Runtime::ThrowError(QueryResult->GetError());
 }
 
 }

@@ -7,7 +7,7 @@
 
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Infrastructure/Store/QueryResultGuard.hpp"
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store {
 
@@ -15,7 +15,7 @@ LibraryClockStore::LibraryClockStore(duckdb::Connection& DatabaseConnection)
     : m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
           Infrastructure::Sql::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql()) } {
     if (m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->HasError()) {
-        Support::ThrowError(m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->GetError());
+        Runtime::ThrowError(m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->GetError());
     }
 }
 

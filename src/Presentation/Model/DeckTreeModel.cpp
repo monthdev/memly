@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Presentation::Model {
 
@@ -186,7 +186,7 @@ void DeckTreeModel::ValidateNoDeckNodeCycles(const QVector<DeckNode>& DeckNodesQ
                 break;
             }
             if (CurrentDeckNodeVisitState == Visiting) {
-                Support::ThrowError("Cycle detected in deck tree snapshot");
+                Runtime::ThrowError("Cycle detected in deck tree snapshot");
             }
             DeckNodeVisitStateQVector[CurrentDeckNodeIndex] = Visiting;
             CurrentDeckNodePathQVector.push_back(CurrentDeckNodeIndex);
@@ -207,7 +207,7 @@ void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
         const qsizetype DeckNodeIndex{ DeckNodesQVector.size() };
         const QString DeckId{ DeckNodeData.m_DeckId };
         if (DeckNodeIndexByIdQHash.contains(DeckId)) {
-            Support::ThrowError("Duplicate deck id in deck tree snapshot");
+            Runtime::ThrowError("Duplicate deck id in deck tree snapshot");
         }
         DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
         DeckNodeIndexByIdQHash.insert(DeckId, DeckNodeIndex);
@@ -222,7 +222,7 @@ void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
         }
         const auto& ParentDeckNodeIdIndexIterator{ DeckNodeIndexByIdQHash.constFind(ParentId.value()) };
         if (ParentDeckNodeIdIndexIterator == DeckNodeIndexByIdQHash.cend() or ParentDeckNodeIdIndexIterator.value() == DeckNodeIndex) {
-            Support::ThrowError("Invalid parent deck id in deck tree snapshot");
+            Runtime::ThrowError("Invalid parent deck id in deck tree snapshot");
         }
         CurrentDeckNode.m_ParentDeckNodeIndex = ParentDeckNodeIdIndexIterator.value();
         CurrentDeckNode.m_RowInParentIndex = DeckNodesQVector.at(CurrentDeckNode.m_ParentDeckNodeIndex).m_ChildDeckNodeIndexesQVector.size();

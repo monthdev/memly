@@ -2,11 +2,11 @@
 #include <QQmlApplicationEngine>
 
 #include "Bootstrap/RuntimeContext.hpp"
-#include "Support/AppStoragePath.hpp"
-#include "Support/Fatal.hpp"
+#include "Runtime/AppStoragePath.hpp"
+#include "Runtime/Crash.hpp"
 
 int main(int argc, char* argv[]) {
-    return Support::TryCatchWrapper([&] {
+    return Runtime::TryCatchWrapper([&] {
         Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };
         constexpr char AppName[]{ "Memly" };
@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
         App.setApplicationDisplayName(AppName);
         App.setOrganizationDomain(OrgName);
         App.setOrganizationName(OrgName);
-        Bootstrap::RuntimeContext::Initialize(Support::DatabaseFilePath());
+        Bootstrap::RuntimeContext::Initialize(Runtime::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine, &QQmlApplicationEngine::objectCreationFailed, QCoreApplication::instance(), [] { QCoreApplication::exit(-1); }, Qt::QueuedConnection);

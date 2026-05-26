@@ -5,7 +5,7 @@
 #include <source_location>
 #include <string>
 
-namespace Support {
+namespace Runtime {
 [[noreturn]] void ThrowError(const std::string_view = std::string_view{}, const std::source_location& = std::source_location::current());
 
 void LogError(const std::string&);
@@ -15,11 +15,11 @@ decltype(auto) TryCatchWrapper(Fn&& Function) noexcept {
     try {
         return std::invoke(std::forward<Fn>(Function));
     } catch (const std::exception& Exception) {
-        Support::LogError(Exception.what());
+        Runtime::LogError(Exception.what());
         qFatal("%s", Exception.what());
     } catch (...) {
         constexpr char What[]{ "Unknown exception" };
-        Support::LogError(What);
+        Runtime::LogError(What);
         qFatal("%s", What);
     }
 }

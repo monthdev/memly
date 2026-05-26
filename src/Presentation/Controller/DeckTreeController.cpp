@@ -1,6 +1,6 @@
 #include "Presentation/Controller/DeckTreeController.hpp"
 
-#include "Support/Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 namespace Presentation::Controller {
 
@@ -45,13 +45,11 @@ namespace Presentation::Controller {
     case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError: {
         return GetDeckTreeCycleDetectionErrorMessage();
     }
-    default:
-        Support::ThrowError("Unknown recoverable deck mutation error");
     }
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
-    return Support::TryCatchWrapper([&]() -> std::optional<QString> {
+    return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldCreateRootDeckDuplicateSiblingName(DeckName)) {
             return GetDuplicateNameErrorMessage();
         }
@@ -64,7 +62,7 @@ namespace Presentation::Controller {
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
-    return Support::TryCatchWrapper([&]() -> std::optional<QString> {
+    return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldCreateChildDeckDuplicateSiblingName(DeckName, ParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
@@ -77,7 +75,7 @@ namespace Presentation::Controller {
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::MoveDeck(const QString& DeckId, const std::optional<QString>& NewParentDeckId) noexcept {
-    return Support::TryCatchWrapper([&]() -> std::optional<QString> {
+    return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldReparentCreateCycle(DeckId, NewParentDeckId)) {
             return GetDeckTreeCycleDetectionErrorMessage();
         }
@@ -96,7 +94,7 @@ namespace Presentation::Controller {
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::RenameDeck(const QString& DeckId, const QString& NewDeckName) noexcept {
-    return Support::TryCatchWrapper([&]() -> std::optional<QString> {
+    return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldRenameDeckDuplicateSiblingName(DeckId, NewDeckName)) {
             return GetDuplicateNameErrorMessage();
         }
@@ -109,7 +107,7 @@ namespace Presentation::Controller {
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::DeleteDeck(const QString& DeckId) noexcept {
-    return Support::TryCatchWrapper([&]() -> std::optional<QString> {
+    return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.DeleteDeck(DeckId)) };
         if (not ErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(true);
@@ -119,7 +117,7 @@ namespace Presentation::Controller {
 }
 
 void DeckTreeController::RefreshDeckTree(const qint64 AsOfMillisecondsSinceEpoch) noexcept {
-    Support::TryCatchWrapper([&] {
+    Runtime::TryCatchWrapper([&] {
         const QVector<Infrastructure::Store::DeckTreeStore::DeckTreeRow> DeckTreeRowQVector{ m_DeckTreeStore.ReadDeckTreeSnapshot(AsOfMillisecondsSinceEpoch) };
         QVector<Model::DeckTreeModel::DeckNodeData> DeckNodeDataQVector{};
         DeckNodeDataQVector.reserve(DeckTreeRowQVector.size());

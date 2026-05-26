@@ -1,13 +1,13 @@
-#include "Fatal.hpp"
+#include "Runtime/Crash.hpp"
 
 #include <QSaveFile>
 #include <format>
 #include <iostream>
 #include <source_location>
 
-#include "Support/AppStoragePath.hpp"
+#include "Runtime/AppStoragePath.hpp"
 
-namespace Support {
+namespace Runtime {
 [[noreturn]] void ThrowError(const std::string_view Message, const std::source_location& SourceLocation) {
     std::string What{ std::format(
         "Exception thrown in {}, {}, line {}:\n\t{}", SourceLocation.file_name(), SourceLocation.function_name(), SourceLocation.line(), Message) };
@@ -15,7 +15,7 @@ namespace Support {
 }
 
 void LogError(const std::string& What) {
-    QSaveFile CrashLogFile{ Support::CrashLogFilePath() };
+    QSaveFile CrashLogFile{ Runtime::CrashLogFilePath() };
     if (CrashLogFile.open(QIODevice::WriteOnly bitor QIODevice::Text)) {
         CrashLogFile.write(What.data());
         CrashLogFile.commit();
