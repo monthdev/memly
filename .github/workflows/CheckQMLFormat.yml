@@ -76,7 +76,10 @@ jobs:
             git fetch origin "${GITHUB_BASE_REF}" --depth=1
             MB="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
           else
-            MB="$(git rev-parse HEAD~1)"
+            MB="${GITHUB_EVENT_BEFORE:-}"
+            if [[ -z "$MB" || "$MB" == "0000000000000000000000000000000000000000" ]]; then
+              MB="$(git rev-parse HEAD~1)"
+            fi
           fi
 
           echo "mb=$MB" >> "$GITHUB_OUTPUT"
