@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
+#include "Infrastructure/Store/QueryResultGuard.hpp"
 #include "Support/Fatal.hpp"
 
 namespace Infrastructure::Store {
@@ -22,9 +23,7 @@ ReviewSessionListStore::~ReviewSessionListStore() = default;
 
 [[nodiscard]] QVector<ReviewSessionListStore::ReviewSessionListRow> ReviewSessionListStore::ReadReviewSessionList() {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionListPreparedStatement->Execute() };
-    if (QueryResult->HasError()) {
-        Support::ThrowError(QueryResult->GetError());
-    }
+    ThrowOnQueryResultError(QueryResult);
     QVector<ReviewSessionListRow> ReviewSessionListRowQVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };

@@ -24,29 +24,29 @@ namespace Presentation::Controller {
     return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
 }
 
-[[nodiscard]] std::optional<QString>
-DeckTreeController::DeckMutationErrorToQString(const std::optional<Infrastructure::Store::DeckStore::DeckMutationErrorEnum> DeckMutationError) const {
-    if (not DeckMutationError.has_value()) {
+[[nodiscard]] std::optional<QString> DeckTreeController::RecoverableDeckMutationErrorToQString(
+    const std::optional<Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError) const {
+    if (not RecoverableDeckMutationError.has_value()) {
         return std::nullopt;
     }
-    switch (DeckMutationError.value()) {
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::DeckNameLengthError: {
+    switch (RecoverableDeckMutationError.value()) {
+    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
         return GetNameLengthErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::DuplicateDeckNameError: {
+    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::DuplicateDeckNameError: {
         return GetDuplicateNameErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
+    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
         return GetTargetLanguageCodeErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
+    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
         return GetParentDeckTargetLanguageMismatchErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::DeckMutationErrorEnum::DeckTreeCycleDetectionError: {
+    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError: {
         return GetDeckTreeCycleDetectionErrorMessage();
     }
     default:
-        Support::ThrowError("Unknown deck mutation error failure");
+        Support::ThrowError("Unknown recoverable deck mutation error");
     }
 }
 
@@ -55,7 +55,7 @@ DeckTreeController::DeckMutationErrorToQString(const std::optional<Infrastructur
         if (m_DeckTree.WouldCreateRootDeckDuplicateSiblingName(DeckName)) {
             return GetDuplicateNameErrorMessage();
         }
-        const std::optional<QString> ErrorMessage{ DeckMutationErrorToQString(m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
+        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
         if (not ErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
@@ -68,7 +68,7 @@ DeckTreeController::DeckMutationErrorToQString(const std::optional<Infrastructur
         if (m_DeckTree.WouldCreateChildDeckDuplicateSiblingName(DeckName, ParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const std::optional<QString> ErrorMessage{ DeckMutationErrorToQString(m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
+        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
         if (not ErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
@@ -87,7 +87,7 @@ DeckTreeController::DeckMutationErrorToQString(const std::optional<Infrastructur
         if (m_DeckTree.WouldMoveDeckDuplicateSiblingName(DeckId, NewParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const std::optional<QString> ErrorMessage{ DeckMutationErrorToQString(m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
+        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
         if (not ErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
@@ -100,7 +100,7 @@ DeckTreeController::DeckMutationErrorToQString(const std::optional<Infrastructur
         if (m_DeckTree.WouldRenameDeckDuplicateSiblingName(DeckId, NewDeckName)) {
             return GetDuplicateNameErrorMessage();
         }
-        const std::optional<QString> ErrorMessage{ DeckMutationErrorToQString(m_DeckStore.RenameDeck(DeckId, NewDeckName)) };
+        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.RenameDeck(DeckId, NewDeckName)) };
         if (not ErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
@@ -110,7 +110,7 @@ DeckTreeController::DeckMutationErrorToQString(const std::optional<Infrastructur
 
 [[nodiscard]] std::optional<QString> DeckTreeController::DeleteDeck(const QString& DeckId) noexcept {
     return Support::TryCatchWrapper([&]() -> std::optional<QString> {
-        const std::optional<QString> ErrorMessage{ DeckMutationErrorToQString(m_DeckStore.DeleteDeck(DeckId)) };
+        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.DeleteDeck(DeckId)) };
         if (not ErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(true);
         }

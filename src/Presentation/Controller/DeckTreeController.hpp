@@ -54,7 +54,8 @@ private:
     [[nodiscard]] QString GetTargetLanguageCodeErrorMessage() const;
     [[nodiscard]] QString GetParentDeckTargetLanguageMismatchErrorMessage() const;
     [[nodiscard]] QString GetDeckTreeCycleDetectionErrorMessage() const;
-    [[nodiscard]] std::optional<QString> DeckMutationErrorToQString(const std::optional<Infrastructure::Store::DeckStore::DeckMutationErrorEnum>) const;
+    [[nodiscard]] std::optional<QString>
+    RecoverableDeckMutationErrorToQString(const std::optional<Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum>) const;
     void RefreshDeckTree(const qint64) noexcept;
 };
 }

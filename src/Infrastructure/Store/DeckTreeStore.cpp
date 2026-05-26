@@ -7,6 +7,7 @@
 
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
 #include "Infrastructure/Store/FlatDeckTreeValidation.hpp"
+#include "Infrastructure/Store/QueryResultGuard.hpp"
 #include "Support/Fatal.hpp"
 
 namespace Infrastructure::Store {
@@ -22,9 +23,7 @@ DeckTreeStore::~DeckTreeStore() = default;
 
 [[nodiscard]] QVector<DeckTreeStore::DeckTreeRow> DeckTreeStore::ReadDeckTreeSnapshot(const qint64 AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadDeckTreeSnapshotPreparedStatement->Execute(static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
-    if (QueryResult->HasError()) {
-        Support::ThrowError(QueryResult->GetError());
-    }
+    ThrowOnQueryResultError(QueryResult);
     QVector<DeckTreeRow> DeckTreeRowQVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };

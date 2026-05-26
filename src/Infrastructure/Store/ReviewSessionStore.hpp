@@ -6,7 +6,6 @@
 #include <expected>
 #include <memory>
 #include <optional>
-#include <string_view>
 
 namespace duckdb {
 class Connection;
@@ -18,7 +17,7 @@ namespace Infrastructure::Store {
 
 class ReviewSessionStore final {
 public:
-    enum class ReviewSessionMutationErrorEnum : std::uint8_t {
+    enum class RecoverableReviewSessionMutationErrorEnum : std::uint8_t {
         ReviewSessionNameLengthError,
         ConflictingReviewSessionDeckSelfSelectionError,
         ConflictingReviewSessionDeckSubtreeSelectionError,
@@ -41,9 +40,9 @@ public:
     explicit ReviewSessionStore(duckdb::Connection&);
     ~ReviewSessionStore();
 
-    [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum>
+    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum>
     CreateOrReadExistingReviewSession(const QString&, const QString&, const QVector<ReviewSessionDeckSelection>&);
-    [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum>
+    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum>
     EditReviewSessionDeckSelections(const QString&, const QString&, const QString&, const QVector<ReviewSessionDeckSelection>&);
     void UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const QString&);
     void DeleteReviewSession(const QString&);
@@ -58,14 +57,14 @@ private:
     std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
 
     [[nodiscard]] std::optional<QString> TryReadReviewSessionIdByReviewSessionDefinitionKey(const QString&);
-    [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum>
+    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum>
     CreateOrReadExistingReviewSessionInCurrentTransaction(const QString&, const QString&, const QVector<ReviewSessionDeckSelection>&);
-    [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum> CreateReviewSession(const QString&, const QString&);
-    [[nodiscard]] std::optional<ReviewSessionMutationErrorEnum>
+    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum> CreateReviewSession(const QString&, const QString&);
+    [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum>
     CreateReviewSessionDeckSelection(const QString&, const QString&, ReviewSessionDeckSelectionTypeEnum);
-    void HandleRequiredReviewSessionMutation(const std::unique_ptr<duckdb::QueryResult>&, const std::string_view) const;
     void DeleteReviewSessionInCurrentTransaction(const QString&);
-    [[nodiscard]] std::optional<ReviewSessionMutationErrorEnum> HandleReviewSessionMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
+    [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum>
+    HandleRecoverableReviewSessionMutationError(const std::unique_ptr<duckdb::QueryResult>&) const;
 };
 
 }

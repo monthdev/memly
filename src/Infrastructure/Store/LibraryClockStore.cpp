@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "Infrastructure/Sql/QuerySqlResource.hpp"
+#include "Infrastructure/Store/QueryResultGuard.hpp"
 #include "Support/Fatal.hpp"
 
 namespace Infrastructure::Store {
@@ -23,9 +24,7 @@ LibraryClockStore::~LibraryClockStore() = default;
 [[nodiscard]] std::optional<qint64> LibraryClockStore::ReadNextLibraryRefreshAtMillisecondsSinceEpoch(const qint64 AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->Execute(
         static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
-    if (QueryResult->HasError()) {
-        Support::ThrowError(QueryResult->GetError());
-    }
+    ThrowOnQueryResultError(QueryResult);
     const auto QueryResultIterator{ QueryResult->begin() };
     const auto& QueryResultRow{ *QueryResultIterator };
     if (QueryResultRow.IsNull(0)) {
