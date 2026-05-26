@@ -80,8 +80,6 @@ CREATE MACRO IF NOT EXISTS card_review_scheduler_combo_is_valid (scheduler_type_
   AND fsrs_scheduler_id_value IS NOT NULL
 );
 
-CREATE MACRO IF NOT EXISTS review_session_deck_selection_type_is_subtree (review_session_deck_selection_type_value) AS review_session_deck_selection_type_value = 'subtree';
-
 CREATE TABLE IF NOT EXISTS fsrs_schedulers (
   id UUID PRIMARY KEY DEFAULT UUIDV7 (),
   name VARCHAR NOT NULL UNIQUE CHECK (settings_name_length_is_valid (name)),
@@ -271,14 +269,48 @@ CREATE TABLE IF NOT EXISTS review_session_deck_selections (
 
 CREATE INDEX IF NOT EXISTS review_session_deck_selections_deck_id_idx ON review_session_deck_selections (deck_id);
 
-CREATE TABLE IF NOT EXISTS default_review_session_deck_bindings (
-  root_deck_id UUID PRIMARY KEY REFERENCES decks (id),
-  review_session_id UUID NOT NULL UNIQUE REFERENCES review_sessions (id),
-  selection_type review_session_deck_selection_type NOT NULL DEFAULT 'subtree' CHECK (
-    review_session_deck_selection_type_is_subtree (selection_type)
-  ),
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (review_session_id, root_deck_id, selection_type) REFERENCES review_session_deck_selections (review_session_id, deck_id, selection_type)
+CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_self_selection_conflict_idx ON review_session_deck_selections (
+  review_session_id,
+  deck_id,
+  (
+    CASE
+      WHEN selection_type IN ('self', 'exclude_self') THEN 'self_selection_conflict'
+      ELSE NULL
+    END
+  )
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_subtree_selection_conflict_idx ON review_session_deck_selections (
+  review_session_id,
+  deck_id,
+  (
+    CASE
+      WHEN selection_type IN ('subtree', 'exclude_subtree') THEN 'subtree_selection_conflict'
+      ELSE NULL
+    END
+  )
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_include_selection_conflict_idx ON review_session_deck_selections (
+  review_session_id,
+  deck_id,
+  (
+    CASE
+      WHEN selection_type IN ('self', 'subtree') THEN 'include_selection_conflict'
+      ELSE NULL
+    END
+  )
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_exclude_selection_conflict_idx ON review_session_deck_selections (
+  review_session_id,
+  deck_id,
+  (
+    CASE
+      WHEN selection_type IN ('exclude_self', 'exclude_subtree') THEN 'exclude_selection_conflict'
+      ELSE NULL
+    END
+  )
 );
 
 CREATE VIEW IF NOT EXISTS deck_subtree_membership_view AS

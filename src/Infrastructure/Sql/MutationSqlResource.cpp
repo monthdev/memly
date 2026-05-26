@@ -24,16 +24,8 @@ namespace Infrastructure::Sql {
     return ReadSqlResourceBytes(":/Sql/Mutation/CreateReviewSession.sql");
 }
 
-[[nodiscard]] std::string CreateDefaultReviewSessionSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/CreateDefaultReviewSession.sql");
-}
-
 [[nodiscard]] std::string CreateReviewSessionDeckSelectionSql() {
     return ReadSqlResourceBytes(":/Sql/Mutation/CreateReviewSessionDeckSelection.sql");
-}
-
-[[nodiscard]] std::string CreateDefaultReviewSessionDeckBindingSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/CreateDefaultReviewSessionDeckBinding.sql");
 }
 
 [[nodiscard]] std::string UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql() {
@@ -50,10 +42,6 @@ namespace Infrastructure::Sql {
 
 [[nodiscard]] std::string DeleteDeckSql() {
     return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeck.sql");
-}
-
-[[nodiscard]] std::string DeleteDefaultReviewSessionDeckBindingSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDefaultReviewSessionDeckBinding.sql");
 }
 
 [[nodiscard]] std::string DeleteReviewSessionDeckSelectionsSql() {
