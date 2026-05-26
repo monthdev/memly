@@ -18,16 +18,18 @@ jobs:
       CMAKE_BUILD_TYPE: Debug
       CC: clang
       CXX: clang++
+      QT_VERSION: "6.11.1"
+      QT_ARCH: "linux_gcc_64"
+      QT_DIR: ${{ github.workspace }}/Qt
 
     steps:
-      - name: Install toolchain and Qt
+      - name: Install toolchain
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y \
             build-essential \
             clang clang-tidy cmake ninja-build \
-            qt6-base-dev qt6-declarative-dev qt6-tools-dev \
-            qt6-base-dev-tools qt6-qmltooling-plugins \
+            python3 python3-venv \
             libgl1-mesa-dev \
             libxkbcommon-dev \
             libgtest-dev \
@@ -41,6 +43,28 @@ jobs:
       - name: Mark workspace safe
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Cache Qt
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.QT_DIR }}
+          key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
+
+      - name: Install aqtinstall
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install "aqtinstall==3.3.*"
+          python -m aqt version
+
+      - name: Install Qt ${{ env.QT_VERSION }}
+        run: |
+          if [[ ! -d "${QT_DIR}/${QT_VERSION}/gcc_64" ]]; then
+            . .venv/bin/activate
+            python -m aqt install-qt linux desktop "${QT_VERSION}" "${QT_ARCH}" \
+              --outputdir "${QT_DIR}"
+          fi
 
       - name: Detect changed source files
         id: changed
@@ -91,6 +115,7 @@ jobs:
           cmake -S . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
+            -DCMAKE_PREFIX_PATH="${QT_DIR}/${QT_VERSION}/gcc_64" \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Run clang-tidy
