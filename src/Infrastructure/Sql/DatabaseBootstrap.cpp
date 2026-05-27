@@ -14,9 +14,9 @@
 namespace Infrastructure::Sql {
 namespace {
 void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(M00_MigrationsTableSql()) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(M00_SchemaMigrationsLogSql()) };
     ThrowOnQueryResultError(*QueryResult);
-    QueryResult = DatabaseConnection.Query(ReadMigrationsTableSql());
+    QueryResult = DatabaseConnection.Query(ReadSchemaMigrationsLogSql());
     ThrowOnQueryResultError(*QueryResult);
     std::vector<std::size_t> AppliedMigrationVersionVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
@@ -38,7 +38,7 @@ void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
         const std::string& MigrationSql{ MigrationSqlFunctionArray.at(UnappliedMigrationVersionIndex)() };
         QueryResult = DatabaseConnection.Query(MigrationSql);
         ThrowOnQueryResultError(*QueryResult);
-        QueryResult = DatabaseConnection.Query(CreateMigrationSql(), static_cast<std::uint32_t>(UnappliedMigrationVersionIndex + 1));
+        QueryResult = DatabaseConnection.Query(CreateSchemaMigrationsLogEntrySql(), static_cast<std::uint32_t>(UnappliedMigrationVersionIndex + 1));
         ThrowOnQueryResultError(*QueryResult);
     }
 }

@@ -1,4 +1,0 @@
-SELECT
-  version
-FROM
-  migrations;

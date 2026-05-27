@@ -63,8 +63,7 @@ private:
     [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum>
     CreateReviewSessionDeckSelection(const QString&, const QString&, ReviewSessionDeckSelectionTypeEnum);
     void DeleteReviewSessionInCurrentTransaction(const QString&);
-    [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum>
-    HandleRecoverableReviewSessionMutationError(duckdb::QueryResult&) const;
+    [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum> HandleRecoverableReviewSessionMutationError(duckdb::QueryResult&) const;
 };
 
 }
