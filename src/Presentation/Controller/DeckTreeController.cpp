@@ -53,11 +53,12 @@ namespace Presentation::Controller {
         if (m_DeckTree.WouldCreateRootDeckDuplicateSiblingName(DeckName)) {
             return GetDuplicateNameErrorMessage();
         }
-        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
-        if (not ErrorMessage.has_value()) {
+        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
+            m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
+        if (not RecoverableDeckMutationErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
-        return ErrorMessage;
+        return RecoverableDeckMutationErrorMessage;
     });
 }
 
@@ -66,11 +67,12 @@ namespace Presentation::Controller {
         if (m_DeckTree.WouldCreateChildDeckDuplicateSiblingName(DeckName, ParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
-        if (not ErrorMessage.has_value()) {
+        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
+            m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
+        if (not RecoverableDeckMutationErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
-        return ErrorMessage;
+        return RecoverableDeckMutationErrorMessage;
     });
 }
 
@@ -85,11 +87,12 @@ namespace Presentation::Controller {
         if (m_DeckTree.WouldMoveDeckDuplicateSiblingName(DeckId, NewParentDeckId)) {
             return GetDuplicateNameErrorMessage();
         }
-        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
-        if (not ErrorMessage.has_value()) {
+        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
+            m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
+        if (not RecoverableDeckMutationErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
-        return ErrorMessage;
+        return RecoverableDeckMutationErrorMessage;
     });
 }
 
@@ -98,21 +101,21 @@ namespace Presentation::Controller {
         if (m_DeckTree.WouldRenameDeckDuplicateSiblingName(DeckId, NewDeckName)) {
             return GetDuplicateNameErrorMessage();
         }
-        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.RenameDeck(DeckId, NewDeckName)) };
-        if (not ErrorMessage.has_value()) {
+        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.RenameDeck(DeckId, NewDeckName)) };
+        if (not RecoverableDeckMutationErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         }
-        return ErrorMessage;
+        return RecoverableDeckMutationErrorMessage;
     });
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::DeleteDeck(const QString& DeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        const std::optional<QString> ErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.DeleteDeck(DeckId)) };
-        if (not ErrorMessage.has_value()) {
+        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.DeleteDeck(DeckId)) };
+        if (not RecoverableDeckMutationErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(true);
         }
-        return ErrorMessage;
+        return RecoverableDeckMutationErrorMessage;
     });
 }
 
