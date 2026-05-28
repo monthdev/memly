@@ -1,18 +1,18 @@
-#include "Infrastructure/Store/LibraryClockStore.hpp"
+#include "Infrastructure/Store/Library/LibraryClockStore.hpp"
 
 #include <duckdb.hpp>
 
 #include <cstdint>
 #include <memory>
 
-#include "Infrastructure/Sql/QuerySqlResource.hpp"
+#include "Infrastructure/Sql/Query/Library/LibraryQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Library {
 
 LibraryClockStore::LibraryClockStore(duckdb::Connection& DatabaseConnection)
     : m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
-          Infrastructure::Sql::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql()) } {
+          Infrastructure::Sql::Query::Library::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql()) } {
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement);
 }
 

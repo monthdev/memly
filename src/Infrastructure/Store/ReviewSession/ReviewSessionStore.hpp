@@ -13,7 +13,7 @@ class PreparedStatement;
 class QueryResult;
 }
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::ReviewSession {
 
 class ReviewSessionStore final {
 public:

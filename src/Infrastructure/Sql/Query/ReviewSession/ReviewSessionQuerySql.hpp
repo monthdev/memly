@@ -2,11 +2,7 @@
 
 #include <string>
 
-namespace Infrastructure::Sql {
-
-[[nodiscard]] std::string ReadDeckTreeSnapshotSql();
-
-[[nodiscard]] std::string ReadNextLibraryRefreshAtMillisecondsSinceEpochSql();
+namespace Infrastructure::Sql::Query::ReviewSession {
 
 [[nodiscard]] std::string ReadReviewSessionListSql();
 

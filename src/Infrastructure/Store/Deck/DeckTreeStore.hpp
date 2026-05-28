@@ -11,7 +11,7 @@ class Connection;
 class PreparedStatement;
 }
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Deck {
 
 class DeckTreeStore final {
 public:

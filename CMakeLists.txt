@@ -56,11 +56,51 @@ file(GLOB INFRASTRUCTURE_CLIENT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/I
 file(GLOB CORE_SCHEDULER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/Scheduler/*.cpp")
 file(GLOB CORE_SCHEDULER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/Scheduler/*.[Hh]*")
 
-file(GLOB INFRASTRUCTURE_STORE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/*.cpp")
-file(GLOB INFRASTRUCTURE_STORE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/*.[Hh]*")
+file(
+  GLOB
+  INFRASTRUCTURE_STORE_CPP
+  CONFIGURE_DEPENDS
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/Deck/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/Library/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/ReviewSession/*.cpp"
+)
+file(
+  GLOB
+  INFRASTRUCTURE_STORE_HDR
+  CONFIGURE_DEPENDS
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/Deck/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/Library/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Store/ReviewSession/*.[Hh]*"
+)
 
-file(GLOB INFRASTRUCTURE_SQL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/*.cpp")
-file(GLOB INFRASTRUCTURE_SQL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/*.[Hh]*")
+file(
+  GLOB
+  INFRASTRUCTURE_SQL_CPP
+  CONFIGURE_DEPENDS
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Migration/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/Deck/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/ReviewSession/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Deck/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Library/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/ReviewSession/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/*.cpp"
+)
+file(
+  GLOB
+  INFRASTRUCTURE_SQL_HDR
+  CONFIGURE_DEPENDS
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Migration/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/Deck/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/ReviewSession/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Deck/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Library/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/ReviewSession/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/*.[Hh]*"
+)
 
 file(GLOB RUNTIME_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Runtime/*.cpp")
 file(GLOB RUNTIME_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Runtime/*.[Hh]*")
@@ -80,10 +120,13 @@ file(
   GLOB
   SQL_FILES
   CONFIGURE_DEPENDS
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Migration/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Migration/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/Deck/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/ReviewSession/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Deck/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Library/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/ReviewSession/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/Statement/*.sql"
 )
 
 file(GLOB TEST_APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/App/*.cpp")

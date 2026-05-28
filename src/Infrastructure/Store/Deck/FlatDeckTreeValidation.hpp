@@ -2,9 +2,9 @@
 
 #include <QVector>
 
-#include "Infrastructure/Store/DeckTreeStore.hpp"
+#include "Infrastructure/Store/Deck/DeckTreeStore.hpp"
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Deck {
 
 void ValidateFlatDeckTree(const QVector<DeckTreeStore::DeckTreeRow>&);
 

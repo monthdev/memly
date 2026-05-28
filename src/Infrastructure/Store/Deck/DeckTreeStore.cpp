@@ -1,18 +1,18 @@
-#include "Infrastructure/Store/DeckTreeStore.hpp"
+#include "Infrastructure/Store/Deck/DeckTreeStore.hpp"
 
 #include <duckdb.hpp>
 
 #include <cstdint>
 #include <memory>
 
-#include "Infrastructure/Sql/QuerySqlResource.hpp"
+#include "Infrastructure/Sql/Query/Deck/DeckQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
-#include "Infrastructure/Store/FlatDeckTreeValidation.hpp"
+#include "Infrastructure/Store/Deck/FlatDeckTreeValidation.hpp"
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Deck {
 
 DeckTreeStore::DeckTreeStore(duckdb::Connection& DatabaseConnection)
-    : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReadDeckTreeSnapshotSql()) } {
+    : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Query::Deck::ReadDeckTreeSnapshotSql()) } {
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_ReadDeckTreeSnapshotPreparedStatement);
 }
 

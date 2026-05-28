@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <optional>
 
-#include "Infrastructure/Store/LibraryClockStore.hpp"
+#include "Infrastructure/Store/Library/LibraryClockStore.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Application::Coordinator {

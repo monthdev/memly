@@ -1,11 +1,11 @@
-#include "Infrastructure/Store/FlatDeckTreeValidation.hpp"
+#include "Infrastructure/Store/Deck/FlatDeckTreeValidation.hpp"
 
 #include <QHash>
 #include <QSet>
 
 #include "Runtime/Crash.hpp"
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Deck {
 
 namespace {
 

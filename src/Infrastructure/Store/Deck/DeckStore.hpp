@@ -11,7 +11,7 @@ class PreparedStatement;
 class QueryResult;
 }
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Deck {
 
 class DeckStore final {
 public:

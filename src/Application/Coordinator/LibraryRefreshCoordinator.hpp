@@ -5,7 +5,7 @@
 #include <QTimer>
 #include <QtTypes>
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Library {
 class LibraryClockStore;
 }
 
@@ -15,7 +15,7 @@ class LibraryRefreshCoordinator final : public QObject {
     Q_OBJECT
 
 public:
-    explicit LibraryRefreshCoordinator(Infrastructure::Store::LibraryClockStore& LibraryClockStore, QObject* Parent = nullptr)
+    explicit LibraryRefreshCoordinator(Infrastructure::Store::Library::LibraryClockStore& LibraryClockStore, QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_LibraryClockStore{ LibraryClockStore }
         , m_LibraryRefreshQTimer{}
@@ -35,7 +35,7 @@ signals:
     void RefreshRequested(const qint64);
 
 private:
-    Infrastructure::Store::LibraryClockStore& m_LibraryClockStore;
+    Infrastructure::Store::Library::LibraryClockStore& m_LibraryClockStore;
     QTimer m_LibraryRefreshQTimer;
     qint64 m_AsOfMillisecondsSinceEpoch;
 

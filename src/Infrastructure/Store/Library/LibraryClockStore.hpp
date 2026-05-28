@@ -9,7 +9,7 @@ class Connection;
 class PreparedStatement;
 }
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Library {
 
 class LibraryClockStore final {
 public:

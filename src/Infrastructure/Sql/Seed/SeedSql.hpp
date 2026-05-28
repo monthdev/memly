@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Sql::Seed {
 
 [[nodiscard]] std::string CreateDefaultFsrs7SchedulerSql();
 

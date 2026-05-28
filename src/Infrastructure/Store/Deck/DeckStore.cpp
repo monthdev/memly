@@ -1,24 +1,24 @@
-#include "Infrastructure/Store/DeckStore.hpp"
+#include "Infrastructure/Store/Deck/DeckStore.hpp"
 
 #include <duckdb.hpp>
 
 #include <string_view>
 
-#include "Infrastructure/Sql/MutationSqlResource.hpp"
+#include "Infrastructure/Sql/Mutation/Deck/DeckMutationSql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 #include "Runtime/Crash.hpp"
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Deck {
 
 DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
     : m_DatabaseConnection{ DatabaseConnection }
-    , m_CreateRootDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::CreateRootDeckSql()) }
-    , m_CreateChildDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::CreateChildDeckSql()) }
-    , m_MoveDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::MoveDeckSql()) }
-    , m_RenameDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::RenameDeckSql()) }
-    , m_DeleteDeckCardReviewsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardReviewsSql()) }
-    , m_DeleteDeckCardsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardsSql()) }
-    , m_DeleteDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckSql()) } {
+    , m_CreateRootDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::CreateRootDeckSql()) }
+    , m_CreateChildDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::CreateChildDeckSql()) }
+    , m_MoveDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::MoveDeckSql()) }
+    , m_RenameDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::RenameDeckSql()) }
+    , m_DeleteDeckCardReviewsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckCardReviewsSql()) }
+    , m_DeleteDeckCardsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckCardsSql()) }
+    , m_DeleteDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckSql()) } {
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_MoveDeckPreparedStatement);

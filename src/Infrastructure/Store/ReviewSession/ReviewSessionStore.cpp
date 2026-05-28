@@ -1,4 +1,4 @@
-#include "Infrastructure/Store/ReviewSessionStore.hpp"
+#include "Infrastructure/Store/ReviewSession/ReviewSessionStore.hpp"
 
 #include <duckdb.hpp>
 
@@ -6,28 +6,32 @@
 #include <memory>
 #include <string_view>
 
-#include "Infrastructure/Sql/MutationSqlResource.hpp"
-#include "Infrastructure/Sql/QuerySqlResource.hpp"
+#include "Infrastructure/Sql/Mutation/ReviewSession/ReviewSessionMutationSql.hpp"
+#include "Infrastructure/Sql/Query/ReviewSession/ReviewSessionQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 #include "Runtime/Crash.hpp"
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::ReviewSession {
 
 ReviewSessionStore::ReviewSessionStore(duckdb::Connection& DatabaseConnection)
-    : m_CreateCustomReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::CreateCustomReviewSessionSql()) }
-    , m_CreateDefaultReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::CreateDefaultReviewSessionSql()) }
-    , m_CreateCustomReviewSessionDeckSelectionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::CreateCustomReviewSessionDeckSelectionSql()) }
-    , m_RenameReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::RenameReviewSessionSql()) }
-    , m_UpdateReviewSessionToDefaultPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::UpdateReviewSessionToDefaultSql()) }
-    , m_UpdateReviewSessionToCustomPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::UpdateReviewSessionToCustomSql()) }
+    : m_CreateCustomReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::ReviewSession::CreateCustomReviewSessionSql()) }
+    , m_CreateDefaultReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::ReviewSession::CreateDefaultReviewSessionSql()) }
+    , m_CreateCustomReviewSessionDeckSelectionPreparedStatement{ DatabaseConnection.Prepare(
+          Infrastructure::Sql::Mutation::ReviewSession::CreateCustomReviewSessionDeckSelectionSql()) }
+    , m_RenameReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::ReviewSession::RenameReviewSessionSql()) }
+    , m_UpdateReviewSessionToDefaultPreparedStatement{ DatabaseConnection.Prepare(
+          Infrastructure::Sql::Mutation::ReviewSession::UpdateReviewSessionToDefaultSql()) }
+    , m_UpdateReviewSessionToCustomPreparedStatement{ DatabaseConnection.Prepare(
+          Infrastructure::Sql::Mutation::ReviewSession::UpdateReviewSessionToCustomSql()) }
     , m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
-          Infrastructure::Sql::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql()) }
+          Infrastructure::Sql::Mutation::ReviewSession::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql()) }
     , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{ DatabaseConnection.Prepare(
-          Infrastructure::Sql::DeleteCustomReviewSessionDeckSelectionsSql()) }
-    , m_DeleteReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::DeleteReviewSessionSql()) }
-    , m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReadDefaultReviewSessionIdByRootDeckIdSql()) }
+          Infrastructure::Sql::Mutation::ReviewSession::DeleteCustomReviewSessionDeckSelectionsSql()) }
+    , m_DeleteReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::ReviewSession::DeleteReviewSessionSql()) }
+    , m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement{ DatabaseConnection.Prepare(
+          Infrastructure::Sql::Query::ReviewSession::ReadDefaultReviewSessionIdByRootDeckIdSql()) }
     , m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{ DatabaseConnection.Prepare(
-          Infrastructure::Sql::ReadReviewSessionIdByReviewSessionDefinitionKeySql()) } {
+          Infrastructure::Sql::Query::ReviewSession::ReadReviewSessionIdByReviewSessionDefinitionKeySql()) } {
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateCustomReviewSessionPreparedStatement);
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateDefaultReviewSessionPreparedStatement);
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateCustomReviewSessionDeckSelectionPreparedStatement);

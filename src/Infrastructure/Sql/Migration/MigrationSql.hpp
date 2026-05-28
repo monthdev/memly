@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Sql::Migration {
 
 [[nodiscard]] std::string M00_SchemaMigrationsLogSql();
 

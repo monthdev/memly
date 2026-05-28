@@ -6,8 +6,8 @@
 #include <optional>
 
 #include "Application/Coordinator/LibraryRefreshCoordinator.hpp"
-#include "Infrastructure/Store/DeckStore.hpp"
-#include "Infrastructure/Store/DeckTreeStore.hpp"
+#include "Infrastructure/Store/Deck/DeckStore.hpp"
+#include "Infrastructure/Store/Deck/DeckTreeStore.hpp"
 #include "Presentation/Model/DeckTreeModel.hpp"
 
 namespace Presentation::Controller {
@@ -18,8 +18,8 @@ class DeckTreeController : public QObject {
 
 public:
     explicit DeckTreeController(Application::Coordinator::LibraryRefreshCoordinator& LibraryRefreshCoordinator,
-                                Infrastructure::Store::DeckStore& DeckStore,
-                                Infrastructure::Store::DeckTreeStore& DeckTreeStore,
+                                Infrastructure::Store::Deck::DeckStore& DeckStore,
+                                Infrastructure::Store::Deck::DeckTreeStore& DeckTreeStore,
                                 QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_LibraryRefreshCoordinator{ LibraryRefreshCoordinator }
@@ -45,8 +45,8 @@ public:
 
 private:
     Application::Coordinator::LibraryRefreshCoordinator& m_LibraryRefreshCoordinator;
-    Infrastructure::Store::DeckStore& m_DeckStore;
-    Infrastructure::Store::DeckTreeStore& m_DeckTreeStore;
+    Infrastructure::Store::Deck::DeckStore& m_DeckStore;
+    Infrastructure::Store::Deck::DeckTreeStore& m_DeckTreeStore;
     Model::DeckTreeModel m_DeckTree;
 
     [[nodiscard]] QString GetNameLengthErrorMessage() const;
@@ -55,7 +55,7 @@ private:
     [[nodiscard]] QString GetParentDeckTargetLanguageMismatchErrorMessage() const;
     [[nodiscard]] QString GetDeckTreeCycleDetectionErrorMessage() const;
     [[nodiscard]] std::optional<QString>
-    RecoverableDeckMutationErrorToQString(const std::optional<Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum>) const;
+    RecoverableDeckMutationErrorToQString(const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum>) const;
     void RefreshDeckTree(const qint64) noexcept;
 };
 }

@@ -12,10 +12,16 @@ class Connection;
 class DuckDB;
 }
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::Deck {
 class DeckStore;
 class DeckTreeStore;
+}
+
+namespace Infrastructure::Store::Library {
 class LibraryClockStore;
+}
+
+namespace Infrastructure::Store::ReviewSession {
 class ReviewSessionListStore;
 class ReviewSessionStore;
 }
@@ -27,20 +33,20 @@ public:
     static void Initialize(const QString&);
 
     static Application::Coordinator::LibraryRefreshCoordinator& GetRequiredLibraryRefreshCoordinator() noexcept;
-    static Infrastructure::Store::DeckStore& GetRequiredDeckStore() noexcept;
-    static Infrastructure::Store::DeckTreeStore& GetRequiredDeckTreeStore() noexcept;
-    static Infrastructure::Store::ReviewSessionListStore& GetRequiredReviewSessionListStore() noexcept;
-    static Infrastructure::Store::ReviewSessionStore& GetRequiredReviewSessionStore() noexcept;
+    static Infrastructure::Store::Deck::DeckStore& GetRequiredDeckStore() noexcept;
+    static Infrastructure::Store::Deck::DeckTreeStore& GetRequiredDeckTreeStore() noexcept;
+    static Infrastructure::Store::ReviewSession::ReviewSessionListStore& GetRequiredReviewSessionListStore() noexcept;
+    static Infrastructure::Store::ReviewSession::ReviewSessionStore& GetRequiredReviewSessionStore() noexcept;
 
 private:
     static std::unique_ptr<duckdb::DuckDB> s_Database;
     static std::unique_ptr<duckdb::Connection> s_DatabaseConnection;
-    static std::unique_ptr<Infrastructure::Store::LibraryClockStore> s_LibraryClockStore;
+    static std::unique_ptr<Infrastructure::Store::Library::LibraryClockStore> s_LibraryClockStore;
     static std::unique_ptr<Application::Coordinator::LibraryRefreshCoordinator> s_LibraryRefreshCoordinator;
-    static std::unique_ptr<Infrastructure::Store::DeckStore> s_DeckStore;
-    static std::unique_ptr<Infrastructure::Store::DeckTreeStore> s_DeckTreeStore;
-    static std::unique_ptr<Infrastructure::Store::ReviewSessionListStore> s_ReviewSessionListStore;
-    static std::unique_ptr<Infrastructure::Store::ReviewSessionStore> s_ReviewSessionStore;
+    static std::unique_ptr<Infrastructure::Store::Deck::DeckStore> s_DeckStore;
+    static std::unique_ptr<Infrastructure::Store::Deck::DeckTreeStore> s_DeckTreeStore;
+    static std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionListStore> s_ReviewSessionListStore;
+    static std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionStore> s_ReviewSessionStore;
 };
 
 }

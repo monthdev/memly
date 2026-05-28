@@ -1,4 +1,4 @@
-#include "Infrastructure/Store/ReviewSessionListStore.hpp"
+#include "Infrastructure/Store/ReviewSession/ReviewSessionListStore.hpp"
 
 #include <duckdb.hpp>
 
@@ -6,13 +6,13 @@
 #include <memory>
 #include <optional>
 
-#include "Infrastructure/Sql/QuerySqlResource.hpp"
+#include "Infrastructure/Sql/Query/ReviewSession/ReviewSessionQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
-namespace Infrastructure::Store {
+namespace Infrastructure::Store::ReviewSession {
 
 ReviewSessionListStore::ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
-    : m_ReadReviewSessionListPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReadReviewSessionListSql()) } {
+    : m_ReadReviewSessionListPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Query::ReviewSession::ReadReviewSessionListSql()) } {
     Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_ReadReviewSessionListPreparedStatement);
 }
 

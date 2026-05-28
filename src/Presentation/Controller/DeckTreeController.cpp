@@ -25,24 +25,24 @@ namespace Presentation::Controller {
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::RecoverableDeckMutationErrorToQString(
-    const std::optional<Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError) const {
+    const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError) const {
     if (not RecoverableDeckMutationError.has_value()) {
         return std::nullopt;
     }
     switch (RecoverableDeckMutationError.value()) {
-    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
+    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
         return GetNameLengthErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::DuplicateDeckNameError: {
+    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DuplicateDeckNameError: {
         return GetDuplicateNameErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
+    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
         return GetTargetLanguageCodeErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
+    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
         return GetParentDeckTargetLanguageMismatchErrorMessage();
     }
-    case Infrastructure::Store::DeckStore::RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError: {
+    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError: {
         return GetDeckTreeCycleDetectionErrorMessage();
     }
     }
@@ -121,7 +121,8 @@ namespace Presentation::Controller {
 
 void DeckTreeController::RefreshDeckTree(const qint64 AsOfMillisecondsSinceEpoch) noexcept {
     Runtime::TryCatchWrapper([&] {
-        const QVector<Infrastructure::Store::DeckTreeStore::DeckTreeRow> DeckTreeRowQVector{ m_DeckTreeStore.ReadDeckTreeSnapshot(AsOfMillisecondsSinceEpoch) };
+        const QVector<Infrastructure::Store::Deck::DeckTreeStore::DeckTreeRow> DeckTreeRowQVector{ m_DeckTreeStore.ReadDeckTreeSnapshot(
+            AsOfMillisecondsSinceEpoch) };
         QVector<Model::DeckTreeModel::DeckNodeData> DeckNodeDataQVector{};
         DeckNodeDataQVector.reserve(DeckTreeRowQVector.size());
         for (const auto& DeckTreeRow : DeckTreeRowQVector) {
