@@ -19,13 +19,13 @@ DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
     , m_DeleteDeckCardReviewsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardReviewsSql()) }
     , m_DeleteDeckCardsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckCardsSql()) }
     , m_DeleteDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::DeleteDeckSql()) } {
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_MoveDeckPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_RenameDeckPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckCardReviewsPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
+    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
+    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
+    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_MoveDeckPreparedStatement);
+    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_RenameDeckPreparedStatement);
+    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_DeleteDeckCardReviewsPreparedStatement);
+    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
+    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
 }
 
 DeckStore::~DeckStore() = default;
@@ -41,7 +41,7 @@ DeckStore::~DeckStore() = default;
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Child deck creation did not insert a deck");
+    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Child deck creation did not insert a deck");
     return std::nullopt;
 }
 
@@ -53,7 +53,7 @@ DeckStore::~DeckStore() = default;
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck move did not update a deck");
+    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Deck move did not update a deck");
     return std::nullopt;
 }
 
@@ -63,7 +63,7 @@ DeckStore::~DeckStore() = default;
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck rename did not update a deck");
+    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Deck rename did not update a deck");
     return std::nullopt;
 }
 
@@ -71,12 +71,12 @@ DeckStore::~DeckStore() = default;
     m_DatabaseConnection.BeginTransaction();
     try {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId.toStdString()) };
-        Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+        Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
         QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId.toStdString());
-        Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+        Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
         QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId.toStdString());
-        Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
-        Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck delete did not delete a deck");
+        Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
+        Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Deck delete did not delete a deck");
         m_DatabaseConnection.Commit();
         return std::nullopt;
     } catch (...) {

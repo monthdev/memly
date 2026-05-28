@@ -13,14 +13,14 @@ namespace Infrastructure::Store {
 
 ReviewSessionListStore::ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
     : m_ReadReviewSessionListPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReadReviewSessionListSql()) } {
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadReviewSessionListPreparedStatement);
+    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_ReadReviewSessionListPreparedStatement);
 }
 
 ReviewSessionListStore::~ReviewSessionListStore() = default;
 
 [[nodiscard]] QVector<ReviewSessionListStore::ReviewSessionListRow> ReviewSessionListStore::ReadReviewSessionList() {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionListPreparedStatement->Execute() };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
     QVector<ReviewSessionListRow> ReviewSessionListRowQVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };

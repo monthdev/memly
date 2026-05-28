@@ -9,10 +9,10 @@ class QueryResult;
 
 namespace Infrastructure::Sql {
 
-void ThrowOnQueryResultError(duckdb::QueryResult&);
+void ThrowUnconditionallyOnQueryResultError(duckdb::QueryResult&);
 
-void ThrowOnPreparedStatementError(duckdb::PreparedStatement&);
+void ThrowUnconditionallyOnPreparedStatementError(duckdb::PreparedStatement&);
 
-void ThrowOnMutationNoOp(duckdb::QueryResult&, const std::string_view);
+void ThrowUnconditionallyOnMutationNoOp(duckdb::QueryResult&, const std::string_view);
 
 }
