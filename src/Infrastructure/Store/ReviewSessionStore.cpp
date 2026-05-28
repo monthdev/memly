@@ -13,22 +13,6 @@
 
 namespace Infrastructure::Store {
 
-namespace {
-std::string_view ReviewSessionDeckSelectionTypeToString(const ReviewSessionStore::ReviewSessionDeckSelectionTypeEnum ReviewSessionDeckSelectionType) {
-    switch (ReviewSessionDeckSelectionType) {
-    case ReviewSessionStore::ReviewSessionDeckSelectionTypeEnum::Self:
-        return "self";
-    case ReviewSessionStore::ReviewSessionDeckSelectionTypeEnum::Subtree:
-        return "subtree";
-    case ReviewSessionStore::ReviewSessionDeckSelectionTypeEnum::ExcludeSelf:
-        return "exclude_self";
-    case ReviewSessionStore::ReviewSessionDeckSelectionTypeEnum::ExcludeSubtree:
-        return "exclude_subtree";
-    }
-}
-
-}
-
 ReviewSessionStore::ReviewSessionStore(duckdb::Connection& DatabaseConnection)
     : m_CreateCustomReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::CreateCustomReviewSessionSql()) }
     , m_CreateDefaultReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::CreateDefaultReviewSessionSql()) }
@@ -64,12 +48,14 @@ ReviewSessionStore::CreateOrReadExistingDefaultReviewSession(const QString& Root
     if (const std::optional<QString> ExistingReviewSessionId{ TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) }; ExistingReviewSessionId.has_value()) {
         return ExistingReviewSessionId.value();
     }
-    std::expected<QString, RecoverableReviewSessionMutationErrorEnum> NewDefaultReviewSessionId{ CreateDefaultReviewSession(RootDeckId,
-                                                                                                                            ReviewSessionDefinitionKey) };
-    if (not NewDefaultReviewSessionId.has_value()) {
-        return std::unexpected{ NewDefaultReviewSessionId.error() };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateDefaultReviewSessionPreparedStatement->Execute(ReviewSessionDefinitionKey.toStdString(),
+                                                                                                             RootDeckId.toStdString()) };
+    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
+    if (RecoverableReviewSessionMutationError.has_value()) {
+        return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    return NewDefaultReviewSessionId.value();
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Default review session creation did not insert a review session");
+    return QString{ (*QueryResult->begin()).GetValue<std::string>(0).c_str() };
 }
 
 [[nodiscard]] std::expected<QString, ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
@@ -80,19 +66,21 @@ ReviewSessionStore::CreateOrReadExistingCustomReviewSession(const QString& Revie
         ExistingReviewSessionId.has_value()) {
         return ExistingReviewSessionId.value();
     }
-    std::expected<QString, RecoverableReviewSessionMutationErrorEnum> NewCustomReviewSessionId{ CreateCustomReviewSession(ReviewSessionName,
-                                                                                                                          ReviewSessionDefinitionKey) };
-    if (not NewCustomReviewSessionId.has_value()) {
-        return std::unexpected{ NewCustomReviewSessionId.error() };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateCustomReviewSessionPreparedStatement->Execute(ReviewSessionName.toStdString(),
+                                                                                                            ReviewSessionDefinitionKey.toStdString()) };
+    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
+    if (RecoverableReviewSessionMutationError.has_value()) {
+        return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
+    const QString NewCustomReviewSessionId{ (*QueryResult->begin()).GetValue<std::string>(0).c_str() };
     for (const ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionQVector) {
-        std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ CreateCustomReviewSessionDeckSelection(
-            NewCustomReviewSessionId.value(), ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType) };
+        RecoverableReviewSessionMutationError = CreateCustomReviewSessionDeckSelection(
+            NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
         if (RecoverableReviewSessionMutationError.has_value()) {
             return std::unexpected{ RecoverableReviewSessionMutationError.value() };
         }
     }
-    return NewCustomReviewSessionId.value();
+    return NewCustomReviewSessionId;
 }
 
 [[nodiscard]] std::optional<ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
@@ -114,11 +102,13 @@ ReviewSessionStore::EditReviewSessionToDefault(const QString& CurrentReviewSessi
             return std::unexpected{ RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ UpdateReviewSessionToDefault(
-        CurrentReviewSessionId, RootDeckId, ReviewSessionDefinitionKey) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_UpdateReviewSessionToDefaultPreparedStatement->Execute(
+        RootDeckId.toStdString(), ReviewSessionDefinitionKey.toStdString(), CurrentReviewSessionId.toStdString()) };
+    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session default edit did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     return CurrentReviewSessionId;
 }
@@ -133,11 +123,13 @@ ReviewSessionStore::EditReviewSessionToCustom(const QString& CurrentReviewSessio
             return std::unexpected{ RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ UpdateReviewSessionToCustom(CurrentReviewSessionId,
-                                                                                                                                ReviewSessionDefinitionKey) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_UpdateReviewSessionToCustomPreparedStatement->Execute(ReviewSessionDefinitionKey.toStdString(),
+                                                                                                              CurrentReviewSessionId.toStdString()) };
+    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session custom edit did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     for (const ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionQVector) {
         RecoverableReviewSessionMutationError =
@@ -182,58 +174,25 @@ void ReviewSessionStore::DeleteReviewSession(const QString& ReviewSessionId) {
     return std::nullopt;
 }
 
-[[nodiscard]] std::expected<QString, ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionStore::CreateCustomReviewSession(const QString& ReviewSessionName, const QString& ReviewSessionDefinitionKey) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateCustomReviewSessionPreparedStatement->Execute(ReviewSessionName.toStdString(),
-                                                                                                            ReviewSessionDefinitionKey.toStdString()) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
-    if (RecoverableReviewSessionMutationError.has_value()) {
-        return std::unexpected{ RecoverableReviewSessionMutationError.value() };
-    }
-    return QString{ (*QueryResult->begin()).GetValue<std::string>(0).c_str() };
-}
-
-[[nodiscard]] std::optional<ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionStore::UpdateReviewSessionToDefault(const QString& CurrentReviewSessionId, const QString& RootDeckId, const QString& ReviewSessionDefinitionKey) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_UpdateReviewSessionToDefaultPreparedStatement->Execute(
-        RootDeckId.toStdString(), ReviewSessionDefinitionKey.toStdString(), CurrentReviewSessionId.toStdString()) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
-    if (RecoverableReviewSessionMutationError.has_value()) {
-        return RecoverableReviewSessionMutationError.value();
-    }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session default edit did not update a review session");
-    return std::nullopt;
-}
-
-[[nodiscard]] std::expected<QString, ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionStore::CreateDefaultReviewSession(const QString& RootDeckId, const QString& ReviewSessionDefinitionKey) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateDefaultReviewSessionPreparedStatement->Execute(ReviewSessionDefinitionKey.toStdString(),
-                                                                                                             RootDeckId.toStdString()) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
-    if (RecoverableReviewSessionMutationError.has_value()) {
-        return std::unexpected{ RecoverableReviewSessionMutationError.value() };
-    }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Default review session creation did not insert a review session");
-    return QString{ (*QueryResult->begin()).GetValue<std::string>(0).c_str() };
-}
-
-[[nodiscard]] std::optional<ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionStore::UpdateReviewSessionToCustom(const QString& CurrentReviewSessionId, const QString& ReviewSessionDefinitionKey) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_UpdateReviewSessionToCustomPreparedStatement->Execute(ReviewSessionDefinitionKey.toStdString(),
-                                                                                                              CurrentReviewSessionId.toStdString()) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
-    if (RecoverableReviewSessionMutationError.has_value()) {
-        return RecoverableReviewSessionMutationError.value();
-    }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session custom edit did not update a review session");
-    return std::nullopt;
-}
-
 [[nodiscard]] std::optional<ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionStore::CreateCustomReviewSessionDeckSelection(const QString& ReviewSessionId,
                                                            const QString& DeckId,
                                                            const ReviewSessionDeckSelectionTypeEnum ReviewSessionDeckSelectionType) {
-    const std::string_view ReviewSessionDeckSelectionTypeString{ ReviewSessionDeckSelectionTypeToString(ReviewSessionDeckSelectionType) };
+    std::string_view ReviewSessionDeckSelectionTypeString;
+    switch (ReviewSessionDeckSelectionType) {
+    case ReviewSessionDeckSelectionTypeEnum::Self:
+        ReviewSessionDeckSelectionTypeString = "self";
+        break;
+    case ReviewSessionDeckSelectionTypeEnum::Subtree:
+        ReviewSessionDeckSelectionTypeString = "subtree";
+        break;
+    case ReviewSessionDeckSelectionTypeEnum::ExcludeSelf:
+        ReviewSessionDeckSelectionTypeString = "exclude_self";
+        break;
+    case ReviewSessionDeckSelectionTypeEnum::ExcludeSubtree:
+        ReviewSessionDeckSelectionTypeString = "exclude_subtree";
+        break;
+    }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateCustomReviewSessionDeckSelectionPreparedStatement->Execute(
         ReviewSessionId.toStdString(),
         DeckId.toStdString(),

@@ -66,10 +66,6 @@ private:
 
     [[nodiscard]] std::optional<QString> TryReadDefaultReviewSessionIdByRootDeckId(const QString&);
     [[nodiscard]] std::optional<QString> TryReadReviewSessionIdByReviewSessionDefinitionKey(const QString&);
-    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum> CreateCustomReviewSession(const QString&, const QString&);
-    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum> CreateDefaultReviewSession(const QString&, const QString&);
-    [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum> UpdateReviewSessionToDefault(const QString&, const QString&, const QString&);
-    [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum> UpdateReviewSessionToCustom(const QString&, const QString&);
     [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum>
     CreateCustomReviewSessionDeckSelection(const QString&, const QString&, ReviewSessionDeckSelectionTypeEnum);
     void DeleteCustomReviewSessionDeckSelections(const QString&);
