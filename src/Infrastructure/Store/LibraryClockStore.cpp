@@ -23,11 +23,10 @@ LibraryClockStore::~LibraryClockStore() = default;
         static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
     Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     const auto QueryResultIterator{ QueryResult->begin() };
-    const auto& QueryResultRow{ *QueryResultIterator };
-    if (QueryResultRow.IsNull(0)) {
+    if ((*QueryResultIterator).IsNull(0)) {
         return std::nullopt;
     }
-    return QueryResultRow.GetValue<std::int64_t>(0);
+    return (*QueryResultIterator).GetValue<std::int64_t>(0);
 }
 
 }

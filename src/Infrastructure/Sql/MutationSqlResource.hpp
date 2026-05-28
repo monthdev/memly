@@ -12,9 +12,17 @@ namespace Infrastructure::Sql {
 
 [[nodiscard]] std::string RenameDeckSql();
 
-[[nodiscard]] std::string CreateReviewSessionSql();
+[[nodiscard]] std::string CreateCustomReviewSessionSql();
 
-[[nodiscard]] std::string CreateReviewSessionDeckSelectionSql();
+[[nodiscard]] std::string CreateDefaultReviewSessionSql();
+
+[[nodiscard]] std::string CreateCustomReviewSessionDeckSelectionSql();
+
+[[nodiscard]] std::string RenameReviewSessionSql();
+
+[[nodiscard]] std::string UpdateReviewSessionToDefaultSql();
+
+[[nodiscard]] std::string UpdateReviewSessionToCustomSql();
 
 [[nodiscard]] std::string UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql();
 
@@ -24,7 +32,7 @@ namespace Infrastructure::Sql {
 
 [[nodiscard]] std::string DeleteDeckSql();
 
-[[nodiscard]] std::string DeleteReviewSessionDeckSelectionsSql();
+[[nodiscard]] std::string DeleteCustomReviewSessionDeckSelectionsSql();
 
 [[nodiscard]] std::string DeleteReviewSessionSql();
 }

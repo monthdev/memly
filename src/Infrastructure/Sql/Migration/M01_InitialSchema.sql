@@ -50,7 +50,13 @@ OR last_updated_at > created_at;
 CREATE MACRO IF NOT EXISTS review_session_name_length_is_valid (review_session_name) AS LENGTH(review_session_name) > 0
 AND LENGTH(review_session_name) <= 40;
 
+CREATE MACRO IF NOT EXISTS review_session_custom_name_is_valid (review_session_custom_name) AS review_session_custom_name IS NULL
+OR review_session_name_length_is_valid (review_session_custom_name);
+
 CREATE MACRO IF NOT EXISTS review_session_definition_key_length_is_valid (review_session_definition_key) AS LENGTH(review_session_definition_key) > 0;
+
+CREATE MACRO IF NOT EXISTS review_session_name_source_is_valid (root_deck_id_if_default, custom_name) AS root_deck_id_if_default IS NOT NULL
+OR custom_name IS NOT NULL;
 
 CREATE MACRO IF NOT EXISTS deck_parent_is_valid (deck_id, parent_deck_id) AS parent_deck_id IS NULL
 OR parent_deck_id <> deck_id;
@@ -247,7 +253,8 @@ CREATE TABLE IF NOT EXISTS card_reviews (
 
 CREATE TABLE IF NOT EXISTS review_sessions (
   id UUID PRIMARY KEY DEFAULT UUIDV7 (),
-  name VARCHAR NOT NULL CHECK (review_session_name_length_is_valid (name)),
+  root_deck_id_if_default UUID UNIQUE REFERENCES decks (id),
+  custom_name VARCHAR CHECK (review_session_custom_name_is_valid (custom_name)),
   definition_key VARCHAR NOT NULL UNIQUE CHECK (
     review_session_definition_key_length_is_valid (definition_key)
   ),
@@ -256,10 +263,13 @@ CREATE TABLE IF NOT EXISTS review_sessions (
   last_card_review_at TIMESTAMP,
   last_updated_at TIMESTAMP CHECK (
     last_updated_at_time_is_valid (created_at, last_updated_at)
+  ),
+  CHECK (
+    review_session_name_source_is_valid (root_deck_id_if_default, custom_name)
   )
 );
 
-CREATE TABLE IF NOT EXISTS review_session_deck_selections (
+CREATE TABLE IF NOT EXISTS custom_review_session_deck_selections (
   review_session_id UUID NOT NULL REFERENCES review_sessions (id),
   deck_id UUID NOT NULL REFERENCES decks (id),
   selection_type review_session_deck_selection_type NOT NULL,
@@ -267,9 +277,9 @@ CREATE TABLE IF NOT EXISTS review_session_deck_selections (
   PRIMARY KEY (review_session_id, deck_id, selection_type)
 );
 
-CREATE INDEX IF NOT EXISTS review_session_deck_selections_deck_id_idx ON review_session_deck_selections (deck_id);
+CREATE INDEX IF NOT EXISTS custom_review_session_deck_selections_deck_id_idx ON custom_review_session_deck_selections (deck_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_self_selection_conflict_idx ON review_session_deck_selections (
+CREATE UNIQUE INDEX IF NOT EXISTS custom_review_session_deck_selections_self_selection_conflict_idx ON custom_review_session_deck_selections (
   review_session_id,
   deck_id,
   (
@@ -280,7 +290,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_self_selection_
   )
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_subtree_selection_conflict_idx ON review_session_deck_selections (
+CREATE UNIQUE INDEX IF NOT EXISTS custom_review_session_deck_selections_subtree_selection_conflict_idx ON custom_review_session_deck_selections (
   review_session_id,
   deck_id,
   (
@@ -291,7 +301,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_subtree_selecti
   )
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_include_selection_conflict_idx ON review_session_deck_selections (
+CREATE UNIQUE INDEX IF NOT EXISTS custom_review_session_deck_selections_include_selection_conflict_idx ON custom_review_session_deck_selections (
   review_session_id,
   deck_id,
   (
@@ -302,7 +312,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_include_selecti
   )
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS review_session_deck_selections_exclude_selection_conflict_idx ON review_session_deck_selections (
+CREATE UNIQUE INDEX IF NOT EXISTS custom_review_session_deck_selections_exclude_selection_conflict_idx ON custom_review_session_deck_selections (
   review_session_id,
   deck_id,
   (
@@ -335,54 +345,54 @@ SELECT
 FROM
   deck_subtree_membership;
 
-CREATE VIEW IF NOT EXISTS review_session_resolved_decks_view AS
+CREATE VIEW IF NOT EXISTS custom_review_session_resolved_decks_view AS
 WITH
-  included_review_session_decks AS (
+  included_custom_review_session_decks AS (
     SELECT
-      review_session_deck_selections.review_session_id,
-      review_session_deck_selections.deck_id
+      custom_review_session_deck_selections.review_session_id,
+      custom_review_session_deck_selections.deck_id
     FROM
-      review_session_deck_selections
+      custom_review_session_deck_selections
     WHERE
-      review_session_deck_selections.selection_type = 'self'
+      custom_review_session_deck_selections.selection_type = 'self'
     UNION
     SELECT
-      review_session_deck_selections.review_session_id,
+      custom_review_session_deck_selections.review_session_id,
       deck_subtree_membership_view.member_deck_id AS deck_id
     FROM
-      review_session_deck_selections
-      INNER JOIN deck_subtree_membership_view ON deck_subtree_membership_view.subtree_root_deck_id = review_session_deck_selections.deck_id
+      custom_review_session_deck_selections
+      INNER JOIN deck_subtree_membership_view ON deck_subtree_membership_view.subtree_root_deck_id = custom_review_session_deck_selections.deck_id
     WHERE
-      review_session_deck_selections.selection_type = 'subtree'
+      custom_review_session_deck_selections.selection_type = 'subtree'
   ),
-  excluded_review_session_decks AS (
+  excluded_custom_review_session_decks AS (
     SELECT
-      review_session_deck_selections.review_session_id,
-      review_session_deck_selections.deck_id
+      custom_review_session_deck_selections.review_session_id,
+      custom_review_session_deck_selections.deck_id
     FROM
-      review_session_deck_selections
+      custom_review_session_deck_selections
     WHERE
-      review_session_deck_selections.selection_type = 'exclude_self'
+      custom_review_session_deck_selections.selection_type = 'exclude_self'
     UNION
     SELECT
-      review_session_deck_selections.review_session_id,
+      custom_review_session_deck_selections.review_session_id,
       deck_subtree_membership_view.member_deck_id AS deck_id
     FROM
-      review_session_deck_selections
-      INNER JOIN deck_subtree_membership_view ON deck_subtree_membership_view.subtree_root_deck_id = review_session_deck_selections.deck_id
+      custom_review_session_deck_selections
+      INNER JOIN deck_subtree_membership_view ON deck_subtree_membership_view.subtree_root_deck_id = custom_review_session_deck_selections.deck_id
     WHERE
-      review_session_deck_selections.selection_type = 'exclude_subtree'
+      custom_review_session_deck_selections.selection_type = 'exclude_subtree'
   )
 SELECT
-  included_review_session_decks.review_session_id,
-  included_review_session_decks.deck_id
+  included_custom_review_session_decks.review_session_id,
+  included_custom_review_session_decks.deck_id
 FROM
-  included_review_session_decks
+  included_custom_review_session_decks
 EXCEPT
 SELECT
-  excluded_review_session_decks.review_session_id,
-  excluded_review_session_decks.deck_id
+  excluded_custom_review_session_decks.review_session_id,
+  excluded_custom_review_session_decks.deck_id
 FROM
-  excluded_review_session_decks;
+  excluded_custom_review_session_decks;
 
 COMMIT;

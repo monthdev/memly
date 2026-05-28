@@ -20,12 +20,28 @@ namespace Infrastructure::Sql {
     return ReadSqlResourceBytes(":/Sql/Mutation/RenameDeck.sql");
 }
 
-[[nodiscard]] std::string CreateReviewSessionSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/CreateReviewSession.sql");
+[[nodiscard]] std::string CreateCustomReviewSessionSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/CreateCustomReviewSession.sql");
 }
 
-[[nodiscard]] std::string CreateReviewSessionDeckSelectionSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/CreateReviewSessionDeckSelection.sql");
+[[nodiscard]] std::string CreateDefaultReviewSessionSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/CreateDefaultReviewSession.sql");
+}
+
+[[nodiscard]] std::string CreateCustomReviewSessionDeckSelectionSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/CreateCustomReviewSessionDeckSelection.sql");
+}
+
+[[nodiscard]] std::string RenameReviewSessionSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/RenameReviewSession.sql");
+}
+
+[[nodiscard]] std::string UpdateReviewSessionToDefaultSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/UpdateReviewSessionToDefault.sql");
+}
+
+[[nodiscard]] std::string UpdateReviewSessionToCustomSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/UpdateReviewSessionToCustom.sql");
 }
 
 [[nodiscard]] std::string UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql() {
@@ -44,8 +60,8 @@ namespace Infrastructure::Sql {
     return ReadSqlResourceBytes(":/Sql/Mutation/DeleteDeck.sql");
 }
 
-[[nodiscard]] std::string DeleteReviewSessionDeckSelectionsSql() {
-    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteReviewSessionDeckSelections.sql");
+[[nodiscard]] std::string DeleteCustomReviewSessionDeckSelectionsSql() {
+    return ReadSqlResourceBytes(":/Sql/Mutation/DeleteCustomReviewSessionDeckSelections.sql");
 }
 
 [[nodiscard]] std::string DeleteReviewSessionSql() {

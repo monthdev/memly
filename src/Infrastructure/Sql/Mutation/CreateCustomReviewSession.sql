@@ -1,5 +1,5 @@
 INSERT INTO
-  review_sessions (name, definition_key)
+  review_sessions (custom_name, definition_key)
 VALUES
   (?, ?)
 RETURNING
