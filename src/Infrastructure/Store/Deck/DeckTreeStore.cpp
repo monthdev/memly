@@ -7,7 +7,6 @@
 
 #include "Infrastructure/Sql/Query/Deck/DeckQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
-#include "Infrastructure/Store/Deck/FlatDeckTreeValidation.hpp"
 
 namespace Infrastructure::Store::Deck {
 
@@ -38,7 +37,6 @@ DeckTreeStore::~DeckTreeStore() = default;
                                         static_cast<quint32>(QueryResultRow.GetValue<std::uint32_t>(10)),
                                         static_cast<quint8>(QueryResultRow.GetValue<std::uint8_t>(11)));
     }
-    ValidateFlatDeckTree(DeckTreeRowQVector);
     return DeckTreeRowQVector;
 }
 }
