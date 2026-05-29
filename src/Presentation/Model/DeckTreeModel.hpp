@@ -211,8 +211,6 @@ public:
         };
     }
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const DeckNodeData>> TryGetDeckNodeData(const QString&) const noexcept;
-
     void ReplaceAll(QVector<DeckNodeData>);
 
 private:

@@ -34,14 +34,6 @@ namespace Presentation::Model {
     return ParentDeckNode->m_ChildDeckNodeIndexesQVector;
 }
 
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNodeData>> DeckTreeModel::TryGetDeckNodeData(const QString& DeckId) const noexcept {
-    const DeckNode* DeckNode{ TryGetDeckNode(DeckId) };
-    if (DeckNode == nullptr) {
-        return std::nullopt;
-    }
-    return DeckNode->m_DeckNodeData;
-}
-
 [[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
     const DeckNode& LeftDeckNode{ m_DeckNodesQVector.at(LeftDeckNodeIndex) };
     const DeckNode& RightDeckNode{ m_DeckNodesQVector.at(RightDeckNodeIndex) };
