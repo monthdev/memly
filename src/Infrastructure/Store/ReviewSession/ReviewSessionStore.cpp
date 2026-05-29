@@ -112,7 +112,7 @@ ReviewSessionStore::EditReviewSessionToDefault(const QString& CurrentReviewSessi
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session default edit did not update a review session");
+    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session edit to default did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     return CurrentReviewSessionId;
 }
@@ -133,7 +133,7 @@ ReviewSessionStore::EditReviewSessionToCustom(const QString& CurrentReviewSessio
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session custom edit did not update a review session");
+    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session edit to custom did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     for (const ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionQVector) {
         RecoverableReviewSessionMutationError =
