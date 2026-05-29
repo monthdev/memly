@@ -8,7 +8,7 @@ namespace Presentation::Controller {
     return QString{ "Deck name length exceeds character limit" };
 }
 
-[[nodiscard]] QString DeckTreeController::GetDuplicateNameErrorMessage() const {
+[[nodiscard]] QString DeckTreeController::GetDuplicateSiblingDeckNameErrorMessage() const {
     return QString{ "Deck name already exists" };
 }
 
@@ -33,8 +33,8 @@ namespace Presentation::Controller {
     case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
         return GetNameLengthErrorMessage();
     }
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DuplicateDeckNameError: {
-        return GetDuplicateNameErrorMessage();
+    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DuplicateSiblingDeckNameError: {
+        return GetDuplicateSiblingDeckNameErrorMessage();
     }
     case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
         return GetTargetLanguageCodeErrorMessage();
@@ -51,7 +51,7 @@ namespace Presentation::Controller {
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldCreateRootDeckDuplicateSiblingName(DeckName)) {
-            return GetDuplicateNameErrorMessage();
+            return GetDuplicateSiblingDeckNameErrorMessage();
         }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
@@ -65,7 +65,7 @@ namespace Presentation::Controller {
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldCreateChildDeckDuplicateSiblingName(DeckName, ParentDeckId)) {
-            return GetDuplicateNameErrorMessage();
+            return GetDuplicateSiblingDeckNameErrorMessage();
         }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
@@ -85,7 +85,7 @@ namespace Presentation::Controller {
             return GetParentDeckTargetLanguageMismatchErrorMessage();
         }
         if (m_DeckTree.WouldMoveDeckDuplicateSiblingName(DeckId, NewParentDeckId)) {
-            return GetDuplicateNameErrorMessage();
+            return GetDuplicateSiblingDeckNameErrorMessage();
         }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
@@ -99,7 +99,7 @@ namespace Presentation::Controller {
 [[nodiscard]] std::optional<QString> DeckTreeController::RenameDeck(const QString& DeckId, const QString& NewDeckName) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldRenameDeckDuplicateSiblingName(DeckId, NewDeckName)) {
-            return GetDuplicateNameErrorMessage();
+            return GetDuplicateSiblingDeckNameErrorMessage();
         }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.RenameDeck(DeckId, NewDeckName)) };
         if (not RecoverableDeckMutationErrorMessage.has_value()) {

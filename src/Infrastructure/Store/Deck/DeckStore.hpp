@@ -17,7 +17,7 @@ class DeckStore final {
 public:
     enum class RecoverableDeckMutationErrorEnum : std::uint8_t {
         DeckNameLengthError,
-        DuplicateDeckNameError,
+        DuplicateSiblingDeckNameError,
         InvalidTargetLanguageCodeError,
         ParentDeckTargetLanguageMismatchError,
         DeckTreeCycleDetectionError

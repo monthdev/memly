@@ -106,7 +106,7 @@ DeckStore::~DeckStore() = default;
         return RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError;
     }
     if (ErrorMessage.contains("Duplicate key \"")) {
-        return RecoverableDeckMutationErrorEnum::DuplicateDeckNameError;
+        return RecoverableDeckMutationErrorEnum::DuplicateSiblingDeckNameError;
     }
     Runtime::ThrowError(QueryResult.GetError());
 }

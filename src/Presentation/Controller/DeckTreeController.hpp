@@ -50,7 +50,7 @@ private:
     Model::DeckTreeModel m_DeckTree;
 
     [[nodiscard]] QString GetNameLengthErrorMessage() const;
-    [[nodiscard]] QString GetDuplicateNameErrorMessage() const;
+    [[nodiscard]] QString GetDuplicateSiblingDeckNameErrorMessage() const;
     [[nodiscard]] QString GetTargetLanguageCodeErrorMessage() const;
     [[nodiscard]] QString GetParentDeckTargetLanguageMismatchErrorMessage() const;
     [[nodiscard]] QString GetDeckTreeCycleDetectionErrorMessage() const;
