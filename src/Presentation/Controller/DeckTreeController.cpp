@@ -4,26 +4,6 @@
 
 namespace Presentation::Controller {
 
-[[nodiscard]] QString DeckTreeController::GetNameLengthErrorMessage() const {
-    return QString{ "Deck name length exceeds character limit" };
-}
-
-[[nodiscard]] QString DeckTreeController::GetDuplicateSiblingDeckNameErrorMessage() const {
-    return QString{ "Deck name already exists" };
-}
-
-[[nodiscard]] QString DeckTreeController::GetTargetLanguageCodeErrorMessage() const {
-    return QString{ "Target language code is invalid" };
-}
-
-[[nodiscard]] QString DeckTreeController::GetParentDeckTargetLanguageMismatchErrorMessage() const {
-    return QString{ "Deck target language does not match parent deck" };
-}
-
-[[nodiscard]] QString DeckTreeController::GetDeckTreeCycleDetectionErrorMessage() const {
-    return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
-}
-
 [[nodiscard]] std::optional<QString> DeckTreeController::RecoverableDeckMutationErrorToQString(
     const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError) const {
     if (not RecoverableDeckMutationError.has_value()) {
@@ -31,19 +11,19 @@ namespace Presentation::Controller {
     }
     switch (RecoverableDeckMutationError.value()) {
     case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
-        return GetNameLengthErrorMessage();
+        return QString{ "Deck name length exceeds character limit" };
     }
     case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DuplicateSiblingDeckNameError: {
-        return GetDuplicateSiblingDeckNameErrorMessage();
+        return QString{ "Deck name already exists" };
     }
     case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
-        return GetTargetLanguageCodeErrorMessage();
+        return QString{ "Target language code is invalid" };
     }
     case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
-        return GetParentDeckTargetLanguageMismatchErrorMessage();
+        return QString{ "Deck target language does not match parent deck" };
     }
     case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError: {
-        return GetDeckTreeCycleDetectionErrorMessage();
+        return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
     }
     }
 }
@@ -51,7 +31,7 @@ namespace Presentation::Controller {
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldCreateRootDeckDuplicateSiblingName(DeckName)) {
-            return GetDuplicateSiblingDeckNameErrorMessage();
+            return QString{ "Deck name already exists" };
         }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
@@ -65,7 +45,7 @@ namespace Presentation::Controller {
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldCreateChildDeckDuplicateSiblingName(DeckName, ParentDeckId)) {
-            return GetDuplicateSiblingDeckNameErrorMessage();
+            return QString{ "Deck name already exists" };
         }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
@@ -79,13 +59,13 @@ namespace Presentation::Controller {
 [[nodiscard]] std::optional<QString> DeckTreeController::MoveDeck(const QString& DeckId, const std::optional<QString>& NewParentDeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldReparentCreateCycle(DeckId, NewParentDeckId)) {
-            return GetDeckTreeCycleDetectionErrorMessage();
+            return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
         }
         if (m_DeckTree.WouldReparentCreateTargetLanguageMismatch(DeckId, NewParentDeckId)) {
-            return GetParentDeckTargetLanguageMismatchErrorMessage();
+            return QString{ "Deck target language does not match parent deck" };
         }
         if (m_DeckTree.WouldMoveDeckDuplicateSiblingName(DeckId, NewParentDeckId)) {
-            return GetDuplicateSiblingDeckNameErrorMessage();
+            return QString{ "Deck name already exists" };
         }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
@@ -99,7 +79,7 @@ namespace Presentation::Controller {
 [[nodiscard]] std::optional<QString> DeckTreeController::RenameDeck(const QString& DeckId, const QString& NewDeckName) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
         if (m_DeckTree.WouldRenameDeckDuplicateSiblingName(DeckId, NewDeckName)) {
-            return GetDuplicateSiblingDeckNameErrorMessage();
+            return QString{ "Deck name already exists" };
         }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.RenameDeck(DeckId, NewDeckName)) };
         if (not RecoverableDeckMutationErrorMessage.has_value()) {

@@ -49,11 +49,6 @@ private:
     Infrastructure::Store::Deck::DeckTreeStore& m_DeckTreeStore;
     Model::DeckTreeModel m_DeckTree;
 
-    [[nodiscard]] QString GetNameLengthErrorMessage() const;
-    [[nodiscard]] QString GetDuplicateSiblingDeckNameErrorMessage() const;
-    [[nodiscard]] QString GetTargetLanguageCodeErrorMessage() const;
-    [[nodiscard]] QString GetParentDeckTargetLanguageMismatchErrorMessage() const;
-    [[nodiscard]] QString GetDeckTreeCycleDetectionErrorMessage() const;
     [[nodiscard]] std::optional<QString>
     RecoverableDeckMutationErrorToQString(const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum>) const;
     void RefreshDeckTree(const qint64) noexcept;
