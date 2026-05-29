@@ -2,8 +2,6 @@
 
 #include <algorithm>
 
-#include "Runtime/Crash.hpp"
-
 namespace Presentation::Model {
 
 [[nodiscard]] const DeckTreeModel::DeckNode* DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
@@ -42,79 +40,6 @@ namespace Presentation::Model {
         return std::nullopt;
     }
     return DeckNode->m_DeckNodeData;
-}
-
-[[nodiscard]] bool
-DeckTreeModel::HasDuplicateSiblingName(const QString& DeckName, const std::optional<QString>& ParentDeckId, const QString& DeckId) const noexcept {
-    const QVector<qsizetype>* SiblingDeckNodeIndexes{ &m_RootDeckNodeIndexesQVector };
-    if (ParentDeckId.has_value()) {
-        const DeckNode* ParentDeckNode{ TryGetDeckNode(ParentDeckId.value()) };
-        if (ParentDeckNode == nullptr) {
-            return false;
-        }
-        SiblingDeckNodeIndexes = &ParentDeckNode->m_ChildDeckNodeIndexesQVector;
-    }
-    for (const qsizetype SiblingDeckNodeIndex : *SiblingDeckNodeIndexes) {
-        const DeckNode& SiblingDeckNode{ m_DeckNodesQVector.at(SiblingDeckNodeIndex) };
-        if (SiblingDeckNode.m_DeckNodeData.m_DeckName == DeckName and SiblingDeckNode.m_DeckNodeData.m_DeckId != DeckId) {
-            return true;
-        }
-    }
-    return false;
-}
-
-[[nodiscard]] bool DeckTreeModel::WouldCreateRootDeckDuplicateSiblingName(const QString& DeckName) const noexcept {
-    return HasDuplicateSiblingName(DeckName, std::nullopt);
-}
-
-[[nodiscard]] bool DeckTreeModel::WouldCreateChildDeckDuplicateSiblingName(const QString& DeckName, const QString& ParentDeckId) const noexcept {
-    return HasDuplicateSiblingName(DeckName, std::make_optional(ParentDeckId));
-}
-
-[[nodiscard]] bool DeckTreeModel::WouldMoveDeckDuplicateSiblingName(const QString& DeckId, const std::optional<QString>& NewParentDeckId) const noexcept {
-    const DeckNode* MovedDeckNode{ TryGetDeckNode(DeckId) };
-    if (MovedDeckNode == nullptr) {
-        return false;
-    }
-    return HasDuplicateSiblingName(MovedDeckNode->m_DeckNodeData.m_DeckName, NewParentDeckId, DeckId);
-}
-
-[[nodiscard]] bool DeckTreeModel::WouldRenameDeckDuplicateSiblingName(const QString& DeckId, const QString& NewDeckName) const noexcept {
-    const DeckNode* RenamedDeckNode{ TryGetDeckNode(DeckId) };
-    if (RenamedDeckNode == nullptr) {
-        return false;
-    }
-    return HasDuplicateSiblingName(NewDeckName, RenamedDeckNode->m_DeckNodeData.m_ParentDeckId, DeckId);
-}
-
-[[nodiscard]] bool DeckTreeModel::WouldReparentCreateCycle(const QString& DeckId, const std::optional<QString>& NewParentDeckId) const noexcept {
-    if (not NewParentDeckId.has_value()) {
-        return false;
-    }
-    const DeckNode* CurrentDeckNode{ TryGetDeckNode(NewParentDeckId.value()) };
-    while (CurrentDeckNode not_eq nullptr) {
-        if (CurrentDeckNode->m_DeckNodeData.m_DeckId == DeckId) {
-            return true;
-        }
-        if (CurrentDeckNode->m_ParentDeckNodeIndex == s_RootDeckNodeIndex) {
-            break;
-        }
-        CurrentDeckNode = &m_DeckNodesQVector.at(CurrentDeckNode->m_ParentDeckNodeIndex);
-    }
-    return false;
-}
-
-[[nodiscard]] bool DeckTreeModel::WouldReparentCreateTargetLanguageMismatch(const QString& DeckId,
-                                                                            const std::optional<QString>& NewParentDeckId) const noexcept {
-    if (not NewParentDeckId.has_value()) {
-        return false;
-    }
-    const DeckNode* CurrentDeckNode{ TryGetDeckNode(DeckId) };
-    const DeckNode* NewParentDeckNode{ TryGetDeckNode(NewParentDeckId.value()) };
-    if (CurrentDeckNode == nullptr or NewParentDeckNode == nullptr) {
-        return false;
-    }
-    return CurrentDeckNode->m_DeckNodeData.m_TargetLanguageCode not_eq NewParentDeckNode->m_DeckNodeData.m_TargetLanguageCode;
 }
 
 [[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
@@ -170,32 +95,6 @@ void DeckTreeModel::ApplyCurrentSort() noexcept {
     UpdateSiblingRowIndexes();
 }
 
-void DeckTreeModel::ValidateNoDeckNodeCycles(const QVector<DeckNode>& DeckNodesQVector) const {
-    constexpr quint8 Unvisited{ 0 };
-    constexpr quint8 Visiting{ 1 };
-    constexpr quint8 Visited{ 2 };
-    QVector<quint8> DeckNodeVisitStateQVector(DeckNodesQVector.size(), Unvisited);
-    QVector<qsizetype> CurrentDeckNodePathQVector;
-    CurrentDeckNodePathQVector.reserve(DeckNodesQVector.size());
-    for (qsizetype DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesQVector.size(); ++DeckNodeIndex) {
-        CurrentDeckNodePathQVector.clear();
-        qsizetype CurrentDeckNodeIndex{ DeckNodeIndex };
-        while (CurrentDeckNodeIndex not_eq s_RootDeckNodeIndex) {
-            const quint8 CurrentDeckNodeVisitState{ DeckNodeVisitStateQVector.at(CurrentDeckNodeIndex) };
-            if (CurrentDeckNodeVisitState == Visited) {
-                break;
-            }
-            if (CurrentDeckNodeVisitState == Visiting) {
-                Runtime::ThrowError("Cycle detected in deck tree snapshot");
-            }
-            DeckNodeVisitStateQVector[CurrentDeckNodeIndex] = Visiting;
-            CurrentDeckNodePathQVector.push_back(CurrentDeckNodeIndex);
-            CurrentDeckNodeIndex = DeckNodesQVector.at(CurrentDeckNodeIndex).m_ParentDeckNodeIndex;
-        }
-        for (const qsizetype CurrentDeckNodePathIndex : CurrentDeckNodePathQVector) { DeckNodeVisitStateQVector[CurrentDeckNodePathIndex] = Visited; }
-    }
-}
-
 void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
     QVector<DeckNode> DeckNodesQVector;
     QVector<qsizetype> RootDeckNodeIndexesQVector;
@@ -206,9 +105,6 @@ void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
     for (DeckNodeData& DeckNodeData : DeckNodeDataQVector) {
         const qsizetype DeckNodeIndex{ DeckNodesQVector.size() };
         const QString DeckId{ DeckNodeData.m_DeckId };
-        if (DeckNodeIndexByIdQHash.contains(DeckId)) {
-            Runtime::ThrowError("Duplicate deck id in deck tree snapshot");
-        }
         DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
         DeckNodeIndexByIdQHash.insert(DeckId, DeckNodeIndex);
     }
@@ -220,15 +116,10 @@ void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
             RootDeckNodeIndexesQVector.push_back(DeckNodeIndex);
             continue;
         }
-        const auto& ParentDeckNodeIdIndexIterator{ DeckNodeIndexByIdQHash.constFind(ParentId.value()) };
-        if (ParentDeckNodeIdIndexIterator == DeckNodeIndexByIdQHash.cend() or ParentDeckNodeIdIndexIterator.value() == DeckNodeIndex) {
-            Runtime::ThrowError("Invalid parent deck id in deck tree snapshot");
-        }
-        CurrentDeckNode.m_ParentDeckNodeIndex = ParentDeckNodeIdIndexIterator.value();
+        CurrentDeckNode.m_ParentDeckNodeIndex = DeckNodeIndexByIdQHash.constFind(ParentId.value()).value();
         CurrentDeckNode.m_RowInParentIndex = DeckNodesQVector.at(CurrentDeckNode.m_ParentDeckNodeIndex).m_ChildDeckNodeIndexesQVector.size();
         DeckNodesQVector[CurrentDeckNode.m_ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector.push_back(DeckNodeIndex);
     }
-    ValidateNoDeckNodeCycles(DeckNodesQVector);
     beginResetModel();
     m_DeckNodesQVector = std::move(DeckNodesQVector);
     m_RootDeckNodeIndexesQVector = std::move(RootDeckNodeIndexesQVector);

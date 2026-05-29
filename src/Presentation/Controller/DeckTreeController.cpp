@@ -30,9 +30,6 @@ namespace Presentation::Controller {
 
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        if (m_DeckTree.WouldCreateRootDeckDuplicateSiblingName(DeckName)) {
-            return QString{ "Deck name already exists" };
-        }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
         if (not RecoverableDeckMutationErrorMessage.has_value()) {
@@ -44,9 +41,6 @@ namespace Presentation::Controller {
 
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        if (m_DeckTree.WouldCreateChildDeckDuplicateSiblingName(DeckName, ParentDeckId)) {
-            return QString{ "Deck name already exists" };
-        }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
         if (not RecoverableDeckMutationErrorMessage.has_value()) {
@@ -58,15 +52,6 @@ namespace Presentation::Controller {
 
 [[nodiscard]] std::optional<QString> DeckTreeController::MoveDeck(const QString& DeckId, const std::optional<QString>& NewParentDeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        if (m_DeckTree.WouldReparentCreateCycle(DeckId, NewParentDeckId)) {
-            return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
-        }
-        if (m_DeckTree.WouldReparentCreateTargetLanguageMismatch(DeckId, NewParentDeckId)) {
-            return QString{ "Deck target language does not match parent deck" };
-        }
-        if (m_DeckTree.WouldMoveDeckDuplicateSiblingName(DeckId, NewParentDeckId)) {
-            return QString{ "Deck name already exists" };
-        }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
             m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
         if (not RecoverableDeckMutationErrorMessage.has_value()) {
@@ -78,9 +63,6 @@ namespace Presentation::Controller {
 
 [[nodiscard]] std::optional<QString> DeckTreeController::RenameDeck(const QString& DeckId, const QString& NewDeckName) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        if (m_DeckTree.WouldRenameDeckDuplicateSiblingName(DeckId, NewDeckName)) {
-            return QString{ "Deck name already exists" };
-        }
         const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.RenameDeck(DeckId, NewDeckName)) };
         if (not RecoverableDeckMutationErrorMessage.has_value()) {
             m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
