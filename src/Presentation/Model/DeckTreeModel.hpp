@@ -225,12 +225,10 @@ private:
 
     QVector<DeckNode> m_DeckNodesQVector;
     QVector<qsizetype> m_RootDeckNodeIndexesQVector;
-    QHash<QString, qsizetype> m_DeckNodeIndexByIdQHash;
     int m_SortColumn;
     Qt::SortOrder m_SortOrder;
 
     [[nodiscard]] const DeckNode* TryGetDeckNode(const QModelIndex&) const noexcept;
-    [[nodiscard]] const DeckNode* TryGetDeckNode(const QString&) const noexcept;
     [[nodiscard]] const QVector<qsizetype>& GetChildDeckNodeIndexes(const QModelIndex&) const noexcept;
     void ApplyCurrentSort() noexcept;
     void SortSiblingDeckNodeIndexes(QVector<qsizetype>&) noexcept;

@@ -15,14 +15,6 @@ namespace Presentation::Model {
     return &m_DeckNodesQVector.at(DeckNodeIndex);
 }
 
-[[nodiscard]] const DeckTreeModel::DeckNode* DeckTreeModel::TryGetDeckNode(const QString& DeckId) const noexcept {
-    const auto& DeckNodeIdIndexIterator{ m_DeckNodeIndexByIdQHash.constFind(DeckId) };
-    if (DeckNodeIdIndexIterator == m_DeckNodeIndexByIdQHash.cend()) {
-        return nullptr;
-    }
-    return &m_DeckNodesQVector.at(DeckNodeIdIndexIterator.value());
-}
-
 [[nodiscard]] const QVector<qsizetype>& DeckTreeModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const noexcept {
     if (not Parent.isValid()) {
         return m_RootDeckNodeIndexesQVector;
@@ -115,7 +107,6 @@ void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
     beginResetModel();
     m_DeckNodesQVector = std::move(DeckNodesQVector);
     m_RootDeckNodeIndexesQVector = std::move(RootDeckNodeIndexesQVector);
-    m_DeckNodeIndexByIdQHash = std::move(DeckNodeIndexByIdQHash);
     ApplyCurrentSort();
     endResetModel();
 }
