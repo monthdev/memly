@@ -59,13 +59,10 @@ public:
     }
 
     [[nodiscard]] QModelIndex index(int Row, int Column, const QModelIndex& Parent = QModelIndex{}) const override {
-        if (Row < 0 or Column < 0 or Parent.column() > 0 or Column >= columnCount(Parent)) {
+        if (not hasIndex(Row, Column, Parent)) {
             return QModelIndex{};
         }
         const QVector<qsizetype>& ChildDeckNodeIndexesQVector{ GetChildDeckNodeIndexes(Parent) };
-        if (Row >= ChildDeckNodeIndexesQVector.size()) {
-            return QModelIndex{};
-        }
         const qsizetype ChildDeckNodeIndex{ ChildDeckNodeIndexesQVector.at(static_cast<qsizetype>(Row)) };
         return createIndex(Row, Column, static_cast<quintptr>(ChildDeckNodeIndex));
     }
