@@ -32,17 +32,17 @@ ReviewSessionStore::ReviewSessionStore(duckdb::Connection& DatabaseConnection)
           Infrastructure::Sql::Query::ReviewSession::ReadDefaultReviewSessionIdByRootDeckIdSql()) }
     , m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{ DatabaseConnection.Prepare(
           Infrastructure::Sql::Query::ReviewSession::ReadReviewSessionIdByReviewSessionDefinitionKeySql()) } {
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateCustomReviewSessionPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateDefaultReviewSessionPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_CreateCustomReviewSessionDeckSelectionPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_RenameReviewSessionPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_UpdateReviewSessionToDefaultPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_UpdateReviewSessionToCustomPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_DeleteReviewSessionPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement);
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_CreateCustomReviewSessionPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_CreateDefaultReviewSessionPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_CreateCustomReviewSessionDeckSelectionPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_RenameReviewSessionPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_UpdateReviewSessionToDefaultPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_UpdateReviewSessionToCustomPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_DeleteReviewSessionPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
 }
 
 ReviewSessionStore::~ReviewSessionStore() = default;
@@ -58,7 +58,7 @@ ReviewSessionStore::CreateOrReadExistingDefaultReviewSession(const QString& Root
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Default review session creation did not insert a review session");
+    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Default review session creation did not insert a review session");
     return QString{ (*QueryResult->begin()).GetValue<std::string>(0).c_str() };
 }
 
@@ -95,7 +95,7 @@ ReviewSessionStore::RenameReviewSession(const QString& ReviewSessionId, const QS
     if (RecoverableReviewSessionMutationError.has_value()) {
         return RecoverableReviewSessionMutationError;
     }
-    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session rename did not update a review session");
+    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Review session rename did not update a review session");
     return std::nullopt;
 }
 
@@ -112,7 +112,7 @@ ReviewSessionStore::EditReviewSessionToDefault(const QString& CurrentReviewSessi
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session edit to default did not update a review session");
+    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Review session edit to default did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     return CurrentReviewSessionId;
 }
@@ -133,7 +133,7 @@ ReviewSessionStore::EditReviewSessionToCustom(const QString& CurrentReviewSessio
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session edit to custom did not update a review session");
+    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Review session edit to custom did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     for (const ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionQVector) {
         RecoverableReviewSessionMutationError =
@@ -148,20 +148,20 @@ ReviewSessionStore::EditReviewSessionToCustom(const QString& CurrentReviewSessio
 void ReviewSessionStore::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const QString& ReviewSessionId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement->Execute(
         ReviewSessionId.toStdString()) };
-    Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
-    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session last card review timestamp update did not update a review session");
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Review session last card review timestamp update did not update a review session");
 }
 
 void ReviewSessionStore::DeleteReviewSession(const QString& ReviewSessionId) {
     DeleteCustomReviewSessionDeckSelections(ReviewSessionId);
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteReviewSessionPreparedStatement->Execute(ReviewSessionId.toStdString()) };
-    Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
-    Infrastructure::Sql::ThrowUnconditionallyOnMutationNoOp(*QueryResult, "Review session delete did not delete a review session");
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Review session delete did not delete a review session");
 }
 
 [[nodiscard]] std::optional<QString> ReviewSessionStore::TryReadDefaultReviewSessionIdByRootDeckId(const QString& RootDeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement->Execute(RootDeckId.toStdString()) };
-    Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
     if (const auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end()) {
         return QString{ (*QueryResultIterator).GetValue<std::string>(0).c_str() };
     }
@@ -171,7 +171,7 @@ void ReviewSessionStore::DeleteReviewSession(const QString& ReviewSessionId) {
 [[nodiscard]] std::optional<QString> ReviewSessionStore::TryReadReviewSessionIdByReviewSessionDefinitionKey(const QString& ReviewSessionDefinitionKey) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement->Execute(
         ReviewSessionDefinitionKey.toStdString()) };
-    Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
     if (const auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end()) {
         return QString{ (*QueryResultIterator).GetValue<std::string>(0).c_str() };
     }
@@ -206,7 +206,7 @@ ReviewSessionStore::CreateCustomReviewSessionDeckSelection(const QString& Review
 
 void ReviewSessionStore::DeleteCustomReviewSessionDeckSelections(const QString& ReviewSessionId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement->Execute(ReviewSessionId.toStdString()) };
-    Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
 }
 
 [[nodiscard]] std::optional<ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
@@ -230,7 +230,7 @@ ReviewSessionStore::HandleRecoverableReviewSessionMutationError(duckdb::QueryRes
     if (ErrorMessage.contains("exclude_selection_conflict")) {
         return RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckExcludeSelectionError;
     }
-    Runtime::ThrowError(QueryResult.GetError());
+    Runtime::Crash(QueryResult.GetError());
 }
 
 }

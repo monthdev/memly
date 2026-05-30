@@ -1,5 +1,6 @@
 #pragma once
 
+#include <source_location>
 #include <string_view>
 
 namespace duckdb {
@@ -9,10 +10,10 @@ class QueryResult;
 
 namespace Infrastructure::Sql {
 
-void ThrowUnconditionallyOnQueryResultError(duckdb::QueryResult&);
+void CrashOnQueryResultError(duckdb::QueryResult&, const std::source_location& = std::source_location::current());
 
-void ThrowUnconditionallyOnPreparedStatementError(duckdb::PreparedStatement&);
+void CrashOnPreparedStatementError(duckdb::PreparedStatement&, const std::source_location& = std::source_location::current());
 
-void ThrowUnconditionallyOnMutationNoOp(duckdb::QueryResult&, const std::string_view);
+void CrashOnMutationNoOp(duckdb::QueryResult&, const std::string_view, const std::source_location& = std::source_location::current());
 
 }

@@ -6,23 +6,23 @@
 
 namespace Infrastructure::Sql {
 
-void ThrowUnconditionallyOnQueryResultError(duckdb::QueryResult& QueryResult) {
+void CrashOnQueryResultError(duckdb::QueryResult& QueryResult, const std::source_location& SourceLocation) {
     if (QueryResult.HasError()) {
-        Runtime::ThrowError(QueryResult.GetError());
+        Runtime::Crash(QueryResult.GetError(), SourceLocation);
     }
 }
 
-void ThrowUnconditionallyOnPreparedStatementError(duckdb::PreparedStatement& PreparedStatement) {
+void CrashOnPreparedStatementError(duckdb::PreparedStatement& PreparedStatement, const std::source_location& SourceLocation) {
     if (PreparedStatement.HasError()) {
-        Runtime::ThrowError(PreparedStatement.GetError());
+        Runtime::Crash(PreparedStatement.GetError(), SourceLocation);
     }
 }
 
-void ThrowUnconditionallyOnMutationNoOp(duckdb::QueryResult& QueryResult, const std::string_view ErrorMessage) {
+void CrashOnMutationNoOp(duckdb::QueryResult& QueryResult, const std::string_view ErrorMessage, const std::source_location& SourceLocation) {
     if (QueryResult.begin() not_eq QueryResult.end()) {
         return;
     }
-    Runtime::ThrowError(ErrorMessage);
+    Runtime::Crash(ErrorMessage, SourceLocation);
 }
 
 }

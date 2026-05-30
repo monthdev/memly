@@ -13,7 +13,7 @@ namespace Infrastructure::Store::Library {
 LibraryClockStore::LibraryClockStore(duckdb::Connection& DatabaseConnection)
     : m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
           Infrastructure::Sql::Query::Library::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql()) } {
-    Infrastructure::Sql::ThrowUnconditionallyOnPreparedStatementError(*m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement);
+    Infrastructure::Sql::CrashOnPreparedStatementError(*m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement);
 }
 
 LibraryClockStore::~LibraryClockStore() = default;
@@ -21,7 +21,7 @@ LibraryClockStore::~LibraryClockStore() = default;
 [[nodiscard]] std::optional<qint64> LibraryClockStore::ReadNextLibraryRefreshAtMillisecondsSinceEpoch(const qint64 AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->Execute(
         static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
-    Infrastructure::Sql::ThrowUnconditionallyOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
     const auto QueryResultIterator{ QueryResult->begin() };
     if ((*QueryResultIterator).IsNull(0)) {
         return std::nullopt;
