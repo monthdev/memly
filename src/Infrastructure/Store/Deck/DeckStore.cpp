@@ -11,14 +11,13 @@
 namespace Infrastructure::Store::Deck {
 
 DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
-    : m_DatabaseConnection{ DatabaseConnection }
-    , m_CreateRootDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::CreateRootDeckSql()) }
-    , m_CreateChildDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::CreateChildDeckSql()) }
-    , m_MoveDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::MoveDeckSql()) }
-    , m_RenameDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::RenameDeckSql()) }
-    , m_DeleteDeckCardReviewsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckCardReviewsSql()) }
-    , m_DeleteDeckCardsPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckCardsSql()) }
-    , m_DeleteDeckPreparedStatement{ m_DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckSql()) } {
+    : m_CreateRootDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::CreateRootDeckSql()) }
+    , m_CreateChildDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::CreateChildDeckSql()) }
+    , m_MoveDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::MoveDeckSql()) }
+    , m_RenameDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::RenameDeckSql()) }
+    , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckCardReviewsSql()) }
+    , m_DeleteDeckCardsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckCardsSql()) }
+    , m_DeleteDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckSql()) } {
     Infrastructure::Sql::CrashOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
     Infrastructure::Sql::CrashOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
     Infrastructure::Sql::CrashOnPreparedStatementError(*m_MoveDeckPreparedStatement);
@@ -68,21 +67,14 @@ DeckStore::~DeckStore() = default;
 }
 
 [[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::DeleteDeck(const QString& DeckId) {
-    m_DatabaseConnection.BeginTransaction();
-    try {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId.toStdString()) };
-        Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
-        QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId.toStdString());
-        Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
-        QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId.toStdString());
-        Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
-        Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Deck delete did not delete a deck");
-        m_DatabaseConnection.Commit();
-        return std::nullopt;
-    } catch (...) {
-        m_DatabaseConnection.Rollback();
-        throw;
-    }
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId.toStdString()) };
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
+    QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId.toStdString());
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
+    QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId.toStdString());
+    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Deck delete did not delete a deck");
+    return std::nullopt;
 }
 
 // TODO: Fix error message string checks and use switch case logic

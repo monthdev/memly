@@ -33,7 +33,6 @@ public:
     [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> DeleteDeck(const QString&);
 
 private:
-    duckdb::Connection& m_DatabaseConnection;
     std::unique_ptr<duckdb::PreparedStatement> m_CreateRootDeckPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_CreateChildDeckPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_MoveDeckPreparedStatement;
