@@ -6,6 +6,7 @@
 #include <QString>
 #include <QVariant>
 #include <QVector>
+#include <functional>
 #include <optional>
 
 namespace Presentation::Model {
@@ -61,9 +62,6 @@ public:
         if (Row < 0 or Column < 0 or Parent.column() > 0 or Column >= columnCount(Parent)) {
             return QModelIndex{};
         }
-        if (Parent.isValid() and TryGetDeckNode(Parent) == nullptr) {
-            return QModelIndex{};
-        }
         const QVector<qsizetype>& ChildDeckNodeIndexesQVector{ GetChildDeckNodeIndexes(Parent) };
         if (Row >= ChildDeckNodeIndexesQVector.size()) {
             return QModelIndex{};
@@ -73,20 +71,21 @@ public:
     }
 
     [[nodiscard]] QModelIndex parent(const QModelIndex& Index) const override {
-        const DeckNode* CurrentDeckNode{ TryGetDeckNode(Index) };
-        if (CurrentDeckNode == nullptr or CurrentDeckNode->m_ParentDeckNodeIndex == s_RootDeckNodeIndex) {
+        const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
+        if (not CurrentDeckNodeOptional.has_value()) {
             return QModelIndex{};
         }
-        const qsizetype ParentDeckNodeIndex{ CurrentDeckNode->m_ParentDeckNodeIndex };
+        const DeckNode& CurrentDeckNode{ CurrentDeckNodeOptional.value().get() };
+        if (CurrentDeckNode.m_ParentDeckNodeIndex == s_RootDeckNodeIndex) {
+            return QModelIndex{};
+        }
+        const qsizetype ParentDeckNodeIndex{ CurrentDeckNode.m_ParentDeckNodeIndex };
         const DeckNode& ParentDeckNode{ m_DeckNodesQVector.at(ParentDeckNodeIndex) };
         return createIndex(static_cast<int>(ParentDeckNode.m_RowInParentIndex), 0, static_cast<quintptr>(ParentDeckNodeIndex));
     }
 
     [[nodiscard]] int rowCount(const QModelIndex& Parent = QModelIndex{}) const override {
         if (Parent.column() > 0) {
-            return 0;
-        }
-        if (Parent.isValid() and TryGetDeckNode(Parent) == nullptr) {
             return 0;
         }
         return static_cast<int>(GetChildDeckNodeIndexes(Parent).size());
@@ -100,54 +99,55 @@ public:
     }
 
     [[nodiscard]] QVariant data(const QModelIndex& Index, int Role) const override {
-        const DeckNode* CurrentDeckNode{ TryGetDeckNode(Index) };
-        if (CurrentDeckNode == nullptr) {
+        const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
+        if (not CurrentDeckNodeOptional.has_value()) {
             return QVariant{};
         }
+        const DeckNode& CurrentDeckNode{ CurrentDeckNodeOptional.value().get() };
         switch (Role) {
         case Qt::DisplayRole:
             switch (Index.column()) {
             case static_cast<int>(ColumnEnum::DeckNameColumn):
-                return CurrentDeckNode->m_DeckNodeData.m_DeckName;
+                return CurrentDeckNode.m_DeckNodeData.m_DeckName;
             case static_cast<int>(ColumnEnum::SubtreeDueNowCountColumn):
-                return CurrentDeckNode->m_DeckNodeData.m_SubtreeDueNowCount;
+                return CurrentDeckNode.m_DeckNodeData.m_SubtreeDueNowCount;
             case static_cast<int>(ColumnEnum::SubtreeByTodayCountColumn):
-                return CurrentDeckNode->m_DeckNodeData.m_SubtreeByTodayCount;
+                return CurrentDeckNode.m_DeckNodeData.m_SubtreeByTodayCount;
             case static_cast<int>(ColumnEnum::SubtreeTotalCountColumn):
-                return CurrentDeckNode->m_DeckNodeData.m_SubtreeTotalCount;
+                return CurrentDeckNode.m_DeckNodeData.m_SubtreeTotalCount;
             default:
                 return QVariant{};
             }
         case static_cast<int>(RoleEnum::DeckIdRole):
-            return CurrentDeckNode->m_DeckNodeData.m_DeckId;
+            return CurrentDeckNode.m_DeckNodeData.m_DeckId;
         case static_cast<int>(RoleEnum::ParentDeckIdRole):
-            if (not CurrentDeckNode->m_DeckNodeData.m_ParentDeckId.has_value()) {
+            if (not CurrentDeckNode.m_DeckNodeData.m_ParentDeckId.has_value()) {
                 return QString{};
             }
-            return CurrentDeckNode->m_DeckNodeData.m_ParentDeckId.value();
+            return CurrentDeckNode.m_DeckNodeData.m_ParentDeckId.value();
         case static_cast<int>(RoleEnum::DeckNameRole):
-            return CurrentDeckNode->m_DeckNodeData.m_DeckName;
+            return CurrentDeckNode.m_DeckNodeData.m_DeckName;
         case static_cast<int>(RoleEnum::CreatedAtMillisecondsSinceEpochRole):
-            return CurrentDeckNode->m_DeckNodeData.m_CreatedAtMillisecondsSinceEpoch;
+            return CurrentDeckNode.m_DeckNodeData.m_CreatedAtMillisecondsSinceEpoch;
         case static_cast<int>(RoleEnum::UpdatedAtMillisecondsSinceEpochRole):
-            if (not CurrentDeckNode->m_DeckNodeData.m_UpdatedAtMillisecondsSinceEpoch.has_value()) {
+            if (not CurrentDeckNode.m_DeckNodeData.m_UpdatedAtMillisecondsSinceEpoch.has_value()) {
                 return qint64{};
             }
-            return CurrentDeckNode->m_DeckNodeData.m_UpdatedAtMillisecondsSinceEpoch.value();
+            return CurrentDeckNode.m_DeckNodeData.m_UpdatedAtMillisecondsSinceEpoch.value();
         case static_cast<int>(RoleEnum::SelfDueNowCountRole):
-            return CurrentDeckNode->m_DeckNodeData.m_SelfDueNowCount;
+            return CurrentDeckNode.m_DeckNodeData.m_SelfDueNowCount;
         case static_cast<int>(RoleEnum::SelfByTodayCountRole):
-            return CurrentDeckNode->m_DeckNodeData.m_SelfByTodayCount;
+            return CurrentDeckNode.m_DeckNodeData.m_SelfByTodayCount;
         case static_cast<int>(RoleEnum::SelfTotalCountRole):
-            return CurrentDeckNode->m_DeckNodeData.m_SelfTotalCount;
+            return CurrentDeckNode.m_DeckNodeData.m_SelfTotalCount;
         case static_cast<int>(RoleEnum::SubtreeDueNowCountRole):
-            return CurrentDeckNode->m_DeckNodeData.m_SubtreeDueNowCount;
+            return CurrentDeckNode.m_DeckNodeData.m_SubtreeDueNowCount;
         case static_cast<int>(RoleEnum::SubtreeByTodayCountRole):
-            return CurrentDeckNode->m_DeckNodeData.m_SubtreeByTodayCount;
+            return CurrentDeckNode.m_DeckNodeData.m_SubtreeByTodayCount;
         case static_cast<int>(RoleEnum::SubtreeTotalCountRole):
-            return CurrentDeckNode->m_DeckNodeData.m_SubtreeTotalCount;
+            return CurrentDeckNode.m_DeckNodeData.m_SubtreeTotalCount;
         case static_cast<int>(RoleEnum::TargetLanguageCodeRole):
-            return static_cast<quint32>(CurrentDeckNode->m_DeckNodeData.m_TargetLanguageCode);
+            return static_cast<quint32>(CurrentDeckNode.m_DeckNodeData.m_TargetLanguageCode);
         default:
             return QVariant{};
         }
@@ -228,7 +228,7 @@ private:
     int m_SortColumn;
     Qt::SortOrder m_SortOrder;
 
-    [[nodiscard]] const DeckNode* TryGetDeckNode(const QModelIndex&) const noexcept;
+    [[nodiscard]] std::optional<std::reference_wrapper<const DeckNode>> TryGetDeckNode(const QModelIndex&) const noexcept;
     [[nodiscard]] const QVector<qsizetype>& GetChildDeckNodeIndexes(const QModelIndex&) const noexcept;
     void ApplyCurrentSort() noexcept;
     void SortSiblingDeckNodeIndexes(QVector<qsizetype>&) noexcept;

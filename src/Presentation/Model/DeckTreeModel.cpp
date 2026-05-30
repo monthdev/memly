@@ -4,26 +4,21 @@
 
 namespace Presentation::Model {
 
-[[nodiscard]] const DeckTreeModel::DeckNode* DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {
-        return nullptr;
+        return std::nullopt;
     }
     const qsizetype DeckNodeIndex{ static_cast<qsizetype>(Index.internalId()) };
-    if (DeckNodeIndex < 0 or DeckNodeIndex >= m_DeckNodesQVector.size()) {
-        return nullptr;
-    }
-    return &m_DeckNodesQVector.at(DeckNodeIndex);
+    Q_ASSERT(DeckNodeIndex >= 0 and DeckNodeIndex < m_DeckNodesQVector.size());
+    return m_DeckNodesQVector.at(DeckNodeIndex);
 }
 
 [[nodiscard]] const QVector<qsizetype>& DeckTreeModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const noexcept {
     if (not Parent.isValid()) {
         return m_RootDeckNodeIndexesQVector;
     }
-    const DeckNode* ParentDeckNode{ TryGetDeckNode(Parent) };
-    if (ParentDeckNode == nullptr) {
-        return m_RootDeckNodeIndexesQVector;
-    }
-    return ParentDeckNode->m_ChildDeckNodeIndexesQVector;
+    const DeckNode& ParentDeckNode{ TryGetDeckNode(Parent).value().get() };
+    return ParentDeckNode.m_ChildDeckNodeIndexesQVector;
 }
 
 [[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
