@@ -64,11 +64,11 @@ public:
         if (Parent.isValid() and TryGetDeckNode(Parent) == nullptr) {
             return QModelIndex{};
         }
-        const QVector<qsizetype>& ChildDeckNodesQVector{ GetChildDeckNodeIndexes(Parent) };
-        if (Row >= ChildDeckNodesQVector.size()) {
+        const QVector<qsizetype>& ChildDeckNodeIndexesQVector{ GetChildDeckNodeIndexes(Parent) };
+        if (Row >= ChildDeckNodeIndexesQVector.size()) {
             return QModelIndex{};
         }
-        const qsizetype ChildDeckNodeIndex{ ChildDeckNodesQVector.at(static_cast<qsizetype>(Row)) };
+        const qsizetype ChildDeckNodeIndex{ ChildDeckNodeIndexesQVector.at(static_cast<qsizetype>(Row)) };
         return createIndex(Row, Column, static_cast<quintptr>(ChildDeckNodeIndex));
     }
 
