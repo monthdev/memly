@@ -18,13 +18,13 @@ DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
     , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckCardReviewsSql()) }
     , m_DeleteDeckCardsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckCardsSql()) }
     , m_DeleteDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Mutation::Deck::DeleteDeckSql()) } {
-    Infrastructure::Sql::CrashOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
-    Infrastructure::Sql::CrashOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
-    Infrastructure::Sql::CrashOnPreparedStatementError(*m_MoveDeckPreparedStatement);
-    Infrastructure::Sql::CrashOnPreparedStatementError(*m_RenameDeckPreparedStatement);
-    Infrastructure::Sql::CrashOnPreparedStatementError(*m_DeleteDeckCardReviewsPreparedStatement);
-    Infrastructure::Sql::CrashOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
-    Infrastructure::Sql::CrashOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_MoveDeckPreparedStatement);
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_RenameDeckPreparedStatement);
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckCardReviewsPreparedStatement);
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
 }
 
 DeckStore::~DeckStore() = default;
@@ -40,7 +40,7 @@ DeckStore::~DeckStore() = default;
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
-    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Child deck creation did not insert a deck");
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Child deck creation did not insert a deck");
     return std::nullopt;
 }
 
@@ -52,7 +52,7 @@ DeckStore::~DeckStore() = default;
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
-    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Deck move did not update a deck");
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck move did not update a deck");
     return std::nullopt;
 }
 
@@ -62,18 +62,18 @@ DeckStore::~DeckStore() = default;
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
-    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Deck rename did not update a deck");
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck rename did not update a deck");
     return std::nullopt;
 }
 
 [[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::DeleteDeck(const QString& DeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId.toStdString()) };
-    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId.toStdString());
-    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId.toStdString());
-    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
-    Infrastructure::Sql::CrashOnMutationNoOp(*QueryResult, "Deck delete did not delete a deck");
+    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck delete did not delete a deck");
     return std::nullopt;
 }
 
@@ -100,6 +100,6 @@ DeckStore::~DeckStore() = default;
     if (ErrorMessage.contains("Duplicate key \"")) {
         return RecoverableDeckMutationErrorEnum::DuplicateSiblingDeckNameError;
     }
-    Runtime::Crash(QueryResult.GetError());
+    Runtime::ThrowError(QueryResult.GetError());
 }
 }

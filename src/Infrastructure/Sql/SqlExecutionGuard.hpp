@@ -10,10 +10,10 @@ class QueryResult;
 
 namespace Infrastructure::Sql {
 
-void CrashOnQueryResultError(duckdb::QueryResult&, const std::source_location& = std::source_location::current());
+void ThrowOnQueryResultError(duckdb::QueryResult&, const std::source_location& = std::source_location::current());
 
-void CrashOnPreparedStatementError(duckdb::PreparedStatement&, const std::source_location& = std::source_location::current());
+void ThrowOnPreparedStatementError(duckdb::PreparedStatement&, const std::source_location& = std::source_location::current());
 
-void CrashOnMutationNoOp(duckdb::QueryResult&, const std::string_view, const std::source_location& = std::source_location::current());
+void ThrowOnMutationNoOp(duckdb::QueryResult&, const std::string_view, const std::source_location& = std::source_location::current());
 
 }

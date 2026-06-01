@@ -12,14 +12,14 @@ namespace Infrastructure::Store::Deck {
 
 DeckTreeStore::DeckTreeStore(duckdb::Connection& DatabaseConnection)
     : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Query::Deck::ReadDeckTreeSnapshotSql()) } {
-    Infrastructure::Sql::CrashOnPreparedStatementError(*m_ReadDeckTreeSnapshotPreparedStatement);
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotPreparedStatement);
 }
 
 DeckTreeStore::~DeckTreeStore() = default;
 
 [[nodiscard]] QVector<DeckTreeStore::DeckTreeRow> DeckTreeStore::ReadDeckTreeSnapshot(const qint64 AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadDeckTreeSnapshotPreparedStatement->Execute(static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
-    Infrastructure::Sql::CrashOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     QVector<DeckTreeRow> DeckTreeRowQVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };
