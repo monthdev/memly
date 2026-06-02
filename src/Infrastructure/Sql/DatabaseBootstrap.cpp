@@ -55,7 +55,14 @@ void SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
 }
 
 void RunDatabaseBootstrap(duckdb::Connection& DatabaseConnection) {
-    ApplySchemaMigrations(DatabaseConnection);
-    SeedTableDefaults(DatabaseConnection);
+    DatabaseConnection.BeginTransaction();
+    try {
+        ApplySchemaMigrations(DatabaseConnection);
+        SeedTableDefaults(DatabaseConnection);
+        DatabaseConnection.Commit();
+    } catch (...) {
+        DatabaseConnection.Rollback();
+        throw;
+    }
 }
 }
