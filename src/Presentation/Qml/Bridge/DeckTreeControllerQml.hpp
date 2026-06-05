@@ -20,8 +20,8 @@ public:
     explicit DeckTreeControllerQml(QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_DeckTreeController{ Bootstrap::RuntimeContext::GetRequiredLibraryRefreshCoordinator(),
-                                Bootstrap::RuntimeContext::GetRequiredDeckStore(),
-                                Bootstrap::RuntimeContext::GetRequiredDeckTreeStore() } {
+                                Bootstrap::RuntimeContext::GetRequiredDeckService(),
+                                Bootstrap::RuntimeContext::GetRequiredDeckTreeService() } {
     }
 
     [[nodiscard]] Model::DeckTreeModel* GetDeckTree() noexcept {

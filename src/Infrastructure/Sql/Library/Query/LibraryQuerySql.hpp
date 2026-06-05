@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Infrastructure::Sql::Query::Library {
+namespace Infrastructure::Sql::Library::Query {
 
 [[nodiscard]] std::string ReadNextLibraryRefreshAtMillisecondsSinceEpochSql();
 }

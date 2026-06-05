@@ -1,28 +1,27 @@
 #include "Presentation/Controller/DeckTreeController.hpp"
 
+#include <expected>
+
 #include "Runtime/Crash.hpp"
 
 namespace Presentation::Controller {
 
-[[nodiscard]] std::optional<QString> DeckTreeController::RecoverableDeckMutationErrorToQString(
-    const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError) const {
-    if (not RecoverableDeckMutationError.has_value()) {
-        return std::nullopt;
-    }
-    switch (RecoverableDeckMutationError.value()) {
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
+[[nodiscard]] QString
+DeckTreeController::DeckMutationErrorToQString(const Application::Service::Deck::DeckService::DeckMutationErrorEnum DeckMutationError) const {
+    switch (DeckMutationError) {
+    case Application::Service::Deck::DeckService::DeckMutationErrorEnum::DeckNameLengthError: {
         return QString{ "Deck name length exceeds character limit" };
     }
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DuplicateSiblingDeckNameError: {
+    case Application::Service::Deck::DeckService::DeckMutationErrorEnum::DuplicateSiblingDeckNameError: {
         return QString{ "Deck name already exists" };
     }
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
+    case Application::Service::Deck::DeckService::DeckMutationErrorEnum::InvalidTargetLanguageCodeError: {
         return QString{ "Target language code is invalid" };
     }
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
+    case Application::Service::Deck::DeckService::DeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError: {
         return QString{ "Deck target language does not match parent deck" };
     }
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError: {
+    case Application::Service::Deck::DeckService::DeckMutationErrorEnum::DeckTreeCycleDetectionError: {
         return QString{ "Deck cannot be moved into itself or one of its own sub decks" };
     }
     }
@@ -30,64 +29,70 @@ namespace Presentation::Controller {
 
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
-            m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode)) };
-        if (not RecoverableDeckMutationErrorMessage.has_value()) {
-            m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
+        const std::expected<void, Application::Service::Deck::DeckService::DeckMutationErrorEnum> DeckMutationResult{ m_DeckService.CreateRootDeck(
+            DeckName, TargetLanguageCode) };
+        if (not DeckMutationResult.has_value()) {
+            return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        return RecoverableDeckMutationErrorMessage;
+        m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
+        return std::nullopt;
     });
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
-            m_DeckStore.CreateChildDeck(DeckName, ParentDeckId)) };
-        if (not RecoverableDeckMutationErrorMessage.has_value()) {
-            m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
+        const std::expected<void, Application::Service::Deck::DeckService::DeckMutationErrorEnum> DeckMutationResult{ m_DeckService.CreateChildDeck(
+            DeckName, ParentDeckId) };
+        if (not DeckMutationResult.has_value()) {
+            return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        return RecoverableDeckMutationErrorMessage;
+        m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
+        return std::nullopt;
     });
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::MoveDeck(const QString& DeckId, const std::optional<QString>& NewParentDeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(
-            m_DeckStore.MoveDeck(DeckId, NewParentDeckId)) };
-        if (not RecoverableDeckMutationErrorMessage.has_value()) {
-            m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
+        const std::expected<void, Application::Service::Deck::DeckService::DeckMutationErrorEnum> DeckMutationResult{ m_DeckService.MoveDeck(DeckId,
+                                                                                                                                             NewParentDeckId) };
+        if (not DeckMutationResult.has_value()) {
+            return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        return RecoverableDeckMutationErrorMessage;
+        m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
+        return std::nullopt;
     });
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::RenameDeck(const QString& DeckId, const QString& NewDeckName) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.RenameDeck(DeckId, NewDeckName)) };
-        if (not RecoverableDeckMutationErrorMessage.has_value()) {
-            m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
+        const std::expected<void, Application::Service::Deck::DeckService::DeckMutationErrorEnum> DeckMutationResult{ m_DeckService.RenameDeck(DeckId,
+                                                                                                                                               NewDeckName) };
+        if (not DeckMutationResult.has_value()) {
+            return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        return RecoverableDeckMutationErrorMessage;
+        m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
+        return std::nullopt;
     });
 }
 
 [[nodiscard]] std::optional<QString> DeckTreeController::DeleteDeck(const QString& DeckId) noexcept {
     return Runtime::TryCatchWrapper([&]() -> std::optional<QString> {
-        const std::optional<QString> RecoverableDeckMutationErrorMessage{ RecoverableDeckMutationErrorToQString(m_DeckStore.DeleteDeck(DeckId)) };
-        if (not RecoverableDeckMutationErrorMessage.has_value()) {
-            m_LibraryRefreshCoordinator.NotifyLibraryMutated(true);
+        const std::expected<void, Application::Service::Deck::DeckService::DeckMutationErrorEnum> DeckMutationResult{ m_DeckService.DeleteDeck(DeckId) };
+        if (not DeckMutationResult.has_value()) {
+            return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        return RecoverableDeckMutationErrorMessage;
+        m_LibraryRefreshCoordinator.NotifyLibraryMutated(true);
+        return std::nullopt;
     });
 }
 
 void DeckTreeController::RefreshDeckTree(const qint64 AsOfMillisecondsSinceEpoch) noexcept {
-    Runtime::TryCatchWrapper([&] {
-        const QVector<Infrastructure::Store::Deck::DeckTreeStore::DeckTreeRow> DeckTreeRowQVector{ m_DeckTreeStore.ReadDeckTreeSnapshot(
+    Runtime::TryCatchWrapper([&]() -> void {
+        const QVector<Application::Service::Deck::DeckTreeService::DeckTreeRow> DeckTreeRowQVector{ m_DeckTreeService.ReadDeckTreeSnapshot(
             AsOfMillisecondsSinceEpoch) };
         QVector<Model::DeckTreeModel::DeckNodeData> DeckNodeDataQVector{};
         DeckNodeDataQVector.reserve(DeckTreeRowQVector.size());
-        for (const auto& DeckTreeRow : DeckTreeRowQVector) {
+        for (const Application::Service::Deck::DeckTreeService::DeckTreeRow& DeckTreeRow : DeckTreeRowQVector) {
             DeckNodeDataQVector.emplace_back(DeckTreeRow.m_DeckId,
                                              DeckTreeRow.m_ParentDeckId,
                                              DeckTreeRow.m_DeckName,

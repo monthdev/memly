@@ -2,9 +2,9 @@
 
 #include "Infrastructure/Sql/SqlResourceBytes.hpp"
 
-namespace Infrastructure::Sql::Query::Deck {
+namespace Infrastructure::Sql::Deck::Query {
 
 [[nodiscard]] std::string ReadDeckTreeSnapshotSql() {
-    return ReadSqlResourceBytes(":/Sql/Query/Deck/Statement/ReadDeckTreeSnapshot.sql");
+    return ReadSqlResourceBytes(":/Sql/Deck/Query/Statement/ReadDeckTreeSnapshot.sql");
 }
 }

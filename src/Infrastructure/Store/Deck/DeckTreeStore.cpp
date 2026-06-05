@@ -5,13 +5,13 @@
 #include <cstdint>
 #include <memory>
 
-#include "Infrastructure/Sql/Query/Deck/DeckQuerySql.hpp"
+#include "Infrastructure/Sql/Deck/Query/DeckQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Deck {
 
 DeckTreeStore::DeckTreeStore(duckdb::Connection& DatabaseConnection)
-    : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Query::Deck::ReadDeckTreeSnapshotSql()) } {
+    : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Query::ReadDeckTreeSnapshotSql()) } {
     Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotPreparedStatement);
 }
 

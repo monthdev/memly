@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Infrastructure::Sql::Query::Deck {
+namespace Infrastructure::Sql::Deck::Query {
 
 [[nodiscard]] std::string ReadDeckTreeSnapshotSql();
 }

@@ -1,5 +1,3 @@
-BEGIN TRANSACTION;
-
 CREATE MACRO IF NOT EXISTS deck_name_length_is_valid (deck_name) AS LENGTH(deck_name) > 0
 AND LENGTH(deck_name) <= 40;
 
@@ -394,5 +392,3 @@ SELECT
   excluded_custom_review_session_decks.deck_id
 FROM
   excluded_custom_review_session_decks;
-
-COMMIT;

@@ -6,8 +6,8 @@
 #include <optional>
 
 #include "Application/Coordinator/LibraryRefreshCoordinator.hpp"
-#include "Infrastructure/Store/Deck/DeckStore.hpp"
-#include "Infrastructure/Store/Deck/DeckTreeStore.hpp"
+#include "Application/Service/Deck/DeckService.hpp"
+#include "Application/Service/Deck/DeckTreeService.hpp"
 #include "Presentation/Model/DeckTreeModel.hpp"
 
 namespace Presentation::Controller {
@@ -18,13 +18,13 @@ class DeckTreeController : public QObject {
 
 public:
     explicit DeckTreeController(Application::Coordinator::LibraryRefreshCoordinator& LibraryRefreshCoordinator,
-                                Infrastructure::Store::Deck::DeckStore& DeckStore,
-                                Infrastructure::Store::Deck::DeckTreeStore& DeckTreeStore,
+                                Application::Service::Deck::DeckService& DeckService,
+                                Application::Service::Deck::DeckTreeService& DeckTreeService,
                                 QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_LibraryRefreshCoordinator{ LibraryRefreshCoordinator }
-        , m_DeckStore{ DeckStore }
-        , m_DeckTreeStore{ DeckTreeStore }
+        , m_DeckService{ DeckService }
+        , m_DeckTreeService{ DeckTreeService }
         , m_DeckTree{ this } {
         connect(&m_LibraryRefreshCoordinator,
                 &Application::Coordinator::LibraryRefreshCoordinator::RefreshRequested,
@@ -45,12 +45,11 @@ public:
 
 private:
     Application::Coordinator::LibraryRefreshCoordinator& m_LibraryRefreshCoordinator;
-    Infrastructure::Store::Deck::DeckStore& m_DeckStore;
-    Infrastructure::Store::Deck::DeckTreeStore& m_DeckTreeStore;
+    Application::Service::Deck::DeckService& m_DeckService;
+    Application::Service::Deck::DeckTreeService& m_DeckTreeService;
     Model::DeckTreeModel m_DeckTree;
 
-    [[nodiscard]] std::optional<QString>
-    RecoverableDeckMutationErrorToQString(const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum>) const;
+    [[nodiscard]] QString DeckMutationErrorToQString(Application::Service::Deck::DeckService::DeckMutationErrorEnum) const;
     void RefreshDeckTree(const qint64) noexcept;
 };
 }

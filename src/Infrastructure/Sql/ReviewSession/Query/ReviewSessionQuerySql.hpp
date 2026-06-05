@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Infrastructure::Sql::Query::ReviewSession {
+namespace Infrastructure::Sql::ReviewSession::Query {
 
 [[nodiscard]] std::string ReadReviewSessionListSql();
 

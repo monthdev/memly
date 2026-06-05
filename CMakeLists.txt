@@ -36,8 +36,14 @@ file(GLOB BOOTSTRAP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bootstrap/*.c
 file(GLOB BOOTSTRAP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bootstrap/*.[Hh]*")
 file(GLOB APPLICATION_COORDINATOR_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Application/Coordinator/*.cpp")
 file(GLOB APPLICATION_COORDINATOR_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Application/Coordinator/*.[Hh]*")
-file(GLOB APPLICATION_SERVICE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Application/Service/*.cpp")
-file(GLOB APPLICATION_SERVICE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Application/Service/*.[Hh]*")
+file(GLOB APPLICATION_SERVICE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Application/Service/*.cpp"
+     "${CMAKE_SOURCE_DIR}/src/Application/Service/Deck/*.cpp"
+     "${CMAKE_SOURCE_DIR}/src/Application/Service/ReviewSession/*.cpp"
+)
+file(GLOB APPLICATION_SERVICE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Application/Service/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/src/Application/Service/Deck/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/src/Application/Service/ReviewSession/*.[Hh]*"
+)
 
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
@@ -80,12 +86,12 @@ file(
   INFRASTRUCTURE_SQL_CPP
   CONFIGURE_DEPENDS
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Deck/Mutation/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Deck/Query/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Library/Query/*.cpp"
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Migration/*.cpp"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/Deck/*.cpp"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/ReviewSession/*.cpp"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Deck/*.cpp"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Library/*.cpp"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/ReviewSession/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/ReviewSession/Mutation/*.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/ReviewSession/Query/*.cpp"
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/*.cpp"
 )
 file(
@@ -93,12 +99,12 @@ file(
   INFRASTRUCTURE_SQL_HDR
   CONFIGURE_DEPENDS
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Deck/Mutation/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Deck/Query/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Library/Query/*.[Hh]*"
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Migration/*.[Hh]*"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/Deck/*.[Hh]*"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/ReviewSession/*.[Hh]*"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Deck/*.[Hh]*"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Library/*.[Hh]*"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/ReviewSession/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/ReviewSession/Mutation/*.[Hh]*"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/ReviewSession/Query/*.[Hh]*"
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/*.[Hh]*"
 )
 
@@ -120,12 +126,12 @@ file(
   GLOB
   SQL_FILES
   CONFIGURE_DEPENDS
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Deck/Mutation/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Deck/Query/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Library/Query/Statement/*.sql"
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Migration/Statement/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/Deck/Statement/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Mutation/ReviewSession/Statement/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Deck/Statement/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/Library/Statement/*.sql"
-  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Query/ReviewSession/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/ReviewSession/Mutation/Statement/*.sql"
+  "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/ReviewSession/Query/Statement/*.sql"
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/Statement/*.sql"
 )
 

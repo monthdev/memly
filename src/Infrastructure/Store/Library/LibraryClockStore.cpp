@@ -5,14 +5,14 @@
 #include <cstdint>
 #include <memory>
 
-#include "Infrastructure/Sql/Query/Library/LibraryQuerySql.hpp"
+#include "Infrastructure/Sql/Library/Query/LibraryQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Library {
 
 LibraryClockStore::LibraryClockStore(duckdb::Connection& DatabaseConnection)
     : m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
-          Infrastructure::Sql::Query::Library::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql()) } {
+          Infrastructure::Sql::Library::Query::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql()) } {
     Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement);
 }
 

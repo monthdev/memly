@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Infrastructure::Sql::Mutation::Deck {
+namespace Infrastructure::Sql::Deck::Mutation {
 
 [[nodiscard]] std::string CreateRootDeckSql();
 

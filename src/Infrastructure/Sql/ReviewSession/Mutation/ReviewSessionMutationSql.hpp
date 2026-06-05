@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Infrastructure::Sql::Mutation::ReviewSession {
+namespace Infrastructure::Sql::ReviewSession::Mutation {
 
 [[nodiscard]] std::string CreateCustomReviewSessionSql();
 
