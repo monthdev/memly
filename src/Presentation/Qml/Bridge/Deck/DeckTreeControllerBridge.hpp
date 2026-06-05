@@ -11,13 +11,13 @@
 
 namespace Presentation::Qml::Bridge::Deck {
 
-class DeckTreeControllerQml : public QObject {
+class DeckTreeControllerBridge : public QObject {
     Q_OBJECT
     Q_PROPERTY(Presentation::Model::Deck::DeckTreeModel* deckTree READ GetDeckTree CONSTANT)
     QML_NAMED_ELEMENT(DeckTreeController)
 
 public:
-    explicit DeckTreeControllerQml(QObject* Parent = nullptr)
+    explicit DeckTreeControllerBridge(QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_DeckTreeController{ Bootstrap::RuntimeContext::GetRequiredLibraryRefreshCoordinator(),
                                 Bootstrap::RuntimeContext::GetRequiredDeckService(),
