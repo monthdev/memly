@@ -47,14 +47,22 @@ file(GLOB APPLICATION_SERVICE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App
 
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
-file(GLOB PRESENTATION_CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.cpp")
-file(GLOB PRESENTATION_CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.[Hh]*")
+file(GLOB PRESENTATION_CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.cpp"
+     "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/Deck/*.cpp"
+)
+file(GLOB PRESENTATION_CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/Deck/*.[Hh]*"
+)
 
 file(GLOB CORE_LANGUAGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/Language/*.cpp")
 file(GLOB CORE_LANGUAGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Core/Language/*.[Hh]*")
 
-file(GLOB PRESENTATION_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.cpp")
-file(GLOB PRESENTATION_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.[Hh]*")
+file(GLOB PRESENTATION_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.cpp"
+     "${CMAKE_SOURCE_DIR}/src/Presentation/Model/Deck/*.cpp"
+)
+file(GLOB PRESENTATION_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/src/Presentation/Model/Deck/*.[Hh]*"
+)
 
 file(GLOB INFRASTRUCTURE_CLIENT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Client/*.cpp")
 file(GLOB INFRASTRUCTURE_CLIENT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Client/*.[Hh]*")
@@ -340,13 +348,13 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_CURRENT_BINARY_DIR}/Memly"
   SOURCES
-  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/DeckTreeControllerQml.hpp"
+  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/Deck/DeckTreeControllerQml.hpp"
   QML_FILES
   ${QT_QML}
 )
 
 target_include_directories(
-  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge"
+  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/Deck"
 )
 
 set_target_properties(

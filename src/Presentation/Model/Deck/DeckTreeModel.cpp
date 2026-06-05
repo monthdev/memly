@@ -1,8 +1,8 @@
-#include "Presentation/Model/DeckTreeModel.hpp"
+#include "Presentation/Model/Deck/DeckTreeModel.hpp"
 
 #include <algorithm>
 
-namespace Presentation::Model {
+namespace Presentation::Model::Deck {
 
 [[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {

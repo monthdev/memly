@@ -1,10 +1,10 @@
-#include "Presentation/Controller/DeckTreeController.hpp"
+#include "Presentation/Controller/Deck/DeckTreeController.hpp"
 
 #include <expected>
 
 #include "Runtime/Crash.hpp"
 
-namespace Presentation::Controller {
+namespace Presentation::Controller::Deck {
 
 [[nodiscard]] QString
 DeckTreeController::DeckMutationErrorToQString(const Application::Service::Deck::DeckService::DeckMutationErrorEnum DeckMutationError) const {
@@ -90,7 +90,7 @@ void DeckTreeController::RefreshDeckTree(const qint64 AsOfMillisecondsSinceEpoch
     Runtime::TryCatchWrapper([&]() -> void {
         const QVector<Application::Service::Deck::DeckTreeService::DeckTreeRow> DeckTreeRowQVector{ m_DeckTreeService.ReadDeckTreeSnapshot(
             AsOfMillisecondsSinceEpoch) };
-        QVector<Model::DeckTreeModel::DeckNodeData> DeckNodeDataQVector{};
+        QVector<Presentation::Model::Deck::DeckTreeModel::DeckNodeData> DeckNodeDataQVector{};
         DeckNodeDataQVector.reserve(DeckTreeRowQVector.size());
         for (const Application::Service::Deck::DeckTreeService::DeckTreeRow& DeckTreeRow : DeckTreeRowQVector) {
             DeckNodeDataQVector.emplace_back(DeckTreeRow.m_DeckId,

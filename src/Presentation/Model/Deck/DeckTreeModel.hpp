@@ -9,7 +9,7 @@
 #include <functional>
 #include <optional>
 
-namespace Presentation::Model {
+namespace Presentation::Model::Deck {
 
 class DeckTreeModel final : public QAbstractItemModel {
     Q_OBJECT

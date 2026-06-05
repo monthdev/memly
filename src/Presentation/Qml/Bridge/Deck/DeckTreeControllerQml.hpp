@@ -7,13 +7,13 @@
 #include <optional>
 
 #include "Bootstrap/RuntimeContext.hpp"
-#include "Presentation/Controller/DeckTreeController.hpp"
+#include "Presentation/Controller/Deck/DeckTreeController.hpp"
 
-namespace Presentation::Qml::Bridge {
+namespace Presentation::Qml::Bridge::Deck {
 
 class DeckTreeControllerQml : public QObject {
     Q_OBJECT
-    Q_PROPERTY(Presentation::Model::DeckTreeModel* deckTree READ GetDeckTree CONSTANT)
+    Q_PROPERTY(Presentation::Model::Deck::DeckTreeModel* deckTree READ GetDeckTree CONSTANT)
     QML_NAMED_ELEMENT(DeckTreeController)
 
 public:
@@ -24,7 +24,7 @@ public:
                                 Bootstrap::RuntimeContext::GetRequiredDeckTreeService() } {
     }
 
-    [[nodiscard]] Model::DeckTreeModel* GetDeckTree() noexcept {
+    [[nodiscard]] Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
         return m_DeckTreeController.GetDeckTree();
     }
 
@@ -49,7 +49,7 @@ public:
     }
 
 private:
-    Controller::DeckTreeController m_DeckTreeController;
+    Presentation::Controller::Deck::DeckTreeController m_DeckTreeController;
 };
 
 }

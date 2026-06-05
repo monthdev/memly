@@ -8,13 +8,13 @@
 #include "Application/Coordinator/LibraryRefreshCoordinator.hpp"
 #include "Application/Service/Deck/DeckService.hpp"
 #include "Application/Service/Deck/DeckTreeService.hpp"
-#include "Presentation/Model/DeckTreeModel.hpp"
+#include "Presentation/Model/Deck/DeckTreeModel.hpp"
 
-namespace Presentation::Controller {
+namespace Presentation::Controller::Deck {
 
 class DeckTreeController : public QObject {
     Q_OBJECT
-    Q_PROPERTY(Presentation::Model::DeckTreeModel* deckTree READ GetDeckTree CONSTANT)
+    Q_PROPERTY(Presentation::Model::Deck::DeckTreeModel* deckTree READ GetDeckTree CONSTANT)
 
 public:
     explicit DeckTreeController(Application::Coordinator::LibraryRefreshCoordinator& LibraryRefreshCoordinator,
@@ -33,7 +33,7 @@ public:
         RefreshDeckTree(m_LibraryRefreshCoordinator.GetAsOfMillisecondsSinceEpoch());
     }
 
-    Model::DeckTreeModel* GetDeckTree() noexcept {
+    Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
         return &m_DeckTree;
     }
 
@@ -47,7 +47,7 @@ private:
     Application::Coordinator::LibraryRefreshCoordinator& m_LibraryRefreshCoordinator;
     Application::Service::Deck::DeckService& m_DeckService;
     Application::Service::Deck::DeckTreeService& m_DeckTreeService;
-    Model::DeckTreeModel m_DeckTree;
+    Presentation::Model::Deck::DeckTreeModel m_DeckTree;
 
     [[nodiscard]] QString DeckMutationErrorToQString(Application::Service::Deck::DeckService::DeckMutationErrorEnum) const;
     void RefreshDeckTree(const qint64) noexcept;
