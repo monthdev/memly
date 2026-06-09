@@ -1,5 +1,6 @@
 #include "Application/Service/Deck/DeckService.hpp"
 
+#include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
 #include "Infrastructure/Sql/TransactionRunner.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 
@@ -25,8 +26,11 @@ ToDeckMutationError(const Infrastructure::Store::Deck::DeckStore::RecoverableDec
 
 namespace Application::Service::Deck {
 
-DeckService::DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunner, Infrastructure::Store::Deck::DeckStore& DeckStore) noexcept
+DeckService::DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunner,
+                         Application::Invalidation::LibraryInvalidationCoordinator& LibraryInvalidationCoordinator,
+                         Infrastructure::Store::Deck::DeckStore& DeckStore) noexcept
     : m_TransactionRunner{ TransactionRunner }
+    , m_LibraryInvalidationCoordinator{ LibraryInvalidationCoordinator }
     , m_DeckStore{ DeckStore } {
 }
 
@@ -37,6 +41,7 @@ DeckService::DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunn
         if (RecoverableDeckMutationError.has_value()) {
             return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
         }
+        m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
@@ -48,6 +53,7 @@ DeckService::DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunn
         if (RecoverableDeckMutationError.has_value()) {
             return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
         }
+        m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
@@ -60,6 +66,7 @@ DeckService::DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunn
         if (RecoverableDeckMutationError.has_value()) {
             return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
         }
+        m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
@@ -71,6 +78,7 @@ DeckService::DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunn
         if (RecoverableDeckMutationError.has_value()) {
             return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
         }
+        m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
@@ -82,6 +90,7 @@ DeckService::DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunn
         if (RecoverableDeckMutationError.has_value()) {
             return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
         }
+        m_LibraryInvalidationCoordinator.InvalidateWithReschedule(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }

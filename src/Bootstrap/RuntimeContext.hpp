@@ -3,8 +3,9 @@
 #include <QString>
 #include <memory>
 
-namespace Application::Coordinator {
-class LibraryRefreshCoordinator;
+namespace Application::Invalidation {
+class LibraryInvalidationChannel;
+class LibraryInvalidationCoordinator;
 }
 
 namespace Application::Service::Deck {
@@ -46,7 +47,7 @@ class RuntimeContext final {
 public:
     static void Initialize(const QString&);
 
-    static Application::Coordinator::LibraryRefreshCoordinator& GetRequiredLibraryRefreshCoordinator() noexcept;
+    static Application::Invalidation::LibraryInvalidationChannel& GetRequiredLibraryInvalidationChannel() noexcept;
     static Application::Service::Deck::DeckService& GetRequiredDeckService() noexcept;
     static Application::Service::Deck::DeckTreeService& GetRequiredDeckTreeService() noexcept;
     static Application::Service::ReviewSession::ReviewSessionListService& GetRequiredReviewSessionListService() noexcept;
@@ -56,8 +57,9 @@ private:
     static std::unique_ptr<duckdb::DuckDB> s_Database;
     static std::unique_ptr<duckdb::Connection> s_DatabaseConnection;
     static std::unique_ptr<Infrastructure::Sql::TransactionRunner> s_TransactionRunner;
+    static std::unique_ptr<Application::Invalidation::LibraryInvalidationChannel> s_LibraryInvalidationChannel;
     static std::unique_ptr<Infrastructure::Store::Library::LibraryClockStore> s_LibraryClockStore;
-    static std::unique_ptr<Application::Coordinator::LibraryRefreshCoordinator> s_LibraryRefreshCoordinator;
+    static std::unique_ptr<Application::Invalidation::LibraryInvalidationCoordinator> s_LibraryInvalidationCoordinator;
     static std::unique_ptr<Infrastructure::Store::Deck::DeckStore> s_DeckStore;
     static std::unique_ptr<Infrastructure::Store::Deck::DeckTreeStore> s_DeckTreeStore;
     static std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionListStore> s_ReviewSessionListStore;

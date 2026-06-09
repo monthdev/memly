@@ -34,7 +34,6 @@ DeckTreeController::DeckMutationErrorToQString(const Application::Service::Deck:
         if (not DeckMutationResult.has_value()) {
             return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         return std::nullopt;
     });
 }
@@ -46,7 +45,6 @@ DeckTreeController::DeckMutationErrorToQString(const Application::Service::Deck:
         if (not DeckMutationResult.has_value()) {
             return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         return std::nullopt;
     });
 }
@@ -58,7 +56,6 @@ DeckTreeController::DeckMutationErrorToQString(const Application::Service::Deck:
         if (not DeckMutationResult.has_value()) {
             return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         return std::nullopt;
     });
 }
@@ -70,7 +67,6 @@ DeckTreeController::DeckMutationErrorToQString(const Application::Service::Deck:
         if (not DeckMutationResult.has_value()) {
             return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        m_LibraryRefreshCoordinator.NotifyLibraryMutated(false);
         return std::nullopt;
     });
 }
@@ -81,7 +77,6 @@ DeckTreeController::DeckMutationErrorToQString(const Application::Service::Deck:
         if (not DeckMutationResult.has_value()) {
             return DeckMutationErrorToQString(DeckMutationResult.error());
         }
-        m_LibraryRefreshCoordinator.NotifyLibraryMutated(true);
         return std::nullopt;
     });
 }

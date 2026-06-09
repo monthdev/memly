@@ -14,6 +14,10 @@ namespace Infrastructure::Store::Deck {
 class DeckStore;
 }
 
+namespace Application::Invalidation {
+class LibraryInvalidationCoordinator;
+}
+
 namespace Application::Service::Deck {
 
 class DeckService final {
@@ -26,7 +30,9 @@ public:
         DeckTreeCycleDetectionError
     };
 
-    DeckService(Infrastructure::Sql::TransactionRunner&, Infrastructure::Store::Deck::DeckStore&) noexcept;
+    DeckService(Infrastructure::Sql::TransactionRunner&,
+                Application::Invalidation::LibraryInvalidationCoordinator&,
+                Infrastructure::Store::Deck::DeckStore&) noexcept;
 
     [[nodiscard]] std::expected<void, DeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
     [[nodiscard]] std::expected<void, DeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);
@@ -36,6 +42,7 @@ public:
 
 private:
     Infrastructure::Sql::TransactionRunner& m_TransactionRunner;
+    Application::Invalidation::LibraryInvalidationCoordinator& m_LibraryInvalidationCoordinator;
     Infrastructure::Store::Deck::DeckStore& m_DeckStore;
 };
 

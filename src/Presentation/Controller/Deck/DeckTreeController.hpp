@@ -5,7 +5,7 @@
 #include <QtTypes>
 #include <optional>
 
-#include "Application/Coordinator/LibraryRefreshCoordinator.hpp"
+#include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Application/Service/Deck/DeckService.hpp"
 #include "Application/Service/Deck/DeckTreeService.hpp"
 #include "Presentation/Model/Deck/DeckTreeModel.hpp"
@@ -17,20 +17,17 @@ class DeckTreeController : public QObject {
     Q_PROPERTY(Presentation::Model::Deck::DeckTreeModel* deckTree READ GetDeckTree CONSTANT)
 
 public:
-    explicit DeckTreeController(Application::Coordinator::LibraryRefreshCoordinator& LibraryRefreshCoordinator,
+    explicit DeckTreeController(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
                                 Application::Service::Deck::DeckService& DeckService,
                                 Application::Service::Deck::DeckTreeService& DeckTreeService,
                                 QObject* Parent = nullptr)
         : QObject{ Parent }
-        , m_LibraryRefreshCoordinator{ LibraryRefreshCoordinator }
+        , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
         , m_DeckService{ DeckService }
         , m_DeckTreeService{ DeckTreeService }
         , m_DeckTree{ this } {
-        connect(&m_LibraryRefreshCoordinator,
-                &Application::Coordinator::LibraryRefreshCoordinator::RefreshRequested,
-                this,
-                [this](const qint64 AsOfMillisecondsSinceEpoch) { RefreshDeckTree(AsOfMillisecondsSinceEpoch); });
-        RefreshDeckTree(m_LibraryRefreshCoordinator.GetAsOfMillisecondsSinceEpoch());
+        m_LibraryInvalidationChannel.ConnectSnapshot(
+            this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot, &DeckTreeController::RefreshDeckTree);
     }
 
     Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
@@ -44,7 +41,7 @@ public:
     [[nodiscard]] std::optional<QString> DeleteDeck(const QString&) noexcept;
 
 private:
-    Application::Coordinator::LibraryRefreshCoordinator& m_LibraryRefreshCoordinator;
+    Application::Invalidation::LibraryInvalidationChannel& m_LibraryInvalidationChannel;
     Application::Service::Deck::DeckService& m_DeckService;
     Application::Service::Deck::DeckTreeService& m_DeckTreeService;
     Presentation::Model::Deck::DeckTreeModel m_DeckTree;

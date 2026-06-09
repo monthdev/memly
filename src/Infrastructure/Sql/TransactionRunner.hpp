@@ -14,8 +14,8 @@ private:
     template <typename>
     struct IsStdExpectedType : std::false_type {};
 
-    template <typename Value, typename Error>
-    struct IsStdExpectedType<std::expected<Value, Error>> : std::true_type {};
+    template <typename SuccessType, typename ErrorType>
+    struct IsStdExpectedType<std::expected<SuccessType, ErrorType>> : std::true_type {};
 
     template <typename>
     struct AlwaysFalseType : std::false_type {};

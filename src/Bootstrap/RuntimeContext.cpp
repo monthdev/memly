@@ -4,7 +4,8 @@
 
 #include <QtGlobal>
 
-#include "Application/Coordinator/LibraryRefreshCoordinator.hpp"
+#include "Application/Invalidation/LibraryInvalidationChannel.hpp"
+#include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
 #include "Application/Service/Deck/DeckService.hpp"
 #include "Application/Service/Deck/DeckTreeService.hpp"
 #include "Application/Service/ReviewSession/ReviewSessionListService.hpp"
@@ -22,8 +23,9 @@ namespace Bootstrap {
 std::unique_ptr<duckdb::DuckDB> RuntimeContext::s_Database{};
 std::unique_ptr<duckdb::Connection> RuntimeContext::s_DatabaseConnection{};
 std::unique_ptr<Infrastructure::Sql::TransactionRunner> RuntimeContext::s_TransactionRunner{};
+std::unique_ptr<Application::Invalidation::LibraryInvalidationChannel> RuntimeContext::s_LibraryInvalidationChannel{};
 std::unique_ptr<Infrastructure::Store::Library::LibraryClockStore> RuntimeContext::s_LibraryClockStore{};
-std::unique_ptr<Application::Coordinator::LibraryRefreshCoordinator> RuntimeContext::s_LibraryRefreshCoordinator{};
+std::unique_ptr<Application::Invalidation::LibraryInvalidationCoordinator> RuntimeContext::s_LibraryInvalidationCoordinator{};
 std::unique_ptr<Infrastructure::Store::Deck::DeckStore> RuntimeContext::s_DeckStore{};
 std::unique_ptr<Infrastructure::Store::Deck::DeckTreeStore> RuntimeContext::s_DeckTreeStore{};
 std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionListStore> RuntimeContext::s_ReviewSessionListStore{};
@@ -38,8 +40,9 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     Q_ASSERT(s_Database == nullptr);
     Q_ASSERT(s_DatabaseConnection == nullptr);
     Q_ASSERT(s_TransactionRunner == nullptr);
+    Q_ASSERT(s_LibraryInvalidationChannel == nullptr);
     Q_ASSERT(s_LibraryClockStore == nullptr);
-    Q_ASSERT(s_LibraryRefreshCoordinator == nullptr);
+    Q_ASSERT(s_LibraryInvalidationCoordinator == nullptr);
     Q_ASSERT(s_DeckStore == nullptr);
     Q_ASSERT(s_DeckTreeStore == nullptr);
     Q_ASSERT(s_ReviewSessionListStore == nullptr);
@@ -53,21 +56,23 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     s_DatabaseConnection = std::make_unique<duckdb::Connection>(*s_Database);
     Infrastructure::Sql::RunDatabaseBootstrap(*s_DatabaseConnection);
     s_TransactionRunner = std::make_unique<Infrastructure::Sql::TransactionRunner>(*s_DatabaseConnection);
+    s_LibraryInvalidationChannel = std::make_unique<Application::Invalidation::LibraryInvalidationChannel>();
     s_LibraryClockStore = std::make_unique<Infrastructure::Store::Library::LibraryClockStore>(*s_DatabaseConnection);
-    s_LibraryRefreshCoordinator = std::make_unique<Application::Coordinator::LibraryRefreshCoordinator>(*s_LibraryClockStore);
+    s_LibraryInvalidationCoordinator =
+        std::make_unique<Application::Invalidation::LibraryInvalidationCoordinator>(*s_LibraryInvalidationChannel, *s_LibraryClockStore);
     s_DeckStore = std::make_unique<Infrastructure::Store::Deck::DeckStore>(*s_DatabaseConnection);
     s_DeckTreeStore = std::make_unique<Infrastructure::Store::Deck::DeckTreeStore>(*s_DatabaseConnection);
     s_ReviewSessionListStore = std::make_unique<Infrastructure::Store::ReviewSession::ReviewSessionListStore>(*s_DatabaseConnection);
     s_ReviewSessionStore = std::make_unique<Infrastructure::Store::ReviewSession::ReviewSessionStore>(*s_DatabaseConnection);
-    s_DeckService = std::make_unique<Application::Service::Deck::DeckService>(*s_TransactionRunner, *s_DeckStore);
+    s_DeckService = std::make_unique<Application::Service::Deck::DeckService>(*s_TransactionRunner, *s_LibraryInvalidationCoordinator, *s_DeckStore);
     s_DeckTreeService = std::make_unique<Application::Service::Deck::DeckTreeService>(*s_DeckTreeStore);
     s_ReviewSessionListService = std::make_unique<Application::Service::ReviewSession::ReviewSessionListService>(*s_ReviewSessionListStore);
     s_ReviewSessionService = std::make_unique<Application::Service::ReviewSession::ReviewSessionService>(*s_TransactionRunner, *s_ReviewSessionStore);
 }
 
-Application::Coordinator::LibraryRefreshCoordinator& RuntimeContext::GetRequiredLibraryRefreshCoordinator() noexcept {
-    Q_ASSERT(s_LibraryRefreshCoordinator not_eq nullptr);
-    return *s_LibraryRefreshCoordinator;
+Application::Invalidation::LibraryInvalidationChannel& RuntimeContext::GetRequiredLibraryInvalidationChannel() noexcept {
+    Q_ASSERT(s_LibraryInvalidationChannel not_eq nullptr);
+    return *s_LibraryInvalidationChannel;
 }
 
 Application::Service::Deck::DeckService& RuntimeContext::GetRequiredDeckService() noexcept {

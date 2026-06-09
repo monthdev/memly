@@ -11,15 +11,15 @@
 namespace Infrastructure::Store::Library {
 
 LibraryClockStore::LibraryClockStore(duckdb::Connection& DatabaseConnection)
-    : m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
-          Infrastructure::Sql::Library::Query::ReadNextLibraryRefreshAtMillisecondsSinceEpochSql()) } {
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement);
+    : m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
+          Infrastructure::Sql::Library::Query::ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql()) } {
+    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement);
 }
 
 LibraryClockStore::~LibraryClockStore() = default;
 
-[[nodiscard]] std::optional<qint64> LibraryClockStore::ReadNextLibraryRefreshAtMillisecondsSinceEpoch(const qint64 AsOfMillisecondsSinceEpoch) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement->Execute(
+[[nodiscard]] std::optional<qint64> LibraryClockStore::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const qint64 AsOfMillisecondsSinceEpoch) {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement->Execute(
         static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
     Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     const auto QueryResultIterator{ QueryResult->begin() };

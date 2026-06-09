@@ -16,10 +16,10 @@ public:
     explicit LibraryClockStore(duckdb::Connection&);
     ~LibraryClockStore();
 
-    [[nodiscard]] std::optional<qint64> ReadNextLibraryRefreshAtMillisecondsSinceEpoch(const qint64);
+    [[nodiscard]] std::optional<qint64> ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const qint64);
 
 private:
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadNextLibraryRefreshAtMillisecondsSinceEpochPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
 };
 
 }

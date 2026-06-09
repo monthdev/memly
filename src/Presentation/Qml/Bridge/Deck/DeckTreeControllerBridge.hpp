@@ -19,7 +19,7 @@ class DeckTreeControllerBridge : public QObject {
 public:
     explicit DeckTreeControllerBridge(QObject* Parent = nullptr)
         : QObject{ Parent }
-        , m_DeckTreeController{ Bootstrap::RuntimeContext::GetRequiredLibraryRefreshCoordinator(),
+        , m_DeckTreeController{ Bootstrap::RuntimeContext::GetRequiredLibraryInvalidationChannel(),
                                 Bootstrap::RuntimeContext::GetRequiredDeckService(),
                                 Bootstrap::RuntimeContext::GetRequiredDeckTreeService() } {
     }

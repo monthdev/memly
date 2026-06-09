@@ -4,5 +4,5 @@
 
 namespace Infrastructure::Sql::Library::Query {
 
-[[nodiscard]] std::string ReadNextLibraryRefreshAtMillisecondsSinceEpochSql();
+[[nodiscard]] std::string ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql();
 }
