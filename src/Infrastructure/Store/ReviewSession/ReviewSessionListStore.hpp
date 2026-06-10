@@ -1,15 +1,15 @@
 #pragma once
 
+#include <duckdb.hpp>
+
 #include <QString>
 #include <QVector>
 #include <QtTypes>
 #include <memory>
 #include <optional>
 
-namespace duckdb {
-class Connection;
-class PreparedStatement;
-}
+#include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
+#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 
@@ -22,8 +22,12 @@ public:
         std::optional<qint64> m_LastCardReviewAtMillisecondsSinceEpoch;
     };
 
-    explicit ReviewSessionListStore(duckdb::Connection&);
-    ~ReviewSessionListStore();
+    explicit ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
+        : m_ReadReviewSessionListPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionListSql()) } {
+        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadReviewSessionListPreparedStatement);
+    }
+
+    ~ReviewSessionListStore() = default;
 
     [[nodiscard]] QVector<ReviewSessionListRow> ReadReviewSessionList();
 

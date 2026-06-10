@@ -4,10 +4,6 @@
 
 namespace Application::Service::Deck {
 
-DeckTreeService::DeckTreeService(Infrastructure::Store::Deck::DeckTreeStore& DeckTreeStore) noexcept
-    : m_DeckTreeStore{ DeckTreeStore } {
-}
-
 [[nodiscard]] QVector<DeckTreeService::DeckTreeRow> DeckTreeService::ReadDeckTreeSnapshot(const qint64 AsOfMillisecondsSinceEpoch) {
     const QVector<Infrastructure::Store::Deck::DeckTreeStore::DeckTreeRow> StoreDeckTreeRowQVector{ m_DeckTreeStore.ReadDeckTreeSnapshot(
         AsOfMillisecondsSinceEpoch) };

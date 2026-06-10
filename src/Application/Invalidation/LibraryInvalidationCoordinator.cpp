@@ -9,18 +9,6 @@
 
 namespace Application::Invalidation {
 
-LibraryInvalidationCoordinator::LibraryInvalidationCoordinator(LibraryInvalidationChannel& LibraryInvalidationChannel,
-                                                               Infrastructure::Store::Library::LibraryClockStore& LibraryClockStore,
-                                                               QObject* Parent)
-    : QObject{ Parent }
-    , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
-    , m_LibraryClockStore{ LibraryClockStore }
-    , m_LibraryInvalidationQTimer{} {
-    m_LibraryInvalidationQTimer.setSingleShot(true);
-    connect(&m_LibraryInvalidationQTimer, &QTimer::timeout, this, &LibraryInvalidationCoordinator::HandleScheduledInvalidation);
-    ScheduleNextLibraryInvalidation();
-}
-
 void LibraryInvalidationCoordinator::Invalidate(const LibraryInvalidationTargetBitset SignaledLibraryInvalidationTargetBitset) {
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
 }

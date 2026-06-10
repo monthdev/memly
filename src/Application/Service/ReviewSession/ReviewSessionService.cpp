@@ -55,12 +55,6 @@ namespace {
 
 namespace Application::Service::ReviewSession {
 
-ReviewSessionService::ReviewSessionService(Infrastructure::Sql::TransactionRunner& TransactionRunner,
-                                           Infrastructure::Store::ReviewSession::ReviewSessionStore& ReviewSessionStore) noexcept
-    : m_TransactionRunner{ TransactionRunner }
-    , m_ReviewSessionStore{ ReviewSessionStore } {
-}
-
 [[nodiscard]] std::expected<QString, ReviewSessionService::ReviewSessionMutationErrorEnum>
 ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const QString& RootDeckId, const QString& ReviewSessionDefinitionKey) {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<QString, ReviewSessionMutationErrorEnum> {

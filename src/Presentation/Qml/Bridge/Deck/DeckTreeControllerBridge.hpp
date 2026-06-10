@@ -24,6 +24,8 @@ public:
                                 Bootstrap::RuntimeContext::GetRequiredDeckTreeService() } {
     }
 
+    ~DeckTreeControllerBridge() override = default;
+
     [[nodiscard]] Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
         return m_DeckTreeController.GetDeckTree();
     }

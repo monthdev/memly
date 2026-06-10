@@ -21,7 +21,11 @@ private:
     struct AlwaysFalseType : std::false_type {};
 
 public:
-    explicit TransactionRunner(duckdb::Connection&) noexcept;
+    explicit TransactionRunner(duckdb::Connection& DatabaseConnection) noexcept
+        : m_DatabaseConnection{ DatabaseConnection } {
+    }
+
+    ~TransactionRunner() = default;
 
     template <typename Fn>
     [[nodiscard]] decltype(auto) TransactionWrapper(Fn&& Function) {

@@ -50,6 +50,9 @@ namespace Bootstrap {
 
 class RuntimeContext final {
 public:
+    RuntimeContext() = delete;
+    ~RuntimeContext() = delete;
+
     static void Initialize(const QString&);
 
     static Application::Invalidation::LibraryInvalidationChannel& GetRequiredLibraryInvalidationChannel() noexcept;

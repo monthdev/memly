@@ -4,30 +4,10 @@
 
 #include <string_view>
 
-#include "Infrastructure/Sql/Deck/Mutation/DeckMutationSql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store::Deck {
-
-DeckStore::DeckStore(duckdb::Connection& DatabaseConnection)
-    : m_CreateRootDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::CreateRootDeckSql()) }
-    , m_CreateChildDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::CreateChildDeckSql()) }
-    , m_MoveDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::MoveDeckSql()) }
-    , m_RenameDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::RenameDeckSql()) }
-    , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::DeleteDeckCardReviewsSql()) }
-    , m_DeleteDeckCardsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::DeleteDeckCardsSql()) }
-    , m_DeleteDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::DeleteDeckSql()) } {
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_MoveDeckPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_RenameDeckPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckCardReviewsPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
-}
-
-DeckStore::~DeckStore() = default;
 
 [[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateRootDeckPreparedStatement->Execute(DeckName.toStdString(), TargetLanguageCode) };

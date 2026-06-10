@@ -4,10 +4,6 @@
 
 namespace Application::Service::ReviewSession {
 
-ReviewSessionListService::ReviewSessionListService(Infrastructure::Store::ReviewSession::ReviewSessionListStore& ReviewSessionListStore) noexcept
-    : m_ReviewSessionListStore{ ReviewSessionListStore } {
-}
-
 [[nodiscard]] QVector<ReviewSessionListService::ReviewSessionListRow> ReviewSessionListService::ReadReviewSessionList() {
     const QVector<Infrastructure::Store::ReviewSession::ReviewSessionListStore::ReviewSessionListRow> StoreReviewSessionListRowQVector{
         m_ReviewSessionListStore.ReadReviewSessionList()

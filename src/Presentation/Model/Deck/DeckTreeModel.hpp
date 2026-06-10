@@ -58,6 +58,8 @@ public:
         , m_SortOrder{ Qt::AscendingOrder } {
     }
 
+    ~DeckTreeModel() override = default;
+
     [[nodiscard]] QModelIndex index(int Row, int Column, const QModelIndex& Parent = QModelIndex{}) const override {
         if (not hasIndex(Row, Column, Parent)) {
             return QModelIndex{};

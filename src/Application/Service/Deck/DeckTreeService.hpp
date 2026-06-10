@@ -28,7 +28,11 @@ public:
         quint8 m_TargetLanguageCode;
     };
 
-    explicit DeckTreeService(Infrastructure::Store::Deck::DeckTreeStore&) noexcept;
+    explicit DeckTreeService(Infrastructure::Store::Deck::DeckTreeStore& DeckTreeStore) noexcept
+        : m_DeckTreeStore{ DeckTreeStore } {
+    }
+
+    ~DeckTreeService() = default;
 
     [[nodiscard]] QVector<DeckTreeRow> ReadDeckTreeSnapshot(qint64);
 

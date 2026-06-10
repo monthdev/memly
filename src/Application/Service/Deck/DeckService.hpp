@@ -30,9 +30,15 @@ public:
         DeckTreeCycleDetectionError
     };
 
-    DeckService(Infrastructure::Sql::TransactionRunner&,
-                Application::Invalidation::LibraryInvalidationCoordinator&,
-                Infrastructure::Store::Deck::DeckStore&) noexcept;
+    DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunner,
+                Application::Invalidation::LibraryInvalidationCoordinator& LibraryInvalidationCoordinator,
+                Infrastructure::Store::Deck::DeckStore& DeckStore) noexcept
+        : m_TransactionRunner{ TransactionRunner }
+        , m_LibraryInvalidationCoordinator{ LibraryInvalidationCoordinator }
+        , m_DeckStore{ DeckStore } {
+    }
+
+    ~DeckService() = default;
 
     [[nodiscard]] std::expected<void, DeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
     [[nodiscard]] std::expected<void, DeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);

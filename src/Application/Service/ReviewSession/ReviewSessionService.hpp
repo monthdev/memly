@@ -38,7 +38,13 @@ public:
         ReviewSessionDeckSelectionTypeEnum m_DeckSelectionType;
     };
 
-    ReviewSessionService(Infrastructure::Sql::TransactionRunner&, Infrastructure::Store::ReviewSession::ReviewSessionStore&) noexcept;
+    ReviewSessionService(Infrastructure::Sql::TransactionRunner& TransactionRunner,
+                         Infrastructure::Store::ReviewSession::ReviewSessionStore& ReviewSessionStore) noexcept
+        : m_TransactionRunner{ TransactionRunner }
+        , m_ReviewSessionStore{ ReviewSessionStore } {
+    }
+
+    ~ReviewSessionService() = default;
 
     [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum> CreateOrReadExistingDefaultReviewSession(const QString&, const QString&);
     [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum>

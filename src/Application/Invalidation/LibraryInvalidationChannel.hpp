@@ -22,6 +22,8 @@ public:
         , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ QDateTime::currentMSecsSinceEpoch() } {
     }
 
+    ~LibraryInvalidationChannel() override = default;
+
     template <typename ControllerType, typename ControllerRefreshFunctionType>
         requires std::is_member_function_pointer_v<ControllerRefreshFunctionType> and std::is_invocable_v<ControllerRefreshFunctionType, ControllerType*>
     void Connect(ControllerType* ControllerPointer,

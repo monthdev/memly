@@ -5,18 +5,9 @@
 #include <cstdint>
 #include <memory>
 
-#include "Infrastructure/Sql/Library/Query/LibraryQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Library {
-
-LibraryClockStore::LibraryClockStore(duckdb::Connection& DatabaseConnection)
-    : m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
-          Infrastructure::Sql::Library::Query::ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql()) } {
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement);
-}
-
-LibraryClockStore::~LibraryClockStore() = default;
 
 [[nodiscard]] std::optional<qint64> LibraryClockStore::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const qint64 AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement->Execute(

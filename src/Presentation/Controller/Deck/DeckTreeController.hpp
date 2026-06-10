@@ -30,6 +30,8 @@ public:
             this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot, &DeckTreeController::RefreshDeckTree);
     }
 
+    ~DeckTreeController() override = default;
+
     Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
         return &m_DeckTree;
     }

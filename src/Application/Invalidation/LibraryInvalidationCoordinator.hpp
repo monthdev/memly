@@ -15,7 +15,19 @@ class LibraryInvalidationCoordinator final : public QObject {
     Q_OBJECT
 
 public:
-    LibraryInvalidationCoordinator(LibraryInvalidationChannel&, Infrastructure::Store::Library::LibraryClockStore&, QObject* Parent = nullptr);
+    LibraryInvalidationCoordinator(LibraryInvalidationChannel& LibraryInvalidationChannel,
+                                   Infrastructure::Store::Library::LibraryClockStore& LibraryClockStore,
+                                   QObject* Parent = nullptr)
+        : QObject{ Parent }
+        , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
+        , m_LibraryClockStore{ LibraryClockStore }
+        , m_LibraryInvalidationQTimer{} {
+        m_LibraryInvalidationQTimer.setSingleShot(true);
+        connect(&m_LibraryInvalidationQTimer, &QTimer::timeout, this, &LibraryInvalidationCoordinator::HandleScheduledInvalidation);
+        ScheduleNextLibraryInvalidation();
+    }
+
+    ~LibraryInvalidationCoordinator() override = default;
 
     void Invalidate(LibraryInvalidationTargetBitset);
     void InvalidateWithReschedule(LibraryInvalidationTargetBitset);

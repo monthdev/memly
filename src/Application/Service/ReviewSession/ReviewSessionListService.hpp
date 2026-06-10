@@ -20,7 +20,11 @@ public:
         std::optional<qint64> m_LastCardReviewAtMillisecondsSinceEpoch;
     };
 
-    explicit ReviewSessionListService(Infrastructure::Store::ReviewSession::ReviewSessionListStore&) noexcept;
+    explicit ReviewSessionListService(Infrastructure::Store::ReviewSession::ReviewSessionListStore& ReviewSessionListStore) noexcept
+        : m_ReviewSessionListStore{ ReviewSessionListStore } {
+    }
+
+    ~ReviewSessionListService() = default;
 
     [[nodiscard]] QVector<ReviewSessionListRow> ReadReviewSessionList();
 

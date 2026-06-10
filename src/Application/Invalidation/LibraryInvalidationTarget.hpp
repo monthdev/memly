@@ -17,6 +17,8 @@ public:
         Set(LibraryInvalidationTarget);
     }
 
+    ~LibraryInvalidationTargetBitset() = default;
+
     [[nodiscard]] bool Contains(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) const noexcept {
         return m_TargetBitset[std::to_underlying(LibraryInvalidationTarget)];
     }

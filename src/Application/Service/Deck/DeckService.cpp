@@ -26,14 +26,6 @@ ToDeckMutationError(const Infrastructure::Store::Deck::DeckStore::RecoverableDec
 
 namespace Application::Service::Deck {
 
-DeckService::DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunner,
-                         Application::Invalidation::LibraryInvalidationCoordinator& LibraryInvalidationCoordinator,
-                         Infrastructure::Store::Deck::DeckStore& DeckStore) noexcept
-    : m_TransactionRunner{ TransactionRunner }
-    , m_LibraryInvalidationCoordinator{ LibraryInvalidationCoordinator }
-    , m_DeckStore{ DeckStore } {
-}
-
 [[nodiscard]] std::expected<void, DeckService::DeckMutationErrorEnum> DeckService::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, DeckMutationErrorEnum> {
         const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.CreateRootDeck(

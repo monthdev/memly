@@ -6,17 +6,9 @@
 #include <memory>
 #include <optional>
 
-#include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
-
-ReviewSessionListStore::ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
-    : m_ReadReviewSessionListPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionListSql()) } {
-    Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadReviewSessionListPreparedStatement);
-}
-
-ReviewSessionListStore::~ReviewSessionListStore() = default;
 
 [[nodiscard]] QVector<ReviewSessionListStore::ReviewSessionListRow> ReviewSessionListStore::ReadReviewSessionList() {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionListPreparedStatement->Execute() };

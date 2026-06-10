@@ -1,15 +1,15 @@
 #pragma once
 
+#include <duckdb.hpp>
+
 #include <QString>
 #include <QVector>
 #include <QtTypes>
 #include <memory>
 #include <optional>
 
-namespace duckdb {
-class Connection;
-class PreparedStatement;
-}
+#include "Infrastructure/Sql/Deck/Query/DeckQuerySql.hpp"
+#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Deck {
 
@@ -30,8 +30,12 @@ public:
         quint8 m_TargetLanguageCode;
     };
 
-    explicit DeckTreeStore(duckdb::Connection&);
-    ~DeckTreeStore();
+    explicit DeckTreeStore(duckdb::Connection& DatabaseConnection)
+        : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Query::ReadDeckTreeSnapshotSql()) } {
+        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotPreparedStatement);
+    }
+
+    ~DeckTreeStore() = default;
 
     [[nodiscard]] QVector<DeckTreeRow> ReadDeckTreeSnapshot(const qint64);
 
