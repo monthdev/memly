@@ -44,7 +44,7 @@ compile_commands.json
 CMakeUserPresets.json
 
 # Generated documentation
-/docs/doxygen/
+/doc/doxygen/
 
 # If using Conan or vcpkg package managers
 .conan/
