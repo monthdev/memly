@@ -1,14 +1,14 @@
 PROJECT_NAME = "Memly Project"
 PROJECT_BRIEF = "Memly Project documentation"
 
-OUTPUT_DIRECTORY = docs/doxygen
+OUTPUT_DIRECTORY = doc/doxygen
 HTML_OUTPUT = html
 GENERATE_HTML = YES
 GENERATE_LATEX = NO
 GENERATE_XML = NO
 GENERATE_TREEVIEW = YES
 
-INPUT = README.md docs/CODING_STYLE.md src
+INPUT = README.md doc/CODING_STYLE.md src
 USE_MDFILE_AS_MAINPAGE = README.md
 RECURSIVE = YES
 FILE_PATTERNS = *.cpp *.hpp *.h *.cc *.cxx *.dox *.md
