@@ -32,6 +32,19 @@ function(memly_enable_clang_tidy target_name)
   endif()
 endfunction()
 
+find_package(Doxygen QUIET)
+if(DOXYGEN_FOUND)
+  add_custom_target(
+    memly-docs
+    COMMAND "${DOXYGEN_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/Doxyfile"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    COMMENT "Generate Doxygen documentation"
+    VERBATIM
+  )
+else()
+  message(STATUS "Doxygen not found; memly-docs target will not be available")
+endif()
+
 file(GLOB BOOTSTRAP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bootstrap/*.cpp")
 file(GLOB BOOTSTRAP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Bootstrap/*.[Hh]*")
 file(GLOB APPLICATION_INVALIDATION_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Application/Invalidation/*.cpp")
