@@ -1,0 +1,74 @@
+name: Check Markdown Format
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  markdown-format:
+    runs-on: ubuntu-latest
+    env:
+      PRETTIER_VERSION: "3.3.3"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Collect target Markdown files
+        id: files
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            git fetch origin "${GITHUB_BASE_REF}" --depth=1
+            BASE="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
+            DIFF_RANGE=("${BASE}...HEAD")
+          else
+            BASE="${BEFORE_SHA:-}"
+            if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
+              BASE="$(git hash-object -t tree /dev/null)"
+            fi
+            DIFF_RANGE=("$BASE" HEAD)
+          fi
+
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "${DIFF_RANGE[@]}" -- \
+              .prettierrc.json .prettierrc .prettierrc.yml .prettierrc.yaml prettier.config.js || true
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "Prettier config changed; checking all Markdown files."
+            git ls-files '*.md' '*.markdown' > /tmp/markdown_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "${DIFF_RANGE[@]}" -- '*.md' '*.markdown' > /tmp/markdown_files.txt || true
+          fi
+
+          if [[ ! -s /tmp/markdown_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No Markdown files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target Markdown files:"
+          cat /tmp/markdown_files.txt
+
+      - name: Show Prettier version
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          npx --yes "prettier@${PRETTIER_VERSION}" --version
+
+      - name: Verify Markdown formatting
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/markdown_files.txt
+          npx --yes "prettier@${PRETTIER_VERSION}" --check "${FILES[@]}"
