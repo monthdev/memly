@@ -9,17 +9,17 @@
 
 namespace Application::Invalidation {
 
-void LibraryInvalidationCoordinator::Invalidate(const LibraryInvalidationTargetBitset SignaledLibraryInvalidationTargetBitset) {
+void LibraryInvalidationCoordinator::Invalidate(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) {
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
 }
 
-void LibraryInvalidationCoordinator::InvalidateWithReschedule(const LibraryInvalidationTargetBitset SignaledLibraryInvalidationTargetBitset) {
+void LibraryInvalidationCoordinator::InvalidateWithReschedule(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) {
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
     ScheduleNextLibraryInvalidation();
 }
 
 void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndCurrentSnapshotEpoch(
-    const LibraryInvalidationTargetBitset SignaledLibraryInvalidationTargetBitset) {
+    const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) {
     m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
     ScheduleNextLibraryInvalidation();

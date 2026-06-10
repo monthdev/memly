@@ -39,6 +39,10 @@ public:
     }
 
     ~DeckService() = default;
+    DeckService(const DeckService&) = delete;
+    DeckService(DeckService&&) = delete;
+    DeckService& operator=(const DeckService&) = delete;
+    DeckService& operator=(DeckService&&) = delete;
 
     [[nodiscard]] std::expected<void, DeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
     [[nodiscard]] std::expected<void, DeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);

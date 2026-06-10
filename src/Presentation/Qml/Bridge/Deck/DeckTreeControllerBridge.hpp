@@ -25,6 +25,10 @@ public:
     }
 
     ~DeckTreeControllerBridge() override = default;
+    DeckTreeControllerBridge(const DeckTreeControllerBridge&) = delete;
+    DeckTreeControllerBridge(DeckTreeControllerBridge&&) = delete;
+    DeckTreeControllerBridge& operator=(const DeckTreeControllerBridge&) = delete;
+    DeckTreeControllerBridge& operator=(DeckTreeControllerBridge&&) = delete;
 
     [[nodiscard]] Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
         return m_DeckTreeController.GetDeckTree();

@@ -26,6 +26,10 @@ public:
     }
 
     ~TransactionRunner() = default;
+    TransactionRunner(const TransactionRunner&) = delete;
+    TransactionRunner(TransactionRunner&&) = delete;
+    TransactionRunner& operator=(const TransactionRunner&) = delete;
+    TransactionRunner& operator=(TransactionRunner&&) = delete;
 
     template <typename Fn>
     [[nodiscard]] decltype(auto) TransactionWrapper(Fn&& Function) {

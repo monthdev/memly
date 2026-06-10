@@ -20,6 +20,10 @@ public:
     }
 
     ~LibraryClockStore() = default;
+    LibraryClockStore(const LibraryClockStore&) = delete;
+    LibraryClockStore(LibraryClockStore&&) = delete;
+    LibraryClockStore& operator=(const LibraryClockStore&) = delete;
+    LibraryClockStore& operator=(LibraryClockStore&&) = delete;
 
     [[nodiscard]] std::optional<qint64> ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const qint64);
 

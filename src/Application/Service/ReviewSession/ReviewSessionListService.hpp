@@ -25,6 +25,10 @@ public:
     }
 
     ~ReviewSessionListService() = default;
+    ReviewSessionListService(const ReviewSessionListService&) = delete;
+    ReviewSessionListService(ReviewSessionListService&&) = delete;
+    ReviewSessionListService& operator=(const ReviewSessionListService&) = delete;
+    ReviewSessionListService& operator=(ReviewSessionListService&&) = delete;
 
     [[nodiscard]] QVector<ReviewSessionListRow> ReadReviewSessionList();
 

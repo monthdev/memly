@@ -28,6 +28,10 @@ public:
     }
 
     ~ReviewSessionListStore() = default;
+    ReviewSessionListStore(const ReviewSessionListStore&) = delete;
+    ReviewSessionListStore(ReviewSessionListStore&&) = delete;
+    ReviewSessionListStore& operator=(const ReviewSessionListStore&) = delete;
+    ReviewSessionListStore& operator=(ReviewSessionListStore&&) = delete;
 
     [[nodiscard]] QVector<ReviewSessionListRow> ReadReviewSessionList();
 

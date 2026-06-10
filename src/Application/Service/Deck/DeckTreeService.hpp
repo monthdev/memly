@@ -33,6 +33,10 @@ public:
     }
 
     ~DeckTreeService() = default;
+    DeckTreeService(const DeckTreeService&) = delete;
+    DeckTreeService(DeckTreeService&&) = delete;
+    DeckTreeService& operator=(const DeckTreeService&) = delete;
+    DeckTreeService& operator=(DeckTreeService&&) = delete;
 
     [[nodiscard]] QVector<DeckTreeRow> ReadDeckTreeSnapshot(qint64);
 

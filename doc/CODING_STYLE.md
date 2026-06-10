@@ -17,5 +17,8 @@ header even when the implementation is `= default`.
 
 Overrides must also be declared and implemented in the header.
 
-This is so the class API and override surface are visible at the declaration
-site.
+Copy and move constructor and assignment operator must explicitly be addressed
+for all declared classes and all declared data-time object structs (DTOs).
+
+This is so the class composition, behavior, and override surface are visible at
+the declaration site.

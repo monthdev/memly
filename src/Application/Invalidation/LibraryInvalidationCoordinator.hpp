@@ -28,10 +28,14 @@ public:
     }
 
     ~LibraryInvalidationCoordinator() override = default;
+    LibraryInvalidationCoordinator(const LibraryInvalidationCoordinator&) = delete;
+    LibraryInvalidationCoordinator(LibraryInvalidationCoordinator&&) = delete;
+    LibraryInvalidationCoordinator& operator=(const LibraryInvalidationCoordinator&) = delete;
+    LibraryInvalidationCoordinator& operator=(LibraryInvalidationCoordinator&&) = delete;
 
-    void Invalidate(LibraryInvalidationTargetBitset);
-    void InvalidateWithReschedule(LibraryInvalidationTargetBitset);
-    void InvalidateWithRescheduleAndCurrentSnapshotEpoch(LibraryInvalidationTargetBitset);
+    void Invalidate(const LibraryInvalidationTargetBitset&);
+    void InvalidateWithReschedule(const LibraryInvalidationTargetBitset&);
+    void InvalidateWithRescheduleAndCurrentSnapshotEpoch(const LibraryInvalidationTargetBitset&);
 
 private:
     LibraryInvalidationChannel& m_LibraryInvalidationChannel;

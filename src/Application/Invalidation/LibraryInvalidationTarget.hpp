@@ -13,11 +13,16 @@ enum class LibraryInvalidationTargetEnum : std::size_t {
 
 class LibraryInvalidationTargetBitset final {
 public:
-    LibraryInvalidationTargetBitset(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept {
+    LibraryInvalidationTargetBitset(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept
+        : m_TargetBitset{} {
         Set(LibraryInvalidationTarget);
     }
 
     ~LibraryInvalidationTargetBitset() = default;
+    LibraryInvalidationTargetBitset(const LibraryInvalidationTargetBitset&) = delete;
+    LibraryInvalidationTargetBitset(LibraryInvalidationTargetBitset&&) noexcept = default;
+    LibraryInvalidationTargetBitset& operator=(const LibraryInvalidationTargetBitset&) = delete;
+    LibraryInvalidationTargetBitset& operator=(LibraryInvalidationTargetBitset&&) = delete;
 
     [[nodiscard]] bool Contains(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) const noexcept {
         return m_TargetBitset[std::to_underlying(LibraryInvalidationTarget)];
@@ -25,7 +30,7 @@ public:
 
 private:
     friend LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetEnum, LibraryInvalidationTargetEnum) noexcept;
-    friend LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetBitset, LibraryInvalidationTargetEnum) noexcept;
+    friend LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetBitset&&, LibraryInvalidationTargetEnum) noexcept;
 
     void Set(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept {
         m_TargetBitset.set(std::to_underlying(LibraryInvalidationTarget));
@@ -41,10 +46,10 @@ private:
     return LibraryInvalidationTargetBitset;
 }
 
-[[nodiscard]] inline LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetBitset LibraryInvalidationTargetBitset,
+[[nodiscard]] inline LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetBitset&& LibraryInvalidationTargetBitset,
                                                                const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept {
     LibraryInvalidationTargetBitset.Set(LibraryInvalidationTarget);
-    return LibraryInvalidationTargetBitset;
+    return std::move(LibraryInvalidationTargetBitset);
 }
 
 }

@@ -31,6 +31,10 @@ public:
     }
 
     ~DeckTreeController() override = default;
+    DeckTreeController(const DeckTreeController&) = delete;
+    DeckTreeController(DeckTreeController&&) = delete;
+    DeckTreeController& operator=(const DeckTreeController&) = delete;
+    DeckTreeController& operator=(DeckTreeController&&) = delete;
 
     Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
         return &m_DeckTree;

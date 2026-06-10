@@ -59,6 +59,10 @@ public:
     }
 
     ~DeckTreeModel() override = default;
+    DeckTreeModel(const DeckTreeModel&) = delete;
+    DeckTreeModel(DeckTreeModel&&) = delete;
+    DeckTreeModel& operator=(const DeckTreeModel&) = delete;
+    DeckTreeModel& operator=(DeckTreeModel&&) = delete;
 
     [[nodiscard]] QModelIndex index(int Row, int Column, const QModelIndex& Parent = QModelIndex{}) const override {
         if (not hasIndex(Row, Column, Parent)) {

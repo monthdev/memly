@@ -40,6 +40,10 @@ public:
     }
 
     ~DeckStore() = default;
+    DeckStore(const DeckStore&) = delete;
+    DeckStore(DeckStore&&) = delete;
+    DeckStore& operator=(const DeckStore&) = delete;
+    DeckStore& operator=(DeckStore&&) = delete;
 
     [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
     [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);

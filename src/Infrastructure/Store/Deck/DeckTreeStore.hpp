@@ -36,6 +36,10 @@ public:
     }
 
     ~DeckTreeStore() = default;
+    DeckTreeStore(const DeckTreeStore&) = delete;
+    DeckTreeStore(DeckTreeStore&&) = delete;
+    DeckTreeStore& operator=(const DeckTreeStore&) = delete;
+    DeckTreeStore& operator=(DeckTreeStore&&) = delete;
 
     [[nodiscard]] QVector<DeckTreeRow> ReadDeckTreeSnapshot(const qint64);
 

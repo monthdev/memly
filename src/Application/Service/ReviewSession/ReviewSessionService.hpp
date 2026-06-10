@@ -45,6 +45,10 @@ public:
     }
 
     ~ReviewSessionService() = default;
+    ReviewSessionService(const ReviewSessionService&) = delete;
+    ReviewSessionService(ReviewSessionService&&) = delete;
+    ReviewSessionService& operator=(const ReviewSessionService&) = delete;
+    ReviewSessionService& operator=(ReviewSessionService&&) = delete;
 
     [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum> CreateOrReadExistingDefaultReviewSession(const QString&, const QString&);
     [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum>

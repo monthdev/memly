@@ -52,6 +52,10 @@ class RuntimeContext final {
 public:
     RuntimeContext() = delete;
     ~RuntimeContext() = delete;
+    RuntimeContext(const RuntimeContext&) = delete;
+    RuntimeContext(RuntimeContext&&) = delete;
+    RuntimeContext& operator=(const RuntimeContext&) = delete;
+    RuntimeContext& operator=(RuntimeContext&&) = delete;
 
     static void Initialize(const QString&);
 
