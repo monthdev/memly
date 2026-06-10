@@ -1,0 +1,28 @@
+name: Build Doxygen
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Doxygen
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y doxygen
+          doxygen --version
+
+      - name: Build Doxygen
+        shell: bash
+        run: |
+          set -euo pipefail
+          doxygen Doxyfile

@@ -6,7 +6,8 @@ Makefile
 CTestTestfile.cmake
 install_manifest.txt
 compile_commands.json
-build*
+/build/
+/build-*/
 
 # Compiled binaries and libraries
 *.o
