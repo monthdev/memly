@@ -1,8 +1,7 @@
 /// \file
 /// \brief Defines and initializes the process-wide runtime object graph.
 ///
-/// \attention Keep static member definitions and `RuntimeContext::Initialize` construction ordered from lower-level dependencies to
-/// higher-level dependents.
+/// \attention Keep static member definitions and `RuntimeContext::Initialize` construction ordered from lower-level dependencies to higher-level dependents.
 
 #include "Bootstrap/RuntimeContext.hpp"
 

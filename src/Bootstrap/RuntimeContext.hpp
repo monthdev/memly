@@ -1,7 +1,7 @@
 /// \file
 /// \brief Declares the process-wide runtime object graph.
 ///
-/// \attention Keep RuntimeContext members ordered from lower-level dependencies to higher-level dependents.
+/// \attention Keep `RuntimeContext` members ordered from lower-level dependencies to higher-level dependents.
 
 #pragma once
 

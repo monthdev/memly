@@ -120,7 +120,7 @@ PenaltyReturnTypeOnItsOwnLine: 60
 
 PointerAlignment: Left
 ReferenceAlignment: Left
-ReflowComments: Never
+ReflowComments: Always
 SeparateDefinitionBlocks: Always
 SortIncludes:
   Enabled: true
