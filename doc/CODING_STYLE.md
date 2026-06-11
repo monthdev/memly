@@ -90,3 +90,8 @@ Lambdas must always declare their return type.
 ## Using
 
 `using` declarations and aliases are disallowed.
+
+## Template Typenames
+
+Template typenames must always end in `*Type` and must be named what the
+template type is intended to represent.
