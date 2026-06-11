@@ -49,6 +49,13 @@ usage.
 
 This is for readability.
 
+## Namespace
+
+Source-owned namespaces must match the folder nesting under `src/`.
+
+Anonymous helper namespaces must be nested inside the matching source-owned
+namespace.
+
 ## Lambdas And Closures
 
 Lambdas and closures must always declare their return type.

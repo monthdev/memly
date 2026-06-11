@@ -5,6 +5,7 @@
 #include "Infrastructure/Sql/TransactionRunner.hpp"
 #include "Infrastructure/Store/ReviewSession/ReviewSessionStore.hpp"
 
+namespace Application::Service::ReviewSession {
 namespace {
 
 [[nodiscard]] Application::Service::ReviewSession::ReviewSessionService::ReviewSessionMutationErrorEnum ToReviewSessionMutationError(
@@ -52,8 +53,6 @@ namespace {
 }
 
 }
-
-namespace Application::Service::ReviewSession {
 
 [[nodiscard]] std::expected<QString, ReviewSessionService::ReviewSessionMutationErrorEnum>
 ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const QString& RootDeckId, const QString& ReviewSessionDefinitionKey) {

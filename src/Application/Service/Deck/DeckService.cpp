@@ -4,6 +4,7 @@
 #include "Infrastructure/Sql/TransactionRunner.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 
+namespace Application::Service::Deck {
 namespace {
 
 [[nodiscard]] Application::Service::Deck::DeckService::DeckMutationErrorEnum
@@ -23,8 +24,6 @@ ToDeckMutationError(const Infrastructure::Store::Deck::DeckStore::RecoverableDec
 }
 
 }
-
-namespace Application::Service::Deck {
 
 [[nodiscard]] std::expected<void, DeckService::DeckMutationErrorEnum> DeckService::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, DeckMutationErrorEnum> {
