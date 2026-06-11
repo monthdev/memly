@@ -44,15 +44,15 @@ namespace Presentation::Model::Deck {
 }
 
 void DeckTreeModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNodeIndexes) {
-    std::stable_sort(
-        SiblingDeckNodeIndexes.begin(), SiblingDeckNodeIndexes.end(), [this](const qsizetype LeftDeckNodeIndex,
-                                                                             const qsizetype RightDeckNodeIndex) noexcept -> bool {
-            const int DeckNodeComparison{ CompareDeckNodes(LeftDeckNodeIndex, RightDeckNodeIndex) };
-            if (m_SortOrder == Qt::AscendingOrder) {
-                return DeckNodeComparison < 0;
-            }
-            return DeckNodeComparison > 0;
-        });
+    std::stable_sort(SiblingDeckNodeIndexes.begin(),
+                     SiblingDeckNodeIndexes.end(),
+                     [this](const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) noexcept -> bool {
+                         const int DeckNodeComparison{ CompareDeckNodes(LeftDeckNodeIndex, RightDeckNodeIndex) };
+                         if (m_SortOrder == Qt::AscendingOrder) {
+                             return DeckNodeComparison < 0;
+                         }
+                         return DeckNodeComparison > 0;
+                     });
 }
 
 void DeckTreeModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) noexcept {
