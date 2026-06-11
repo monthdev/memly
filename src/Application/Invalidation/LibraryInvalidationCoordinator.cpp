@@ -30,7 +30,7 @@ void LibraryInvalidationCoordinator::HandleScheduledInvalidation() {
 }
 
 void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() {
-    Runtime::TryCatchWrapper([&] {
+    Runtime::TryCatchWrapper([&]() -> void {
         m_LibraryInvalidationQTimer.stop();
         const std::optional<qint64> NextLibraryInvalidationAtMillisecondsSinceEpoch{ m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(
             m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch) };

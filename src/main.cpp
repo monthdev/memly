@@ -6,7 +6,7 @@
 #include "Runtime/Crash.hpp"
 
 int main(int argc, char* argv[]) {
-    return Runtime::TryCatchWrapper([&] {
+    return Runtime::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };
         constexpr char AppName[]{ "Memly" };
@@ -18,7 +18,11 @@ int main(int argc, char* argv[]) {
         Bootstrap::RuntimeContext::Initialize(Runtime::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
-            &AppEngine, &QQmlApplicationEngine::objectCreationFailed, QCoreApplication::instance(), [] { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+            &AppEngine,
+            &QQmlApplicationEngine::objectCreationFailed,
+            QCoreApplication::instance(),
+            []() -> void { QCoreApplication::exit(-1); },
+            Qt::QueuedConnection);
         AppEngine.loadFromModule(AppName, "MainWindow");
         return App.exec();
     });

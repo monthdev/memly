@@ -23,8 +23,8 @@
 
 // QNetworkReply* reply = nam.get(req);
 
-// QObject::connect(reply, &QNetworkReply::finished, [&] {
-//     const auto guard = qScopeGuard([&] { reply->deleteLater(); });
+// QObject::connect(reply, &QNetworkReply::finished, [&]() -> void {
+//     const auto guard = qScopeGuard([&]() -> void { reply->deleteLater(); });
 
 //     if (reply->error() != QNetworkReply::NoError) {
 //         qWarning() << "Network error:" << reply->errorString();
@@ -62,7 +62,7 @@
 // QNetworkRequest req1(url1);
 // QNetworkReply*  reply1 = nam.get(req1);
 
-// QObject::connect(reply1, &QNetworkReply::finished, [reply1]() {
+// QObject::connect(reply1, &QNetworkReply::finished, [reply1]() -> void {
 //     if (reply1->error() != QNetworkReply::NoError) {
 //         qWarning() << "Network error:" << reply1->errorString();
 //     } else {

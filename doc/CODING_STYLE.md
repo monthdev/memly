@@ -49,6 +49,12 @@ usage.
 
 This is for readability.
 
+## Lambdas And Closures
+
+Lambdas and closures must always declare their return type.
+
+This is to reduce boilerplate for return statements.
+
 ## Using
 
 `using` declarations and aliases are disallowed.

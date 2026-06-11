@@ -33,7 +33,7 @@ public:
     void Connect(ControllerType* ControllerPointer,
                  const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                  const ControllerRefreshFunctionType ControllerRefreshFunction) {
-        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshFunction] {
+        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshFunction]() -> void {
             std::invoke(ControllerRefreshFunction, ControllerPointer);
         });
     }
@@ -44,7 +44,7 @@ public:
     void ConnectSnapshot(ControllerType* ControllerPointer,
                          const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                          const ControllerRefreshFunctionType ControllerRefreshFunction) {
-        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [this, ControllerPointer, ControllerRefreshFunction] {
+        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [this, ControllerPointer, ControllerRefreshFunction]() -> void {
             std::invoke(ControllerRefreshFunction, ControllerPointer, m_CurrentSnapshotAsOfMillisecondsSinceEpoch);
         });
     }
@@ -64,7 +64,7 @@ private:
             &LibraryInvalidationChannel::InvalidationSignal,
             ControllerPointer,
             [ControllerLibraryInvalidationTarget, ControllerRefreshFunction = std::forward<ControllerRefreshFunctionType>(ControllerRefreshFunction)](
-                const LibraryInvalidationTargetBitset& CoordinatorLibraryInvalidationTargetBitset) {
+                const LibraryInvalidationTargetBitset& CoordinatorLibraryInvalidationTargetBitset) -> void {
                 if (CoordinatorLibraryInvalidationTargetBitset.Contains(ControllerLibraryInvalidationTarget)) {
                     std::invoke(ControllerRefreshFunction);
                 }
