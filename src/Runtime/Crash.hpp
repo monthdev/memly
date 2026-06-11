@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtLogging>
+#include <concepts>
 #include <functional>
 #include <source_location>
 #include <string_view>
@@ -12,6 +13,7 @@ namespace Runtime {
 void LogError(const std::string_view);
 
 template <typename FunctionType>
+    requires std::invocable<FunctionType&&>
 std::invoke_result_t<FunctionType&&> TryCatchWrapper(FunctionType&& Function) noexcept {
     try {
         return std::invoke(std::forward<FunctionType>(Function));

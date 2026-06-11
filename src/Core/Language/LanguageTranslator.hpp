@@ -83,6 +83,6 @@ struct TargetLanguageInfo {
     std::string_view m_GuiName;
 };
 
-std::span<const TargetLanguageInfo> GetSupportedTargetLanguages();
-const TargetLanguageInfo& GetTargetLanguageInfo(TargetLanguage Language);
+[[nodiscard]] std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() noexcept;
+[[nodiscard]] const TargetLanguageInfo& GetTargetLanguageInfo(TargetLanguage) noexcept;
 }

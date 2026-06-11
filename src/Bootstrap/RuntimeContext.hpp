@@ -59,11 +59,11 @@ public:
 
     static void Initialize(const QString&);
 
-    static Application::Invalidation::LibraryInvalidationChannel& GetRequiredLibraryInvalidationChannel() noexcept;
-    static Application::Service::Deck::DeckService& GetRequiredDeckService() noexcept;
-    static Application::Service::Deck::DeckTreeService& GetRequiredDeckTreeService() noexcept;
-    static Application::Service::ReviewSession::ReviewSessionListService& GetRequiredReviewSessionListService() noexcept;
-    static Application::Service::ReviewSession::ReviewSessionService& GetRequiredReviewSessionService() noexcept;
+    [[nodiscard]] static Application::Invalidation::LibraryInvalidationChannel& GetRequiredLibraryInvalidationChannel() noexcept;
+    [[nodiscard]] static Application::Service::Deck::DeckService& GetRequiredDeckService() noexcept;
+    [[nodiscard]] static Application::Service::Deck::DeckTreeService& GetRequiredDeckTreeService() noexcept;
+    [[nodiscard]] static Application::Service::ReviewSession::ReviewSessionListService& GetRequiredReviewSessionListService() noexcept;
+    [[nodiscard]] static Application::Service::ReviewSession::ReviewSessionService& GetRequiredReviewSessionService() noexcept;
 
 private:
     static std::unique_ptr<duckdb::DuckDB> s_Database;

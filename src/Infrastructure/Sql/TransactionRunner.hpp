@@ -2,6 +2,7 @@
 
 #include <duckdb.hpp>
 
+#include <concepts>
 #include <expected>
 #include <functional>
 #include <type_traits>
@@ -32,6 +33,7 @@ public:
     TransactionRunner& operator=(TransactionRunner&&) = delete;
 
     template <typename ServiceMethodType>
+        requires std::invocable<ServiceMethodType&&>
     [[nodiscard]] std::invoke_result_t<ServiceMethodType&&> TransactionWrapper(ServiceMethodType&& ServiceMethod) {
         m_DatabaseConnection.BeginTransaction();
         try {

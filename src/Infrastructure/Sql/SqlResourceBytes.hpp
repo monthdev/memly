@@ -4,5 +4,5 @@
 
 namespace Infrastructure::Sql {
 
-[[nodiscard]] std::string ReadSqlResourceBytes(const char* SqlResourcePath);
+[[nodiscard]] std::string ReadSqlResourceBytes(const char*);
 }

@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QObject>
 #include <QtTypes>
+#include <concepts>
 #include <functional>
 #include <type_traits>
 #include <utility>
@@ -29,7 +30,7 @@ public:
     LibraryInvalidationChannel& operator=(LibraryInvalidationChannel&&) = delete;
 
     template <typename ControllerType, typename ControllerRefreshFunctionType>
-        requires std::is_member_function_pointer_v<ControllerRefreshFunctionType> and std::is_invocable_v<ControllerRefreshFunctionType, ControllerType*>
+        requires std::is_member_function_pointer_v<ControllerRefreshFunctionType> and std::invocable<ControllerRefreshFunctionType, ControllerType*>
     void Connect(ControllerType* ControllerPointer,
                  const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                  const ControllerRefreshFunctionType ControllerRefreshFunction) {
@@ -39,8 +40,7 @@ public:
     }
 
     template <typename ControllerType, typename ControllerRefreshFunctionType>
-        requires std::is_member_function_pointer_v<ControllerRefreshFunctionType> and
-                 std::is_invocable_v<ControllerRefreshFunctionType, ControllerType*, qint64>
+        requires std::is_member_function_pointer_v<ControllerRefreshFunctionType> and std::invocable<ControllerRefreshFunctionType, ControllerType*, qint64>
     void ConnectSnapshot(ControllerType* ControllerPointer,
                          const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                          const ControllerRefreshFunctionType ControllerRefreshFunction) {
@@ -55,6 +55,7 @@ private:
     friend class LibraryInvalidationCoordinator;
 
     template <typename ControllerType, typename ControllerRefreshFunctionType>
+        requires std::invocable<ControllerRefreshFunctionType&>
     void ConnectInvalidationSignal(ControllerType* ControllerPointer,
                                    const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                                    ControllerRefreshFunctionType&& ControllerRefreshFunction) {

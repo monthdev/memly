@@ -5,25 +5,25 @@
 
 namespace Runtime {
 namespace {
-QString EnsureDirectory(const QString& Directory) {
+[[nodiscard]] QString EnsureDirectory(const QString& Directory) {
     QDir().mkpath(Directory);
     return Directory;
 }
 
-QString BaseDirectoryPath() {
+[[nodiscard]] QString BaseDirectoryPath() {
     return EnsureDirectory(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 }
 }
 
-QString AudioDirectoryPath() {
+[[nodiscard]] QString AudioDirectoryPath() {
     return EnsureDirectory(BaseDirectoryPath() + "/Audio");
 }
 
-QString CrashLogFilePath() {
+[[nodiscard]] QString CrashLogFilePath() {
     return BaseDirectoryPath() + "/crash.log";
 }
 
-QString DatabaseFilePath() {
+[[nodiscard]] QString DatabaseFilePath() {
     return BaseDirectoryPath() + "/memly.duckdb";
 }
 }

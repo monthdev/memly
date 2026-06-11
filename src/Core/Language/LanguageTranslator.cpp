@@ -4,7 +4,7 @@
 #include <cstddef>
 
 namespace Core::Language {
-std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() {
+[[nodiscard]] std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() noexcept {
     static constexpr std::array<TargetLanguageInfo, 67> TargetLanguages{
         {
          { TargetLanguage::NoLanguage, "", "", "", "(No Language)" },
@@ -80,7 +80,7 @@ std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() {
     return TargetLanguages;
 }
 
-const TargetLanguageInfo& GetTargetLanguageInfo(TargetLanguage Language) {
+[[nodiscard]] const TargetLanguageInfo& GetTargetLanguageInfo(const TargetLanguage Language) noexcept {
     return GetSupportedTargetLanguages()[static_cast<std::size_t>(Language)];
 }
 }

@@ -15,7 +15,7 @@ class DeckTreeService;
 
 namespace Presentation::Controller::Deck {
 
-class DeckTreeController : public QObject {
+class DeckTreeController final : public QObject {
     Q_OBJECT
     Q_PROPERTY(Presentation::Model::Deck::DeckTreeModel* deckTree READ GetDeckTree CONSTANT)
 
@@ -39,7 +39,7 @@ public:
     DeckTreeController& operator=(const DeckTreeController&) = delete;
     DeckTreeController& operator=(DeckTreeController&&) = delete;
 
-    Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
+    [[nodiscard]] Presentation::Model::Deck::DeckTreeModel* GetDeckTree() noexcept {
         return &m_DeckTree;
     }
 

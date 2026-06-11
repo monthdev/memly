@@ -3,9 +3,9 @@
 #include <QString>
 
 namespace Runtime {
-QString AudioDirectoryPath();
+[[nodiscard]] QString AudioDirectoryPath();
 
-QString CrashLogFilePath();
+[[nodiscard]] QString CrashLogFilePath();
 
-QString DatabaseFilePath();
+[[nodiscard]] QString DatabaseFilePath();
 }

@@ -233,8 +233,8 @@ private:
 
     [[nodiscard]] std::optional<std::reference_wrapper<const DeckNode>> TryGetDeckNode(const QModelIndex&) const noexcept;
     [[nodiscard]] const QVector<qsizetype>& GetChildDeckNodeIndexes(const QModelIndex&) const noexcept;
-    void ApplyCurrentSort() noexcept;
-    void SortSiblingDeckNodeIndexes(QVector<qsizetype>&) noexcept;
+    void ApplyCurrentSort();
+    void SortSiblingDeckNodeIndexes(QVector<qsizetype>&);
     void UpdateSiblingRowIndexes(qsizetype = s_RootDeckNodeIndex) noexcept;
     [[nodiscard]] int CompareDeckNodes(qsizetype, qsizetype) const noexcept;
 };
