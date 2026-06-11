@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <optional>
 
+#include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Infrastructure/Store/Library/LibraryClockStore.hpp"
 #include "Runtime/Crash.hpp"
 

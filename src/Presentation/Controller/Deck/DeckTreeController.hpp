@@ -7,8 +7,11 @@
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Application/Service/Deck/DeckService.hpp"
-#include "Application/Service/Deck/DeckTreeService.hpp"
 #include "Presentation/Model/Deck/DeckTreeModel.hpp"
+
+namespace Application::Service::Deck {
+class DeckTreeService;
+}
 
 namespace Presentation::Controller::Deck {
 

@@ -3,13 +3,15 @@
 #include <QObject>
 #include <QTimer>
 
-#include "Application/Invalidation/LibraryInvalidationChannel.hpp"
+#include "Application/Invalidation/LibraryInvalidationTarget.hpp"
 
 namespace Infrastructure::Store::Library {
 class LibraryClockStore;
 }
 
 namespace Application::Invalidation {
+
+class LibraryInvalidationChannel;
 
 class LibraryInvalidationCoordinator final : public QObject {
     Q_OBJECT

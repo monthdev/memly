@@ -2,6 +2,7 @@
 
 #include <expected>
 
+#include "Application/Service/Deck/DeckTreeService.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Presentation::Controller::Deck {
