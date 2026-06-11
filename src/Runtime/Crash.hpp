@@ -4,6 +4,7 @@
 #include <functional>
 #include <source_location>
 #include <string_view>
+#include <type_traits>
 
 namespace Runtime {
 [[noreturn]] void ThrowError(const std::string_view = std::string_view{}, const std::source_location& = std::source_location::current());
@@ -11,7 +12,7 @@ namespace Runtime {
 void LogError(const std::string_view);
 
 template <typename Fn>
-decltype(auto) TryCatchWrapper(Fn&& Function) noexcept {
+std::invoke_result_t<Fn&&> TryCatchWrapper(Fn&& Function) noexcept {
     try {
         return std::invoke(std::forward<Fn>(Function));
     } catch (const std::exception& Exception) {

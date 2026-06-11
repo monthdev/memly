@@ -47,7 +47,7 @@ void SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
     std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ Seed::CreateDefaultFsrs7SchedulerSql,
                                                                                Seed::CreateDefaultFsrs7SettingsSql,
                                                                                Seed::CreateDefaultDeckSettingsSql };
-    for (const auto& SeedSqlFunction : SeedSqlFunctionArray) {
+    for (const std::reference_wrapper<std::string()>& SeedSqlFunction : SeedSqlFunctionArray) {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(std::invoke(SeedSqlFunction)) };
         ThrowOnQueryResultError(*QueryResult);
     }

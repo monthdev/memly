@@ -32,7 +32,7 @@ public:
     TransactionRunner& operator=(TransactionRunner&&) = delete;
 
     template <typename Fn>
-    [[nodiscard]] decltype(auto) TransactionWrapper(Fn&& Function) {
+    [[nodiscard]] std::invoke_result_t<Fn&&> TransactionWrapper(Fn&& Function) {
         m_DatabaseConnection.BeginTransaction();
         try {
             if constexpr (std::is_void_v<std::invoke_result_t<Fn&&>>) {

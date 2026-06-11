@@ -44,7 +44,7 @@
 //     // Parse translation: [[["Hello World","Hallo Welt",...],...],...]
 //     QJsonArray top = doc.array();
 //     QString    out;
-//     for (const auto& seg : top[0].toArray()) {
+//     for (const QJsonValue& seg : top[0].toArray()) {
 //         if (seg.isArray() && seg.toArray()[0].isString()) out += seg.toArray()[0].toString();
 //     }
 //     qDebug() << "Translation:" << out;

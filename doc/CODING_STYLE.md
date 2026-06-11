@@ -38,3 +38,13 @@ for all declared classes and for all declared data-time object structs (DTOs).
 This is so ownership and value semantics for a class are intentionally
 considered and set instead of simply letting the compiler infer it from
 inheritance, special members, or default language rules.
+
+## Auto
+
+`auto` is disallowed except where the language or API requires it such as
+lambdas, APIs that expose private types, or otherwise unnameable types.
+
+Local lambdas and DuckDB query result iterators are examples of required `auto`
+usage.
+
+This is for readability.
