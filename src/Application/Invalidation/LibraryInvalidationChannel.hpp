@@ -29,23 +29,23 @@ public:
     LibraryInvalidationChannel& operator=(const LibraryInvalidationChannel&) = delete;
     LibraryInvalidationChannel& operator=(LibraryInvalidationChannel&&) = delete;
 
-    template <typename ControllerType, typename ControllerRefreshFunctionType>
-        requires std::is_member_function_pointer_v<ControllerRefreshFunctionType> and std::invocable<ControllerRefreshFunctionType, ControllerType*>
+    template <typename ControllerType, typename ControllerRefreshMethodType>
+        requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::invocable<ControllerRefreshMethodType, ControllerType*>
     void Connect(ControllerType* ControllerPointer,
                  const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
-                 const ControllerRefreshFunctionType ControllerRefreshFunction) {
-        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshFunction]() -> void {
-            std::invoke(ControllerRefreshFunction, ControllerPointer);
+                 const ControllerRefreshMethodType ControllerRefreshMethod) {
+        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshMethod]() -> void {
+            std::invoke(ControllerRefreshMethod, ControllerPointer);
         });
     }
 
-    template <typename ControllerType, typename ControllerRefreshFunctionType>
-        requires std::is_member_function_pointer_v<ControllerRefreshFunctionType> and std::invocable<ControllerRefreshFunctionType, ControllerType*, qint64>
+    template <typename ControllerType, typename ControllerRefreshMethodType>
+        requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::invocable<ControllerRefreshMethodType, ControllerType*, qint64>
     void ConnectSnapshot(ControllerType* ControllerPointer,
                          const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
-                         const ControllerRefreshFunctionType ControllerRefreshFunction) {
-        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [this, ControllerPointer, ControllerRefreshFunction]() -> void {
-            std::invoke(ControllerRefreshFunction, ControllerPointer, m_CurrentSnapshotAsOfMillisecondsSinceEpoch);
+                         const ControllerRefreshMethodType ControllerRefreshMethod) {
+        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [this, ControllerPointer, ControllerRefreshMethod]() -> void {
+            std::invoke(ControllerRefreshMethod, ControllerPointer, m_CurrentSnapshotAsOfMillisecondsSinceEpoch);
         });
     }
 
@@ -54,20 +54,20 @@ private:
 
     friend class LibraryInvalidationCoordinator;
 
-    template <typename ControllerType, typename ControllerRefreshFunctionType>
-        requires std::invocable<ControllerRefreshFunctionType&>
+    template <typename ControllerType, typename ControllerRefreshMethodType>
+        requires std::invocable<ControllerRefreshMethodType&>
     void ConnectInvalidationSignal(ControllerType* ControllerPointer,
                                    const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
-                                   ControllerRefreshFunctionType&& ControllerRefreshFunction) {
-        std::invoke(ControllerRefreshFunction);
+                                   ControllerRefreshMethodType&& ControllerRefreshMethod) {
+        std::invoke(ControllerRefreshMethod);
         QObject::connect(
             this,
             &LibraryInvalidationChannel::InvalidationSignal,
             ControllerPointer,
-            [ControllerLibraryInvalidationTarget, ControllerRefreshFunction = std::forward<ControllerRefreshFunctionType>(ControllerRefreshFunction)](
+            [ControllerLibraryInvalidationTarget, ControllerRefreshMethod = std::forward<ControllerRefreshMethodType>(ControllerRefreshMethod)](
                 const LibraryInvalidationTargetBitset& CoordinatorLibraryInvalidationTargetBitset) -> void {
                 if (CoordinatorLibraryInvalidationTargetBitset.Contains(ControllerLibraryInvalidationTarget)) {
-                    std::invoke(ControllerRefreshFunction);
+                    std::invoke(ControllerRefreshMethod);
                 }
             },
             Qt::DirectConnection);
