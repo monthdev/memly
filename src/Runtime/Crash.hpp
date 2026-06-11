@@ -11,10 +11,10 @@ namespace Runtime {
 
 void LogError(const std::string_view);
 
-template <typename Fn>
-std::invoke_result_t<Fn&&> TryCatchWrapper(Fn&& Function) noexcept {
+template <typename FunctionType>
+std::invoke_result_t<FunctionType&&> TryCatchWrapper(FunctionType&& Function) noexcept {
     try {
-        return std::invoke(std::forward<Fn>(Function));
+        return std::invoke(std::forward<FunctionType>(Function));
     } catch (const std::exception& Exception) {
         Runtime::LogError(Exception.what());
         qFatal("%s", Exception.what());

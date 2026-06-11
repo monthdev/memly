@@ -31,15 +31,15 @@ public:
     TransactionRunner& operator=(const TransactionRunner&) = delete;
     TransactionRunner& operator=(TransactionRunner&&) = delete;
 
-    template <typename Fn>
-    [[nodiscard]] std::invoke_result_t<Fn&&> TransactionWrapper(Fn&& Function) {
+    template <typename ServiceMethodType>
+    [[nodiscard]] std::invoke_result_t<ServiceMethodType&&> TransactionWrapper(ServiceMethodType&& ServiceMethod) {
         m_DatabaseConnection.BeginTransaction();
         try {
-            if constexpr (std::is_void_v<std::invoke_result_t<Fn&&>>) {
-                std::invoke(std::forward<Fn>(Function));
+            if constexpr (std::is_void_v<std::invoke_result_t<ServiceMethodType&&>>) {
+                std::invoke(std::forward<ServiceMethodType>(ServiceMethod));
                 m_DatabaseConnection.Commit();
-            } else if constexpr (IsStdExpectedType<std::remove_cvref_t<std::invoke_result_t<Fn&&>>>::value) {
-                std::invoke_result_t<Fn&&> Result{ std::invoke(std::forward<Fn>(Function)) };
+            } else if constexpr (IsStdExpectedType<std::remove_cvref_t<std::invoke_result_t<ServiceMethodType&&>>>::value) {
+                std::invoke_result_t<ServiceMethodType&&> Result{ std::invoke(std::forward<ServiceMethodType>(ServiceMethod)) };
                 if (Result.has_value()) {
                     m_DatabaseConnection.Commit();
                 } else {
@@ -47,7 +47,8 @@ public:
                 }
                 return Result;
             } else {
-                static_assert(AlwaysFalseType<std::invoke_result_t<Fn&&>>::value, "TransactionWrapper only supports void or std::expected return types");
+                static_assert(AlwaysFalseType<std::invoke_result_t<ServiceMethodType&&>>::value,
+                              "TransactionWrapper only supports void or std::expected return types");
             }
         } catch (...) {
             m_DatabaseConnection.Rollback();
