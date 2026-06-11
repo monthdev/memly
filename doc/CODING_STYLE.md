@@ -48,3 +48,9 @@ Local lambdas and DuckDB query result iterators are examples of required `auto`
 usage.
 
 This is for readability.
+
+## Using
+
+`using` declarations and aliases are disallowed.
+
+This is so type names and namespace ownership stay explicit at each use site.
