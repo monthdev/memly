@@ -26,7 +26,7 @@ public:
         : m_DatabaseConnection{ DatabaseConnection } {
     }
 
-    ~TransactionRunner() = default;
+    ~TransactionRunner() noexcept = default;
     TransactionRunner(const TransactionRunner&) = delete;
     TransactionRunner(TransactionRunner&&) = delete;
     TransactionRunner& operator=(const TransactionRunner&) = delete;

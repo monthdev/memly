@@ -29,23 +29,23 @@ public:
         ScheduleNextLibraryInvalidation();
     }
 
-    ~LibraryInvalidationCoordinator() override = default;
+    ~LibraryInvalidationCoordinator() noexcept override = default;
     LibraryInvalidationCoordinator(const LibraryInvalidationCoordinator&) = delete;
     LibraryInvalidationCoordinator(LibraryInvalidationCoordinator&&) = delete;
     LibraryInvalidationCoordinator& operator=(const LibraryInvalidationCoordinator&) = delete;
     LibraryInvalidationCoordinator& operator=(LibraryInvalidationCoordinator&&) = delete;
 
-    void Invalidate(const LibraryInvalidationTargetBitset&);
-    void InvalidateWithReschedule(const LibraryInvalidationTargetBitset&);
-    void InvalidateWithRescheduleAndCurrentSnapshotEpoch(const LibraryInvalidationTargetBitset&);
+    void Invalidate(const LibraryInvalidationTargetBitset&) noexcept;
+    void InvalidateWithReschedule(const LibraryInvalidationTargetBitset&) noexcept;
+    void InvalidateWithRescheduleAndCurrentSnapshotEpoch(const LibraryInvalidationTargetBitset&) noexcept;
 
 private:
     LibraryInvalidationChannel& m_LibraryInvalidationChannel;
     Infrastructure::Store::Library::LibraryClockStore& m_LibraryClockStore;
     QTimer m_LibraryInvalidationQTimer;
 
-    void HandleScheduledInvalidation();
-    void ScheduleNextLibraryInvalidation();
+    void HandleScheduledInvalidation() noexcept;
+    void ScheduleNextLibraryInvalidation() noexcept;
 };
 
 }

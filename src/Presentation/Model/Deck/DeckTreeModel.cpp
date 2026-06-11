@@ -6,7 +6,7 @@
 
 namespace Presentation::Model::Deck {
 
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {
         return std::nullopt;
     }
@@ -23,7 +23,7 @@ namespace Presentation::Model::Deck {
     return ParentDeckNode.m_ChildDeckNodeIndexesQVector;
 }
 
-[[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const {
+[[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
     const DeckNode& LeftDeckNode{ m_DeckNodesQVector.at(LeftDeckNodeIndex) };
     const DeckNode& RightDeckNode{ m_DeckNodesQVector.at(RightDeckNodeIndex) };
     const auto CompareDeckNodeCounts{ [](const quint32 LeftDeckNodeCount, const quint32 RightDeckNodeCount) static noexcept -> int {
@@ -45,7 +45,8 @@ namespace Presentation::Model::Deck {
 
 void DeckTreeModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNodeIndexes) {
     std::stable_sort(
-        SiblingDeckNodeIndexes.begin(), SiblingDeckNodeIndexes.end(), [this](const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) -> bool {
+        SiblingDeckNodeIndexes.begin(), SiblingDeckNodeIndexes.end(), [this](const qsizetype LeftDeckNodeIndex,
+                                                                             const qsizetype RightDeckNodeIndex) noexcept -> bool {
             const int DeckNodeComparison{ CompareDeckNodes(LeftDeckNodeIndex, RightDeckNodeIndex) };
             if (m_SortOrder == Qt::AscendingOrder) {
                 return DeckNodeComparison < 0;
@@ -54,7 +55,7 @@ void DeckTreeModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNo
         });
 }
 
-void DeckTreeModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) {
+void DeckTreeModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) noexcept {
     QVector<qsizetype>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex == s_RootDeckNodeIndex ?
                                                     m_RootDeckNodeIndexesQVector :
                                                     m_DeckNodesQVector[ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector };

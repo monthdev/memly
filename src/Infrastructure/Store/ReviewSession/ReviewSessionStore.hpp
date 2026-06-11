@@ -72,7 +72,7 @@ public:
         Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
     }
 
-    ~ReviewSessionStore() = default;
+    ~ReviewSessionStore() noexcept = default;
     ReviewSessionStore(const ReviewSessionStore&) = delete;
     ReviewSessionStore(ReviewSessionStore&&) = delete;
     ReviewSessionStore& operator=(const ReviewSessionStore&) = delete;

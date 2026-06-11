@@ -24,7 +24,7 @@ public:
         : m_ReviewSessionListStore{ ReviewSessionListStore } {
     }
 
-    ~ReviewSessionListService() = default;
+    ~ReviewSessionListService() noexcept = default;
     ReviewSessionListService(const ReviewSessionListService&) = delete;
     ReviewSessionListService(ReviewSessionListService&&) = delete;
     ReviewSessionListService& operator=(const ReviewSessionListService&) = delete;

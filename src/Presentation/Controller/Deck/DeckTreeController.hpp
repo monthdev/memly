@@ -33,7 +33,7 @@ public:
             this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot, &DeckTreeController::RefreshDeckTree);
     }
 
-    ~DeckTreeController() override = default;
+    ~DeckTreeController() noexcept override = default;
     DeckTreeController(const DeckTreeController&) = delete;
     DeckTreeController(DeckTreeController&&) = delete;
     DeckTreeController& operator=(const DeckTreeController&) = delete;

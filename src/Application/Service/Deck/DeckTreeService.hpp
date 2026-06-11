@@ -32,7 +32,7 @@ public:
         : m_DeckTreeStore{ DeckTreeStore } {
     }
 
-    ~DeckTreeService() = default;
+    ~DeckTreeService() noexcept = default;
     DeckTreeService(const DeckTreeService&) = delete;
     DeckTreeService(DeckTreeService&&) = delete;
     DeckTreeService& operator=(const DeckTreeService&) = delete;

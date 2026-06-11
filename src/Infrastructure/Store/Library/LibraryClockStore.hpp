@@ -19,7 +19,7 @@ public:
         Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement);
     }
 
-    ~LibraryClockStore() = default;
+    ~LibraryClockStore() noexcept = default;
     LibraryClockStore(const LibraryClockStore&) = delete;
     LibraryClockStore(LibraryClockStore&&) = delete;
     LibraryClockStore& operator=(const LibraryClockStore&) = delete;

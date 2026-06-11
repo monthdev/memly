@@ -39,7 +39,7 @@ public:
         Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
     }
 
-    ~DeckStore() = default;
+    ~DeckStore() noexcept = default;
     DeckStore(const DeckStore&) = delete;
     DeckStore(DeckStore&&) = delete;
     DeckStore& operator=(const DeckStore&) = delete;

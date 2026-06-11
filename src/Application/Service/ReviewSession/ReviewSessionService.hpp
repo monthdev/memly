@@ -44,7 +44,7 @@ public:
         , m_ReviewSessionStore{ ReviewSessionStore } {
     }
 
-    ~ReviewSessionService() = default;
+    ~ReviewSessionService() noexcept = default;
     ReviewSessionService(const ReviewSessionService&) = delete;
     ReviewSessionService(ReviewSessionService&&) = delete;
     ReviewSessionService& operator=(const ReviewSessionService&) = delete;

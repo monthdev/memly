@@ -38,7 +38,7 @@ public:
         , m_DeckStore{ DeckStore } {
     }
 
-    ~DeckService() = default;
+    ~DeckService() noexcept = default;
     DeckService(const DeckService&) = delete;
     DeckService(DeckService&&) = delete;
     DeckService& operator=(const DeckService&) = delete;

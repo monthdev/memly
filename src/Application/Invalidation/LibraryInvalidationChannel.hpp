@@ -22,7 +22,7 @@ public:
         , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ QDateTime::currentMSecsSinceEpoch() } {
     }
 
-    ~LibraryInvalidationChannel() override = default;
+    ~LibraryInvalidationChannel() noexcept override = default;
     LibraryInvalidationChannel(const LibraryInvalidationChannel&) = delete;
     LibraryInvalidationChannel(LibraryInvalidationChannel&&) = delete;
     LibraryInvalidationChannel& operator=(const LibraryInvalidationChannel&) = delete;

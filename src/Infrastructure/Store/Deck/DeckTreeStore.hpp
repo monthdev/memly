@@ -35,7 +35,7 @@ public:
         Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotPreparedStatement);
     }
 
-    ~DeckTreeStore() = default;
+    ~DeckTreeStore() noexcept = default;
     DeckTreeStore(const DeckTreeStore&) = delete;
     DeckTreeStore(DeckTreeStore&&) = delete;
     DeckTreeStore& operator=(const DeckTreeStore&) = delete;

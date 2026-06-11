@@ -24,7 +24,7 @@ public:
                                 Bootstrap::RuntimeContext::GetRequiredDeckTreeService() } {
     }
 
-    ~DeckTreeControllerBridge() override = default;
+    ~DeckTreeControllerBridge() noexcept override = default;
     DeckTreeControllerBridge(const DeckTreeControllerBridge&) = delete;
     DeckTreeControllerBridge(DeckTreeControllerBridge&&) = delete;
     DeckTreeControllerBridge& operator=(const DeckTreeControllerBridge&) = delete;

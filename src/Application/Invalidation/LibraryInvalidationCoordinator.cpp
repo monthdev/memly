@@ -10,27 +10,27 @@
 
 namespace Application::Invalidation {
 
-void LibraryInvalidationCoordinator::Invalidate(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) {
+void LibraryInvalidationCoordinator::Invalidate(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
 }
 
-void LibraryInvalidationCoordinator::InvalidateWithReschedule(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) {
+void LibraryInvalidationCoordinator::InvalidateWithReschedule(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
     ScheduleNextLibraryInvalidation();
 }
 
 void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndCurrentSnapshotEpoch(
-    const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) {
+    const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
     m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
     ScheduleNextLibraryInvalidation();
 }
 
-void LibraryInvalidationCoordinator::HandleScheduledInvalidation() {
+void LibraryInvalidationCoordinator::HandleScheduledInvalidation() noexcept {
     InvalidateWithRescheduleAndCurrentSnapshotEpoch(LibraryInvalidationTargetEnum::DeckTreeSnapshot);
 }
 
-void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() {
+void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
         m_LibraryInvalidationQTimer.stop();
         const std::optional<qint64> NextLibraryInvalidationAtMillisecondsSinceEpoch{ m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(

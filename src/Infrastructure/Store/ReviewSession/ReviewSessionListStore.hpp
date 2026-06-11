@@ -27,7 +27,7 @@ public:
         Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadReviewSessionListPreparedStatement);
     }
 
-    ~ReviewSessionListStore() = default;
+    ~ReviewSessionListStore() noexcept = default;
     ReviewSessionListStore(const ReviewSessionListStore&) = delete;
     ReviewSessionListStore(ReviewSessionListStore&&) = delete;
     ReviewSessionListStore& operator=(const ReviewSessionListStore&) = delete;

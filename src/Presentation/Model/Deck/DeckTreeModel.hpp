@@ -60,7 +60,7 @@ public:
         , m_SortOrder{ Qt::AscendingOrder } {
     }
 
-    ~DeckTreeModel() override = default;
+    ~DeckTreeModel() noexcept override = default;
     DeckTreeModel(const DeckTreeModel&) = delete;
     DeckTreeModel(DeckTreeModel&&) = delete;
     DeckTreeModel& operator=(const DeckTreeModel&) = delete;
@@ -251,11 +251,11 @@ private:
     int m_SortColumn;
     Qt::SortOrder m_SortOrder;
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const DeckNode>> TryGetDeckNode(const QModelIndex&) const;
+    [[nodiscard]] std::optional<std::reference_wrapper<const DeckNode>> TryGetDeckNode(const QModelIndex&) const noexcept;
     [[nodiscard]] const QVector<qsizetype>& GetChildDeckNodeIndexes(const QModelIndex&) const;
     void ApplyCurrentSort();
     void SortSiblingDeckNodeIndexes(QVector<qsizetype>&);
-    void UpdateSiblingRowIndexes(qsizetype = s_RootDeckNodeIndex);
-    [[nodiscard]] int CompareDeckNodes(qsizetype, qsizetype) const;
+    void UpdateSiblingRowIndexes(qsizetype = s_RootDeckNodeIndex) noexcept;
+    [[nodiscard]] int CompareDeckNodes(qsizetype, qsizetype) const noexcept;
 };
 }
