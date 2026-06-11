@@ -36,5 +36,5 @@ Copy and move constructor and assignment operator must explicitly be addressed
 for all declared classes and for all declared data-time object structs (DTOs).
 
 This is so ownership and value semantics for a class are intentionally
-considered and set instead of letting the compiler infer it from inheritance,
-special members, or default language rules.
+considered and set instead of simply letting the compiler infer it from
+inheritance, special members, or default language rules.
