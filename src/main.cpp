@@ -5,7 +5,7 @@
 #include "Runtime/AppStoragePath.hpp"
 #include "Runtime/Crash.hpp"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) noexcept {
     return Runtime::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };

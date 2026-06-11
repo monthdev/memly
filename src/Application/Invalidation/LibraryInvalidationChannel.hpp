@@ -3,7 +3,6 @@
 #include <QDateTime>
 #include <QObject>
 #include <QtTypes>
-#include <concepts>
 #include <functional>
 #include <type_traits>
 #include <utility>
@@ -30,23 +29,25 @@ public:
     LibraryInvalidationChannel& operator=(LibraryInvalidationChannel&&) = delete;
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
-        requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::invocable<ControllerRefreshMethodType, ControllerType*>
+        requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*>
     void Connect(ControllerType* ControllerPointer,
                  const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                  const ControllerRefreshMethodType ControllerRefreshMethod) {
-        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshMethod]() -> void {
+        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshMethod]() noexcept -> void {
             std::invoke(ControllerRefreshMethod, ControllerPointer);
         });
     }
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
-        requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::invocable<ControllerRefreshMethodType, ControllerType*, qint64>
+        requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and
+                 std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*, qint64>
     void ConnectSnapshot(ControllerType* ControllerPointer,
                          const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                          const ControllerRefreshMethodType ControllerRefreshMethod) {
-        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [this, ControllerPointer, ControllerRefreshMethod]() -> void {
-            std::invoke(ControllerRefreshMethod, ControllerPointer, m_CurrentSnapshotAsOfMillisecondsSinceEpoch);
-        });
+        ConnectInvalidationSignal(
+            ControllerPointer, ControllerLibraryInvalidationTarget, [this, ControllerPointer, ControllerRefreshMethod]() noexcept -> void {
+                std::invoke(ControllerRefreshMethod, ControllerPointer, m_CurrentSnapshotAsOfMillisecondsSinceEpoch);
+            });
     }
 
 private:
@@ -55,7 +56,7 @@ private:
     friend class LibraryInvalidationCoordinator;
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
-        requires std::invocable<ControllerRefreshMethodType&>
+        requires std::is_nothrow_invocable_v<ControllerRefreshMethodType&>
     void ConnectInvalidationSignal(ControllerType* ControllerPointer,
                                    const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                                    ControllerRefreshMethodType&& ControllerRefreshMethod) {
@@ -65,7 +66,7 @@ private:
             &LibraryInvalidationChannel::InvalidationSignal,
             ControllerPointer,
             [ControllerLibraryInvalidationTarget, ControllerRefreshMethod = std::forward<ControllerRefreshMethodType>(ControllerRefreshMethod)](
-                const LibraryInvalidationTargetBitset& CoordinatorLibraryInvalidationTargetBitset) -> void {
+                const LibraryInvalidationTargetBitset& CoordinatorLibraryInvalidationTargetBitset) noexcept -> void {
                 if (CoordinatorLibraryInvalidationTargetBitset.Contains(ControllerLibraryInvalidationTarget)) {
                     std::invoke(ControllerRefreshMethod);
                 }
