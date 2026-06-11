@@ -2,9 +2,11 @@
 
 #include <algorithm>
 
+#include "Runtime/Crash.hpp"
+
 namespace Presentation::Model::Deck {
 
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const {
     if (not Index.isValid()) {
         return std::nullopt;
     }
@@ -13,7 +15,7 @@ namespace Presentation::Model::Deck {
     return m_DeckNodesQVector.at(DeckNodeIndex);
 }
 
-[[nodiscard]] const QVector<qsizetype>& DeckTreeModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const noexcept {
+[[nodiscard]] const QVector<qsizetype>& DeckTreeModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const {
     if (not Parent.isValid()) {
         return m_RootDeckNodeIndexesQVector;
     }
@@ -21,7 +23,7 @@ namespace Presentation::Model::Deck {
     return ParentDeckNode.m_ChildDeckNodeIndexesQVector;
 }
 
-[[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
+[[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const {
     const DeckNode& LeftDeckNode{ m_DeckNodesQVector.at(LeftDeckNodeIndex) };
     const DeckNode& RightDeckNode{ m_DeckNodesQVector.at(RightDeckNodeIndex) };
     const auto CompareDeckNodeCounts{ [](const quint32 LeftDeckNodeCount, const quint32 RightDeckNodeCount) static noexcept -> int {
@@ -42,18 +44,17 @@ namespace Presentation::Model::Deck {
 }
 
 void DeckTreeModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNodeIndexes) {
-    std::stable_sort(SiblingDeckNodeIndexes.begin(),
-                     SiblingDeckNodeIndexes.end(),
-                     [this](const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) noexcept -> bool {
-                         const int DeckNodeComparison{ CompareDeckNodes(LeftDeckNodeIndex, RightDeckNodeIndex) };
-                         if (m_SortOrder == Qt::AscendingOrder) {
-                             return DeckNodeComparison < 0;
-                         }
-                         return DeckNodeComparison > 0;
-                     });
+    std::stable_sort(
+        SiblingDeckNodeIndexes.begin(), SiblingDeckNodeIndexes.end(), [this](const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) -> bool {
+            const int DeckNodeComparison{ CompareDeckNodes(LeftDeckNodeIndex, RightDeckNodeIndex) };
+            if (m_SortOrder == Qt::AscendingOrder) {
+                return DeckNodeComparison < 0;
+            }
+            return DeckNodeComparison > 0;
+        });
 }
 
-void DeckTreeModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) noexcept {
+void DeckTreeModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) {
     QVector<qsizetype>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex == s_RootDeckNodeIndex ?
                                                     m_RootDeckNodeIndexesQVector :
                                                     m_DeckNodesQVector[ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector };
@@ -75,36 +76,38 @@ void DeckTreeModel::ApplyCurrentSort() {
     UpdateSiblingRowIndexes();
 }
 
-void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) {
-    QVector<DeckNode> DeckNodesQVector;
-    QVector<qsizetype> RootDeckNodeIndexesQVector;
-    QHash<QString, qsizetype> DeckNodeIndexByIdQHash;
-    DeckNodesQVector.reserve(DeckNodeDataQVector.size());
-    RootDeckNodeIndexesQVector.reserve(DeckNodeDataQVector.size());
-    DeckNodeIndexByIdQHash.reserve(DeckNodeDataQVector.size());
-    for (DeckNodeData& DeckNodeData : DeckNodeDataQVector) {
-        const qsizetype DeckNodeIndex{ DeckNodesQVector.size() };
-        const QString DeckId{ DeckNodeData.m_DeckId };
-        DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
-        DeckNodeIndexByIdQHash.insert(DeckId, DeckNodeIndex);
-    }
-    for (qsizetype DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesQVector.size(); ++DeckNodeIndex) {
-        DeckNode& CurrentDeckNode{ DeckNodesQVector[DeckNodeIndex] };
-        const std::optional<QString>& ParentId{ CurrentDeckNode.m_DeckNodeData.m_ParentDeckId };
-        if (not ParentId.has_value()) {
-            CurrentDeckNode.m_RowInParentIndex = RootDeckNodeIndexesQVector.size();
-            RootDeckNodeIndexesQVector.push_back(DeckNodeIndex);
-            continue;
+void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) noexcept {
+    Runtime::TryCatchWrapper([&]() -> void {
+        QVector<DeckNode> DeckNodesQVector;
+        QVector<qsizetype> RootDeckNodeIndexesQVector;
+        QHash<QString, qsizetype> DeckNodeIndexByIdQHash;
+        DeckNodesQVector.reserve(DeckNodeDataQVector.size());
+        RootDeckNodeIndexesQVector.reserve(DeckNodeDataQVector.size());
+        DeckNodeIndexByIdQHash.reserve(DeckNodeDataQVector.size());
+        for (DeckNodeData& DeckNodeData : DeckNodeDataQVector) {
+            const qsizetype DeckNodeIndex{ DeckNodesQVector.size() };
+            const QString DeckId{ DeckNodeData.m_DeckId };
+            DeckNodesQVector.emplace_back(DeckNode{ std::move(DeckNodeData), s_RootDeckNodeIndex, -1, QVector<qsizetype>{} });
+            DeckNodeIndexByIdQHash.insert(DeckId, DeckNodeIndex);
         }
-        CurrentDeckNode.m_ParentDeckNodeIndex = DeckNodeIndexByIdQHash.constFind(ParentId.value()).value();
-        CurrentDeckNode.m_RowInParentIndex = DeckNodesQVector.at(CurrentDeckNode.m_ParentDeckNodeIndex).m_ChildDeckNodeIndexesQVector.size();
-        DeckNodesQVector[CurrentDeckNode.m_ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector.push_back(DeckNodeIndex);
-    }
-    beginResetModel();
-    m_DeckNodesQVector = std::move(DeckNodesQVector);
-    m_RootDeckNodeIndexesQVector = std::move(RootDeckNodeIndexesQVector);
-    ApplyCurrentSort();
-    endResetModel();
+        for (qsizetype DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesQVector.size(); ++DeckNodeIndex) {
+            DeckNode& CurrentDeckNode{ DeckNodesQVector[DeckNodeIndex] };
+            const std::optional<QString>& ParentId{ CurrentDeckNode.m_DeckNodeData.m_ParentDeckId };
+            if (not ParentId.has_value()) {
+                CurrentDeckNode.m_RowInParentIndex = RootDeckNodeIndexesQVector.size();
+                RootDeckNodeIndexesQVector.push_back(DeckNodeIndex);
+                continue;
+            }
+            CurrentDeckNode.m_ParentDeckNodeIndex = DeckNodeIndexByIdQHash.constFind(ParentId.value()).value();
+            CurrentDeckNode.m_RowInParentIndex = DeckNodesQVector.at(CurrentDeckNode.m_ParentDeckNodeIndex).m_ChildDeckNodeIndexesQVector.size();
+            DeckNodesQVector[CurrentDeckNode.m_ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector.push_back(DeckNodeIndex);
+        }
+        beginResetModel();
+        m_DeckNodesQVector = std::move(DeckNodesQVector);
+        m_RootDeckNodeIndexesQVector = std::move(RootDeckNodeIndexesQVector);
+        ApplyCurrentSort();
+        endResetModel();
+    });
 }
 
 }
