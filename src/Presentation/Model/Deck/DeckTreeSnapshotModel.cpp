@@ -1,4 +1,4 @@
-#include "Presentation/Model/Deck/DeckTreeModel.hpp"
+#include "Presentation/Model/Deck/DeckTreeSnapshotModel.hpp"
 
 #include <algorithm>
 
@@ -6,7 +6,8 @@
 
 namespace Presentation::Model::Deck {
 
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeSnapshotModel::DeckNode>>
+DeckTreeSnapshotModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {
         return std::nullopt;
     }
@@ -15,7 +16,7 @@ namespace Presentation::Model::Deck {
     return m_DeckNodesQVector.at(DeckNodeIndex);
 }
 
-[[nodiscard]] const QVector<qsizetype>& DeckTreeModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const {
+[[nodiscard]] const QVector<qsizetype>& DeckTreeSnapshotModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const {
     if (not Parent.isValid()) {
         return m_RootDeckNodeIndexesQVector;
     }
@@ -23,7 +24,7 @@ namespace Presentation::Model::Deck {
     return ParentDeckNode.m_ChildDeckNodeIndexesQVector;
 }
 
-[[nodiscard]] int DeckTreeModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
+[[nodiscard]] int DeckTreeSnapshotModel::CompareDeckNodes(const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) const noexcept {
     const DeckNode& LeftDeckNode{ m_DeckNodesQVector.at(LeftDeckNodeIndex) };
     const DeckNode& RightDeckNode{ m_DeckNodesQVector.at(RightDeckNodeIndex) };
     const auto CompareDeckNodeCounts{ [](const quint32 LeftDeckNodeCount, const quint32 RightDeckNodeCount) static noexcept -> int {
@@ -43,7 +44,7 @@ namespace Presentation::Model::Deck {
     }
 }
 
-void DeckTreeModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNodeIndexes) {
+void DeckTreeSnapshotModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNodeIndexes) {
     std::stable_sort(SiblingDeckNodeIndexes.begin(),
                      SiblingDeckNodeIndexes.end(),
                      [this](const qsizetype LeftDeckNodeIndex, const qsizetype RightDeckNodeIndex) noexcept -> bool {
@@ -55,7 +56,7 @@ void DeckTreeModel::SortSiblingDeckNodeIndexes(QVector<qsizetype>& SiblingDeckNo
                      });
 }
 
-void DeckTreeModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) noexcept {
+void DeckTreeSnapshotModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex) noexcept {
     QVector<qsizetype>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex == s_RootDeckNodeIndex ?
                                                     m_RootDeckNodeIndexesQVector :
                                                     m_DeckNodesQVector[ParentDeckNodeIndex].m_ChildDeckNodeIndexesQVector };
@@ -66,7 +67,7 @@ void DeckTreeModel::UpdateSiblingRowIndexes(const qsizetype ParentDeckNodeIndex)
     }
 }
 
-void DeckTreeModel::ApplyCurrentSort() {
+void DeckTreeSnapshotModel::ApplyCurrentSort() {
     if (m_SortColumn < static_cast<int>(ColumnEnum::DeckNameColumn) or m_SortColumn > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
         return;
     }
@@ -77,7 +78,7 @@ void DeckTreeModel::ApplyCurrentSort() {
     UpdateSiblingRowIndexes();
 }
 
-void DeckTreeModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) noexcept {
+void DeckTreeSnapshotModel::ReplaceAll(QVector<DeckNodeData> DeckNodeDataQVector) noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
         QVector<DeckNode> DeckNodesQVector;
         QVector<qsizetype> RootDeckNodeIndexesQVector;

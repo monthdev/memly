@@ -13,7 +13,7 @@
 
 namespace Presentation::Model::Deck {
 
-class DeckTreeModel final : public QAbstractItemModel {
+class DeckTreeSnapshotModel final : public QAbstractItemModel {
     Q_OBJECT
 
 public:
@@ -54,17 +54,17 @@ public:
         SubtreeTotalCountColumn
     };
 
-    explicit DeckTreeModel(QObject* Parent = nullptr) noexcept
+    explicit DeckTreeSnapshotModel(QObject* Parent = nullptr) noexcept
         : QAbstractItemModel{ Parent }
         , m_SortColumn{ -1 }
         , m_SortOrder{ Qt::AscendingOrder } {
     }
 
-    ~DeckTreeModel() noexcept override = default;
-    DeckTreeModel(const DeckTreeModel&) = delete;
-    DeckTreeModel(DeckTreeModel&&) = delete;
-    DeckTreeModel& operator=(const DeckTreeModel&) = delete;
-    DeckTreeModel& operator=(DeckTreeModel&&) = delete;
+    ~DeckTreeSnapshotModel() noexcept override = default;
+    DeckTreeSnapshotModel(const DeckTreeSnapshotModel&) = delete;
+    DeckTreeSnapshotModel(DeckTreeSnapshotModel&&) = delete;
+    DeckTreeSnapshotModel& operator=(const DeckTreeSnapshotModel&) = delete;
+    DeckTreeSnapshotModel& operator=(DeckTreeSnapshotModel&&) = delete;
 
     [[nodiscard]] QModelIndex index(int Row, int Column, const QModelIndex& Parent = QModelIndex{}) const noexcept override {
         return Runtime::TryCatchWrapper([&]() -> QModelIndex {

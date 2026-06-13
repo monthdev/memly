@@ -13,9 +13,9 @@
 
 namespace Infrastructure::Store::Deck {
 
-class DeckTreeStore final {
+class DeckTreeSnapshotStore final {
 public:
-    struct DeckTreeRow {
+    struct DeckTreeSnapshotRow {
         QString m_DeckId;
         std::optional<QString> m_ParentDeckId;
         QString m_DeckName;
@@ -30,18 +30,18 @@ public:
         quint8 m_TargetLanguageCode;
     };
 
-    explicit DeckTreeStore(duckdb::Connection& DatabaseConnection)
+    explicit DeckTreeSnapshotStore(duckdb::Connection& DatabaseConnection)
         : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Query::ReadDeckTreeSnapshotSql()) } {
         Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotPreparedStatement);
     }
 
-    ~DeckTreeStore() noexcept = default;
-    DeckTreeStore(const DeckTreeStore&) = delete;
-    DeckTreeStore(DeckTreeStore&&) = delete;
-    DeckTreeStore& operator=(const DeckTreeStore&) = delete;
-    DeckTreeStore& operator=(DeckTreeStore&&) = delete;
+    ~DeckTreeSnapshotStore() noexcept = default;
+    DeckTreeSnapshotStore(const DeckTreeSnapshotStore&) = delete;
+    DeckTreeSnapshotStore(DeckTreeSnapshotStore&&) = delete;
+    DeckTreeSnapshotStore& operator=(const DeckTreeSnapshotStore&) = delete;
+    DeckTreeSnapshotStore& operator=(DeckTreeSnapshotStore&&) = delete;
 
-    [[nodiscard]] QVector<DeckTreeRow> ReadDeckTreeSnapshot(const qint64);
+    [[nodiscard]] QVector<DeckTreeSnapshotRow> ReadDeckTreeSnapshot(const qint64);
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_ReadDeckTreeSnapshotPreparedStatement;
