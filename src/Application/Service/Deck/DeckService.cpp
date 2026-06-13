@@ -5,81 +5,60 @@
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 
 namespace Application::Service::Deck {
-namespace {
 
-[[nodiscard]] Application::Service::Deck::DeckService::DeckMutationErrorEnum
-ToDeckMutationError(const Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum RecoverableDeckMutationError) noexcept {
-    switch (RecoverableDeckMutationError) {
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckNameLengthError:
-        return Application::Service::Deck::DeckService::DeckMutationErrorEnum::DeckNameLengthError;
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DuplicateSiblingDeckNameError:
-        return Application::Service::Deck::DeckService::DeckMutationErrorEnum::DuplicateSiblingDeckNameError;
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError:
-        return Application::Service::Deck::DeckService::DeckMutationErrorEnum::InvalidTargetLanguageCodeError;
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError:
-        return Application::Service::Deck::DeckService::DeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError;
-    case Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError:
-        return Application::Service::Deck::DeckService::DeckMutationErrorEnum::DeckTreeCycleDetectionError;
-    }
-}
-
-}
-
-[[nodiscard]] std::expected<void, DeckService::DeckMutationErrorEnum> DeckService::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, DeckMutationErrorEnum> {
-        const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.CreateRootDeck(
-            DeckName, TargetLanguageCode) };
+[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::CreateRootDeck(const QString& DeckName,
+                                                                                                              const quint8 TargetLanguageCode) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
+        const std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.CreateRootDeck(DeckName,
+                                                                                                                                     TargetLanguageCode) };
         if (RecoverableDeckMutationError.has_value()) {
-            return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
+            return std::unexpected{ RecoverableDeckMutationError.value() };
         }
         m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, DeckService::DeckMutationErrorEnum> DeckService::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, DeckMutationErrorEnum> {
-        const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.CreateChildDeck(
-            DeckName, ParentDeckId) };
+[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::CreateChildDeck(const QString& DeckName,
+                                                                                                               const QString& ParentDeckId) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
+        const std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.CreateChildDeck(DeckName, ParentDeckId) };
         if (RecoverableDeckMutationError.has_value()) {
-            return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
+            return std::unexpected{ RecoverableDeckMutationError.value() };
         }
         m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, DeckService::DeckMutationErrorEnum> DeckService::MoveDeck(const QString& DeckId,
-                                                                                            const std::optional<QString>& NewParentDeckId) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, DeckMutationErrorEnum> {
-        const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.MoveDeck(
-            DeckId, NewParentDeckId) };
+[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::MoveDeck(const QString& DeckId,
+                                                                                                        const std::optional<QString>& NewParentDeckId) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
+        const std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.MoveDeck(DeckId, NewParentDeckId) };
         if (RecoverableDeckMutationError.has_value()) {
-            return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
+            return std::unexpected{ RecoverableDeckMutationError.value() };
         }
         m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, DeckService::DeckMutationErrorEnum> DeckService::RenameDeck(const QString& DeckId, const QString& NewDeckName) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, DeckMutationErrorEnum> {
-        const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.RenameDeck(
-            DeckId, NewDeckName) };
+[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::RenameDeck(const QString& DeckId, const QString& NewDeckName) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
+        const std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.RenameDeck(DeckId, NewDeckName) };
         if (RecoverableDeckMutationError.has_value()) {
-            return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
+            return std::unexpected{ RecoverableDeckMutationError.value() };
         }
         m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, DeckService::DeckMutationErrorEnum> DeckService::DeleteDeck(const QString& DeckId) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, DeckMutationErrorEnum> {
-        const std::optional<Infrastructure::Store::Deck::DeckStore::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.DeleteDeck(
-            DeckId) };
+[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::DeleteDeck(const QString& DeckId) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
+        const std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ m_DeckStore.DeleteDeck(DeckId) };
         if (RecoverableDeckMutationError.has_value()) {
-            return std::unexpected{ ToDeckMutationError(RecoverableDeckMutationError.value()) };
+            return std::unexpected{ RecoverableDeckMutationError.value() };
         }
         m_LibraryInvalidationCoordinator.InvalidateWithReschedule(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};

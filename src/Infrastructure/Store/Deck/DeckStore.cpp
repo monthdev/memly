@@ -2,6 +2,7 @@
 
 #include <duckdb.hpp>
 
+#include <memory>
 #include <string_view>
 
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
@@ -9,14 +10,15 @@
 
 namespace Infrastructure::Store::Deck {
 
-[[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) {
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::CreateRootDeck(const QString& DeckName,
+                                                                                                      const quint8 TargetLanguageCode) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateRootDeckPreparedStatement->Execute(DeckName.toStdString(), TargetLanguageCode) };
     return HandleRecoverableDeckMutationError(*QueryResult);
 }
 
-[[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateChildDeckPreparedStatement->Execute(ParentDeckId.toStdString(), DeckName.toStdString()) };
-    std::optional<RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
+    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
@@ -24,11 +26,11 @@ namespace Infrastructure::Store::Deck {
     return std::nullopt;
 }
 
-[[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::MoveDeck(const QString& DeckId,
-                                                                                             const std::optional<QString>& NewParentDeckId) {
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::MoveDeck(const QString& DeckId,
+                                                                                                const std::optional<QString>& NewParentDeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_MoveDeckPreparedStatement->Execute(
         DeckId.toStdString(), NewParentDeckId.has_value() ? duckdb::Value{ NewParentDeckId.value().toStdString() } : duckdb::Value{ nullptr }) };
-    std::optional<RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
+    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
@@ -36,9 +38,9 @@ namespace Infrastructure::Store::Deck {
     return std::nullopt;
 }
 
-[[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::RenameDeck(const QString& DeckId, const QString& NewDeckName) {
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::RenameDeck(const QString& DeckId, const QString& NewDeckName) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_RenameDeckPreparedStatement->Execute(NewDeckName.toStdString(), DeckId.toStdString()) };
-    std::optional<RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
+    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
     if (RecoverableDeckMutationError.has_value()) {
         return RecoverableDeckMutationError;
     }
@@ -46,7 +48,7 @@ namespace Infrastructure::Store::Deck {
     return std::nullopt;
 }
 
-[[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::DeleteDeck(const QString& DeckId) {
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::DeleteDeck(const QString& DeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId.toStdString()) };
     Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId.toStdString());
@@ -58,27 +60,28 @@ namespace Infrastructure::Store::Deck {
 }
 
 // TODO: Fix error message string checks and use switch case logic
-[[nodiscard]] std::optional<DeckStore::RecoverableDeckMutationErrorEnum> DeckStore::HandleRecoverableDeckMutationError(duckdb::QueryResult& QueryResult) const {
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum>
+DeckStore::HandleRecoverableDeckMutationError(duckdb::QueryResult& QueryResult) const {
     if (not QueryResult.HasError()) {
         return std::nullopt;
     }
     const std::string_view ErrorMessage{ QueryResult.GetError() };
     if (ErrorMessage.contains("deck_name_length_is_valid(\"name\")")) {
-        return RecoverableDeckMutationErrorEnum::DeckNameLengthError;
+        return Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError;
     }
     if (ErrorMessage.contains("target_language_code_is_valid(target_language_code)")) {
-        return RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError;
+        return Domain::Deck::RecoverableDeckMutationErrorEnum::InvalidTargetLanguageCodeError;
     }
     if (ErrorMessage.starts_with("Invalid Input Error: Deck target language does not match parent deck")) {
-        return RecoverableDeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError;
+        return Domain::Deck::RecoverableDeckMutationErrorEnum::ParentDeckTargetLanguageMismatchError;
     }
     if (ErrorMessage.starts_with("Invalid Input Error: Deck cannot move into itself") or
         ErrorMessage.starts_with("Invalid Input Error: Deck move would create a cycle") or
         ErrorMessage.starts_with("Invalid Input Error: deck move would create a cycle")) {
-        return RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError;
+        return Domain::Deck::RecoverableDeckMutationErrorEnum::DeckTreeCycleDetectionError;
     }
     if (ErrorMessage.contains("Duplicate key \"")) {
-        return RecoverableDeckMutationErrorEnum::DuplicateSiblingDeckNameError;
+        return Domain::Deck::RecoverableDeckMutationErrorEnum::DuplicateSiblingDeckNameError;
     }
     Runtime::ThrowError(QueryResult.GetError());
 }

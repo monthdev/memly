@@ -6,9 +6,12 @@
 #include <QString>
 #include <QVariant>
 #include <QVector>
+#include <cstddef>
 #include <functional>
 #include <optional>
+#include <vector>
 
+#include "Domain/Deck/DeckTreeSnapshotNodeData.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Presentation::Model::Deck {
@@ -17,21 +20,6 @@ class DeckTreeSnapshotModel final : public QAbstractItemModel {
     Q_OBJECT
 
 public:
-    struct DeckNodeData {
-        QString m_DeckId;
-        std::optional<QString> m_ParentDeckId;
-        QString m_DeckName;
-        qint64 m_CreatedAtMillisecondsSinceEpoch;
-        std::optional<qint64> m_UpdatedAtMillisecondsSinceEpoch;
-        quint32 m_SelfDueNowCount;
-        quint32 m_SelfByTodayCount;
-        quint32 m_SelfTotalCount;
-        quint32 m_SubtreeDueNowCount;
-        quint32 m_SubtreeByTodayCount;
-        quint32 m_SubtreeTotalCount;
-        quint8 m_TargetLanguageCode;
-    };
-
     enum class RoleEnum : int {
         DeckIdRole = Qt::UserRole + 1,
         ParentDeckIdRole,
@@ -88,7 +76,7 @@ public:
                 return QModelIndex{};
             }
             const qsizetype ParentDeckNodeIndex{ CurrentDeckNode.m_ParentDeckNodeIndex };
-            const DeckNode& ParentDeckNode{ m_DeckNodesQVector.at(ParentDeckNodeIndex) };
+            const DeckNode& ParentDeckNode{ m_DeckNodesVector.at(static_cast<std::size_t>(ParentDeckNodeIndex)) };
             return createIndex(static_cast<int>(ParentDeckNode.m_RowInParentIndex), 0, static_cast<quintptr>(ParentDeckNodeIndex));
         });
     }
@@ -122,46 +110,46 @@ public:
             case Qt::DisplayRole:
                 switch (Index.column()) {
                 case static_cast<int>(ColumnEnum::DeckNameColumn):
-                    return CurrentDeckNode.m_DeckNodeData.m_DeckName;
+                    return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckName;
                 case static_cast<int>(ColumnEnum::SubtreeDueNowCountColumn):
-                    return CurrentDeckNode.m_DeckNodeData.m_SubtreeDueNowCount;
+                    return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SubtreeDueNowCount;
                 case static_cast<int>(ColumnEnum::SubtreeByTodayCountColumn):
-                    return CurrentDeckNode.m_DeckNodeData.m_SubtreeByTodayCount;
+                    return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SubtreeByTodayCount;
                 case static_cast<int>(ColumnEnum::SubtreeTotalCountColumn):
-                    return CurrentDeckNode.m_DeckNodeData.m_SubtreeTotalCount;
+                    return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SubtreeTotalCount;
                 default:
                     return QVariant{};
                 }
             case static_cast<int>(RoleEnum::DeckIdRole):
-                return CurrentDeckNode.m_DeckNodeData.m_DeckId;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckId;
             case static_cast<int>(RoleEnum::ParentDeckIdRole):
-                if (not CurrentDeckNode.m_DeckNodeData.m_ParentDeckId.has_value()) {
+                if (not CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_ParentDeckId.has_value()) {
                     return QString{};
                 }
-                return CurrentDeckNode.m_DeckNodeData.m_ParentDeckId.value();
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_ParentDeckId.value();
             case static_cast<int>(RoleEnum::DeckNameRole):
-                return CurrentDeckNode.m_DeckNodeData.m_DeckName;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckName;
             case static_cast<int>(RoleEnum::CreatedAtMillisecondsSinceEpochRole):
-                return CurrentDeckNode.m_DeckNodeData.m_CreatedAtMillisecondsSinceEpoch;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_CreatedAtMillisecondsSinceEpoch;
             case static_cast<int>(RoleEnum::UpdatedAtMillisecondsSinceEpochRole):
-                if (not CurrentDeckNode.m_DeckNodeData.m_UpdatedAtMillisecondsSinceEpoch.has_value()) {
+                if (not CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_UpdatedAtMillisecondsSinceEpoch.has_value()) {
                     return qint64{};
                 }
-                return CurrentDeckNode.m_DeckNodeData.m_UpdatedAtMillisecondsSinceEpoch.value();
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_UpdatedAtMillisecondsSinceEpoch.value();
             case static_cast<int>(RoleEnum::SelfDueNowCountRole):
-                return CurrentDeckNode.m_DeckNodeData.m_SelfDueNowCount;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SelfDueNowCount;
             case static_cast<int>(RoleEnum::SelfByTodayCountRole):
-                return CurrentDeckNode.m_DeckNodeData.m_SelfByTodayCount;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SelfByTodayCount;
             case static_cast<int>(RoleEnum::SelfTotalCountRole):
-                return CurrentDeckNode.m_DeckNodeData.m_SelfTotalCount;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SelfTotalCount;
             case static_cast<int>(RoleEnum::SubtreeDueNowCountRole):
-                return CurrentDeckNode.m_DeckNodeData.m_SubtreeDueNowCount;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SubtreeDueNowCount;
             case static_cast<int>(RoleEnum::SubtreeByTodayCountRole):
-                return CurrentDeckNode.m_DeckNodeData.m_SubtreeByTodayCount;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SubtreeByTodayCount;
             case static_cast<int>(RoleEnum::SubtreeTotalCountRole):
-                return CurrentDeckNode.m_DeckNodeData.m_SubtreeTotalCount;
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SubtreeTotalCount;
             case static_cast<int>(RoleEnum::TargetLanguageCodeRole):
-                return static_cast<quint32>(CurrentDeckNode.m_DeckNodeData.m_TargetLanguageCode);
+                return static_cast<quint32>(CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_TargetLanguageCode);
             default:
                 return QVariant{};
             }
@@ -234,11 +222,11 @@ public:
         });
     }
 
-    void ReplaceAll(QVector<DeckNodeData>) noexcept;
+    void ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNodeData>) noexcept;
 
 private:
     struct DeckNode {
-        DeckNodeData m_DeckNodeData;
+        Domain::Deck::DeckTreeSnapshotNodeData m_DeckTreeSnapshotNodeData;
         qsizetype m_ParentDeckNodeIndex;
         qsizetype m_RowInParentIndex;
         QVector<qsizetype> m_ChildDeckNodeIndexesQVector;
@@ -246,7 +234,7 @@ private:
 
     static constexpr qsizetype s_RootDeckNodeIndex{ -1 };
 
-    QVector<DeckNode> m_DeckNodesQVector;
+    std::vector<DeckNode> m_DeckNodesVector;
     QVector<qsizetype> m_RootDeckNodeIndexesQVector;
     int m_SortColumn;
     Qt::SortOrder m_SortOrder;

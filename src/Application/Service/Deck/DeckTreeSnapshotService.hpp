@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QString>
-#include <QVector>
 #include <QtTypes>
-#include <optional>
+#include <vector>
+
+#include "Domain/Deck/DeckTreeSnapshotNodeData.hpp"
 
 namespace Infrastructure::Store::Deck {
 class DeckTreeSnapshotStore;
@@ -13,21 +13,6 @@ namespace Application::Service::Deck {
 
 class DeckTreeSnapshotService final {
 public:
-    struct DeckTreeSnapshotRow {
-        QString m_DeckId;
-        std::optional<QString> m_ParentDeckId;
-        QString m_DeckName;
-        qint64 m_CreatedAtMillisecondsSinceEpoch;
-        std::optional<qint64> m_UpdatedAtMillisecondsSinceEpoch;
-        quint32 m_SelfDueNowCount;
-        quint32 m_SelfByTodayCount;
-        quint32 m_SelfTotalCount;
-        quint32 m_SubtreeDueNowCount;
-        quint32 m_SubtreeByTodayCount;
-        quint32 m_SubtreeTotalCount;
-        quint8 m_TargetLanguageCode;
-    };
-
     explicit DeckTreeSnapshotService(Infrastructure::Store::Deck::DeckTreeSnapshotStore& DeckTreeSnapshotStore) noexcept
         : m_DeckTreeSnapshotStore{ DeckTreeSnapshotStore } {
     }
@@ -38,7 +23,7 @@ public:
     DeckTreeSnapshotService& operator=(const DeckTreeSnapshotService&) = delete;
     DeckTreeSnapshotService& operator=(DeckTreeSnapshotService&&) = delete;
 
-    [[nodiscard]] QVector<DeckTreeSnapshotRow> ReadDeckTreeSnapshot(qint64);
+    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> ReadDeckTreeSnapshot(qint64);
 
 private:
     Infrastructure::Store::Deck::DeckTreeSnapshotStore& m_DeckTreeSnapshotStore;

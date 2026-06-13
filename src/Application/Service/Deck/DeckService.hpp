@@ -2,9 +2,10 @@
 
 #include <QString>
 #include <QtTypes>
-#include <cstdint>
 #include <expected>
 #include <optional>
+
+#include "Domain/Deck/RecoverableDeckMutationError.hpp"
 
 namespace Infrastructure::Sql {
 class TransactionRunner;
@@ -22,14 +23,6 @@ namespace Application::Service::Deck {
 
 class DeckService final {
 public:
-    enum class DeckMutationErrorEnum : std::uint8_t {
-        DeckNameLengthError,
-        DuplicateSiblingDeckNameError,
-        InvalidTargetLanguageCodeError,
-        ParentDeckTargetLanguageMismatchError,
-        DeckTreeCycleDetectionError
-    };
-
     DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunner,
                 Application::Invalidation::LibraryInvalidationCoordinator& LibraryInvalidationCoordinator,
                 Infrastructure::Store::Deck::DeckStore& DeckStore) noexcept
@@ -44,11 +37,11 @@ public:
     DeckService& operator=(const DeckService&) = delete;
     DeckService& operator=(DeckService&&) = delete;
 
-    [[nodiscard]] std::expected<void, DeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
-    [[nodiscard]] std::expected<void, DeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);
-    [[nodiscard]] std::expected<void, DeckMutationErrorEnum> MoveDeck(const QString&, const std::optional<QString>&);
-    [[nodiscard]] std::expected<void, DeckMutationErrorEnum> RenameDeck(const QString&, const QString&);
-    [[nodiscard]] std::expected<void, DeckMutationErrorEnum> DeleteDeck(const QString&);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> MoveDeck(const QString&, const std::optional<QString>&);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeck(const QString&, const QString&);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const QString&);
 
 private:
     Infrastructure::Sql::TransactionRunner& m_TransactionRunner;

@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 
+#include "Domain/Deck/RecoverableDeckMutationError.hpp"
 #include "Infrastructure/Sql/Deck/Mutation/DeckMutationSql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
@@ -14,14 +15,6 @@ namespace Infrastructure::Store::Deck {
 
 class DeckStore final {
 public:
-    enum class RecoverableDeckMutationErrorEnum : std::uint8_t {
-        DeckNameLengthError,
-        DuplicateSiblingDeckNameError,
-        InvalidTargetLanguageCodeError,
-        ParentDeckTargetLanguageMismatchError,
-        DeckTreeCycleDetectionError
-    };
-
     explicit DeckStore(duckdb::Connection& DatabaseConnection)
         : m_CreateRootDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::CreateRootDeckSql()) }
         , m_CreateChildDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::CreateChildDeckSql()) }
@@ -45,11 +38,11 @@ public:
     DeckStore& operator=(const DeckStore&) = delete;
     DeckStore& operator=(DeckStore&&) = delete;
 
-    [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
-    [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);
-    [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> MoveDeck(const QString&, const std::optional<QString>&);
-    [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> RenameDeck(const QString&, const QString&);
-    [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> DeleteDeck(const QString&);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> MoveDeck(const QString&, const std::optional<QString>&);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeck(const QString&, const QString&);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const QString&);
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_CreateRootDeckPreparedStatement;
@@ -60,7 +53,7 @@ private:
     std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckCardsPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckPreparedStatement;
 
-    [[nodiscard]] std::optional<RecoverableDeckMutationErrorEnum> HandleRecoverableDeckMutationError(duckdb::QueryResult&) const;
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> HandleRecoverableDeckMutationError(duckdb::QueryResult&) const;
 };
 
 }
