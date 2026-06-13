@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QtTypes>
+#include <cstdint>
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Presentation/Model/Deck/DeckTreeSnapshotModel.hpp"
@@ -43,6 +43,6 @@ private:
     Application::Service::Deck::DeckTreeSnapshotService& m_DeckTreeSnapshotService;
     Presentation::Model::Deck::DeckTreeSnapshotModel m_DeckTreeSnapshot;
 
-    void RefreshDeckTreeSnapshot(const qint64) noexcept;
+    void RefreshDeckTreeSnapshot(std::int64_t) noexcept;
 };
 }

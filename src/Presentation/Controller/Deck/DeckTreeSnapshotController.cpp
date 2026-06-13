@@ -1,5 +1,6 @@
 #include "Presentation/Controller/Deck/DeckTreeSnapshotController.hpp"
 
+#include <cstdint>
 #include <utility>
 #include <vector>
 
@@ -9,7 +10,7 @@
 
 namespace Presentation::Controller::Deck {
 
-void DeckTreeSnapshotController::RefreshDeckTreeSnapshot(const qint64 AsOfMillisecondsSinceEpoch) noexcept {
+void DeckTreeSnapshotController::RefreshDeckTreeSnapshot(const std::int64_t AsOfMillisecondsSinceEpoch) noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
         std::vector<Domain::Deck::DeckTreeSnapshotNodeData> DeckTreeSnapshotNodeDataVector{ m_DeckTreeSnapshotService.ReadDeckTreeSnapshot(
             AsOfMillisecondsSinceEpoch) };

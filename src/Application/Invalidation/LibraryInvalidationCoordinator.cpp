@@ -2,6 +2,7 @@
 
 #include <QDateTime>
 #include <algorithm>
+#include <cstdint>
 #include <optional>
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
@@ -21,7 +22,7 @@ void LibraryInvalidationCoordinator::InvalidateWithReschedule(const LibraryInval
 
 void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndCurrentSnapshotEpoch(
     const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
-    m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
+    m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch = static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch());
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
     ScheduleNextLibraryInvalidation();
 }
@@ -33,13 +34,14 @@ void LibraryInvalidationCoordinator::HandleScheduledInvalidation() noexcept {
 void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
         m_LibraryInvalidationQTimer.stop();
-        const std::optional<qint64> NextLibraryInvalidationAtMillisecondsSinceEpoch{ m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(
-            m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch) };
+        const std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpoch{
+            m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch)
+        };
         if (not NextLibraryInvalidationAtMillisecondsSinceEpoch.has_value()) {
             return;
         }
-        const qint64 LibraryInvalidationDelayMilliseconds{ std::max<qint64>(
-            0, NextLibraryInvalidationAtMillisecondsSinceEpoch.value() - QDateTime::currentMSecsSinceEpoch()) };
+        const std::int64_t LibraryInvalidationDelayMilliseconds{ std::max<std::int64_t>(
+            0, NextLibraryInvalidationAtMillisecondsSinceEpoch.value() - static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch())) };
         m_LibraryInvalidationQTimer.start(static_cast<int>(LibraryInvalidationDelayMilliseconds));
     });
 }

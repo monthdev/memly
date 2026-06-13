@@ -1,6 +1,8 @@
 #include "Application/Service/ReviewSession/ReviewSessionService.hpp"
 
 #include <optional>
+#include <string>
+#include <vector>
 
 #include "Infrastructure/Sql/TransactionRunner.hpp"
 #include "Infrastructure/Store/ReviewSession/ReviewSessionStore.hpp"
@@ -40,24 +42,24 @@ namespace {
     }
 }
 
-[[nodiscard]] QVector<Infrastructure::Store::ReviewSession::ReviewSessionStore::ReviewSessionDeckSelection> ToStoreReviewSessionDeckSelectionQVector(
-    const QVector<Application::Service::ReviewSession::ReviewSessionService::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionQVector) {
-    QVector<Infrastructure::Store::ReviewSession::ReviewSessionStore::ReviewSessionDeckSelection> StoreReviewSessionDeckSelectionQVector{};
-    StoreReviewSessionDeckSelectionQVector.reserve(ReviewSessionDeckSelectionQVector.size());
+[[nodiscard]] std::vector<Infrastructure::Store::ReviewSession::ReviewSessionStore::ReviewSessionDeckSelection> ToStoreReviewSessionDeckSelectionVector(
+    const std::vector<Application::Service::ReviewSession::ReviewSessionService::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
+    std::vector<Infrastructure::Store::ReviewSession::ReviewSessionStore::ReviewSessionDeckSelection> StoreReviewSessionDeckSelectionVector{};
+    StoreReviewSessionDeckSelectionVector.reserve(ReviewSessionDeckSelectionVector.size());
     for (const Application::Service::ReviewSession::ReviewSessionService::ReviewSessionDeckSelection& ReviewSessionDeckSelection :
-         ReviewSessionDeckSelectionQVector) {
-        StoreReviewSessionDeckSelectionQVector.emplace_back(ReviewSessionDeckSelection.m_DeckId,
-                                                            ToStoreReviewSessionDeckSelectionType(ReviewSessionDeckSelection.m_DeckSelectionType));
+         ReviewSessionDeckSelectionVector) {
+        StoreReviewSessionDeckSelectionVector.emplace_back(ReviewSessionDeckSelection.m_DeckId,
+                                                           ToStoreReviewSessionDeckSelectionType(ReviewSessionDeckSelection.m_DeckSelectionType));
     }
-    return StoreReviewSessionDeckSelectionQVector;
+    return StoreReviewSessionDeckSelectionVector;
 }
 
 }
 
-[[nodiscard]] std::expected<QString, ReviewSessionService::ReviewSessionMutationErrorEnum>
-ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const QString& RootDeckId, const QString& ReviewSessionDefinitionKey) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<QString, ReviewSessionMutationErrorEnum> {
-        std::expected<QString, Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum> StoreReviewSessionId{
+[[nodiscard]] std::expected<std::string, ReviewSessionService::ReviewSessionMutationErrorEnum>
+ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<std::string, ReviewSessionMutationErrorEnum> {
+        std::expected<std::string, Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum> StoreReviewSessionId{
             m_ReviewSessionStore.CreateOrReadExistingDefaultReviewSession(RootDeckId, ReviewSessionDefinitionKey)
         };
         if (not StoreReviewSessionId.has_value()) {
@@ -67,16 +69,16 @@ ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const QString& Ro
     });
 }
 
-[[nodiscard]] std::expected<QString, ReviewSessionService::ReviewSessionMutationErrorEnum>
-ReviewSessionService::CreateOrReadExistingCustomReviewSession(const QString& ReviewSessionName,
-                                                              const QString& ReviewSessionDefinitionKey,
-                                                              const QVector<ReviewSessionDeckSelection>& ReviewSessionDeckSelectionQVector) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<QString, ReviewSessionMutationErrorEnum> {
-        const QVector<Infrastructure::Store::ReviewSession::ReviewSessionStore::ReviewSessionDeckSelection> StoreReviewSessionDeckSelectionQVector{
-            ToStoreReviewSessionDeckSelectionQVector(ReviewSessionDeckSelectionQVector)
+[[nodiscard]] std::expected<std::string, ReviewSessionService::ReviewSessionMutationErrorEnum>
+ReviewSessionService::CreateOrReadExistingCustomReviewSession(const std::string& ReviewSessionName,
+                                                              const std::string& ReviewSessionDefinitionKey,
+                                                              const std::vector<ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<std::string, ReviewSessionMutationErrorEnum> {
+        const std::vector<Infrastructure::Store::ReviewSession::ReviewSessionStore::ReviewSessionDeckSelection> StoreReviewSessionDeckSelectionVector{
+            ToStoreReviewSessionDeckSelectionVector(ReviewSessionDeckSelectionVector)
         };
-        std::expected<QString, Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum> StoreReviewSessionId{
-            m_ReviewSessionStore.CreateOrReadExistingCustomReviewSession(ReviewSessionName, ReviewSessionDefinitionKey, StoreReviewSessionDeckSelectionQVector)
+        std::expected<std::string, Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum> StoreReviewSessionId{
+            m_ReviewSessionStore.CreateOrReadExistingCustomReviewSession(ReviewSessionName, ReviewSessionDefinitionKey, StoreReviewSessionDeckSelectionVector)
         };
         if (not StoreReviewSessionId.has_value()) {
             return std::unexpected{ ToReviewSessionMutationError(StoreReviewSessionId.error()) };
@@ -86,7 +88,7 @@ ReviewSessionService::CreateOrReadExistingCustomReviewSession(const QString& Rev
 }
 
 [[nodiscard]] std::expected<void, ReviewSessionService::ReviewSessionMutationErrorEnum>
-ReviewSessionService::RenameReviewSession(const QString& ReviewSessionId, const QString& ReviewSessionName) {
+ReviewSessionService::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName) {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, ReviewSessionMutationErrorEnum> {
         const std::optional<Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
             RecoverableReviewSessionMutationError{ m_ReviewSessionStore.RenameReviewSession(ReviewSessionId, ReviewSessionName) };
@@ -97,10 +99,12 @@ ReviewSessionService::RenameReviewSession(const QString& ReviewSessionId, const 
     });
 }
 
-[[nodiscard]] std::expected<QString, ReviewSessionService::ReviewSessionMutationErrorEnum>
-ReviewSessionService::EditReviewSessionToDefault(const QString& CurrentReviewSessionId, const QString& RootDeckId, const QString& ReviewSessionDefinitionKey) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<QString, ReviewSessionMutationErrorEnum> {
-        std::expected<QString, Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum> StoreReviewSessionId{
+[[nodiscard]] std::expected<std::string, ReviewSessionService::ReviewSessionMutationErrorEnum>
+ReviewSessionService::EditReviewSessionToDefault(const std::string& CurrentReviewSessionId,
+                                                 const std::string& RootDeckId,
+                                                 const std::string& ReviewSessionDefinitionKey) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<std::string, ReviewSessionMutationErrorEnum> {
+        std::expected<std::string, Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum> StoreReviewSessionId{
             m_ReviewSessionStore.EditReviewSessionToDefault(CurrentReviewSessionId, RootDeckId, ReviewSessionDefinitionKey)
         };
         if (not StoreReviewSessionId.has_value()) {
@@ -110,16 +114,16 @@ ReviewSessionService::EditReviewSessionToDefault(const QString& CurrentReviewSes
     });
 }
 
-[[nodiscard]] std::expected<QString, ReviewSessionService::ReviewSessionMutationErrorEnum>
-ReviewSessionService::EditReviewSessionToCustom(const QString& CurrentReviewSessionId,
-                                                const QString& ReviewSessionDefinitionKey,
-                                                const QVector<ReviewSessionDeckSelection>& ReviewSessionDeckSelectionQVector) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<QString, ReviewSessionMutationErrorEnum> {
-        const QVector<Infrastructure::Store::ReviewSession::ReviewSessionStore::ReviewSessionDeckSelection> StoreReviewSessionDeckSelectionQVector{
-            ToStoreReviewSessionDeckSelectionQVector(ReviewSessionDeckSelectionQVector)
+[[nodiscard]] std::expected<std::string, ReviewSessionService::ReviewSessionMutationErrorEnum>
+ReviewSessionService::EditReviewSessionToCustom(const std::string& CurrentReviewSessionId,
+                                                const std::string& ReviewSessionDefinitionKey,
+                                                const std::vector<ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
+    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<std::string, ReviewSessionMutationErrorEnum> {
+        const std::vector<Infrastructure::Store::ReviewSession::ReviewSessionStore::ReviewSessionDeckSelection> StoreReviewSessionDeckSelectionVector{
+            ToStoreReviewSessionDeckSelectionVector(ReviewSessionDeckSelectionVector)
         };
-        std::expected<QString, Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum> StoreReviewSessionId{
-            m_ReviewSessionStore.EditReviewSessionToCustom(CurrentReviewSessionId, ReviewSessionDefinitionKey, StoreReviewSessionDeckSelectionQVector)
+        std::expected<std::string, Infrastructure::Store::ReviewSession::ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum> StoreReviewSessionId{
+            m_ReviewSessionStore.EditReviewSessionToCustom(CurrentReviewSessionId, ReviewSessionDefinitionKey, StoreReviewSessionDeckSelectionVector)
         };
         if (not StoreReviewSessionId.has_value()) {
             return std::unexpected{ ToReviewSessionMutationError(StoreReviewSessionId.error()) };
@@ -129,7 +133,7 @@ ReviewSessionService::EditReviewSessionToCustom(const QString& CurrentReviewSess
 }
 
 [[nodiscard]] std::expected<void, ReviewSessionService::ReviewSessionMutationErrorEnum>
-ReviewSessionService::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const QString& ReviewSessionId) {
+ReviewSessionService::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId) {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, ReviewSessionMutationErrorEnum> {
         m_ReviewSessionStore.UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(ReviewSessionId);
         return {};
@@ -137,7 +141,7 @@ ReviewSessionService::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(
 }
 
 [[nodiscard]] std::expected<void, ReviewSessionService::ReviewSessionMutationErrorEnum>
-ReviewSessionService::DeleteReviewSession(const QString& ReviewSessionId) {
+ReviewSessionService::DeleteReviewSession(const std::string& ReviewSessionId) {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, ReviewSessionMutationErrorEnum> {
         m_ReviewSessionStore.DeleteReviewSession(ReviewSessionId);
         return {};

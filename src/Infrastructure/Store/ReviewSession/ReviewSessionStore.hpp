@@ -2,12 +2,12 @@
 
 #include <duckdb.hpp>
 
-#include <QString>
-#include <QVector>
 #include <cstdint>
 #include <expected>
 #include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
 #include "Infrastructure/Sql/ReviewSession/Mutation/ReviewSessionMutationSql.hpp"
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
@@ -34,7 +34,7 @@ public:
     };
 
     struct ReviewSessionDeckSelection {
-        QString m_DeckId;
+        std::string m_DeckId;
         ReviewSessionDeckSelectionTypeEnum m_DeckSelectionType;
     };
 
@@ -78,15 +78,17 @@ public:
     ReviewSessionStore& operator=(const ReviewSessionStore&) = delete;
     ReviewSessionStore& operator=(ReviewSessionStore&&) = delete;
 
-    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum> CreateOrReadExistingDefaultReviewSession(const QString&, const QString&);
-    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum>
-    CreateOrReadExistingCustomReviewSession(const QString&, const QString&, const QVector<ReviewSessionDeckSelection>&);
-    [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum> RenameReviewSession(const QString&, const QString&);
-    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum> EditReviewSessionToDefault(const QString&, const QString&, const QString&);
-    [[nodiscard]] std::expected<QString, RecoverableReviewSessionMutationErrorEnum>
-    EditReviewSessionToCustom(const QString&, const QString&, const QVector<ReviewSessionDeckSelection>&);
-    void UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const QString&);
-    void DeleteReviewSession(const QString&);
+    [[nodiscard]] std::expected<std::string, RecoverableReviewSessionMutationErrorEnum> CreateOrReadExistingDefaultReviewSession(const std::string&,
+                                                                                                                                 const std::string&);
+    [[nodiscard]] std::expected<std::string, RecoverableReviewSessionMutationErrorEnum>
+    CreateOrReadExistingCustomReviewSession(const std::string&, const std::string&, const std::vector<ReviewSessionDeckSelection>&);
+    [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum> RenameReviewSession(const std::string&, const std::string&);
+    [[nodiscard]] std::expected<std::string, RecoverableReviewSessionMutationErrorEnum>
+    EditReviewSessionToDefault(const std::string&, const std::string&, const std::string&);
+    [[nodiscard]] std::expected<std::string, RecoverableReviewSessionMutationErrorEnum>
+    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<ReviewSessionDeckSelection>&);
+    void UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string&);
+    void DeleteReviewSession(const std::string&);
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_CreateCustomReviewSessionPreparedStatement;
@@ -101,11 +103,11 @@ private:
     std::unique_ptr<duckdb::PreparedStatement> m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
 
-    [[nodiscard]] std::optional<QString> TryReadDefaultReviewSessionIdByRootDeckId(const QString&);
-    [[nodiscard]] std::optional<QString> TryReadReviewSessionIdByReviewSessionDefinitionKey(const QString&);
+    [[nodiscard]] std::optional<std::string> TryReadDefaultReviewSessionIdByRootDeckId(const std::string&);
+    [[nodiscard]] std::optional<std::string> TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string&);
     [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum>
-    CreateCustomReviewSessionDeckSelection(const QString&, const QString&, ReviewSessionDeckSelectionTypeEnum);
-    void DeleteCustomReviewSessionDeckSelections(const QString&);
+    CreateCustomReviewSessionDeckSelection(const std::string&, const std::string&, ReviewSessionDeckSelectionTypeEnum);
+    void DeleteCustomReviewSessionDeckSelections(const std::string&);
     [[nodiscard]] std::optional<RecoverableReviewSessionMutationErrorEnum> HandleRecoverableReviewSessionMutationError(duckdb::QueryResult&) const;
 };
 

@@ -2,10 +2,10 @@
 
 #include <duckdb.hpp>
 
-#include <QString>
-#include <QtGlobal>
+#include <cstdint>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "Domain/Deck/RecoverableDeckMutationError.hpp"
 #include "Infrastructure/Sql/Deck/Mutation/DeckMutationSql.hpp"
@@ -38,11 +38,11 @@ public:
     DeckStore& operator=(const DeckStore&) = delete;
     DeckStore& operator=(DeckStore&&) = delete;
 
-    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
-    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);
-    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> MoveDeck(const QString&, const std::optional<QString>&);
-    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeck(const QString&, const QString&);
-    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const QString&);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeck(const std::string&, std::uint8_t);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeck(const std::string&, const std::string&);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> MoveDeck(const std::string&, const std::optional<std::string>&);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeck(const std::string&, const std::string&);
+    [[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const std::string&);
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_CreateRootDeckPreparedStatement;

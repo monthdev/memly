@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QString>
-#include <QtTypes>
+#include <cstdint>
 #include <expected>
 #include <optional>
+#include <string>
 
 #include "Domain/Deck/RecoverableDeckMutationError.hpp"
 
@@ -37,11 +37,11 @@ public:
     DeckService& operator=(const DeckService&) = delete;
     DeckService& operator=(DeckService&&) = delete;
 
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeck(const QString&, quint8);
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeck(const QString&, const QString&);
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> MoveDeck(const QString&, const std::optional<QString>&);
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeck(const QString&, const QString&);
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const QString&);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeck(const std::string&, std::uint8_t);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeck(const std::string&, const std::string&);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> MoveDeck(const std::string&, const std::optional<std::string>&);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeck(const std::string&, const std::string&);
+    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const std::string&);
 
 private:
     Infrastructure::Sql::TransactionRunner& m_TransactionRunner;

@@ -1,23 +1,25 @@
 #include "Application/Service/ReviewSession/ReviewSessionListService.hpp"
 
+#include <vector>
+
 #include "Infrastructure/Store/ReviewSession/ReviewSessionListStore.hpp"
 
 namespace Application::Service::ReviewSession {
 
-[[nodiscard]] QVector<ReviewSessionListService::ReviewSessionListRow> ReviewSessionListService::ReadReviewSessionList() {
-    const QVector<Infrastructure::Store::ReviewSession::ReviewSessionListStore::ReviewSessionListRow> StoreReviewSessionListRowQVector{
+[[nodiscard]] std::vector<ReviewSessionListService::ReviewSessionListRow> ReviewSessionListService::ReadReviewSessionList() {
+    const std::vector<Infrastructure::Store::ReviewSession::ReviewSessionListStore::ReviewSessionListRow> StoreReviewSessionListRowVector{
         m_ReviewSessionListStore.ReadReviewSessionList()
     };
-    QVector<ReviewSessionListRow> ReviewSessionListRowQVector{};
-    ReviewSessionListRowQVector.reserve(StoreReviewSessionListRowQVector.size());
+    std::vector<ReviewSessionListRow> ReviewSessionListRowVector{};
+    ReviewSessionListRowVector.reserve(StoreReviewSessionListRowVector.size());
     for (const Infrastructure::Store::ReviewSession::ReviewSessionListStore::ReviewSessionListRow& StoreReviewSessionListRow :
-         StoreReviewSessionListRowQVector) {
-        ReviewSessionListRowQVector.emplace_back(StoreReviewSessionListRow.m_ReviewSessionId,
-                                                 StoreReviewSessionListRow.m_ReviewSessionName,
-                                                 StoreReviewSessionListRow.m_CreatedAtMillisecondsSinceEpoch,
-                                                 StoreReviewSessionListRow.m_LastCardReviewAtMillisecondsSinceEpoch);
+         StoreReviewSessionListRowVector) {
+        ReviewSessionListRowVector.emplace_back(StoreReviewSessionListRow.m_ReviewSessionId,
+                                                StoreReviewSessionListRow.m_ReviewSessionName,
+                                                StoreReviewSessionListRow.m_CreatedAtMillisecondsSinceEpoch,
+                                                StoreReviewSessionListRow.m_LastCardReviewAtMillisecondsSinceEpoch);
     }
-    return ReviewSessionListRowQVector;
+    return ReviewSessionListRowVector;
 }
 
 }

@@ -5,7 +5,9 @@
 #include <QObject>
 #include <QString>
 #include <QtTypes>
+#include <cstdint>
 #include <optional>
+#include <string>
 
 #include "Bootstrap/RuntimeContext.hpp"
 #include "Presentation/Controller/Deck/DeckController.hpp"
@@ -29,23 +31,45 @@ public:
     DeckControllerBridge& operator=(DeckControllerBridge&&) = delete;
 
     [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
-        return m_DeckController.CreateRootDeck(DeckName, TargetLanguageCode).value_or(QString{});
+        const std::optional<std::string> RecoverableDeckMutationError{ m_DeckController.CreateRootDeck(DeckName.toStdString(),
+                                                                                                       static_cast<std::uint8_t>(TargetLanguageCode)) };
+        if (not RecoverableDeckMutationError.has_value()) {
+            return QString{};
+        }
+        return QString::fromStdString(RecoverableDeckMutationError.value());
     }
 
     [[nodiscard]] Q_INVOKABLE QString CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
-        return m_DeckController.CreateChildDeck(DeckName, ParentDeckId).value_or(QString{});
+        const std::optional<std::string> RecoverableDeckMutationError{ m_DeckController.CreateChildDeck(DeckName.toStdString(), ParentDeckId.toStdString()) };
+        if (not RecoverableDeckMutationError.has_value()) {
+            return QString{};
+        }
+        return QString::fromStdString(RecoverableDeckMutationError.value());
     }
 
     [[nodiscard]] Q_INVOKABLE QString MoveDeck(const QString& DeckId, const QString& NewParentDeckId = QString{}) noexcept {
-        return m_DeckController.MoveDeck(DeckId, NewParentDeckId.isEmpty() ? std::nullopt : std::make_optional(NewParentDeckId)).value_or(QString{});
+        const std::optional<std::string> RecoverableDeckMutationError{ m_DeckController.MoveDeck(
+            DeckId.toStdString(), NewParentDeckId.isEmpty() ? std::nullopt : std::make_optional(NewParentDeckId.toStdString())) };
+        if (not RecoverableDeckMutationError.has_value()) {
+            return QString{};
+        }
+        return QString::fromStdString(RecoverableDeckMutationError.value());
     }
 
     [[nodiscard]] Q_INVOKABLE QString RenameDeck(const QString& DeckId, const QString& NewDeckName) noexcept {
-        return m_DeckController.RenameDeck(DeckId, NewDeckName).value_or(QString{});
+        const std::optional<std::string> RecoverableDeckMutationError{ m_DeckController.RenameDeck(DeckId.toStdString(), NewDeckName.toStdString()) };
+        if (not RecoverableDeckMutationError.has_value()) {
+            return QString{};
+        }
+        return QString::fromStdString(RecoverableDeckMutationError.value());
     }
 
     [[nodiscard]] Q_INVOKABLE QString DeleteDeck(const QString& DeckId) noexcept {
-        return m_DeckController.DeleteDeck(DeckId).value_or(QString{});
+        const std::optional<std::string> RecoverableDeckMutationError{ m_DeckController.DeleteDeck(DeckId.toStdString()) };
+        if (not RecoverableDeckMutationError.has_value()) {
+            return QString{};
+        }
+        return QString::fromStdString(RecoverableDeckMutationError.value());
     }
 
 private:

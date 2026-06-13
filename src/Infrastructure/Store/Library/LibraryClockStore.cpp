@@ -9,9 +9,10 @@
 
 namespace Infrastructure::Store::Library {
 
-[[nodiscard]] std::optional<qint64> LibraryClockStore::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const qint64 AsOfMillisecondsSinceEpoch) {
+[[nodiscard]] std::optional<std::int64_t>
+LibraryClockStore::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const std::int64_t AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement->Execute(
-        static_cast<std::int64_t>(AsOfMillisecondsSinceEpoch)) };
+        AsOfMillisecondsSinceEpoch) };
     Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     const auto QueryResultIterator{ QueryResult->begin() };
     if ((*QueryResultIterator).IsNull(0)) {

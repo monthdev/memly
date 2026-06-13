@@ -4,7 +4,7 @@
 
 namespace Application::Service::Deck {
 
-[[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> DeckTreeSnapshotService::ReadDeckTreeSnapshot(const qint64 AsOfMillisecondsSinceEpoch) {
+[[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> DeckTreeSnapshotService::ReadDeckTreeSnapshot(const std::int64_t AsOfMillisecondsSinceEpoch) {
     return m_DeckTreeSnapshotStore.ReadDeckTreeSnapshot(AsOfMillisecondsSinceEpoch);
 }
 

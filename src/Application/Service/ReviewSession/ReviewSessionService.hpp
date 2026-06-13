@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QString>
-#include <QVector>
 #include <cstdint>
 #include <expected>
+#include <string>
+#include <vector>
 
 namespace Infrastructure::Sql {
 class TransactionRunner;
@@ -34,7 +34,7 @@ public:
     };
 
     struct ReviewSessionDeckSelection {
-        QString m_DeckId;
+        std::string m_DeckId;
         ReviewSessionDeckSelectionTypeEnum m_DeckSelectionType;
     };
 
@@ -50,15 +50,16 @@ public:
     ReviewSessionService& operator=(const ReviewSessionService&) = delete;
     ReviewSessionService& operator=(ReviewSessionService&&) = delete;
 
-    [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum> CreateOrReadExistingDefaultReviewSession(const QString&, const QString&);
-    [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum>
-    CreateOrReadExistingCustomReviewSession(const QString&, const QString&, const QVector<ReviewSessionDeckSelection>&);
-    [[nodiscard]] std::expected<void, ReviewSessionMutationErrorEnum> RenameReviewSession(const QString&, const QString&);
-    [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum> EditReviewSessionToDefault(const QString&, const QString&, const QString&);
-    [[nodiscard]] std::expected<QString, ReviewSessionMutationErrorEnum>
-    EditReviewSessionToCustom(const QString&, const QString&, const QVector<ReviewSessionDeckSelection>&);
-    [[nodiscard]] std::expected<void, ReviewSessionMutationErrorEnum> UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const QString&);
-    [[nodiscard]] std::expected<void, ReviewSessionMutationErrorEnum> DeleteReviewSession(const QString&);
+    [[nodiscard]] std::expected<std::string, ReviewSessionMutationErrorEnum> CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&);
+    [[nodiscard]] std::expected<std::string, ReviewSessionMutationErrorEnum>
+    CreateOrReadExistingCustomReviewSession(const std::string&, const std::string&, const std::vector<ReviewSessionDeckSelection>&);
+    [[nodiscard]] std::expected<void, ReviewSessionMutationErrorEnum> RenameReviewSession(const std::string&, const std::string&);
+    [[nodiscard]] std::expected<std::string, ReviewSessionMutationErrorEnum>
+    EditReviewSessionToDefault(const std::string&, const std::string&, const std::string&);
+    [[nodiscard]] std::expected<std::string, ReviewSessionMutationErrorEnum>
+    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<ReviewSessionDeckSelection>&);
+    [[nodiscard]] std::expected<void, ReviewSessionMutationErrorEnum> UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string&);
+    [[nodiscard]] std::expected<void, ReviewSessionMutationErrorEnum> DeleteReviewSession(const std::string&);
 
 private:
     Infrastructure::Sql::TransactionRunner& m_TransactionRunner;

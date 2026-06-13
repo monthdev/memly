@@ -2,11 +2,11 @@
 
 #include <duckdb.hpp>
 
-#include <QString>
-#include <QVector>
-#include <QtTypes>
+#include <cstdint>
 #include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
@@ -16,10 +16,10 @@ namespace Infrastructure::Store::ReviewSession {
 class ReviewSessionListStore final {
 public:
     struct ReviewSessionListRow {
-        QString m_ReviewSessionId;
-        QString m_ReviewSessionName;
-        qint64 m_CreatedAtMillisecondsSinceEpoch;
-        std::optional<qint64> m_LastCardReviewAtMillisecondsSinceEpoch;
+        std::string m_ReviewSessionId;
+        std::string m_ReviewSessionName;
+        std::int64_t m_CreatedAtMillisecondsSinceEpoch;
+        std::optional<std::int64_t> m_LastCardReviewAtMillisecondsSinceEpoch;
     };
 
     explicit ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
@@ -33,7 +33,7 @@ public:
     ReviewSessionListStore& operator=(const ReviewSessionListStore&) = delete;
     ReviewSessionListStore& operator=(ReviewSessionListStore&&) = delete;
 
-    [[nodiscard]] QVector<ReviewSessionListRow> ReadReviewSessionList();
+    [[nodiscard]] std::vector<ReviewSessionListRow> ReadReviewSessionList();
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionListPreparedStatement;

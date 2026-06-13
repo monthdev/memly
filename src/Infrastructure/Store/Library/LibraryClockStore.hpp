@@ -2,7 +2,7 @@
 
 #include <duckdb.hpp>
 
-#include <QtTypes>
+#include <cstdint>
 #include <memory>
 #include <optional>
 
@@ -25,7 +25,7 @@ public:
     LibraryClockStore& operator=(const LibraryClockStore&) = delete;
     LibraryClockStore& operator=(LibraryClockStore&&) = delete;
 
-    [[nodiscard]] std::optional<qint64> ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const qint64);
+    [[nodiscard]] std::optional<std::int64_t> ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(std::int64_t);
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;

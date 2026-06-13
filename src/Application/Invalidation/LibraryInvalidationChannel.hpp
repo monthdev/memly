@@ -2,7 +2,7 @@
 
 #include <QDateTime>
 #include <QObject>
-#include <QtTypes>
+#include <cstdint>
 #include <functional>
 #include <type_traits>
 #include <utility>
@@ -19,7 +19,7 @@ class LibraryInvalidationChannel final : public QObject {
 public:
     explicit LibraryInvalidationChannel(QObject* Parent = nullptr)
         : QObject{ Parent }
-        , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ QDateTime::currentMSecsSinceEpoch() } {
+        , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch()) } {
     }
 
     ~LibraryInvalidationChannel() noexcept override = default;
@@ -40,7 +40,7 @@ public:
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and
-                 std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*, qint64>
+                 std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*, std::int64_t>
     void ConnectSnapshot(ControllerType* ControllerPointer,
                          const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                          const ControllerRefreshMethodType ControllerRefreshMethod) {
@@ -74,7 +74,7 @@ private:
             Qt::DirectConnection);
     }
 
-    qint64 m_CurrentSnapshotAsOfMillisecondsSinceEpoch;
+    std::int64_t m_CurrentSnapshotAsOfMillisecondsSinceEpoch;
 };
 
 }

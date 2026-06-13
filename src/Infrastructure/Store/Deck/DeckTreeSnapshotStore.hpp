@@ -2,7 +2,7 @@
 
 #include <duckdb.hpp>
 
-#include <QtTypes>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -25,7 +25,7 @@ public:
     DeckTreeSnapshotStore& operator=(const DeckTreeSnapshotStore&) = delete;
     DeckTreeSnapshotStore& operator=(DeckTreeSnapshotStore&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> ReadDeckTreeSnapshot(const qint64);
+    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> ReadDeckTreeSnapshot(std::int64_t);
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_ReadDeckTreeSnapshotPreparedStatement;

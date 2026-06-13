@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QtTypes>
+#include <cstdint>
 #include <vector>
 
 #include "Domain/Deck/DeckTreeSnapshotNodeData.hpp"
@@ -23,7 +23,7 @@ public:
     DeckTreeSnapshotService& operator=(const DeckTreeSnapshotService&) = delete;
     DeckTreeSnapshotService& operator=(DeckTreeSnapshotService&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> ReadDeckTreeSnapshot(qint64);
+    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> ReadDeckTreeSnapshot(std::int64_t);
 
 private:
     Infrastructure::Store::Deck::DeckTreeSnapshotStore& m_DeckTreeSnapshotStore;

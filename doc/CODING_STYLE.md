@@ -59,6 +59,16 @@ Qt types and callable surfaces must use `Q_OBJECT`, `Q_GADGET`, `Q_NAMESPACE`,
 `Q_DECLARE_FLAGS`, `QML_ELEMENT`, `QML_NAMED_ELEMENT`, `QML_SINGLETON`, and
 `QML_UNCREATABLE` where they apply.
 
+## Qt Types And Containers
+
+Project-owned application code must use standard library types and containers.
+
+Qt types and containers must only appear at Qt framework, QML bridge, Qt
+resource, Qt signal, and method override boundaries where the Qt API requires
+them.
+
+Convert between standard library types and Qt types at the boundary.
+
 ## Forward Declarations
 
 Use forward declarations where the header only needs an incomplete type.

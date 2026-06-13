@@ -5,8 +5,8 @@
 #include <QHash>
 #include <QString>
 #include <QVariant>
-#include <QVector>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <vector>
@@ -59,8 +59,8 @@ public:
             if (not hasIndex(Row, Column, Parent)) {
                 return QModelIndex{};
             }
-            const QVector<qsizetype>& ChildDeckNodeIndexesQVector{ GetChildDeckNodeIndexes(Parent) };
-            const qsizetype ChildDeckNodeIndex{ ChildDeckNodeIndexesQVector.at(static_cast<qsizetype>(Row)) };
+            const std::vector<std::size_t>& ChildDeckNodeIndexesVector{ GetChildDeckNodeIndexes(Parent) };
+            const std::size_t ChildDeckNodeIndex{ ChildDeckNodeIndexesVector.at(static_cast<std::size_t>(Row)) };
             return createIndex(Row, Column, static_cast<quintptr>(ChildDeckNodeIndex));
         });
     }
@@ -72,11 +72,11 @@ public:
                 return QModelIndex{};
             }
             const DeckNode& CurrentDeckNode{ CurrentDeckNodeOptional.value().get() };
-            if (CurrentDeckNode.m_ParentDeckNodeIndex == s_RootDeckNodeIndex) {
+            if (not CurrentDeckNode.m_ParentDeckNodeIndex.has_value()) {
                 return QModelIndex{};
             }
-            const qsizetype ParentDeckNodeIndex{ CurrentDeckNode.m_ParentDeckNodeIndex };
-            const DeckNode& ParentDeckNode{ m_DeckNodesVector.at(static_cast<std::size_t>(ParentDeckNodeIndex)) };
+            const std::size_t ParentDeckNodeIndex{ CurrentDeckNode.m_ParentDeckNodeIndex.value() };
+            const DeckNode& ParentDeckNode{ m_DeckNodesVector.at(ParentDeckNodeIndex) };
             return createIndex(static_cast<int>(ParentDeckNode.m_RowInParentIndex), 0, static_cast<quintptr>(ParentDeckNodeIndex));
         });
     }
@@ -110,7 +110,7 @@ public:
             case Qt::DisplayRole:
                 switch (Index.column()) {
                 case static_cast<int>(ColumnEnum::DeckNameColumn):
-                    return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckName;
+                    return QString::fromStdString(CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckName);
                 case static_cast<int>(ColumnEnum::SubtreeDueNowCountColumn):
                     return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SubtreeDueNowCount;
                 case static_cast<int>(ColumnEnum::SubtreeByTodayCountColumn):
@@ -121,19 +121,19 @@ public:
                     return QVariant{};
                 }
             case static_cast<int>(RoleEnum::DeckIdRole):
-                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckId;
+                return QString::fromStdString(CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckId);
             case static_cast<int>(RoleEnum::ParentDeckIdRole):
                 if (not CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_ParentDeckId.has_value()) {
                     return QString{};
                 }
-                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_ParentDeckId.value();
+                return QString::fromStdString(CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_ParentDeckId.value());
             case static_cast<int>(RoleEnum::DeckNameRole):
-                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckName;
+                return QString::fromStdString(CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckName);
             case static_cast<int>(RoleEnum::CreatedAtMillisecondsSinceEpochRole):
                 return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_CreatedAtMillisecondsSinceEpoch;
             case static_cast<int>(RoleEnum::UpdatedAtMillisecondsSinceEpochRole):
                 if (not CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_UpdatedAtMillisecondsSinceEpoch.has_value()) {
-                    return qint64{};
+                    return std::int64_t{};
                 }
                 return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_UpdatedAtMillisecondsSinceEpoch.value();
             case static_cast<int>(RoleEnum::SelfDueNowCountRole):
@@ -149,7 +149,7 @@ public:
             case static_cast<int>(RoleEnum::SubtreeTotalCountRole):
                 return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SubtreeTotalCount;
             case static_cast<int>(RoleEnum::TargetLanguageCodeRole):
-                return static_cast<quint32>(CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_TargetLanguageCode);
+                return static_cast<unsigned int>(CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_TargetLanguageCode);
             default:
                 return QVariant{};
             }
@@ -227,23 +227,21 @@ public:
 private:
     struct DeckNode {
         Domain::Deck::DeckTreeSnapshotNodeData m_DeckTreeSnapshotNodeData;
-        qsizetype m_ParentDeckNodeIndex;
-        qsizetype m_RowInParentIndex;
-        QVector<qsizetype> m_ChildDeckNodeIndexesQVector;
+        std::optional<std::size_t> m_ParentDeckNodeIndex;
+        std::size_t m_RowInParentIndex;
+        std::vector<std::size_t> m_ChildDeckNodeIndexesVector;
     };
 
-    static constexpr qsizetype s_RootDeckNodeIndex{ -1 };
-
     std::vector<DeckNode> m_DeckNodesVector;
-    QVector<qsizetype> m_RootDeckNodeIndexesQVector;
+    std::vector<std::size_t> m_RootDeckNodeIndexesVector;
     int m_SortColumn;
     Qt::SortOrder m_SortOrder;
 
     [[nodiscard]] std::optional<std::reference_wrapper<const DeckNode>> TryGetDeckNode(const QModelIndex&) const noexcept;
-    [[nodiscard]] const QVector<qsizetype>& GetChildDeckNodeIndexes(const QModelIndex&) const;
+    [[nodiscard]] const std::vector<std::size_t>& GetChildDeckNodeIndexes(const QModelIndex&) const;
     void ApplyCurrentSort();
-    void SortSiblingDeckNodeIndexes(QVector<qsizetype>&);
-    void UpdateSiblingRowIndexes(qsizetype = s_RootDeckNodeIndex) noexcept;
-    [[nodiscard]] int CompareDeckNodes(qsizetype, qsizetype) const noexcept;
+    void SortSiblingDeckNodeIndexes(std::vector<std::size_t>&);
+    void UpdateSiblingRowIndexes(std::optional<std::size_t> = std::nullopt) noexcept;
+    [[nodiscard]] int CompareDeckNodes(std::size_t, std::size_t) const noexcept;
 };
 }
