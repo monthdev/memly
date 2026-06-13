@@ -1,9 +1,9 @@
-#include "Core/Language/LanguageTranslator.hpp"
+#include "Domain/Language/LanguageTranslator.hpp"
 
 #include <array>
 #include <cstddef>
 
-namespace Core::Language {
+namespace Domain::Language {
 [[nodiscard]] std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() noexcept {
     static constexpr std::array<TargetLanguageInfo, 67> TargetLanguages{
         {
