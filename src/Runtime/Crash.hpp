@@ -21,9 +21,9 @@ std::invoke_result_t<FunctionType&&> TryCatchWrapper(FunctionType&& Function) no
         Runtime::LogError(Exception.what());
         qFatal("%s", Exception.what());
     } catch (...) {
-        constexpr char What[]{ "Unknown exception" };
+        constexpr std::string_view What{ "Unknown exception" };
         Runtime::LogError(What);
-        qFatal("%s", What);
+        qFatal("%s", What.data());
     }
 }
 }

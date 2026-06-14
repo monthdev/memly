@@ -69,6 +69,20 @@ them.
 
 Convert between standard library types and Qt types at the boundary.
 
+## String Views
+
+Project-owned read-only string API parameters must use `const std::string_view`
+instead of C-style string pointer or array types.
+
+Named string constants must use `std::string_view` when they need a name.
+
+In this project, named `std::string_view` values used at C and Qt string
+boundaries are expected to wrap the complete null-terminated string, not a
+substring. Passing `.data()` to the boundary is the convention.
+
+Do not wrap throwaway string literals in local `std::string_view` variables just
+to pass them to a `const std::string_view` parameter.
+
 ## Forward Declarations
 
 Use forward declarations where the header only needs an incomplete type.

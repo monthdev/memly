@@ -1,8 +1,10 @@
 #include <QCoreApplication>
 #include <QTest>
+#include <string_view>
 
 int main(int argc, char* argv[]) {
-    QCoreApplication::setApplicationName("Memly");
+    constexpr std::string_view AppName{ "Memly" };
+    QCoreApplication::setApplicationName(AppName.data());
     QCoreApplication App(argc, argv);
 
     int ExitCode{ 0 };
