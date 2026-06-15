@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "Domain/Deck/DeckTreeSnapshotNodeData.hpp"
+#include "Domain/Deck/DeckTreeSnapshotNode.hpp"
 #include "Infrastructure/Sql/Deck/Query/DeckQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
@@ -25,7 +25,7 @@ public:
     DeckTreeSnapshotStore& operator=(const DeckTreeSnapshotStore&) = delete;
     DeckTreeSnapshotStore& operator=(DeckTreeSnapshotStore&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> ReadDeckTreeSnapshot(std::int64_t);
+    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> ReadDeckTreeSnapshot(std::int64_t);
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_ReadDeckTreeSnapshotPreparedStatement;

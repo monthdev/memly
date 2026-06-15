@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "Domain/Deck/DeckTreeSnapshotNodeData.hpp"
+#include "Domain/Deck/DeckTreeSnapshotNode.hpp"
 
 namespace Infrastructure::Store::Deck {
 class DeckTreeSnapshotStore;
@@ -23,7 +23,7 @@ public:
     DeckTreeSnapshotService& operator=(const DeckTreeSnapshotService&) = delete;
     DeckTreeSnapshotService& operator=(DeckTreeSnapshotService&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNodeData> ReadDeckTreeSnapshot(std::int64_t);
+    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> ReadDeckTreeSnapshot(std::int64_t);
 
 private:
     Infrastructure::Store::Deck::DeckTreeSnapshotStore& m_DeckTreeSnapshotStore;

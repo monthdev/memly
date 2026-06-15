@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
-#include "Domain/ReviewSession/ReviewSessionDeckSelectionData.hpp"
+#include "Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Infrastructure/Sql/TransactionRunner.hpp"
 #include "Infrastructure/Store/ReviewSession/ReviewSessionStore.hpp"
 
@@ -23,7 +23,7 @@ ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const std::string
 ReviewSessionService::CreateOrReadExistingCustomReviewSession(
     const std::string& ReviewSessionName,
     const std::string& ReviewSessionDefinitionKey,
-    const std::vector<Domain::ReviewSession::ReviewSessionDeckSelectionData>& ReviewSessionDeckSelectionVector) {
+    const std::vector<Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
         return m_ReviewSessionStore.CreateOrReadExistingCustomReviewSession(ReviewSessionName, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
     });
@@ -54,7 +54,7 @@ ReviewSessionService::EditReviewSessionToDefault(const std::string& CurrentRevie
 [[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionService::EditReviewSessionToCustom(const std::string& CurrentReviewSessionId,
                                                 const std::string& ReviewSessionDefinitionKey,
-                                                const std::vector<Domain::ReviewSession::ReviewSessionDeckSelectionData>& ReviewSessionDeckSelectionVector) {
+                                                const std::vector<Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
         return m_ReviewSessionStore.EditReviewSessionToCustom(CurrentReviewSessionId, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
     });

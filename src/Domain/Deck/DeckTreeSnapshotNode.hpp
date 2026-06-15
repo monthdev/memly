@@ -7,19 +7,19 @@
 
 namespace Domain::Deck {
 
-struct DeckTreeSnapshotNodeData {
-    DeckTreeSnapshotNodeData(std::string DeckId,
-                             std::optional<std::string> ParentDeckId,
-                             std::string DeckName,
-                             std::int64_t CreatedAtMillisecondsSinceEpoch,
-                             std::optional<std::int64_t> LastUpdatedAtMillisecondsSinceEpoch,
-                             std::uint32_t SelfDueNowCount,
-                             std::uint32_t SelfByTodayCount,
-                             std::uint32_t SelfTotalCount,
-                             std::uint32_t SubtreeDueNowCount,
-                             std::uint32_t SubtreeByTodayCount,
-                             std::uint32_t SubtreeTotalCount,
-                             std::uint8_t TargetLanguageCode)
+struct DeckTreeSnapshotNode {
+    DeckTreeSnapshotNode(std::string DeckId,
+                         std::optional<std::string> ParentDeckId,
+                         std::string DeckName,
+                         std::int64_t CreatedAtMillisecondsSinceEpoch,
+                         std::optional<std::int64_t> LastUpdatedAtMillisecondsSinceEpoch,
+                         std::uint32_t SelfDueNowCount,
+                         std::uint32_t SelfByTodayCount,
+                         std::uint32_t SelfTotalCount,
+                         std::uint32_t SubtreeDueNowCount,
+                         std::uint32_t SubtreeByTodayCount,
+                         std::uint32_t SubtreeTotalCount,
+                         std::uint8_t TargetLanguageCode)
         : m_DeckId{ std::move(DeckId) }
         , m_ParentDeckId{ std::move(ParentDeckId) }
         , m_DeckName{ std::move(DeckName) }
@@ -34,11 +34,11 @@ struct DeckTreeSnapshotNodeData {
         , m_TargetLanguageCode{ TargetLanguageCode } {
     }
 
-    ~DeckTreeSnapshotNodeData() = default;
-    DeckTreeSnapshotNodeData(const DeckTreeSnapshotNodeData&) = delete;
-    DeckTreeSnapshotNodeData(DeckTreeSnapshotNodeData&&) noexcept = default;
-    DeckTreeSnapshotNodeData& operator=(const DeckTreeSnapshotNodeData&) = delete;
-    DeckTreeSnapshotNodeData& operator=(DeckTreeSnapshotNodeData&&) noexcept = default;
+    ~DeckTreeSnapshotNode() = default;
+    DeckTreeSnapshotNode(const DeckTreeSnapshotNode&) = delete;
+    DeckTreeSnapshotNode(DeckTreeSnapshotNode&&) noexcept = default;
+    DeckTreeSnapshotNode& operator=(const DeckTreeSnapshotNode&) = delete;
+    DeckTreeSnapshotNode& operator=(DeckTreeSnapshotNode&&) noexcept = default;
 
     std::string m_DeckId;
     std::optional<std::string> m_ParentDeckId;
