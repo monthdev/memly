@@ -34,7 +34,7 @@ struct DeckTreeSnapshotNode {
         , m_TargetLanguageCode{ TargetLanguageCode } {
     }
 
-    ~DeckTreeSnapshotNode() = default;
+    ~DeckTreeSnapshotNode() noexcept = default;
     DeckTreeSnapshotNode(const DeckTreeSnapshotNode&) = delete;
     DeckTreeSnapshotNode(DeckTreeSnapshotNode&&) noexcept = default;
     DeckTreeSnapshotNode& operator=(const DeckTreeSnapshotNode&) = delete;

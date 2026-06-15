@@ -19,7 +19,7 @@ struct ReviewSessionDeckSelection {
         , m_DeckSelectionType{ DeckSelectionType } {
     }
 
-    ~ReviewSessionDeckSelection() = default;
+    ~ReviewSessionDeckSelection() noexcept = default;
     ReviewSessionDeckSelection(const ReviewSessionDeckSelection&) = delete;
     ReviewSessionDeckSelection(ReviewSessionDeckSelection&&) noexcept = default;
     ReviewSessionDeckSelection& operator=(const ReviewSessionDeckSelection&) = delete;
