@@ -86,7 +86,7 @@ private:
     [[nodiscard]] std::optional<std::string> TryReadDefaultReviewSessionIdByRootDeckId(const std::string&);
     [[nodiscard]] std::optional<std::string> TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string&);
     [[nodiscard]] std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    CreateCustomReviewSessionDeckSelection(const std::string&, const std::string&, Domain::ReviewSession::ReviewSessionDeckSelection::SelectionTypeEnum);
+    CreateCustomReviewSessionDeckSelection(const std::string&, const std::string&, Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum);
     void DeleteCustomReviewSessionDeckSelections(const std::string&);
     [[nodiscard]] std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
     HandleRecoverableReviewSessionMutationError(duckdb::QueryResult&) const;

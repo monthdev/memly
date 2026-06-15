@@ -18,15 +18,15 @@ namespace Infrastructure::Store::ReviewSession {
 namespace {
 
 [[nodiscard]] constexpr std::string_view
-ReviewSessionDeckSelectionTypeToString(const Domain::ReviewSession::ReviewSessionDeckSelection::SelectionTypeEnum SelectionType) noexcept {
-    switch (SelectionType) {
-    case Domain::ReviewSession::ReviewSessionDeckSelection::SelectionTypeEnum::Self:
+ReviewSessionDeckSelectionTypeToString(const Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) noexcept {
+    switch (DeckSelectionType) {
+    case Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Self:
         return "self";
-    case Domain::ReviewSession::ReviewSessionDeckSelection::SelectionTypeEnum::Subtree:
+    case Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Subtree:
         return "subtree";
-    case Domain::ReviewSession::ReviewSessionDeckSelection::SelectionTypeEnum::ExcludeSelf:
+    case Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSelf:
         return "exclude_self";
-    case Domain::ReviewSession::ReviewSessionDeckSelection::SelectionTypeEnum::ExcludeSubtree:
+    case Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSubtree:
         return "exclude_subtree";
     }
 }
@@ -68,8 +68,8 @@ ReviewSessionStore::CreateOrReadExistingCustomReviewSession(
     }
     const std::string NewCustomReviewSessionId{ (*QueryResult->begin()).GetValue<std::string>(0) };
     for (const Domain::ReviewSession::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
-        RecoverableReviewSessionMutationError =
-            CreateCustomReviewSessionDeckSelection(NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_SelectionType);
+        RecoverableReviewSessionMutationError = CreateCustomReviewSessionDeckSelection(
+            NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
         if (RecoverableReviewSessionMutationError.has_value()) {
             return std::unexpected{ RecoverableReviewSessionMutationError.value() };
         }
@@ -135,7 +135,7 @@ ReviewSessionStore::EditReviewSessionToCustom(const std::string& CurrentReviewSe
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     for (const Domain::ReviewSession::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
         RecoverableReviewSessionMutationError =
-            CreateCustomReviewSessionDeckSelection(CurrentReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_SelectionType);
+            CreateCustomReviewSessionDeckSelection(CurrentReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
         if (RecoverableReviewSessionMutationError.has_value()) {
             return std::unexpected{ RecoverableReviewSessionMutationError.value() };
         }
@@ -177,10 +177,10 @@ void ReviewSessionStore::DeleteReviewSession(const std::string& ReviewSessionId)
 [[nodiscard]] std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionStore::CreateCustomReviewSessionDeckSelection(const std::string& ReviewSessionId,
                                                            const std::string& DeckId,
-                                                           const Domain::ReviewSession::ReviewSessionDeckSelection::SelectionTypeEnum SelectionType) {
-    const std::string_view SelectionTypeString{ ReviewSessionDeckSelectionTypeToString(SelectionType) };
+                                                           const Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) {
+    const std::string_view DeckSelectionTypeString{ ReviewSessionDeckSelectionTypeToString(DeckSelectionType) };
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateCustomReviewSessionDeckSelectionPreparedStatement->Execute(
-        ReviewSessionId, DeckId, SelectionTypeString.data()) };
+        ReviewSessionId, DeckId, DeckSelectionTypeString.data()) };
     return HandleRecoverableReviewSessionMutationError(*QueryResult);
 }
 

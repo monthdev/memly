@@ -7,16 +7,16 @@
 namespace Domain::ReviewSession {
 
 struct ReviewSessionDeckSelection {
-    enum class SelectionTypeEnum : std::uint8_t {
+    enum class DeckSelectionTypeEnum : std::uint8_t {
         Self,
         Subtree,
         ExcludeSelf,
         ExcludeSubtree
     };
 
-    ReviewSessionDeckSelection(std::string DeckId, const SelectionTypeEnum SelectionType)
+    ReviewSessionDeckSelection(std::string DeckId, const DeckSelectionTypeEnum DeckSelectionType)
         : m_DeckId{ std::move(DeckId) }
-        , m_SelectionType{ SelectionType } {
+        , m_DeckSelectionType{ DeckSelectionType } {
     }
 
     ~ReviewSessionDeckSelection() = default;
@@ -26,7 +26,7 @@ struct ReviewSessionDeckSelection {
     ReviewSessionDeckSelection& operator=(ReviewSessionDeckSelection&&) noexcept = default;
 
     std::string m_DeckId;
-    SelectionTypeEnum m_SelectionType;
+    DeckSelectionTypeEnum m_DeckSelectionType;
 };
 
 }
