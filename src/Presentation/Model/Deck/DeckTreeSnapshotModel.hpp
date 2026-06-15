@@ -25,7 +25,7 @@ public:
         ParentDeckIdRole,
         DeckNameRole,
         CreatedAtMillisecondsSinceEpochRole,
-        UpdatedAtMillisecondsSinceEpochRole,
+        LastUpdatedAtMillisecondsSinceEpochRole,
         SelfDueNowCountRole,
         SelfByTodayCountRole,
         SelfTotalCountRole,
@@ -131,11 +131,11 @@ public:
                 return QString::fromStdString(CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_DeckName);
             case static_cast<int>(RoleEnum::CreatedAtMillisecondsSinceEpochRole):
                 return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_CreatedAtMillisecondsSinceEpoch;
-            case static_cast<int>(RoleEnum::UpdatedAtMillisecondsSinceEpochRole):
-                if (not CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_UpdatedAtMillisecondsSinceEpoch.has_value()) {
+            case static_cast<int>(RoleEnum::LastUpdatedAtMillisecondsSinceEpochRole):
+                if (not CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_LastUpdatedAtMillisecondsSinceEpoch.has_value()) {
                     return std::int64_t{};
                 }
-                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_UpdatedAtMillisecondsSinceEpoch.value();
+                return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_LastUpdatedAtMillisecondsSinceEpoch.value();
             case static_cast<int>(RoleEnum::SelfDueNowCountRole):
                 return CurrentDeckNode.m_DeckTreeSnapshotNodeData.m_SelfDueNowCount;
             case static_cast<int>(RoleEnum::SelfByTodayCountRole):
@@ -205,19 +205,19 @@ public:
     [[nodiscard]] QHash<int, QByteArray> roleNames() const noexcept override {
         return Runtime::TryCatchWrapper([&]() -> QHash<int, QByteArray> {
             return {
-                {                                                 Qt::DisplayRole,                         "display" },
-                {                          static_cast<int>(RoleEnum::DeckIdRole),                          "deckId" },
-                {                    static_cast<int>(RoleEnum::ParentDeckIdRole),                    "parentDeckId" },
-                {                        static_cast<int>(RoleEnum::DeckNameRole),                        "deckName" },
-                { static_cast<int>(RoleEnum::CreatedAtMillisecondsSinceEpochRole), "createdAtMillisecondsSinceEpoch" },
-                { static_cast<int>(RoleEnum::UpdatedAtMillisecondsSinceEpochRole), "updatedAtMillisecondsSinceEpoch" },
-                {                 static_cast<int>(RoleEnum::SelfDueNowCountRole),                 "selfDueNowCount" },
-                {                static_cast<int>(RoleEnum::SelfByTodayCountRole),                "selfByTodayCount" },
-                {                  static_cast<int>(RoleEnum::SelfTotalCountRole),                  "selfTotalCount" },
-                {              static_cast<int>(RoleEnum::SubtreeDueNowCountRole),              "subtreeDueNowCount" },
-                {             static_cast<int>(RoleEnum::SubtreeByTodayCountRole),             "subtreeByTodayCount" },
-                {               static_cast<int>(RoleEnum::SubtreeTotalCountRole),               "subtreeTotalCount" },
-                {              static_cast<int>(RoleEnum::TargetLanguageCodeRole),              "targetLanguageCode" },
+                {                                                     Qt::DisplayRole,                             "display" },
+                {                              static_cast<int>(RoleEnum::DeckIdRole),                              "deckId" },
+                {                        static_cast<int>(RoleEnum::ParentDeckIdRole),                        "parentDeckId" },
+                {                            static_cast<int>(RoleEnum::DeckNameRole),                            "deckName" },
+                {     static_cast<int>(RoleEnum::CreatedAtMillisecondsSinceEpochRole),     "createdAtMillisecondsSinceEpoch" },
+                { static_cast<int>(RoleEnum::LastUpdatedAtMillisecondsSinceEpochRole), "lastUpdatedAtMillisecondsSinceEpoch" },
+                {                     static_cast<int>(RoleEnum::SelfDueNowCountRole),                     "selfDueNowCount" },
+                {                    static_cast<int>(RoleEnum::SelfByTodayCountRole),                    "selfByTodayCount" },
+                {                      static_cast<int>(RoleEnum::SelfTotalCountRole),                      "selfTotalCount" },
+                {                  static_cast<int>(RoleEnum::SubtreeDueNowCountRole),                  "subtreeDueNowCount" },
+                {                 static_cast<int>(RoleEnum::SubtreeByTodayCountRole),                 "subtreeByTodayCount" },
+                {                   static_cast<int>(RoleEnum::SubtreeTotalCountRole),                   "subtreeTotalCount" },
+                {                  static_cast<int>(RoleEnum::TargetLanguageCodeRole),                  "targetLanguageCode" },
             };
         });
     }

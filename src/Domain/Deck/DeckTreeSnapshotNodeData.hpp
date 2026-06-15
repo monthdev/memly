@@ -12,7 +12,7 @@ struct DeckTreeSnapshotNodeData {
                              std::optional<std::string> ParentDeckId,
                              std::string DeckName,
                              std::int64_t CreatedAtMillisecondsSinceEpoch,
-                             std::optional<std::int64_t> UpdatedAtMillisecondsSinceEpoch,
+                             std::optional<std::int64_t> LastUpdatedAtMillisecondsSinceEpoch,
                              std::uint32_t SelfDueNowCount,
                              std::uint32_t SelfByTodayCount,
                              std::uint32_t SelfTotalCount,
@@ -24,7 +24,7 @@ struct DeckTreeSnapshotNodeData {
         , m_ParentDeckId{ std::move(ParentDeckId) }
         , m_DeckName{ std::move(DeckName) }
         , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
-        , m_UpdatedAtMillisecondsSinceEpoch{ std::move(UpdatedAtMillisecondsSinceEpoch) }
+        , m_LastUpdatedAtMillisecondsSinceEpoch{ std::move(LastUpdatedAtMillisecondsSinceEpoch) }
         , m_SelfDueNowCount{ SelfDueNowCount }
         , m_SelfByTodayCount{ SelfByTodayCount }
         , m_SelfTotalCount{ SelfTotalCount }
@@ -44,7 +44,7 @@ struct DeckTreeSnapshotNodeData {
     std::optional<std::string> m_ParentDeckId;
     std::string m_DeckName;
     std::int64_t m_CreatedAtMillisecondsSinceEpoch;
-    std::optional<std::int64_t> m_UpdatedAtMillisecondsSinceEpoch;
+    std::optional<std::int64_t> m_LastUpdatedAtMillisecondsSinceEpoch;
     std::uint32_t m_SelfDueNowCount;
     std::uint32_t m_SelfByTodayCount;
     std::uint32_t m_SelfTotalCount;
