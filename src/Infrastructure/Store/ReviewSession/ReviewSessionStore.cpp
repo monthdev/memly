@@ -2,26 +2,47 @@
 
 #include <duckdb.hpp>
 
-#include <cstdint>
 #include <expected>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
+#include "Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
+#include "Domain/ReviewSession/ReviewSessionDeckSelectionData.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
+namespace {
 
-[[nodiscard]] std::expected<std::string, ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
+[[nodiscard]] constexpr std::string_view
+ReviewSessionDeckSelectionTypeToString(const Domain::ReviewSession::ReviewSessionDeckSelectionData::SelectionTypeEnum SelectionType) noexcept {
+    switch (SelectionType) {
+    case Domain::ReviewSession::ReviewSessionDeckSelectionData::SelectionTypeEnum::Self:
+        return "self";
+    case Domain::ReviewSession::ReviewSessionDeckSelectionData::SelectionTypeEnum::Subtree:
+        return "subtree";
+    case Domain::ReviewSession::ReviewSessionDeckSelectionData::SelectionTypeEnum::ExcludeSelf:
+        return "exclude_self";
+    case Domain::ReviewSession::ReviewSessionDeckSelectionData::SelectionTypeEnum::ExcludeSubtree:
+        return "exclude_subtree";
+    }
+}
+
+}
+
+[[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionStore::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey) {
     if (const std::optional<std::string> ExistingReviewSessionId{ TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
         ExistingReviewSessionId.has_value()) {
         return ExistingReviewSessionId.value();
     }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateDefaultReviewSessionPreparedStatement->Execute(ReviewSessionDefinitionKey, RootDeckId) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
+    std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{
+        HandleRecoverableReviewSessionMutationError(*QueryResult)
+    };
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
@@ -29,23 +50,26 @@ ReviewSessionStore::CreateOrReadExistingDefaultReviewSession(const std::string& 
     return (*QueryResult->begin()).GetValue<std::string>(0);
 }
 
-[[nodiscard]] std::expected<std::string, ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionStore::CreateOrReadExistingCustomReviewSession(const std::string& ReviewSessionName,
-                                                            const std::string& ReviewSessionDefinitionKey,
-                                                            const std::vector<ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
+[[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
+ReviewSessionStore::CreateOrReadExistingCustomReviewSession(
+    const std::string& ReviewSessionName,
+    const std::string& ReviewSessionDefinitionKey,
+    const std::vector<Domain::ReviewSession::ReviewSessionDeckSelectionData>& ReviewSessionDeckSelectionVector) {
     if (const std::optional<std::string> ExistingReviewSessionId{ TryReadReviewSessionIdByReviewSessionDefinitionKey(ReviewSessionDefinitionKey) };
         ExistingReviewSessionId.has_value()) {
         return ExistingReviewSessionId.value();
     }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateCustomReviewSessionPreparedStatement->Execute(ReviewSessionName, ReviewSessionDefinitionKey) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
+    std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{
+        HandleRecoverableReviewSessionMutationError(*QueryResult)
+    };
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
     const std::string NewCustomReviewSessionId{ (*QueryResult->begin()).GetValue<std::string>(0) };
-    for (const ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
-        RecoverableReviewSessionMutationError = CreateCustomReviewSessionDeckSelection(
-            NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
+    for (const Domain::ReviewSession::ReviewSessionDeckSelectionData& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
+        RecoverableReviewSessionMutationError =
+            CreateCustomReviewSessionDeckSelection(NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_SelectionType);
         if (RecoverableReviewSessionMutationError.has_value()) {
             return std::unexpected{ RecoverableReviewSessionMutationError.value() };
         }
@@ -53,10 +77,12 @@ ReviewSessionStore::CreateOrReadExistingCustomReviewSession(const std::string& R
     return NewCustomReviewSessionId;
 }
 
-[[nodiscard]] std::optional<ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
+[[nodiscard]] std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionStore::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_RenameReviewSessionPreparedStatement->Execute(ReviewSessionName, ReviewSessionId) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
+    std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{
+        HandleRecoverableReviewSessionMutationError(*QueryResult)
+    };
     if (RecoverableReviewSessionMutationError.has_value()) {
         return RecoverableReviewSessionMutationError;
     }
@@ -64,19 +90,21 @@ ReviewSessionStore::RenameReviewSession(const std::string& ReviewSessionId, cons
     return std::nullopt;
 }
 
-[[nodiscard]] std::expected<std::string, ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
+[[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionStore::EditReviewSessionToDefault(const std::string& CurrentReviewSessionId,
                                                const std::string& RootDeckId,
                                                const std::string& ReviewSessionDefinitionKey) {
     if (const std::optional<std::string> ExistingReviewSessionId{ TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
         ExistingReviewSessionId.has_value()) {
         if (ExistingReviewSessionId.value() not_eq CurrentReviewSessionId) {
-            return std::unexpected{ RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
+            return std::unexpected{ Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_UpdateReviewSessionToDefaultPreparedStatement->Execute(
         RootDeckId, ReviewSessionDefinitionKey, CurrentReviewSessionId) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
+    std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{
+        HandleRecoverableReviewSessionMutationError(*QueryResult)
+    };
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
@@ -85,27 +113,29 @@ ReviewSessionStore::EditReviewSessionToDefault(const std::string& CurrentReviewS
     return CurrentReviewSessionId;
 }
 
-[[nodiscard]] std::expected<std::string, ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
+[[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionStore::EditReviewSessionToCustom(const std::string& CurrentReviewSessionId,
                                               const std::string& ReviewSessionDefinitionKey,
-                                              const std::vector<ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
+                                              const std::vector<Domain::ReviewSession::ReviewSessionDeckSelectionData>& ReviewSessionDeckSelectionVector) {
     if (const std::optional<std::string> ExistingReviewSessionId{ TryReadReviewSessionIdByReviewSessionDefinitionKey(ReviewSessionDefinitionKey) };
         ExistingReviewSessionId.has_value()) {
         if (ExistingReviewSessionId.value() not_eq CurrentReviewSessionId) {
-            return std::unexpected{ RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
+            return std::unexpected{ Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_UpdateReviewSessionToCustomPreparedStatement->Execute(ReviewSessionDefinitionKey,
                                                                                                               CurrentReviewSessionId) };
-    std::optional<RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{ HandleRecoverableReviewSessionMutationError(*QueryResult) };
+    std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{
+        HandleRecoverableReviewSessionMutationError(*QueryResult)
+    };
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
     Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session edit to custom did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
-    for (const ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
+    for (const Domain::ReviewSession::ReviewSessionDeckSelectionData& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
         RecoverableReviewSessionMutationError =
-            CreateCustomReviewSessionDeckSelection(CurrentReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
+            CreateCustomReviewSessionDeckSelection(CurrentReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_SelectionType);
         if (RecoverableReviewSessionMutationError.has_value()) {
             return std::unexpected{ RecoverableReviewSessionMutationError.value() };
         }
@@ -144,29 +174,13 @@ void ReviewSessionStore::DeleteReviewSession(const std::string& ReviewSessionId)
     return std::nullopt;
 }
 
-[[nodiscard]] std::optional<ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
+[[nodiscard]] std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionStore::CreateCustomReviewSessionDeckSelection(const std::string& ReviewSessionId,
                                                            const std::string& DeckId,
-                                                           const ReviewSessionDeckSelectionTypeEnum ReviewSessionDeckSelectionType) {
-    std::string_view ReviewSessionDeckSelectionTypeString;
-    switch (ReviewSessionDeckSelectionType) {
-    case ReviewSessionDeckSelectionTypeEnum::Self:
-        ReviewSessionDeckSelectionTypeString = "self";
-        break;
-    case ReviewSessionDeckSelectionTypeEnum::Subtree:
-        ReviewSessionDeckSelectionTypeString = "subtree";
-        break;
-    case ReviewSessionDeckSelectionTypeEnum::ExcludeSelf:
-        ReviewSessionDeckSelectionTypeString = "exclude_self";
-        break;
-    case ReviewSessionDeckSelectionTypeEnum::ExcludeSubtree:
-        ReviewSessionDeckSelectionTypeString = "exclude_subtree";
-        break;
-    }
+                                                           const Domain::ReviewSession::ReviewSessionDeckSelectionData::SelectionTypeEnum SelectionType) {
+    const std::string_view SelectionTypeString{ ReviewSessionDeckSelectionTypeToString(SelectionType) };
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateCustomReviewSessionDeckSelectionPreparedStatement->Execute(
-        ReviewSessionId,
-        DeckId,
-        duckdb::string_t{ ReviewSessionDeckSelectionTypeString.data(), static_cast<std::uint32_t>(ReviewSessionDeckSelectionTypeString.size()) }) };
+        ReviewSessionId, DeckId, SelectionTypeString.data()) };
     return HandleRecoverableReviewSessionMutationError(*QueryResult);
 }
 
@@ -175,26 +189,26 @@ void ReviewSessionStore::DeleteCustomReviewSessionDeckSelections(const std::stri
     Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
 }
 
-[[nodiscard]] std::optional<ReviewSessionStore::RecoverableReviewSessionMutationErrorEnum>
+[[nodiscard]] std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
 ReviewSessionStore::HandleRecoverableReviewSessionMutationError(duckdb::QueryResult& QueryResult) const {
     if (not QueryResult.HasError()) {
         return std::nullopt;
     }
     const std::string_view ErrorMessage{ QueryResult.GetError() };
     if (ErrorMessage.contains("review_session_custom_name_is_valid(\"custom_name\")")) {
-        return RecoverableReviewSessionMutationErrorEnum::ReviewSessionNameLengthError;
+        return Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::ReviewSessionNameLengthError;
     }
     if (ErrorMessage.contains("self_selection_conflict")) {
-        return RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckSelfSelectionError;
+        return Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckSelfSelectionError;
     }
     if (ErrorMessage.contains("subtree_selection_conflict")) {
-        return RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckSubtreeSelectionError;
+        return Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckSubtreeSelectionError;
     }
     if (ErrorMessage.contains("include_selection_conflict")) {
-        return RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckIncludeSelectionError;
+        return Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckIncludeSelectionError;
     }
     if (ErrorMessage.contains("exclude_selection_conflict")) {
-        return RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckExcludeSelectionError;
+        return Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckExcludeSelectionError;
     }
     Runtime::ThrowError(QueryResult.GetError());
 }

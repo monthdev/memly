@@ -1,9 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include <optional>
-#include <string>
 #include <vector>
+
+#include "Domain/ReviewSession/ReviewSessionListRow.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 class ReviewSessionListStore;
@@ -13,13 +12,6 @@ namespace Application::Service::ReviewSession {
 
 class ReviewSessionListService final {
 public:
-    struct ReviewSessionListRow {
-        std::string m_ReviewSessionId;
-        std::string m_ReviewSessionName;
-        std::int64_t m_CreatedAtMillisecondsSinceEpoch;
-        std::optional<std::int64_t> m_LastCardReviewAtMillisecondsSinceEpoch;
-    };
-
     explicit ReviewSessionListService(Infrastructure::Store::ReviewSession::ReviewSessionListStore& ReviewSessionListStore) noexcept
         : m_ReviewSessionListStore{ ReviewSessionListStore } {
     }
@@ -30,7 +22,7 @@ public:
     ReviewSessionListService& operator=(const ReviewSessionListService&) = delete;
     ReviewSessionListService& operator=(ReviewSessionListService&&) = delete;
 
-    [[nodiscard]] std::vector<ReviewSessionListRow> ReadReviewSessionList();
+    [[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionList();
 
 private:
     Infrastructure::Store::ReviewSession::ReviewSessionListStore& m_ReviewSessionListStore;
