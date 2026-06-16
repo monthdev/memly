@@ -59,6 +59,14 @@ Qt types and callable surfaces must use `Q_OBJECT`, `Q_GADGET`, `Q_NAMESPACE`,
 `Q_DECLARE_FLAGS`, `QML_ELEMENT`, `QML_NAMED_ELEMENT`, `QML_SINGLETON`, and
 `QML_UNCREATABLE` where they apply.
 
+## Data Naming Prefixes
+
+Instance data members must use an `m_` prefix.
+
+Static data members and function-local static variables must use an `s_` prefix.
+
+Global variables are disallowed.
+
 ## Qt Types And Containers
 
 Project-owned application code must use standard library types and containers.

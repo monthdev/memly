@@ -4,7 +4,8 @@
 
 namespace Domain::Language {
 [[nodiscard]] const std::array<TargetLanguageInfo, 67>& GetSupportedTargetLanguages() noexcept {
-    static constexpr std::array<TargetLanguageInfo, 67> TargetLanguages{
+    // TODO: Move array to unnamed namespace?
+    static constexpr std::array<TargetLanguageInfo, 67> s_TargetLanguages{
         {
          { TargetLanguage::NoLanguage, "", "", "", "(No Language)" },
          { TargetLanguage::Afrikaans, "af", "af", "", "Afrikaans" },
@@ -75,8 +76,8 @@ namespace Domain::Language {
          { TargetLanguage::ChineseTraditional, "zh-tw", "zh-TW", "", "Chinese (Traditional)" },
          }
     };
-    static_assert(TargetLanguages.size() == 67);
-    return TargetLanguages;
+    static_assert(s_TargetLanguages.size() == 67);
+    return s_TargetLanguages;
 }
 
 [[nodiscard]] const TargetLanguageInfo& GetTargetLanguageInfo(const TargetLanguage Language) {
