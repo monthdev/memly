@@ -69,6 +69,14 @@ them.
 
 Convert between standard library types and Qt types at the boundary.
 
+## Container Access
+
+Use read-only container accessors when not modifying container data.
+
+Use `.at()` instead of `operator[]` for non-mutating element access.
+
+Use `operator[]` only for intentional mutation.
+
 ## String Views
 
 Project-owned read-only string API parameters must use `const std::string_view`

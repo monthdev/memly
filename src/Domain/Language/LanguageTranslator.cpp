@@ -1,10 +1,9 @@
 #include "Domain/Language/LanguageTranslator.hpp"
 
-#include <array>
 #include <cstddef>
 
 namespace Domain::Language {
-[[nodiscard]] std::span<const TargetLanguageInfo> GetSupportedTargetLanguages() noexcept {
+[[nodiscard]] const std::array<TargetLanguageInfo, 67>& GetSupportedTargetLanguages() noexcept {
     static constexpr std::array<TargetLanguageInfo, 67> TargetLanguages{
         {
          { TargetLanguage::NoLanguage, "", "", "", "(No Language)" },
@@ -80,7 +79,7 @@ namespace Domain::Language {
     return TargetLanguages;
 }
 
-[[nodiscard]] const TargetLanguageInfo& GetTargetLanguageInfo(const TargetLanguage Language) noexcept {
-    return GetSupportedTargetLanguages()[static_cast<std::size_t>(Language)];
+[[nodiscard]] const TargetLanguageInfo& GetTargetLanguageInfo(const TargetLanguage Language) {
+    return GetSupportedTargetLanguages().at(static_cast<std::size_t>(Language));
 }
 }

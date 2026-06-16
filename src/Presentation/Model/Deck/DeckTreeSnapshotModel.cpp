@@ -64,10 +64,10 @@ void DeckTreeSnapshotModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>&
 
 void DeckTreeSnapshotModel::UpdateSiblingRowIndexes(const std::optional<std::size_t> ParentDeckNodeIndex) noexcept {
     std::vector<std::size_t>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex.has_value() ?
-                                                          m_DeckNodesVector[ParentDeckNodeIndex.value()].m_ChildDeckNodeIndexesVector :
+                                                          m_DeckNodesVector.at(ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector :
                                                           m_RootDeckNodeIndexesVector };
     for (std::size_t SiblingDeckRow{ 0 }; SiblingDeckRow < SiblingDeckNodeIndexes.size(); ++SiblingDeckRow) {
-        DeckNode& ChildDeckNode{ m_DeckNodesVector[SiblingDeckNodeIndexes.at(SiblingDeckRow)] };
+        DeckNode& ChildDeckNode{ m_DeckNodesVector.at(SiblingDeckNodeIndexes.at(SiblingDeckRow)) };
         ChildDeckNode.m_RowInParentIndex = SiblingDeckRow;
         UpdateSiblingRowIndexes(SiblingDeckNodeIndexes.at(SiblingDeckRow));
     }
@@ -79,7 +79,7 @@ void DeckTreeSnapshotModel::ApplyCurrentSort() {
     }
     SortSiblingDeckNodeIndexes(m_RootDeckNodeIndexesVector);
     for (std::size_t DeckNodeIndex{ 0 }; DeckNodeIndex < m_DeckNodesVector.size(); ++DeckNodeIndex) {
-        SortSiblingDeckNodeIndexes(m_DeckNodesVector[DeckNodeIndex].m_ChildDeckNodeIndexesVector);
+        SortSiblingDeckNodeIndexes(m_DeckNodesVector.at(DeckNodeIndex).m_ChildDeckNodeIndexesVector);
     }
     UpdateSiblingRowIndexes();
 }
@@ -98,7 +98,7 @@ void DeckTreeSnapshotModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapsho
             DeckNodesVector.emplace_back(DeckNode{ std::move(DeckTreeSnapshotNode), std::nullopt, 0, std::vector<std::size_t>{} });
         }
         for (std::size_t DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesVector.size(); ++DeckNodeIndex) {
-            DeckNode& CurrentDeckNode{ DeckNodesVector[DeckNodeIndex] };
+            DeckNode& CurrentDeckNode{ DeckNodesVector.at(DeckNodeIndex) };
             const std::optional<std::string>& ParentId{ CurrentDeckNode.m_DeckTreeSnapshotNode.m_ParentDeckId };
             if (not ParentId.has_value()) {
                 CurrentDeckNode.m_RowInParentIndex = RootDeckNodeIndexesVector.size();
@@ -107,7 +107,7 @@ void DeckTreeSnapshotModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapsho
             }
             CurrentDeckNode.m_ParentDeckNodeIndex = DeckNodeIndexByIdHash.at(ParentId.value());
             CurrentDeckNode.m_RowInParentIndex = DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector.size();
-            DeckNodesVector[CurrentDeckNode.m_ParentDeckNodeIndex.value()].m_ChildDeckNodeIndexesVector.push_back(DeckNodeIndex);
+            DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector.push_back(DeckNodeIndex);
         }
         beginResetModel();
         m_DeckNodesVector = std::move(DeckNodesVector);

@@ -25,7 +25,7 @@ public:
     LibraryInvalidationTargetBitset& operator=(LibraryInvalidationTargetBitset&&) = delete;
 
     [[nodiscard]] bool Contains(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) const noexcept {
-        return m_TargetBitset[std::to_underlying(LibraryInvalidationTarget)];
+        return m_TargetBitset.test(std::to_underlying(LibraryInvalidationTarget));
     }
 
 private:
