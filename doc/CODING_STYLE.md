@@ -114,8 +114,8 @@ Named `std::string_view` values used at C and Qt string boundaries are expected
 to wrap the complete null-terminated string, not a substring. Passing `.data()`
 to the boundary is the convention.
 
-Do not wrap throwaway string literals in local `std::string_view` variables just
-to pass them to a `const std::string_view` parameter.
+Do not name `std::string_view` values if they are immediately being passed as a
+parameter just a single time.
 
 ## Forward Declarations
 
