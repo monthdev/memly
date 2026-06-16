@@ -13,7 +13,7 @@
 
 namespace Infrastructure::Sql {
 namespace {
-void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
+void u_ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(Migration::M00_SchemaMigrationsLogSql()) };
     ThrowOnQueryResultError(*QueryResult);
     QueryResult = DatabaseConnection.Query(Migration::ReadSchemaMigrationsLogSql());
@@ -43,7 +43,7 @@ void ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
     }
 }
 
-void SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
+void u_SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
     std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ Seed::CreateDefaultFsrs7SchedulerSql,
                                                                                Seed::CreateDefaultFsrs7SettingsSql,
                                                                                Seed::CreateDefaultDeckSettingsSql };
@@ -57,8 +57,8 @@ void SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
 void RunDatabaseBootstrap(duckdb::Connection& DatabaseConnection) {
     DatabaseConnection.BeginTransaction();
     try {
-        ApplySchemaMigrations(DatabaseConnection);
-        SeedTableDefaults(DatabaseConnection);
+        u_ApplySchemaMigrations(DatabaseConnection);
+        u_SeedTableDefaults(DatabaseConnection);
         DatabaseConnection.Commit();
     } catch (...) {
         DatabaseConnection.Rollback();

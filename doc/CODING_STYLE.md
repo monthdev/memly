@@ -112,8 +112,18 @@ usage.
 
 Source-owned namespaces must match the folder nesting under `src/`.
 
-Anonymous helper namespaces must be nested inside the matching source-owned
+Unnamed helper namespaces must be nested inside the matching source-owned
 namespace.
+
+## Unnamed Namespace Helpers
+
+Use file-private free helpers in unnamed namespaces for logic that does not use
+class state.
+
+File-private helper function names in unnamed namespaces must use a `u_` prefix.
+
+We want to keep header declaration surfaces very explicit but minimal which also
+acts as the testing surface.
 
 ## Lambdas
 

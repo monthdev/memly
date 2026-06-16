@@ -11,60 +11,10 @@
 #include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store::Deck {
-
-[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::CreateRootDeck(const std::string& DeckName,
-                                                                                                      const std::uint8_t TargetLanguageCode) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateRootDeckPreparedStatement->Execute(DeckName, TargetLanguageCode) };
-    return HandleRecoverableDeckMutationError(*QueryResult);
-}
-
-[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::CreateChildDeck(const std::string& DeckName,
-                                                                                                       const std::string& ParentDeckId) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateChildDeckPreparedStatement->Execute(ParentDeckId, DeckName) };
-    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
-    if (RecoverableDeckMutationError.has_value()) {
-        return RecoverableDeckMutationError;
-    }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Child deck creation did not insert a deck");
-    return std::nullopt;
-}
-
-[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::MoveDeck(const std::string& DeckId,
-                                                                                                const std::optional<std::string>& NewParentDeckId) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_MoveDeckPreparedStatement->Execute(
-        DeckId, NewParentDeckId.has_value() ? duckdb::Value{ NewParentDeckId.value() } : duckdb::Value{ nullptr }) };
-    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
-    if (RecoverableDeckMutationError.has_value()) {
-        return RecoverableDeckMutationError;
-    }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck move did not update a deck");
-    return std::nullopt;
-}
-
-[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_RenameDeckPreparedStatement->Execute(NewDeckName, DeckId) };
-    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ HandleRecoverableDeckMutationError(*QueryResult) };
-    if (RecoverableDeckMutationError.has_value()) {
-        return RecoverableDeckMutationError;
-    }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck rename did not update a deck");
-    return std::nullopt;
-}
-
-[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::DeleteDeck(const std::string& DeckId) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
-    QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId);
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
-    QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId);
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck delete did not delete a deck");
-    return std::nullopt;
-}
+namespace {
 
 // TODO: Fix error message string checks and use switch case logic
-[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum>
-DeckStore::HandleRecoverableDeckMutationError(duckdb::QueryResult& QueryResult) const {
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> u_HandleRecoverableDeckMutationError(duckdb::QueryResult& QueryResult) {
     if (not QueryResult.HasError()) {
         return std::nullopt;
     }
@@ -88,4 +38,57 @@ DeckStore::HandleRecoverableDeckMutationError(duckdb::QueryResult& QueryResult) 
     }
     Runtime::ThrowError(QueryResult.GetError());
 }
+
+}
+
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::CreateRootDeck(const std::string& DeckName,
+                                                                                                      const std::uint8_t TargetLanguageCode) {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateRootDeckPreparedStatement->Execute(DeckName, TargetLanguageCode) };
+    return u_HandleRecoverableDeckMutationError(*QueryResult);
+}
+
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::CreateChildDeck(const std::string& DeckName,
+                                                                                                       const std::string& ParentDeckId) {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateChildDeckPreparedStatement->Execute(ParentDeckId, DeckName) };
+    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ u_HandleRecoverableDeckMutationError(*QueryResult) };
+    if (RecoverableDeckMutationError.has_value()) {
+        return RecoverableDeckMutationError;
+    }
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Child deck creation did not insert a deck");
+    return std::nullopt;
+}
+
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::MoveDeck(const std::string& DeckId,
+                                                                                                const std::optional<std::string>& NewParentDeckId) {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_MoveDeckPreparedStatement->Execute(
+        DeckId, NewParentDeckId.has_value() ? duckdb::Value{ NewParentDeckId.value() } : duckdb::Value{ nullptr }) };
+    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ u_HandleRecoverableDeckMutationError(*QueryResult) };
+    if (RecoverableDeckMutationError.has_value()) {
+        return RecoverableDeckMutationError;
+    }
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck move did not update a deck");
+    return std::nullopt;
+}
+
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_RenameDeckPreparedStatement->Execute(NewDeckName, DeckId) };
+    std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationError{ u_HandleRecoverableDeckMutationError(*QueryResult) };
+    if (RecoverableDeckMutationError.has_value()) {
+        return RecoverableDeckMutationError;
+    }
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck rename did not update a deck");
+    return std::nullopt;
+}
+
+[[nodiscard]] std::optional<Domain::Deck::RecoverableDeckMutationErrorEnum> DeckStore::DeleteDeck(const std::string& DeckId) {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId) };
+    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId);
+    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId);
+    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Deck delete did not delete a deck");
+    return std::nullopt;
+}
+
 }

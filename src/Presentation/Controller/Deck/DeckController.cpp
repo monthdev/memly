@@ -11,7 +11,7 @@
 namespace Presentation::Controller::Deck {
 namespace {
 
-[[nodiscard]] std::string RecoverableDeckMutationErrorToString(const Domain::Deck::RecoverableDeckMutationErrorEnum RecoverableDeckMutationError) {
+[[nodiscard]] std::string u_RecoverableDeckMutationErrorToString(const Domain::Deck::RecoverableDeckMutationErrorEnum RecoverableDeckMutationError) {
     switch (RecoverableDeckMutationError) {
     case Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
         return "Deck name length exceeds character limit";
@@ -38,7 +38,7 @@ namespace {
         const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.CreateRootDeck(
             DeckName, TargetLanguageCode) };
         if (not RecoverableDeckMutationResult.has_value()) {
-            return RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
+            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
         }
         return std::nullopt;
     });
@@ -49,7 +49,7 @@ namespace {
         const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.CreateChildDeck(DeckName,
                                                                                                                                                ParentDeckId) };
         if (not RecoverableDeckMutationResult.has_value()) {
-            return RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
+            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
         }
         return std::nullopt;
     });
@@ -60,7 +60,7 @@ namespace {
         const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.MoveDeck(DeckId,
                                                                                                                                         NewParentDeckId) };
         if (not RecoverableDeckMutationResult.has_value()) {
-            return RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
+            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
         }
         return std::nullopt;
     });
@@ -71,7 +71,7 @@ namespace {
         const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.RenameDeck(DeckId,
                                                                                                                                           NewDeckName) };
         if (not RecoverableDeckMutationResult.has_value()) {
-            return RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
+            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
         }
         return std::nullopt;
     });
@@ -81,7 +81,7 @@ namespace {
     return Runtime::TryCatchWrapper([&]() -> std::optional<std::string> {
         const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.DeleteDeck(DeckId) };
         if (not RecoverableDeckMutationResult.has_value()) {
-            return RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
+            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
         }
         return std::nullopt;
     });
