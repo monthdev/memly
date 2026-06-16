@@ -65,7 +65,7 @@ private:
             this,
             &LibraryInvalidationChannel::InvalidationSignal,
             ControllerPointer,
-            [ControllerLibraryInvalidationTarget, ControllerRefreshMethod = std::forward<ControllerRefreshMethodType>(ControllerRefreshMethod)](
+            [ControllerLibraryInvalidationTarget, ControllerRefreshMethod{ std::forward<ControllerRefreshMethodType>(ControllerRefreshMethod) }](
                 const LibraryInvalidationTargetBitset& CoordinatorLibraryInvalidationTargetBitset) noexcept -> void {
                 if (CoordinatorLibraryInvalidationTargetBitset.Contains(ControllerLibraryInvalidationTarget)) {
                     std::invoke(ControllerRefreshMethod);

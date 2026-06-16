@@ -16,6 +16,12 @@ Constructor member construction must use brace-initialized construction in the
 initializer list. Class members must not be initialized anywhere else but the
 initializer list.
 
+## Variable Initialization
+
+Named variables must use brace initialization.
+
+Lambda init-captures must use brace initialization.
+
 ## Header Declaration Surface
 
 Constructors and destructors must always be declared and implemented in the
