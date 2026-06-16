@@ -8,11 +8,11 @@
 namespace Domain::ReviewSession {
 
 struct ReviewSessionListRow {
-    ReviewSessionListRow(std::string ReviewSessionId,
-                         std::string ReviewSessionName,
+    ReviewSessionListRow(std::string&& ReviewSessionId,
+                         std::string&& ReviewSessionName,
                          const std::int64_t CreatedAtMillisecondsSinceEpoch,
-                         std::optional<std::int64_t> LastUpdatedAtMillisecondsSinceEpoch,
-                         std::optional<std::int64_t> LastCardReviewAtMillisecondsSinceEpoch)
+                         std::optional<std::int64_t>&& LastUpdatedAtMillisecondsSinceEpoch,
+                         std::optional<std::int64_t>&& LastCardReviewAtMillisecondsSinceEpoch)
         : m_ReviewSessionId{ std::move(ReviewSessionId) }
         , m_ReviewSessionName{ std::move(ReviewSessionName) }
         , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }

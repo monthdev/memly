@@ -14,7 +14,7 @@ struct ReviewSessionDeckSelection {
         ExcludeSubtree
     };
 
-    ReviewSessionDeckSelection(std::string DeckId, const DeckSelectionTypeEnum DeckSelectionType)
+    ReviewSessionDeckSelection(std::string&& DeckId, const DeckSelectionTypeEnum DeckSelectionType)
         : m_DeckId{ std::move(DeckId) }
         , m_DeckSelectionType{ DeckSelectionType } {
     }

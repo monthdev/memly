@@ -8,18 +8,18 @@
 namespace Domain::Deck {
 
 struct DeckTreeSnapshotNode {
-    DeckTreeSnapshotNode(std::string DeckId,
-                         std::optional<std::string> ParentDeckId,
-                         std::string DeckName,
-                         std::int64_t CreatedAtMillisecondsSinceEpoch,
-                         std::optional<std::int64_t> LastUpdatedAtMillisecondsSinceEpoch,
-                         std::uint32_t SelfDueNowCount,
-                         std::uint32_t SelfByTodayCount,
-                         std::uint32_t SelfTotalCount,
-                         std::uint32_t SubtreeDueNowCount,
-                         std::uint32_t SubtreeByTodayCount,
-                         std::uint32_t SubtreeTotalCount,
-                         std::uint8_t TargetLanguageCode)
+    DeckTreeSnapshotNode(std::string&& DeckId,
+                         std::optional<std::string>&& ParentDeckId,
+                         std::string&& DeckName,
+                         const std::int64_t CreatedAtMillisecondsSinceEpoch,
+                         std::optional<std::int64_t>&& LastUpdatedAtMillisecondsSinceEpoch,
+                         const std::uint32_t SelfDueNowCount,
+                         const std::uint32_t SelfByTodayCount,
+                         const std::uint32_t SelfTotalCount,
+                         const std::uint32_t SubtreeDueNowCount,
+                         const std::uint32_t SubtreeByTodayCount,
+                         const std::uint32_t SubtreeTotalCount,
+                         const std::uint8_t TargetLanguageCode)
         : m_DeckId{ std::move(DeckId) }
         , m_ParentDeckId{ std::move(ParentDeckId) }
         , m_DeckName{ std::move(DeckName) }

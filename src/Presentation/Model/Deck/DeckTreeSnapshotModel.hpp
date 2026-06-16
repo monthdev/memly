@@ -222,7 +222,7 @@ public:
         });
     }
 
-    void ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>) noexcept;
+    void ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>&&) noexcept;
 
 private:
     struct DeckNode {
@@ -241,7 +241,7 @@ private:
     [[nodiscard]] const std::vector<std::size_t>& GetChildDeckNodeIndexes(const QModelIndex&) const;
     void ApplyCurrentSort();
     void SortSiblingDeckNodeIndexes(std::vector<std::size_t>&);
-    void UpdateSiblingRowIndexes(std::optional<std::size_t> = std::nullopt) noexcept;
+    void UpdateSiblingRowIndexes(const std::optional<std::size_t>& = std::nullopt) noexcept;
     [[nodiscard]] int CompareDeckNodes(std::size_t, std::size_t) const noexcept;
 };
 }

@@ -31,6 +31,18 @@ Overrides must also be declared and implemented in the header.
 
 Parameters must only be named where methods are implemented, not declared.
 
+## Parameter Passing
+
+Parameters must be trivial primitive value copies, references, or rvalue
+references.
+
+Non-trivial owning values must not be copied into parameters by value.
+
+Use rvalue reference parameters when the callee consumes ownership.
+
+Value parameters only apply for `const std::string_view` as described in the
+string view rule.
+
 ## Attributes, Specifiers, Qualifiers, And Qt Metadata Macros
 
 Classes, data-time object structs, methods, members, parameters, free functions,

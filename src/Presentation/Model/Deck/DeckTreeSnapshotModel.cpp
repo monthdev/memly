@@ -62,7 +62,7 @@ void DeckTreeSnapshotModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>&
                      });
 }
 
-void DeckTreeSnapshotModel::UpdateSiblingRowIndexes(const std::optional<std::size_t> ParentDeckNodeIndex) noexcept {
+void DeckTreeSnapshotModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& ParentDeckNodeIndex) noexcept {
     std::vector<std::size_t>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex.has_value() ?
                                                           m_DeckNodesVector.at(ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector :
                                                           m_RootDeckNodeIndexesVector };
@@ -84,7 +84,7 @@ void DeckTreeSnapshotModel::ApplyCurrentSort() {
     UpdateSiblingRowIndexes();
 }
 
-void DeckTreeSnapshotModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode> DeckTreeSnapshotNodeVector) noexcept {
+void DeckTreeSnapshotModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>&& DeckTreeSnapshotNodeVector) noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
         std::vector<DeckNode> DeckNodesVector;
         std::vector<std::size_t> RootDeckNodeIndexesVector;
