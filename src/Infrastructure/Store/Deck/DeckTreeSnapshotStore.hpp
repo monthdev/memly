@@ -15,8 +15,8 @@ namespace Infrastructure::Store::Deck {
 class DeckTreeSnapshotStore final {
 public:
     explicit DeckTreeSnapshotStore(duckdb::Connection& DatabaseConnection)
-        : m_ReadDeckTreeSnapshotPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Query::ReadDeckTreeSnapshotSql()) } {
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotPreparedStatement);
+        : m_ReadDeckTreeSnapshotNodesPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Query::ReadDeckTreeSnapshotNodesSql()) } {
+        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotNodesPreparedStatement);
     }
 
     ~DeckTreeSnapshotStore() noexcept = default;
@@ -25,9 +25,9 @@ public:
     DeckTreeSnapshotStore& operator=(const DeckTreeSnapshotStore&) = delete;
     DeckTreeSnapshotStore& operator=(DeckTreeSnapshotStore&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> ReadDeckTreeSnapshot(std::int64_t);
+    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> ReadDeckTreeSnapshotNodes(std::int64_t);
 
 private:
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadDeckTreeSnapshotPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_ReadDeckTreeSnapshotNodesPreparedStatement;
 };
 }

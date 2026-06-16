@@ -13,8 +13,8 @@
 
 namespace Infrastructure::Store::ReviewSession {
 
-[[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListStore::ReadReviewSessionList() {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionListPreparedStatement->Execute() };
+[[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListStore::ReadReviewSessionListRows() {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionListRowsPreparedStatement->Execute() };
     Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
     std::vector<Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListRowVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {

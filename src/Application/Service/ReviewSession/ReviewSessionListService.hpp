@@ -22,7 +22,7 @@ public:
     ReviewSessionListService& operator=(const ReviewSessionListService&) = delete;
     ReviewSessionListService& operator=(ReviewSessionListService&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionList();
+    [[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionListRows();
 
 private:
     Infrastructure::Store::ReviewSession::ReviewSessionListStore& m_ReviewSessionListStore;

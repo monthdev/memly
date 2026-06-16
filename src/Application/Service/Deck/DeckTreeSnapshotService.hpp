@@ -23,7 +23,7 @@ public:
     DeckTreeSnapshotService& operator=(const DeckTreeSnapshotService&) = delete;
     DeckTreeSnapshotService& operator=(DeckTreeSnapshotService&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> ReadDeckTreeSnapshot(std::int64_t);
+    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> ReadDeckTreeSnapshotNodes(std::int64_t);
 
 private:
     Infrastructure::Store::Deck::DeckTreeSnapshotStore& m_DeckTreeSnapshotStore;

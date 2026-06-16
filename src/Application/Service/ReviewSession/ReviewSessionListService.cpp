@@ -7,8 +7,8 @@
 
 namespace Application::Service::ReviewSession {
 
-[[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListService::ReadReviewSessionList() {
-    return m_ReviewSessionListStore.ReadReviewSessionList();
+[[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListService::ReadReviewSessionListRows() {
+    return m_ReviewSessionListStore.ReadReviewSessionListRows();
 }
 
 }

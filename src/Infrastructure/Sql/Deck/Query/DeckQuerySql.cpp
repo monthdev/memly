@@ -4,7 +4,7 @@
 
 namespace Infrastructure::Sql::Deck::Query {
 
-[[nodiscard]] std::string ReadDeckTreeSnapshotSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Query/Statement/ReadDeckTreeSnapshot.sql");
+[[nodiscard]] std::string ReadDeckTreeSnapshotNodesSql() {
+    return ReadSqlResourceBytes(":/Sql/Deck/Query/Statement/ReadDeckTreeSnapshotNodes.sql");
 }
 }

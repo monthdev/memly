@@ -4,7 +4,7 @@
 
 namespace Infrastructure::Sql::ReviewSession::Query {
 
-[[nodiscard]] std::string ReadReviewSessionListSql();
+[[nodiscard]] std::string ReadReviewSessionListRowsSql();
 
 [[nodiscard]] std::string ReadDefaultReviewSessionIdByRootDeckIdSql();
 
