@@ -58,6 +58,4 @@ SET
 FROM
   validated_move
 WHERE
-  decks.id = validated_move.moved_deck_id
-RETURNING
-  id;
+  decks.id = validated_move.moved_deck_id;

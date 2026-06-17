@@ -1,0 +1,6 @@
+SELECT
+  id
+FROM
+  decks
+WHERE
+  id = CAST(CAST(? AS VARCHAR) AS UUID);

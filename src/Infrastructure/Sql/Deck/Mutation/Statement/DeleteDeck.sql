@@ -16,6 +16,4 @@ WHERE
       id
     FROM
       deck_subtree
-  )
-RETURNING
-  id;
+  );

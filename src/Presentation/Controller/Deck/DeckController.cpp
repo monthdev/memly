@@ -15,6 +15,12 @@ namespace {
 [[nodiscard]] constexpr std::string_view
 u_RecoverableDeckMutationErrorToStringView(const Domain::Deck::RecoverableDeckMutationErrorEnum RecoverableDeckMutationError) noexcept {
     switch (RecoverableDeckMutationError) {
+    case Domain::Deck::RecoverableDeckMutationErrorEnum::InvalidDeckIdError: {
+        return "Deck no longer exists";
+    }
+    case Domain::Deck::RecoverableDeckMutationErrorEnum::InvalidParentDeckIdError: {
+        return "Parent deck no longer exists";
+    }
     case Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
         return "Deck name length exceeds character limit";
     }

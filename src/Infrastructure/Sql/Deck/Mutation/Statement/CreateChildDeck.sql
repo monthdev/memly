@@ -25,6 +25,4 @@ SELECT
   child_creation_context.target_language_code,
   child_creation_context.deck_settings_id
 FROM
-  child_creation_context
-RETURNING
-  id;
+  child_creation_context;
