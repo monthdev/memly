@@ -12,6 +12,10 @@ Page {
         id: deckTreeSnapshotController
     }
 
+    DeckController {
+        id: deckController
+    }
+
     background: Rectangle {
         color: root.pageColor
     }
