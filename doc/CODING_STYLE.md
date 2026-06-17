@@ -85,6 +85,35 @@ Static data members and function-local static variables must use an `s_` prefix.
 
 Global variables are disallowed.
 
+## Type-Suffix Naming
+
+Named container variables and helper methods (not public API methods) whose
+names describe their container return type or the data they are working with
+must end with the concrete container type name.
+
+Use suffixes such as `Vector`, `Array`, `Map`, `UnorderedMap`, `Set`, and
+`UnorderedSet` where they apply.
+
+`std::string` is grouped with primitive types and must not add a type suffix to
+names.
+
+Names for `std::string_view` values must end in `StringView`.
+
+Named `std::expected` result variables must use the wrapped operation name plus
+the `Expected` suffix such as `CreateRootDeckExpected`.
+
+Named `std::optional` values must use the `Optional` suffix.
+
+Method and function names must not include `Optional` or `Expected` if that is
+their return type.
+
+Methods and functions that return `std::optional` must begin with `Try`.
+
+Associative container names must keep the lookup relationship before the
+container suffix such as `DeckNodeIndexByDeckIdUnorderedMap`.
+
+Enum class type names must end in `Enum`.
+
 ## Qt Types And Containers
 
 Project-owned application code must use standard library types and containers.
