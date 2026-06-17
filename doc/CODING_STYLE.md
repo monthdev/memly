@@ -99,8 +99,7 @@ names.
 
 Names for `std::string_view` values must end in `StringView`.
 
-Named `std::expected` result variables must use the wrapped operation name plus
-the `Expected` suffix such as `CreateRootDeckExpected`.
+Named `std::expected` result variables must use the `Expected` suffix.
 
 Named `std::optional` values must use the `Optional` suffix.
 
@@ -109,7 +108,7 @@ their return type.
 
 Methods and functions that return `std::optional` must begin with `Try`.
 
-Associative container names must keep the lookup relationship before the
+Associative container names must name the lookup relationship before the
 container suffix such as `DeckNodeIndexByDeckIdUnorderedMap`.
 
 Enum class type names must end in `Enum`.
