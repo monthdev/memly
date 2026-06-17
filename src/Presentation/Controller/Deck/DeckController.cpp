@@ -2,7 +2,8 @@
 
 #include <cstdint>
 #include <expected>
-#include <string>
+#include <optional>
+#include <string_view>
 
 #include "Application/Service/Deck/DeckService.hpp"
 #include "Domain/Deck/RecoverableDeckMutationError.hpp"
@@ -11,7 +12,8 @@
 namespace Presentation::Controller::Deck {
 namespace {
 
-[[nodiscard]] std::string u_RecoverableDeckMutationErrorToString(const Domain::Deck::RecoverableDeckMutationErrorEnum RecoverableDeckMutationError) {
+[[nodiscard]] constexpr std::string_view
+u_RecoverableDeckMutationErrorToStringView(const Domain::Deck::RecoverableDeckMutationErrorEnum RecoverableDeckMutationError) noexcept {
     switch (RecoverableDeckMutationError) {
     case Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError: {
         return "Deck name length exceeds character limit";
@@ -31,60 +33,45 @@ namespace {
     }
 }
 
+[[nodiscard]] constexpr std::expected<void, std::string_view>
+u_DeckServiceExpectedToDeckControllerExpected(const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum>& DeckServiceExpected) noexcept {
+    if (DeckServiceExpected.has_value()) {
+        return {};
+    }
+    return std::unexpected{ u_RecoverableDeckMutationErrorToStringView(DeckServiceExpected.error()) };
 }
 
-[[nodiscard]] std::optional<std::string> DeckController::CreateRootDeck(const std::string& DeckName, const std::uint8_t TargetLanguageCode) noexcept {
-    return Runtime::TryCatchWrapper([&]() -> std::optional<std::string> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.CreateRootDeck(
-            DeckName, TargetLanguageCode) };
-        if (not RecoverableDeckMutationResult.has_value()) {
-            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
-        }
-        return std::nullopt;
+}
+
+[[nodiscard]] std::expected<void, std::string_view> DeckController::CreateRootDeck(const std::string& DeckName,
+                                                                                   const std::uint8_t TargetLanguageCode) noexcept {
+    return Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+        return u_DeckServiceExpectedToDeckControllerExpected(m_DeckService.CreateRootDeck(DeckName, TargetLanguageCode));
     });
 }
 
-[[nodiscard]] std::optional<std::string> DeckController::CreateChildDeck(const std::string& DeckName, const std::string& ParentDeckId) noexcept {
-    return Runtime::TryCatchWrapper([&]() -> std::optional<std::string> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.CreateChildDeck(DeckName,
-                                                                                                                                               ParentDeckId) };
-        if (not RecoverableDeckMutationResult.has_value()) {
-            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
-        }
-        return std::nullopt;
+[[nodiscard]] std::expected<void, std::string_view> DeckController::CreateChildDeck(const std::string& DeckName, const std::string& ParentDeckId) noexcept {
+    return Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+        return u_DeckServiceExpectedToDeckControllerExpected(m_DeckService.CreateChildDeck(DeckName, ParentDeckId));
     });
 }
 
-[[nodiscard]] std::optional<std::string> DeckController::MoveDeck(const std::string& DeckId, const std::optional<std::string>& NewParentDeckId) noexcept {
-    return Runtime::TryCatchWrapper([&]() -> std::optional<std::string> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.MoveDeck(DeckId,
-                                                                                                                                        NewParentDeckId) };
-        if (not RecoverableDeckMutationResult.has_value()) {
-            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
-        }
-        return std::nullopt;
+[[nodiscard]] std::expected<void, std::string_view> DeckController::MoveDeck(const std::string& DeckId,
+                                                                             const std::optional<std::string>& NewParentDeckId) noexcept {
+    return Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+        return u_DeckServiceExpectedToDeckControllerExpected(m_DeckService.MoveDeck(DeckId, NewParentDeckId));
     });
 }
 
-[[nodiscard]] std::optional<std::string> DeckController::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) noexcept {
-    return Runtime::TryCatchWrapper([&]() -> std::optional<std::string> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.RenameDeck(DeckId,
-                                                                                                                                          NewDeckName) };
-        if (not RecoverableDeckMutationResult.has_value()) {
-            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
-        }
-        return std::nullopt;
+[[nodiscard]] std::expected<void, std::string_view> DeckController::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) noexcept {
+    return Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+        return u_DeckServiceExpectedToDeckControllerExpected(m_DeckService.RenameDeck(DeckId, NewDeckName));
     });
 }
 
-[[nodiscard]] std::optional<std::string> DeckController::DeleteDeck(const std::string& DeckId) noexcept {
-    return Runtime::TryCatchWrapper([&]() -> std::optional<std::string> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RecoverableDeckMutationResult{ m_DeckService.DeleteDeck(DeckId) };
-        if (not RecoverableDeckMutationResult.has_value()) {
-            return u_RecoverableDeckMutationErrorToString(RecoverableDeckMutationResult.error());
-        }
-        return std::nullopt;
-    });
+[[nodiscard]] std::expected<void, std::string_view> DeckController::DeleteDeck(const std::string& DeckId) noexcept {
+    return Runtime::TryCatchWrapper(
+        [&]() -> std::expected<void, std::string_view> { return u_DeckServiceExpectedToDeckControllerExpected(m_DeckService.DeleteDeck(DeckId)); });
 }
 
 }
