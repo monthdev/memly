@@ -4,6 +4,6 @@ namespace duckdb {
 class Connection;
 }
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Database {
 void RunDatabaseBootstrap(duckdb::Connection&);
 }

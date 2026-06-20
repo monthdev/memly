@@ -7,7 +7,7 @@
 #include "Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Database {
 class TransactionRunner;
 }
 
@@ -19,7 +19,7 @@ namespace Application::Service::ReviewSession {
 
 class ReviewSessionService final {
 public:
-    ReviewSessionService(Infrastructure::Sql::TransactionRunner& TransactionRunner,
+    ReviewSessionService(Infrastructure::Database::TransactionRunner& TransactionRunner,
                          Infrastructure::Store::ReviewSession::ReviewSessionStore& ReviewSessionStore) noexcept
         : m_TransactionRunner{ TransactionRunner }
         , m_ReviewSessionStore{ ReviewSessionStore } {
@@ -46,7 +46,7 @@ public:
     [[nodiscard]] std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> DeleteReviewSession(const std::string&);
 
 private:
-    Infrastructure::Sql::TransactionRunner& m_TransactionRunner;
+    Infrastructure::Database::TransactionRunner& m_TransactionRunner;
     Infrastructure::Store::ReviewSession::ReviewSessionStore& m_ReviewSessionStore;
 };
 

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Library {
 
@@ -13,7 +13,7 @@ namespace Infrastructure::Store::Library {
 LibraryClockStore::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const std::int64_t AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement->Execute(
         AsOfMillisecondsSinceEpoch) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     const auto QueryResultIterator{ QueryResult->begin() };
     if ((*QueryResultIterator).IsNull(0)) {
         return std::nullopt;

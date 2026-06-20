@@ -6,8 +6,8 @@
 #include <memory>
 #include <optional>
 
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/Library/Query/LibraryQuerySql.hpp"
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Library {
 
@@ -16,7 +16,7 @@ public:
     explicit LibraryClockStore(duckdb::Connection& DatabaseConnection)
         : m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
               Infrastructure::Sql::Library::Query::ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql()) } {
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement);
     }
 
     ~LibraryClockStore() noexcept = default;

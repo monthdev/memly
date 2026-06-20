@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "Domain/ReviewSession/ReviewSessionListRow.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 
@@ -16,7 +16,7 @@ public:
     explicit ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
         : m_ReadReviewSessionListRowsPreparedStatement{ DatabaseConnection.Prepare(
               Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionListRowsSql()) } {
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadReviewSessionListRowsPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionListRowsPreparedStatement);
     }
 
     ~ReviewSessionListStore() noexcept = default;

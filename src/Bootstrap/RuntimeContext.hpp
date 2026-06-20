@@ -28,7 +28,7 @@ class Connection;
 class DuckDB;
 }
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Database {
 class TransactionRunner;
 }
 
@@ -68,7 +68,7 @@ public:
 private:
     static std::unique_ptr<duckdb::DuckDB> s_Database;
     static std::unique_ptr<duckdb::Connection> s_DatabaseConnection;
-    static std::unique_ptr<Infrastructure::Sql::TransactionRunner> s_TransactionRunner;
+    static std::unique_ptr<Infrastructure::Database::TransactionRunner> s_TransactionRunner;
     static std::unique_ptr<Application::Invalidation::LibraryInvalidationChannel> s_LibraryInvalidationChannel;
     static std::unique_ptr<Infrastructure::Store::Library::LibraryClockStore> s_LibraryClockStore;
     static std::unique_ptr<Application::Invalidation::LibraryInvalidationCoordinator> s_LibraryInvalidationCoordinator;

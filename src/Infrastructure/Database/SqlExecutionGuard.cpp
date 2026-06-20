@@ -1,10 +1,10 @@
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 
 #include <duckdb.hpp>
 
 #include "Runtime/Crash.hpp"
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Database {
 
 void ThrowOnQueryResultError(duckdb::QueryResult& QueryResult, const std::source_location& SourceLocation) {
     if (QueryResult.HasError()) {

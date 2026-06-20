@@ -9,7 +9,7 @@
 #include <string>
 #include <string_view>
 
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store::Deck {
@@ -45,7 +45,7 @@ namespace {
 
 [[nodiscard]] bool DeckStore::CheckDeckIdExists(const std::string& DeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CheckDeckIdExistsPreparedStatement->Execute(DeckId) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     return QueryResult->begin() not_eq QueryResult->end();
 }
 
@@ -113,11 +113,11 @@ namespace {
         return std::unexpected{ Domain::Deck::RecoverableDeckIdErrorEnum::InvalidDeckIdError };
     }
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteDeckCardReviewsPreparedStatement->Execute(DeckId) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     QueryResult = m_DeleteDeckCardsPreparedStatement->Execute(DeckId);
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     QueryResult = m_DeleteDeckPreparedStatement->Execute(DeckId);
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     return {};
 }
 

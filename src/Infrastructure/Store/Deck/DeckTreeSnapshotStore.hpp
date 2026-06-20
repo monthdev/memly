@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "Domain/Deck/DeckTreeSnapshotNode.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/Deck/Query/DeckQuerySql.hpp"
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Deck {
 
@@ -16,7 +16,7 @@ class DeckTreeSnapshotStore final {
 public:
     explicit DeckTreeSnapshotStore(duckdb::Connection& DatabaseConnection)
         : m_ReadDeckTreeSnapshotNodesPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Query::ReadDeckTreeSnapshotNodesSql()) } {
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotNodesPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadDeckTreeSnapshotNodesPreparedStatement);
     }
 
     ~DeckTreeSnapshotStore() noexcept = default;

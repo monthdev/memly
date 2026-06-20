@@ -7,7 +7,7 @@
 
 #include "Domain/Deck/RecoverableDeckError.hpp"
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Database {
 class TransactionRunner;
 }
 
@@ -23,7 +23,7 @@ namespace Application::Service::Deck {
 
 class DeckService final {
 public:
-    DeckService(Infrastructure::Sql::TransactionRunner& TransactionRunner,
+    DeckService(Infrastructure::Database::TransactionRunner& TransactionRunner,
                 Application::Invalidation::LibraryInvalidationCoordinator& LibraryInvalidationCoordinator,
                 Infrastructure::Store::Deck::DeckStore& DeckStore) noexcept
         : m_TransactionRunner{ TransactionRunner }
@@ -44,7 +44,7 @@ public:
     [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const std::string&);
 
 private:
-    Infrastructure::Sql::TransactionRunner& m_TransactionRunner;
+    Infrastructure::Database::TransactionRunner& m_TransactionRunner;
     Application::Invalidation::LibraryInvalidationCoordinator& m_LibraryInvalidationCoordinator;
     Infrastructure::Store::Deck::DeckStore& m_DeckStore;
 };

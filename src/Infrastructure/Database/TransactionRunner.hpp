@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Database {
 
 class TransactionRunner final {
 private:

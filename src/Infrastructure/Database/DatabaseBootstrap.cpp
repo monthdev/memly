@@ -6,17 +6,17 @@
 #include <cstdint>
 #include <functional>
 
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/Migration/MigrationSql.hpp"
 #include "Infrastructure/Sql/Seed/SeedSql.hpp"
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 #include "Runtime/Crash.hpp"
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Database {
 namespace {
 void u_ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(Migration::M00_SchemaMigrationsLogSql()) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(Infrastructure::Sql::Migration::M00_SchemaMigrationsLogSql()) };
     ThrowOnQueryResultError(*QueryResult);
-    QueryResult = DatabaseConnection.Query(Migration::ReadSchemaMigrationsLogSql());
+    QueryResult = DatabaseConnection.Query(Infrastructure::Sql::Migration::ReadSchemaMigrationsLogSql());
     ThrowOnQueryResultError(*QueryResult);
     std::vector<std::size_t> AppliedMigrationVersionVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
@@ -28,7 +28,7 @@ void u_ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
             Runtime::ThrowError("Unexpected applied migration version order");
         }
     }
-    std::array<std::reference_wrapper<std::string()>, 1> MigrationSqlFunctionArray{ Migration::M01_InitialSchemaSql };
+    std::array<std::reference_wrapper<std::string()>, 1> MigrationSqlFunctionArray{ Infrastructure::Sql::Migration::M01_InitialSchemaSql };
     if (AppliedMigrationVersionVector.size() > MigrationSqlFunctionArray.size()) {
         Runtime::ThrowError("Unexpected number of applied migrations");
     }
@@ -38,15 +38,16 @@ void u_ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
         const std::string& MigrationSql{ std::invoke(MigrationSqlFunctionArray.at(UnappliedMigrationVersionIndex)) };
         QueryResult = DatabaseConnection.Query(MigrationSql);
         ThrowOnQueryResultError(*QueryResult);
-        QueryResult = DatabaseConnection.Query(Migration::CreateSchemaMigrationsLogEntrySql(), static_cast<std::uint32_t>(UnappliedMigrationVersionIndex + 1));
+        QueryResult = DatabaseConnection.Query(Infrastructure::Sql::Migration::CreateSchemaMigrationsLogEntrySql(),
+                                               static_cast<std::uint32_t>(UnappliedMigrationVersionIndex + 1));
         ThrowOnQueryResultError(*QueryResult);
     }
 }
 
 void u_SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
-    std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ Seed::CreateDefaultFsrs7SchedulerSql,
-                                                                               Seed::CreateDefaultFsrs7SettingsSql,
-                                                                               Seed::CreateDefaultDeckSettingsSql };
+    std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ Infrastructure::Sql::Seed::CreateDefaultFsrs7SchedulerSql,
+                                                                               Infrastructure::Sql::Seed::CreateDefaultFsrs7SettingsSql,
+                                                                               Infrastructure::Sql::Seed::CreateDefaultDeckSettingsSql };
     for (const std::reference_wrapper<std::string()>& SeedSqlFunction : SeedSqlFunctionArray) {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(std::invoke(SeedSqlFunction)) };
         ThrowOnQueryResultError(*QueryResult);

@@ -7,7 +7,7 @@
 
 #include "Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
-#include "Infrastructure/Sql/TransactionRunner.hpp"
+#include "Infrastructure/Database/TransactionRunner.hpp"
 #include "Infrastructure/Store/ReviewSession/ReviewSessionStore.hpp"
 
 namespace Application::Service::ReviewSession {

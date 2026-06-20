@@ -6,7 +6,7 @@
 
 #include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
 #include "Domain/Deck/DeckConstraint.hpp"
-#include "Infrastructure/Sql/TransactionRunner.hpp"
+#include "Infrastructure/Database/TransactionRunner.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 
 namespace Application::Service::Deck {

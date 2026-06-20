@@ -15,8 +15,8 @@
 #include "Application/Service/Deck/DeckTreeSnapshotService.hpp"
 #include "Application/Service/ReviewSession/ReviewSessionListService.hpp"
 #include "Application/Service/ReviewSession/ReviewSessionService.hpp"
-#include "Infrastructure/Sql/DatabaseBootstrap.hpp"
-#include "Infrastructure/Sql/TransactionRunner.hpp"
+#include "Infrastructure/Database/DatabaseBootstrap.hpp"
+#include "Infrastructure/Database/TransactionRunner.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 #include "Infrastructure/Store/Deck/DeckTreeSnapshotStore.hpp"
 #include "Infrastructure/Store/Library/LibraryClockStore.hpp"
@@ -27,7 +27,7 @@ namespace Bootstrap {
 
 std::unique_ptr<duckdb::DuckDB> RuntimeContext::s_Database{};
 std::unique_ptr<duckdb::Connection> RuntimeContext::s_DatabaseConnection{};
-std::unique_ptr<Infrastructure::Sql::TransactionRunner> RuntimeContext::s_TransactionRunner{};
+std::unique_ptr<Infrastructure::Database::TransactionRunner> RuntimeContext::s_TransactionRunner{};
 std::unique_ptr<Application::Invalidation::LibraryInvalidationChannel> RuntimeContext::s_LibraryInvalidationChannel{};
 std::unique_ptr<Infrastructure::Store::Library::LibraryClockStore> RuntimeContext::s_LibraryClockStore{};
 std::unique_ptr<Application::Invalidation::LibraryInvalidationCoordinator> RuntimeContext::s_LibraryInvalidationCoordinator{};
@@ -59,8 +59,8 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
 
     s_Database = std::make_unique<duckdb::DuckDB>(DatabaseFilePath.toStdString());
     s_DatabaseConnection = std::make_unique<duckdb::Connection>(*s_Database);
-    Infrastructure::Sql::RunDatabaseBootstrap(*s_DatabaseConnection);
-    s_TransactionRunner = std::make_unique<Infrastructure::Sql::TransactionRunner>(*s_DatabaseConnection);
+    Infrastructure::Database::RunDatabaseBootstrap(*s_DatabaseConnection);
+    s_TransactionRunner = std::make_unique<Infrastructure::Database::TransactionRunner>(*s_DatabaseConnection);
     s_LibraryInvalidationChannel = std::make_unique<Application::Invalidation::LibraryInvalidationChannel>();
     s_LibraryClockStore = std::make_unique<Infrastructure::Store::Library::LibraryClockStore>(*s_DatabaseConnection);
     s_LibraryInvalidationCoordinator =

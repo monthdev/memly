@@ -8,7 +8,7 @@ class PreparedStatement;
 class QueryResult;
 }
 
-namespace Infrastructure::Sql {
+namespace Infrastructure::Database {
 
 void ThrowOnQueryResultError(duckdb::QueryResult&, const std::source_location& = std::source_location::current());
 

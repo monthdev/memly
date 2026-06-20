@@ -11,7 +11,7 @@
 
 #include "Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
@@ -70,7 +70,7 @@ ReviewSessionStore::CreateOrReadExistingDefaultReviewSession(const std::string& 
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Default review session creation did not insert a review session");
+    Infrastructure::Database::ThrowOnMutationNoOp(*QueryResult, "Default review session creation did not insert a review session");
     return (*QueryResult->begin()).GetValue<std::string>(0);
 }
 
@@ -110,7 +110,7 @@ ReviewSessionStore::RenameReviewSession(const std::string& ReviewSessionId, cons
     if (RecoverableReviewSessionMutationError.has_value()) {
         return RecoverableReviewSessionMutationError;
     }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session rename did not update a review session");
+    Infrastructure::Database::ThrowOnMutationNoOp(*QueryResult, "Review session rename did not update a review session");
     return std::nullopt;
 }
 
@@ -132,7 +132,7 @@ ReviewSessionStore::EditReviewSessionToDefault(const std::string& CurrentReviewS
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session edit to default did not update a review session");
+    Infrastructure::Database::ThrowOnMutationNoOp(*QueryResult, "Review session edit to default did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     return CurrentReviewSessionId;
 }
@@ -155,7 +155,7 @@ ReviewSessionStore::EditReviewSessionToCustom(const std::string& CurrentReviewSe
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session edit to custom did not update a review session");
+    Infrastructure::Database::ThrowOnMutationNoOp(*QueryResult, "Review session edit to custom did not update a review session");
     DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     for (const Domain::ReviewSession::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
         RecoverableReviewSessionMutationError =
@@ -169,20 +169,20 @@ ReviewSessionStore::EditReviewSessionToCustom(const std::string& CurrentReviewSe
 
 void ReviewSessionStore::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement->Execute(ReviewSessionId) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session last card review timestamp update did not update a review session");
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnMutationNoOp(*QueryResult, "Review session last card review timestamp update did not update a review session");
 }
 
 void ReviewSessionStore::DeleteReviewSession(const std::string& ReviewSessionId) {
     DeleteCustomReviewSessionDeckSelections(ReviewSessionId);
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteReviewSessionPreparedStatement->Execute(ReviewSessionId) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
-    Infrastructure::Sql::ThrowOnMutationNoOp(*QueryResult, "Review session delete did not delete a review session");
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnMutationNoOp(*QueryResult, "Review session delete did not delete a review session");
 }
 
 [[nodiscard]] std::optional<std::string> ReviewSessionStore::TryReadDefaultReviewSessionIdByRootDeckId(const std::string& RootDeckId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement->Execute(RootDeckId) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     if (const auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end()) {
         return (*QueryResultIterator).GetValue<std::string>(0);
     }
@@ -191,7 +191,7 @@ void ReviewSessionStore::DeleteReviewSession(const std::string& ReviewSessionId)
 
 [[nodiscard]] std::optional<std::string> ReviewSessionStore::TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string& ReviewSessionDefinitionKey) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement->Execute(ReviewSessionDefinitionKey) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     if (const auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end()) {
         return (*QueryResultIterator).GetValue<std::string>(0);
     }
@@ -210,7 +210,7 @@ ReviewSessionStore::CreateCustomReviewSessionDeckSelection(const std::string& Re
 
 void ReviewSessionStore::DeleteCustomReviewSessionDeckSelections(const std::string& ReviewSessionId) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement->Execute(ReviewSessionId) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
 }
 
 }

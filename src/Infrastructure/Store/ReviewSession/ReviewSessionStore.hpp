@@ -10,9 +10,9 @@
 
 #include "Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/ReviewSession/Mutation/ReviewSessionMutationSql.hpp"
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 
@@ -39,17 +39,17 @@ public:
               Infrastructure::Sql::ReviewSession::Query::ReadDefaultReviewSessionIdByRootDeckIdSql()) }
         , m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{ DatabaseConnection.Prepare(
               Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionIdByReviewSessionDefinitionKeySql()) } {
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateCustomReviewSessionPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateDefaultReviewSessionPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateCustomReviewSessionDeckSelectionPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_RenameReviewSessionPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_UpdateReviewSessionToDefaultPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_UpdateReviewSessionToCustomPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteReviewSessionPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CreateCustomReviewSessionPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CreateDefaultReviewSessionPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CreateCustomReviewSessionDeckSelectionPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_RenameReviewSessionPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_UpdateReviewSessionToDefaultPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_UpdateReviewSessionToCustomPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteReviewSessionPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
     }
 
     ~ReviewSessionStore() noexcept = default;

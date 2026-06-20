@@ -7,13 +7,13 @@
 #include <optional>
 #include <vector>
 
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Deck {
 
 [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> DeckTreeSnapshotStore::ReadDeckTreeSnapshotNodes(const std::int64_t AsOfMillisecondsSinceEpoch) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadDeckTreeSnapshotNodesPreparedStatement->Execute(AsOfMillisecondsSinceEpoch) };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     std::vector<Domain::Deck::DeckTreeSnapshotNode> DeckTreeSnapshotNodeVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };

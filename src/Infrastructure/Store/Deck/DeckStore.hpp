@@ -9,9 +9,9 @@
 #include <string>
 
 #include "Domain/Deck/RecoverableDeckError.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/Deck/Mutation/DeckMutationSql.hpp"
 #include "Infrastructure/Sql/Deck/Query/DeckQuerySql.hpp"
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::Deck {
 
@@ -26,14 +26,14 @@ public:
         , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::DeleteDeckCardReviewsSql()) }
         , m_DeleteDeckCardsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::DeleteDeckCardsSql()) }
         , m_DeleteDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::DeleteDeckSql()) } {
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CheckDeckIdExistsPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_MoveDeckPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_RenameDeckPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckCardReviewsPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
-        Infrastructure::Sql::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CheckDeckIdExistsPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CreateRootDeckPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CreateChildDeckPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_MoveDeckPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_RenameDeckPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteDeckCardReviewsPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
+        Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
     }
 
     ~DeckStore() noexcept = default;

@@ -9,13 +9,13 @@
 #include <vector>
 
 #include "Domain/ReviewSession/ReviewSessionListRow.hpp"
-#include "Infrastructure/Sql/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/SqlExecutionGuard.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 
 [[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListStore::ReadReviewSessionListRows() {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionListRowsPreparedStatement->Execute() };
-    Infrastructure::Sql::ThrowOnQueryResultError(*QueryResult);
+    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     std::vector<Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListRowVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };
