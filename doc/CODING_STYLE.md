@@ -77,6 +77,16 @@ Qt types and callable surfaces must use `Q_OBJECT`, `Q_GADGET`, `Q_NAMESPACE`,
 `Q_DECLARE_FLAGS`, `QML_ELEMENT`, `QML_NAMED_ELEMENT`, `QML_SINGLETON`, and
 `QML_UNCREATABLE` where they apply.
 
+## QML Bridge Surface
+
+QML bridge state, object, model, and metadata surfaces must be exposed through
+`Q_PROPERTY`.
+
+Stable object and model pointers exposed through `Q_PROPERTY` must use
+`CONSTANT` when the pointer identity does not change.
+
+QML bridge application commands must use `Q_INVOKABLE`.
+
 ## Data Naming Prefixes
 
 Instance data members must use an `m_` prefix.

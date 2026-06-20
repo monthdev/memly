@@ -6,7 +6,7 @@
 #include <string_view>
 
 #include "Application/Service/Deck/DeckService.hpp"
-#include "Domain/Deck/RecoverableDeckMutationError.hpp"
+#include "Domain/Deck/RecoverableDeckError.hpp"
 #include "Runtime/Crash.hpp"
 
 namespace Presentation::Controller::Deck {

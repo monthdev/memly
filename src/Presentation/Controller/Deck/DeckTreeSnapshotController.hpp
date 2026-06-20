@@ -14,7 +14,6 @@ namespace Presentation::Controller::Deck {
 
 class DeckTreeSnapshotController final : public QObject {
     Q_OBJECT
-    Q_PROPERTY(Presentation::Model::Deck::DeckTreeSnapshotModel* deckTreeSnapshot READ GetDeckTreeSnapshot CONSTANT)
 
 public:
     explicit DeckTreeSnapshotController(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,

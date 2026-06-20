@@ -5,7 +5,7 @@
 #include <optional>
 #include <string>
 
-#include "Domain/Deck/RecoverableDeckMutationError.hpp"
+#include "Domain/Deck/RecoverableDeckError.hpp"
 
 namespace Infrastructure::Sql {
 class TransactionRunner;

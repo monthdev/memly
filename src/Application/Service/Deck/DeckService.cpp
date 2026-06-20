@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
-#include "Domain/Deck/RecoverableDeckIdError.hpp"
+#include "Domain/Deck/DeckConstraint.hpp"
 #include "Infrastructure/Sql/TransactionRunner.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 
@@ -28,6 +28,9 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
 
 [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::CreateRootDeck(const std::string& DeckName,
                                                                                                               const std::uint8_t TargetLanguageCode) {
+    if (not Domain::Deck::IsDeckNameLengthValid(DeckName)) {
+        return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
+    }
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
         const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeckExpected{ m_DeckStore.CreateRootDeck(DeckName,
                                                                                                                                      TargetLanguageCode) };
@@ -41,6 +44,9 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
 
 [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::CreateChildDeck(const std::string& DeckName,
                                                                                                                const std::string& ParentDeckId) {
+    if (not Domain::Deck::IsDeckNameLengthValid(DeckName)) {
+        return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
+    }
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
         const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeckExpected{ m_DeckStore.CreateChildDeck(DeckName,
                                                                                                                                        ParentDeckId) };
@@ -66,6 +72,9 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
 
 [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::RenameDeck(const std::string& DeckId,
                                                                                                           const std::string& NewDeckName) {
+    if (not Domain::Deck::IsDeckNameLengthValid(NewDeckName)) {
+        return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
+    }
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
         const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeckExpected{ m_DeckStore.RenameDeck(DeckId, NewDeckName) };
         if (not RenameDeckExpected.has_value()) {

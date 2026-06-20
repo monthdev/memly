@@ -8,8 +8,7 @@
 #include <optional>
 #include <string>
 
-#include "Domain/Deck/RecoverableDeckIdError.hpp"
-#include "Domain/Deck/RecoverableDeckMutationError.hpp"
+#include "Domain/Deck/RecoverableDeckError.hpp"
 #include "Infrastructure/Sql/Deck/Mutation/DeckMutationSql.hpp"
 #include "Infrastructure/Sql/Deck/Query/DeckQuerySql.hpp"
 #include "Infrastructure/Sql/SqlExecutionGuard.hpp"
