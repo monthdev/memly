@@ -1,10 +1,10 @@
-#include "DatabaseBootstrap.hpp"
-
-#include <duckdb.hpp>
+#include "Infrastructure/Database/DatabaseRuntime.hpp"
 
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <memory>
+#include <vector>
 
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/Migration/MigrationSql.hpp"
@@ -12,11 +12,11 @@
 #include "Runtime/Crash.hpp"
 
 namespace Infrastructure::Database {
-namespace {
-void u_ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(Infrastructure::Sql::Migration::M00_SchemaMigrationsLogSql()) };
+
+void DatabaseRuntime::ApplySchemaMigrations() {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::Migration::M00_SchemaMigrationsLogSql()) };
     ThrowOnQueryResultError(*QueryResult);
-    QueryResult = DatabaseConnection.Query(Infrastructure::Sql::Migration::ReadSchemaMigrationsLogSql());
+    QueryResult = m_DatabaseConnection.Query(Infrastructure::Sql::Migration::ReadSchemaMigrationsLogSql());
     ThrowOnQueryResultError(*QueryResult);
     std::vector<std::size_t> AppliedMigrationVersionVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
@@ -36,34 +36,22 @@ void u_ApplySchemaMigrations(duckdb::Connection& DatabaseConnection) {
          UnappliedMigrationVersionIndex not_eq MigrationSqlFunctionArray.size();
          ++UnappliedMigrationVersionIndex) {
         const std::string& MigrationSql{ std::invoke(MigrationSqlFunctionArray.at(UnappliedMigrationVersionIndex)) };
-        QueryResult = DatabaseConnection.Query(MigrationSql);
+        QueryResult = m_DatabaseConnection.Query(MigrationSql);
         ThrowOnQueryResultError(*QueryResult);
-        QueryResult = DatabaseConnection.Query(Infrastructure::Sql::Migration::CreateSchemaMigrationsLogEntrySql(),
-                                               static_cast<std::uint32_t>(UnappliedMigrationVersionIndex + 1));
+        QueryResult = m_DatabaseConnection.Query(Infrastructure::Sql::Migration::CreateSchemaMigrationsLogEntrySql(),
+                                                 static_cast<std::uint32_t>(UnappliedMigrationVersionIndex + 1));
         ThrowOnQueryResultError(*QueryResult);
     }
 }
 
-void u_SeedTableDefaults(duckdb::Connection& DatabaseConnection) {
+void DatabaseRuntime::SeedTableDefaults() {
     std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ Infrastructure::Sql::Seed::CreateDefaultFsrs7SchedulerSql,
                                                                                Infrastructure::Sql::Seed::CreateDefaultFsrs7SettingsSql,
                                                                                Infrastructure::Sql::Seed::CreateDefaultDeckSettingsSql };
     for (const std::reference_wrapper<std::string()>& SeedSqlFunction : SeedSqlFunctionArray) {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{ DatabaseConnection.Query(std::invoke(SeedSqlFunction)) };
+        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(std::invoke(SeedSqlFunction)) };
         ThrowOnQueryResultError(*QueryResult);
     }
 }
-}
 
-void RunDatabaseBootstrap(duckdb::Connection& DatabaseConnection) {
-    DatabaseConnection.BeginTransaction();
-    try {
-        u_ApplySchemaMigrations(DatabaseConnection);
-        u_SeedTableDefaults(DatabaseConnection);
-        DatabaseConnection.Commit();
-    } catch (...) {
-        DatabaseConnection.Rollback();
-        throw;
-    }
-}
 }

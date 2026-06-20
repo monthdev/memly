@@ -23,13 +23,8 @@ class ReviewSessionListService;
 class ReviewSessionService;
 }
 
-namespace duckdb {
-class Connection;
-class DuckDB;
-}
-
 namespace Infrastructure::Database {
-class TransactionRunner;
+class DatabaseRuntime;
 }
 
 namespace Infrastructure::Store::Deck {
@@ -66,9 +61,7 @@ public:
     [[nodiscard]] static Application::Service::ReviewSession::ReviewSessionService& GetRequiredReviewSessionService() noexcept;
 
 private:
-    static std::unique_ptr<duckdb::DuckDB> s_Database;
-    static std::unique_ptr<duckdb::Connection> s_DatabaseConnection;
-    static std::unique_ptr<Infrastructure::Database::TransactionRunner> s_TransactionRunner;
+    static std::unique_ptr<Infrastructure::Database::DatabaseRuntime> s_DatabaseRuntime;
     static std::unique_ptr<Application::Invalidation::LibraryInvalidationChannel> s_LibraryInvalidationChannel;
     static std::unique_ptr<Infrastructure::Store::Library::LibraryClockStore> s_LibraryClockStore;
     static std::unique_ptr<Application::Invalidation::LibraryInvalidationCoordinator> s_LibraryInvalidationCoordinator;
