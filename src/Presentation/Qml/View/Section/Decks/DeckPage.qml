@@ -4,16 +4,12 @@ import Memly
 
 Page {
     id: root
-    objectName: "deckTreeSnapshotPage"
+    objectName: "deckPage"
 
     required property color pageColor
 
-    DeckTreeSnapshotController {
-        id: deckTreeSnapshotController
-    }
-
-    DeckController {
-        id: deckController
+    DeckPageController {
+        id: deckPageController
     }
 
     background: Rectangle {

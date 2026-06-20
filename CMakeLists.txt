@@ -60,12 +60,8 @@ file(GLOB APPLICATION_SERVICE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/App
 
 set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
-file(GLOB PRESENTATION_CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.cpp"
-     "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/Deck/*.cpp"
-)
-file(GLOB PRESENTATION_CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.[Hh]*"
-     "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/Deck/*.[Hh]*"
-)
+file(GLOB PRESENTATION_CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.cpp")
+file(GLOB PRESENTATION_CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Controller/*.[Hh]*")
 
 file(GLOB DOMAIN_DECK_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/Deck/*.cpp")
 file(GLOB DOMAIN_DECK_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/Deck/*.[Hh]*")
@@ -76,12 +72,8 @@ file(GLOB DOMAIN_LANGUAGE_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/
 file(GLOB DOMAIN_REVIEW_SESSION_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/ReviewSession/*.cpp")
 file(GLOB DOMAIN_REVIEW_SESSION_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Domain/ReviewSession/*.[Hh]*")
 
-file(GLOB PRESENTATION_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.cpp"
-     "${CMAKE_SOURCE_DIR}/src/Presentation/Model/Deck/*.cpp"
-)
-file(GLOB PRESENTATION_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.[Hh]*"
-     "${CMAKE_SOURCE_DIR}/src/Presentation/Model/Deck/*.[Hh]*"
-)
+file(GLOB PRESENTATION_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.cpp")
+file(GLOB PRESENTATION_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Presentation/Model/*.[Hh]*")
 
 file(GLOB INFRASTRUCTURE_CLIENT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Client/*.cpp")
 file(GLOB INFRASTRUCTURE_CLIENT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Client/*.[Hh]*")
@@ -371,15 +363,14 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_CURRENT_BINARY_DIR}/Memly"
   SOURCES
-  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/Deck/DeckControllerBridge.cpp"
-  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/Deck/DeckControllerBridge.hpp"
-  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/Deck/DeckTreeSnapshotControllerBridge.hpp"
+  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/DeckPageControllerBridge.cpp"
+  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/DeckPageControllerBridge.hpp"
   QML_FILES
   ${QT_QML}
 )
 
 target_include_directories(
-  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/Deck"
+  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge"
 )
 
 set_target_properties(

@@ -1,4 +1,4 @@
-#include "Presentation/Model/Deck/DeckTreeSnapshotModel.hpp"
+#include "Presentation/Model/DeckTreeModel.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -10,10 +10,9 @@
 
 #include "Runtime/Crash.hpp"
 
-namespace Presentation::Model::Deck {
+namespace Presentation::Model {
 
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeSnapshotModel::DeckNode>>
-DeckTreeSnapshotModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {
         return std::nullopt;
     }
@@ -22,7 +21,7 @@ DeckTreeSnapshotModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     return m_DeckNodesVector.at(DeckNodeIndex);
 }
 
-[[nodiscard]] const std::vector<std::size_t>& DeckTreeSnapshotModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const {
+[[nodiscard]] const std::vector<std::size_t>& DeckTreeModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const {
     if (not Parent.isValid()) {
         return m_RootDeckNodeIndexesVector;
     }
@@ -30,7 +29,7 @@ DeckTreeSnapshotModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     return ParentDeckNode.m_ChildDeckNodeIndexesVector;
 }
 
-[[nodiscard]] int DeckTreeSnapshotModel::CompareDeckNodes(const std::size_t LeftDeckNodeIndex, const std::size_t RightDeckNodeIndex) const noexcept {
+[[nodiscard]] int DeckTreeModel::CompareDeckNodes(const std::size_t LeftDeckNodeIndex, const std::size_t RightDeckNodeIndex) const noexcept {
     const DeckNode& LeftDeckNode{ m_DeckNodesVector.at(LeftDeckNodeIndex) };
     const DeckNode& RightDeckNode{ m_DeckNodesVector.at(RightDeckNodeIndex) };
     const auto CompareDeckNodeCounts{ [](const std::uint32_t LeftDeckNodeCount, const std::uint32_t RightDeckNodeCount) static noexcept -> int {
@@ -38,19 +37,19 @@ DeckTreeSnapshotModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     } };
     switch (m_SortColumn) {
     case static_cast<int>(ColumnEnum::DeckNameColumn):
-        return LeftDeckNode.m_DeckTreeSnapshotNode.m_DeckName.compare(RightDeckNode.m_DeckTreeSnapshotNode.m_DeckName);
+        return LeftDeckNode.m_DeckTreeNode.m_DeckName.compare(RightDeckNode.m_DeckTreeNode.m_DeckName);
     case static_cast<int>(ColumnEnum::SubtreeDueNowCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeSnapshotNode.m_SubtreeDueNowCount, RightDeckNode.m_DeckTreeSnapshotNode.m_SubtreeDueNowCount);
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeNode.m_SubtreeDueNowCount, RightDeckNode.m_DeckTreeNode.m_SubtreeDueNowCount);
     case static_cast<int>(ColumnEnum::SubtreeByTodayCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeSnapshotNode.m_SubtreeByTodayCount, RightDeckNode.m_DeckTreeSnapshotNode.m_SubtreeByTodayCount);
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeNode.m_SubtreeByTodayCount, RightDeckNode.m_DeckTreeNode.m_SubtreeByTodayCount);
     case static_cast<int>(ColumnEnum::SubtreeTotalCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeSnapshotNode.m_SubtreeTotalCount, RightDeckNode.m_DeckTreeSnapshotNode.m_SubtreeTotalCount);
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeNode.m_SubtreeTotalCount, RightDeckNode.m_DeckTreeNode.m_SubtreeTotalCount);
     default:
         return 0;
     }
 }
 
-void DeckTreeSnapshotModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>& SiblingDeckNodeIndexes) {
+void DeckTreeModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>& SiblingDeckNodeIndexes) {
     std::stable_sort(SiblingDeckNodeIndexes.begin(),
                      SiblingDeckNodeIndexes.end(),
                      [this](const std::size_t LeftDeckNodeIndex, const std::size_t RightDeckNodeIndex) noexcept -> bool {
@@ -62,7 +61,7 @@ void DeckTreeSnapshotModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>&
                      });
 }
 
-void DeckTreeSnapshotModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& ParentDeckNodeIndex) noexcept {
+void DeckTreeModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& ParentDeckNodeIndex) noexcept {
     std::vector<std::size_t>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex.has_value() ?
                                                           m_DeckNodesVector.at(ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector :
                                                           m_RootDeckNodeIndexesVector };
@@ -73,7 +72,7 @@ void DeckTreeSnapshotModel::UpdateSiblingRowIndexes(const std::optional<std::siz
     }
 }
 
-void DeckTreeSnapshotModel::ApplyCurrentSort() {
+void DeckTreeModel::ApplyCurrentSort() {
     if (m_SortColumn < static_cast<int>(ColumnEnum::DeckNameColumn) or m_SortColumn > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
         return;
     }
@@ -84,22 +83,22 @@ void DeckTreeSnapshotModel::ApplyCurrentSort() {
     UpdateSiblingRowIndexes();
 }
 
-void DeckTreeSnapshotModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>&& DeckTreeSnapshotNodeVector) noexcept {
+void DeckTreeModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>&& DeckTreeNodeVector) noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
         std::vector<DeckNode> DeckNodesVector;
         std::vector<std::size_t> RootDeckNodeIndexesVector;
         std::unordered_map<std::string, std::size_t> DeckNodeIndexByIdHash;
-        DeckNodesVector.reserve(DeckTreeSnapshotNodeVector.size());
-        RootDeckNodeIndexesVector.reserve(DeckTreeSnapshotNodeVector.size());
-        DeckNodeIndexByIdHash.reserve(DeckTreeSnapshotNodeVector.size());
-        for (Domain::Deck::DeckTreeSnapshotNode& DeckTreeSnapshotNode : DeckTreeSnapshotNodeVector) {
+        DeckNodesVector.reserve(DeckTreeNodeVector.size());
+        RootDeckNodeIndexesVector.reserve(DeckTreeNodeVector.size());
+        DeckNodeIndexByIdHash.reserve(DeckTreeNodeVector.size());
+        for (Domain::Deck::DeckTreeSnapshotNode& DeckTreeNode : DeckTreeNodeVector) {
             const std::size_t DeckNodeIndex{ DeckNodesVector.size() };
-            DeckNodeIndexByIdHash.emplace(DeckTreeSnapshotNode.m_DeckId, DeckNodeIndex);
-            DeckNodesVector.emplace_back(DeckNode{ std::move(DeckTreeSnapshotNode), std::nullopt, 0, std::vector<std::size_t>{} });
+            DeckNodeIndexByIdHash.emplace(DeckTreeNode.m_DeckId, DeckNodeIndex);
+            DeckNodesVector.emplace_back(DeckNode{ std::move(DeckTreeNode), std::nullopt, 0, std::vector<std::size_t>{} });
         }
         for (std::size_t DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesVector.size(); ++DeckNodeIndex) {
             DeckNode& CurrentDeckNode{ DeckNodesVector.at(DeckNodeIndex) };
-            const std::optional<std::string>& ParentId{ CurrentDeckNode.m_DeckTreeSnapshotNode.m_ParentDeckId };
+            const std::optional<std::string>& ParentId{ CurrentDeckNode.m_DeckTreeNode.m_ParentDeckId };
             if (not ParentId.has_value()) {
                 CurrentDeckNode.m_RowInParentIndex = RootDeckNodeIndexesVector.size();
                 RootDeckNodeIndexesVector.push_back(DeckNodeIndex);
