@@ -8,13 +8,13 @@
 
 #include "Bootstrap/RuntimeContext.hpp"
 #include "Presentation/Controller/DeckPageController.hpp"
-#include "View/Bridge/Model/DeckTreeModelBridge.hpp"
+#include "View/Bridge/ProxyModel/DeckTreeProxyModel.hpp"
 
 namespace View::Bridge::Controller {
 
 class DeckPageControllerBridge : public QObject {
     Q_OBJECT
-    Q_PROPERTY(View::Bridge::Model::DeckTreeModelBridge* deckTreeModel READ GetDeckTreeModelBridge CONSTANT)
+    Q_PROPERTY(View::Bridge::ProxyModel::DeckTreeProxyModel* deckTreeModel READ GetDeckTreeProxyModel CONSTANT)
     QML_NAMED_ELEMENT(DeckPageController)
 
 public:
@@ -23,7 +23,7 @@ public:
         , m_DeckPageController{ Bootstrap::RuntimeContext::GetRequiredLibraryInvalidationChannel(),
                                 Bootstrap::RuntimeContext::GetRequiredDeckService(),
                                 Bootstrap::RuntimeContext::GetRequiredDeckTreeSnapshotService() }
-        , m_DeckTreeModelBridge{ *m_DeckPageController.GetDeckTreeModel(), this } {
+        , m_DeckTreeProxyModel{ *m_DeckPageController.GetDeckTreeModel(), this } {
     }
 
     ~DeckPageControllerBridge() noexcept override = default;
@@ -32,7 +32,7 @@ public:
     DeckPageControllerBridge& operator=(const DeckPageControllerBridge&) = delete;
     DeckPageControllerBridge& operator=(DeckPageControllerBridge&&) = delete;
 
-    [[nodiscard]] View::Bridge::Model::DeckTreeModelBridge* GetDeckTreeModelBridge() noexcept;
+    [[nodiscard]] View::Bridge::ProxyModel::DeckTreeProxyModel* GetDeckTreeProxyModel() noexcept;
 
     [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString&, quint8) noexcept;
     [[nodiscard]] Q_INVOKABLE QString CreateChildDeck(const QString&, const QString&) noexcept;
@@ -42,7 +42,7 @@ public:
 
 private:
     Presentation::Controller::DeckPageController m_DeckPageController;
-    View::Bridge::Model::DeckTreeModelBridge m_DeckTreeModelBridge;
+    View::Bridge::ProxyModel::DeckTreeProxyModel m_DeckTreeProxyModel;
 };
 
 }

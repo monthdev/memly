@@ -169,8 +169,8 @@ file(GLOB TEST_SUPPORT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Support/*
 
 file(GLOB VIEW_BRIDGE_CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/Controller/*.cpp")
 file(GLOB VIEW_BRIDGE_CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/Controller/*.[Hh]*")
-file(GLOB VIEW_BRIDGE_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/Model/*.cpp")
-file(GLOB VIEW_BRIDGE_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/Model/*.[Hh]*")
+file(GLOB VIEW_BRIDGE_PROXY_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/ProxyModel/*.cpp")
+file(GLOB VIEW_BRIDGE_PROXY_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/ProxyModel/*.[Hh]*")
 
 set(TEST_MAIN_CPP "${CMAKE_SOURCE_DIR}/test/App/TestMain.cpp")
 list(REMOVE_ITEM TEST_APP_CPP "${TEST_MAIN_CPP}")
@@ -375,15 +375,15 @@ qt_add_qml_module(
   SOURCES
   ${VIEW_BRIDGE_CONTROLLER_CPP}
   ${VIEW_BRIDGE_CONTROLLER_HDR}
-  ${VIEW_BRIDGE_MODEL_CPP}
-  ${VIEW_BRIDGE_MODEL_HDR}
+  ${VIEW_BRIDGE_PROXY_MODEL_CPP}
+  ${VIEW_BRIDGE_PROXY_MODEL_HDR}
   QML_FILES
   ${QT_QML}
 )
 
 target_include_directories(
   memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/View/Bridge/Controller"
-                       "${CMAKE_SOURCE_DIR}/src/View/Bridge/Model"
+                       "${CMAKE_SOURCE_DIR}/src/View/Bridge/ProxyModel"
 )
 
 set_target_properties(

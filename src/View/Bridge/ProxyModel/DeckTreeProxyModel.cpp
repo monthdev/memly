@@ -1,16 +1,16 @@
-#include "View/Bridge/Model/DeckTreeModelBridge.hpp"
+#include "View/Bridge/ProxyModel/DeckTreeProxyModel.hpp"
 
 #include <QString>
 
 #include "Runtime/Crash.hpp"
 
-namespace View::Bridge::Model {
+namespace View::Bridge::ProxyModel {
 
-void DeckTreeModelBridge::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
+void DeckTreeProxyModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
     sourceModel()->sort(Column, SortOrder);
 }
 
-[[nodiscard]] QVariant DeckTreeModelBridge::headerData(const int Section, const Qt::Orientation Orientation, const int Role) const noexcept {
+[[nodiscard]] QVariant DeckTreeProxyModel::headerData(const int Section, const Qt::Orientation Orientation, const int Role) const noexcept {
     if (Orientation not_eq Qt::Horizontal or Role not_eq Qt::DisplayRole) {
         return {};
     }
@@ -28,7 +28,7 @@ void DeckTreeModelBridge::sort(const int Column, const Qt::SortOrder SortOrder) 
     }
 }
 
-[[nodiscard]] QHash<int, QByteArray> DeckTreeModelBridge::roleNames() const noexcept {
+[[nodiscard]] QHash<int, QByteArray> DeckTreeProxyModel::roleNames() const noexcept {
     return Runtime::TryCatchWrapper([&]() -> QHash<int, QByteArray> {
         static const QHash<int, QByteArray> s_DeckTreeRoleNameByRoleQHash{
             {                                                                                         Qt::DisplayRole,QByteArrayLiteral("display")                                                                                                                      },

@@ -17,8 +17,8 @@ namespace {
 
 }
 
-[[nodiscard]] View::Bridge::Model::DeckTreeModelBridge* DeckPageControllerBridge::GetDeckTreeModelBridge() noexcept {
-    return &m_DeckTreeModelBridge;
+[[nodiscard]] View::Bridge::ProxyModel::DeckTreeProxyModel* DeckPageControllerBridge::GetDeckTreeProxyModel() noexcept {
+    return &m_DeckTreeProxyModel;
 }
 
 [[nodiscard]] QString DeckPageControllerBridge::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
