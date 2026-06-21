@@ -1,11 +1,11 @@
-#include "Presentation/Qml/Bridge/DeckPageControllerBridge.hpp"
+#include "View/Bridge/Controller/DeckPageControllerBridge.hpp"
 
 #include <cstdint>
 #include <expected>
 #include <optional>
 #include <string_view>
 
-namespace Presentation::Qml::Bridge {
+namespace View::Bridge::Controller {
 namespace {
 
 [[nodiscard]] QString u_DeckPageControllerExpectedToQString(const std::expected<void, std::string_view>& DeckPageControllerExpected) noexcept {
@@ -15,6 +15,10 @@ namespace {
     return QString::fromUtf8(DeckPageControllerExpected.error().data());
 }
 
+}
+
+[[nodiscard]] View::Bridge::Model::DeckTreeModelBridge* DeckPageControllerBridge::GetDeckTreeModelBridge() noexcept {
+    return &m_DeckTreeModelBridge;
 }
 
 [[nodiscard]] QString DeckPageControllerBridge::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {

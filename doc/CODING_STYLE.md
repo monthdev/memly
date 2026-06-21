@@ -27,9 +27,8 @@ Lambda init-captures must use brace initialization.
 Constructors and destructors must always be declared and implemented in the
 header even when the implementation is `= default`.
 
-Overrides must also be declared and implemented in the header.
-
-Parameters must only be named where methods are implemented, not declared.
+Parameters must only be named where methods are implemented, not where methods
+are declared.
 
 ## Parameter Passing
 
@@ -74,8 +73,8 @@ Lambdas must use explicit return types, explicit template parameter lists,
 
 Qt types and callable surfaces must use `Q_OBJECT`, `Q_GADGET`, `Q_NAMESPACE`,
 `Q_PROPERTY`, `Q_SIGNAL`, `Q_SLOT`, `Q_INVOKABLE`, `Q_ENUM`, `Q_FLAG`,
-`Q_DECLARE_FLAGS`, `QML_ELEMENT`, `QML_NAMED_ELEMENT`, `QML_SINGLETON`, and
-`QML_UNCREATABLE` where they apply.
+`Q_DECLARE_FLAGS`, `QML_ANONYMOUS`, `QML_ELEMENT`, `QML_NAMED_ELEMENT`,
+`QML_SINGLETON`, and `QML_UNCREATABLE` where they apply.
 
 ## QML Bridge Surface
 
@@ -125,7 +124,7 @@ Enum class type names must end in `Enum`.
 
 ## Qt Types And Containers
 
-Project-owned application code must use standard library types and containers.
+Application code must use standard library types and containers.
 
 Qt types and containers must only appear at Qt framework, QML bridge, Qt
 resource, Qt signal, and method override boundaries where the Qt API requires
@@ -143,8 +142,8 @@ Use `operator[]` only for intentional mutation.
 
 ## String Views
 
-Project-owned read-only string API parameters must use `const std::string_view`
-instead of C-style string pointer or array types.
+Read-only string API parameters must use `const std::string_view` instead of
+C-style string pointer or array types.
 
 Named string constants must use `std::string_view` when they need a name.
 

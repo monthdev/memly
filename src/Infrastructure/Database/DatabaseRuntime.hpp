@@ -15,10 +15,7 @@ public:
         : m_Database{ std::string{ DatabaseFilePathStringView } }
         , m_DatabaseConnection{ m_Database }
         , m_TransactionRunner{ m_DatabaseConnection } {
-        m_TransactionRunner.TransactionWrapper([this]() -> void {
-            ApplySchemaMigrations();
-            SeedTableDefaults();
-        });
+        BootstrapDatabase();
     }
 
     ~DatabaseRuntime() noexcept = default;
@@ -36,6 +33,7 @@ public:
     }
 
 private:
+    void BootstrapDatabase();
     void ApplySchemaMigrations();
     void SeedTableDefaults();
 

@@ -133,7 +133,7 @@ file(
 file(GLOB RUNTIME_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Runtime/*.cpp")
 file(GLOB RUNTIME_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Runtime/*.[Hh]*")
 
-set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/View")
+set(QML_DIR "${CMAKE_SOURCE_DIR}/src/View/Qml")
 file(GLOB QML_ROOT CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
 file(GLOB_RECURSE QML_COMPONENTS CONFIGURE_DEPENDS "${QML_DIR}/Component/*.qml")
 file(GLOB_RECURSE QML_SECTIONS CONFIGURE_DEPENDS "${QML_DIR}/Section/*.qml")
@@ -166,6 +166,11 @@ file(GLOB TEST_QML_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Qml/*.cpp")
 file(GLOB TEST_SERVICE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Service/*.cpp")
 file(GLOB TEST_SQL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Sql/*.cpp")
 file(GLOB TEST_SUPPORT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Support/*.cpp")
+
+file(GLOB VIEW_BRIDGE_CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/Controller/*.cpp")
+file(GLOB VIEW_BRIDGE_CONTROLLER_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/Controller/*.[Hh]*")
+file(GLOB VIEW_BRIDGE_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/Model/*.cpp")
+file(GLOB VIEW_BRIDGE_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/View/Bridge/Model/*.[Hh]*")
 
 set(TEST_MAIN_CPP "${CMAKE_SOURCE_DIR}/test/App/TestMain.cpp")
 list(REMOVE_ITEM TEST_APP_CPP "${TEST_MAIN_CPP}")
@@ -368,14 +373,17 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_CURRENT_BINARY_DIR}/Memly"
   SOURCES
-  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/DeckPageControllerBridge.cpp"
-  "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge/DeckPageControllerBridge.hpp"
+  ${VIEW_BRIDGE_CONTROLLER_CPP}
+  ${VIEW_BRIDGE_CONTROLLER_HDR}
+  ${VIEW_BRIDGE_MODEL_CPP}
+  ${VIEW_BRIDGE_MODEL_HDR}
   QML_FILES
   ${QT_QML}
 )
 
 target_include_directories(
-  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Presentation/Qml/Bridge"
+  memly BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/View/Bridge/Controller"
+                       "${CMAKE_SOURCE_DIR}/src/View/Bridge/Model"
 )
 
 set_target_properties(

@@ -13,6 +13,13 @@
 
 namespace Infrastructure::Database {
 
+void DatabaseRuntime::BootstrapDatabase() {
+    m_TransactionRunner.TransactionWrapper([this]() -> void {
+        ApplySchemaMigrations();
+        SeedTableDefaults();
+    });
+}
+
 void DatabaseRuntime::ApplySchemaMigrations() {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::Migration::M00_SchemaMigrationsLogSql()) };
     ThrowOnQueryResultError(*QueryResult);
