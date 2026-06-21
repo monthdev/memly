@@ -1,8 +1,6 @@
 # Memly Coding Style
 
-## Constructor
-
-### Parameter and Member Ordering
+## Constructor Parameter and Member Ordering
 
 Constructor parameter and member ordering of `RuntimeContext`-owned objects must
 match the ordering found in `RuntimeContext`.
@@ -10,7 +8,7 @@ match the ordering found in `RuntimeContext`.
 See \ref RuntimeContext.hpp "RuntimeContext.hpp" and \ref RuntimeContext.cpp
 "RuntimeContext.cpp".
 
-### Member Construction
+## Constructor Member Construction
 
 Constructor member construction must use brace-initialized construction in the
 initializer list. Class members must not be initialized anywhere else but the
