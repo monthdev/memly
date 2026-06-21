@@ -124,13 +124,13 @@ namespace Presentation::Model {
     });
 }
 
-void DeckTreeModel::sort(const int Column, const Qt::SortOrder Order) noexcept {
+void DeckTreeModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
         if (Column < static_cast<int>(ColumnEnum::DeckNameColumn) or Column > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
             return;
         }
         m_SortColumn = Column;
-        m_SortOrder = Order;
+        m_SortOrder = SortOrder;
         beginResetModel();
         ApplyCurrentSort();
         endResetModel();
