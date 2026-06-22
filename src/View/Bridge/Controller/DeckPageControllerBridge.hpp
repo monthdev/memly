@@ -20,9 +20,7 @@ class DeckPageControllerBridge : public QObject {
 public:
     explicit DeckPageControllerBridge(QObject* Parent = nullptr)
         : QObject{ Parent }
-        , m_DeckPageController{ Bootstrap::RuntimeContext::GetRequiredLibraryInvalidationChannel(),
-                                Bootstrap::RuntimeContext::GetRequiredDeckService(),
-                                Bootstrap::RuntimeContext::GetRequiredDeckTreeSnapshotService() }
+        , m_DeckPageController{ Bootstrap::RuntimeContext::GetRequiredLibraryInvalidationChannel(), Bootstrap::RuntimeContext::GetRequiredDeckService() }
         , m_DeckTreeProxyModel{ *m_DeckPageController.GetDeckTreeModel(), this } {
     }
 

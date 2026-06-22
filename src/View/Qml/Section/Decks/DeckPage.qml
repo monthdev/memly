@@ -8,9 +8,9 @@ Page {
 
     required property color pageColor
 
-    DeckPageController {
-        id: deckPageController
-    }
+    // DeckPageController {
+    //     id: deckPageController
+    // }
 
     background: Rectangle {
         color: root.pageColor

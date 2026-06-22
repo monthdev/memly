@@ -3,11 +3,12 @@
 #include <cstdint>
 #include <expected>
 #include <string>
+#include <vector>
 
-#include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
 #include "Domain/Deck/DeckConstraint.hpp"
 #include "Infrastructure/Database/TransactionRunner.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
+#include "Infrastructure/Store/Deck/DeckTreeSnapshotStore.hpp"
 
 namespace Application::Service::Deck {
 namespace {
@@ -26,6 +27,10 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
 
 }
 
+[[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> DeckService::ReadDeckTreeSnapshotNodes(const std::int64_t AsOfMillisecondsSinceEpoch) {
+    return m_DeckTreeSnapshotStore.ReadDeckTreeSnapshotNodes(AsOfMillisecondsSinceEpoch);
+}
+
 [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::CreateRootDeck(const std::string& DeckName,
                                                                                                               const std::uint8_t TargetLanguageCode) {
     if (not Domain::Deck::IsDeckNameLengthValid(DeckName)) {
@@ -37,7 +42,6 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
         if (not CreateRootDeckExpected.has_value()) {
             return std::unexpected{ CreateRootDeckExpected.error() };
         }
-        m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
@@ -53,7 +57,6 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
         if (not CreateChildDeckExpected.has_value()) {
             return std::unexpected{ CreateChildDeckExpected.error() };
         }
-        m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
@@ -65,7 +68,6 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
         if (not MoveDeckExpected.has_value()) {
             return std::unexpected{ MoveDeckExpected.error() };
         }
-        m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
@@ -80,7 +82,6 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
         if (not RenameDeckExpected.has_value()) {
             return std::unexpected{ RenameDeckExpected.error() };
         }
-        m_LibraryInvalidationCoordinator.Invalidate(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }
@@ -91,7 +92,6 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
         if (not DeleteDeckExpected.has_value()) {
             return std::unexpected{ u_RecoverableDeckIdErrorToMutationError(DeleteDeckExpected.error()) };
         }
-        m_LibraryInvalidationCoordinator.InvalidateWithReschedule(Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot);
         return {};
     });
 }

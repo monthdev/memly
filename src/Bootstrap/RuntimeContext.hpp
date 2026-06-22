@@ -15,7 +15,6 @@ class LibraryInvalidationCoordinator;
 
 namespace Application::Service::Deck {
 class DeckService;
-class DeckTreeSnapshotService;
 }
 
 namespace Application::Service::ReviewSession {
@@ -56,7 +55,6 @@ public:
 
     [[nodiscard]] static Application::Invalidation::LibraryInvalidationChannel& GetRequiredLibraryInvalidationChannel() noexcept;
     [[nodiscard]] static Application::Service::Deck::DeckService& GetRequiredDeckService() noexcept;
-    [[nodiscard]] static Application::Service::Deck::DeckTreeSnapshotService& GetRequiredDeckTreeSnapshotService() noexcept;
     [[nodiscard]] static Application::Service::ReviewSession::ReviewSessionListService& GetRequiredReviewSessionListService() noexcept;
     [[nodiscard]] static Application::Service::ReviewSession::ReviewSessionService& GetRequiredReviewSessionService() noexcept;
 
@@ -70,7 +68,6 @@ private:
     static std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionListStore> s_ReviewSessionListStore;
     static std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionStore> s_ReviewSessionStore;
     static std::unique_ptr<Application::Service::Deck::DeckService> s_DeckService;
-    static std::unique_ptr<Application::Service::Deck::DeckTreeSnapshotService> s_DeckTreeSnapshotService;
     static std::unique_ptr<Application::Service::ReviewSession::ReviewSessionListService> s_ReviewSessionListService;
     static std::unique_ptr<Application::Service::ReviewSession::ReviewSessionService> s_ReviewSessionService;
 };

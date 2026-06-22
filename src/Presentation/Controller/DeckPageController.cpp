@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "Application/Service/Deck/DeckService.hpp"
-#include "Application/Service/Deck/DeckTreeSnapshotService.hpp"
 #include "Domain/Deck/DeckTreeSnapshotNode.hpp"
 #include "Domain/Deck/RecoverableDeckError.hpp"
 #include "Runtime/Crash.hpp"
@@ -55,7 +54,7 @@ u_DeckServiceExpectedToDeckPageControllerExpected(const std::expected<void, Doma
 
 void DeckPageController::RefreshDeckTreeModel(const std::int64_t AsOfMillisecondsSinceEpoch) noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
-        std::vector<Domain::Deck::DeckTreeSnapshotNode> DeckTreeNodeVector{ m_DeckTreeSnapshotService.ReadDeckTreeSnapshotNodes(AsOfMillisecondsSinceEpoch) };
+        std::vector<Domain::Deck::DeckTreeSnapshotNode> DeckTreeNodeVector{ m_DeckService.ReadDeckTreeSnapshotNodes(AsOfMillisecondsSinceEpoch) };
         m_DeckTreeModel.ReplaceAll(std::move(DeckTreeNodeVector));
     });
 }

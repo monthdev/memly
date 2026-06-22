@@ -12,7 +12,6 @@
 
 namespace Application::Service::Deck {
 class DeckService;
-class DeckTreeSnapshotService;
 }
 
 namespace Presentation::Controller {
@@ -23,11 +22,9 @@ class DeckPageController final : public QObject {
 public:
     explicit DeckPageController(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
                                 Application::Service::Deck::DeckService& DeckService,
-                                Application::Service::Deck::DeckTreeSnapshotService& DeckTreeSnapshotService,
                                 QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_DeckService{ DeckService }
-        , m_DeckTreeSnapshotService{ DeckTreeSnapshotService }
         , m_DeckTreeModel{ this } {
         LibraryInvalidationChannel.ConnectSnapshot(
             this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot, &DeckPageController::RefreshDeckTreeModel);
@@ -51,7 +48,6 @@ public:
 
 private:
     Application::Service::Deck::DeckService& m_DeckService;
-    Application::Service::Deck::DeckTreeSnapshotService& m_DeckTreeSnapshotService;
     Presentation::Model::DeckTreeModel m_DeckTreeModel;
 
     void RefreshDeckTreeModel(std::int64_t) noexcept;

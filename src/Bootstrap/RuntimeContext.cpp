@@ -10,7 +10,6 @@
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
 #include "Application/Service/Deck/DeckService.hpp"
-#include "Application/Service/Deck/DeckTreeSnapshotService.hpp"
 #include "Application/Service/ReviewSession/ReviewSessionListService.hpp"
 #include "Application/Service/ReviewSession/ReviewSessionService.hpp"
 #include "Infrastructure/Database/DatabaseRuntime.hpp"
@@ -31,7 +30,6 @@ std::unique_ptr<Infrastructure::Store::Deck::DeckTreeSnapshotStore> RuntimeConte
 std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionListStore> RuntimeContext::s_ReviewSessionListStore{};
 std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionStore> RuntimeContext::s_ReviewSessionStore{};
 std::unique_ptr<Application::Service::Deck::DeckService> RuntimeContext::s_DeckService{};
-std::unique_ptr<Application::Service::Deck::DeckTreeSnapshotService> RuntimeContext::s_DeckTreeSnapshotService{};
 std::unique_ptr<Application::Service::ReviewSession::ReviewSessionListService> RuntimeContext::s_ReviewSessionListService{};
 std::unique_ptr<Application::Service::ReviewSession::ReviewSessionService> RuntimeContext::s_ReviewSessionService{};
 
@@ -46,7 +44,6 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     Q_ASSERT(s_ReviewSessionListStore == nullptr);
     Q_ASSERT(s_ReviewSessionStore == nullptr);
     Q_ASSERT(s_DeckService == nullptr);
-    Q_ASSERT(s_DeckTreeSnapshotService == nullptr);
     Q_ASSERT(s_ReviewSessionListService == nullptr);
     Q_ASSERT(s_ReviewSessionService == nullptr);
 
@@ -60,8 +57,7 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     s_ReviewSessionListStore = std::make_unique<Infrastructure::Store::ReviewSession::ReviewSessionListStore>(s_DatabaseRuntime->GetDatabaseConnection());
     s_ReviewSessionStore = std::make_unique<Infrastructure::Store::ReviewSession::ReviewSessionStore>(s_DatabaseRuntime->GetDatabaseConnection());
     s_DeckService =
-        std::make_unique<Application::Service::Deck::DeckService>(s_DatabaseRuntime->GetTransactionRunner(), *s_LibraryInvalidationCoordinator, *s_DeckStore);
-    s_DeckTreeSnapshotService = std::make_unique<Application::Service::Deck::DeckTreeSnapshotService>(*s_DeckTreeSnapshotStore);
+        std::make_unique<Application::Service::Deck::DeckService>(s_DatabaseRuntime->GetTransactionRunner(), *s_DeckStore, *s_DeckTreeSnapshotStore);
     s_ReviewSessionListService = std::make_unique<Application::Service::ReviewSession::ReviewSessionListService>(*s_ReviewSessionListStore);
     s_ReviewSessionService =
         std::make_unique<Application::Service::ReviewSession::ReviewSessionService>(s_DatabaseRuntime->GetTransactionRunner(), *s_ReviewSessionStore);
@@ -75,11 +71,6 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
 [[nodiscard]] Application::Service::Deck::DeckService& RuntimeContext::GetRequiredDeckService() noexcept {
     Q_ASSERT(s_DeckService not_eq nullptr);
     return *s_DeckService;
-}
-
-[[nodiscard]] Application::Service::Deck::DeckTreeSnapshotService& RuntimeContext::GetRequiredDeckTreeSnapshotService() noexcept {
-    Q_ASSERT(s_DeckTreeSnapshotService not_eq nullptr);
-    return *s_DeckTreeSnapshotService;
 }
 
 [[nodiscard]] Application::Service::ReviewSession::ReviewSessionListService& RuntimeContext::GetRequiredReviewSessionListService() noexcept {
