@@ -56,8 +56,7 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     s_DeckTreeSnapshotStore = std::make_unique<Infrastructure::Store::Deck::DeckTreeSnapshotStore>(s_DatabaseRuntime->GetDatabaseConnection());
     s_ReviewSessionListStore = std::make_unique<Infrastructure::Store::ReviewSession::ReviewSessionListStore>(s_DatabaseRuntime->GetDatabaseConnection());
     s_ReviewSessionStore = std::make_unique<Infrastructure::Store::ReviewSession::ReviewSessionStore>(s_DatabaseRuntime->GetDatabaseConnection());
-    s_DeckService =
-        std::make_unique<Application::Service::Deck::DeckService>(s_DatabaseRuntime->GetTransactionRunner(), *s_DeckStore, *s_DeckTreeSnapshotStore);
+    s_DeckService = std::make_unique<Application::Service::Deck::DeckService>(*s_DeckStore, *s_DeckTreeSnapshotStore);
     s_ReviewSessionListService = std::make_unique<Application::Service::ReviewSession::ReviewSessionListService>(*s_ReviewSessionListStore);
     s_ReviewSessionService =
         std::make_unique<Application::Service::ReviewSession::ReviewSessionService>(s_DatabaseRuntime->GetTransactionRunner(), *s_ReviewSessionStore);

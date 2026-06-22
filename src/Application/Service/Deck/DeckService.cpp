@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "Domain/Deck/DeckConstraint.hpp"
-#include "Infrastructure/Database/TransactionRunner.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 #include "Infrastructure/Store/Deck/DeckTreeSnapshotStore.hpp"
 
@@ -36,14 +35,7 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
     if (not Domain::Deck::IsDeckNameLengthValid(DeckName)) {
         return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
     }
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeckExpected{ m_DeckStore.CreateRootDeck(DeckName,
-                                                                                                                                     TargetLanguageCode) };
-        if (not CreateRootDeckExpected.has_value()) {
-            return std::unexpected{ CreateRootDeckExpected.error() };
-        }
-        return {};
-    });
+    return m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode);
 }
 
 [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::CreateChildDeck(const std::string& DeckName,
@@ -51,25 +43,12 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
     if (not Domain::Deck::IsDeckNameLengthValid(DeckName)) {
         return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
     }
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeckExpected{ m_DeckStore.CreateChildDeck(DeckName,
-                                                                                                                                       ParentDeckId) };
-        if (not CreateChildDeckExpected.has_value()) {
-            return std::unexpected{ CreateChildDeckExpected.error() };
-        }
-        return {};
-    });
+    return m_DeckStore.CreateChildDeck(DeckName, ParentDeckId);
 }
 
 [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::MoveDeck(const std::string& DeckId,
                                                                                                         const std::optional<std::string>& NewParentDeckId) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> MoveDeckExpected{ m_DeckStore.MoveDeck(DeckId, NewParentDeckId) };
-        if (not MoveDeckExpected.has_value()) {
-            return std::unexpected{ MoveDeckExpected.error() };
-        }
-        return {};
-    });
+    return m_DeckStore.MoveDeck(DeckId, NewParentDeckId);
 }
 
 [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::RenameDeck(const std::string& DeckId,
@@ -77,23 +56,15 @@ u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErr
     if (not Domain::Deck::IsDeckNameLengthValid(NewDeckName)) {
         return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
     }
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
-        const std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeckExpected{ m_DeckStore.RenameDeck(DeckId, NewDeckName) };
-        if (not RenameDeckExpected.has_value()) {
-            return std::unexpected{ RenameDeckExpected.error() };
-        }
-        return {};
-    });
+    return m_DeckStore.RenameDeck(DeckId, NewDeckName);
 }
 
 [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::DeleteDeck(const std::string& DeckId) {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> {
-        const std::expected<void, Domain::Deck::RecoverableDeckIdErrorEnum> DeleteDeckExpected{ m_DeckStore.DeleteDeck(DeckId) };
-        if (not DeleteDeckExpected.has_value()) {
-            return std::unexpected{ u_RecoverableDeckIdErrorToMutationError(DeleteDeckExpected.error()) };
-        }
-        return {};
-    });
+    const std::expected<void, Domain::Deck::RecoverableDeckIdErrorEnum> DeleteDeckExpected{ m_DeckStore.DeleteDeck(DeckId) };
+    if (not DeleteDeckExpected.has_value()) {
+        return std::unexpected{ u_RecoverableDeckIdErrorToMutationError(DeleteDeckExpected.error()) };
+    }
+    return {};
 }
 
 }

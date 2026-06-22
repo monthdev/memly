@@ -9,10 +9,6 @@
 #include "Domain/Deck/DeckTreeSnapshotNode.hpp"
 #include "Domain/Deck/RecoverableDeckError.hpp"
 
-namespace Infrastructure::Database {
-class TransactionRunner;
-}
-
 namespace Infrastructure::Store::Deck {
 class DeckStore;
 class DeckTreeSnapshotStore;
@@ -22,11 +18,8 @@ namespace Application::Service::Deck {
 
 class DeckService final {
 public:
-    DeckService(Infrastructure::Database::TransactionRunner& TransactionRunner,
-                Infrastructure::Store::Deck::DeckStore& DeckStore,
-                Infrastructure::Store::Deck::DeckTreeSnapshotStore& DeckTreeSnapshotStore) noexcept
-        : m_TransactionRunner{ TransactionRunner }
-        , m_DeckStore{ DeckStore }
+    DeckService(Infrastructure::Store::Deck::DeckStore& DeckStore, Infrastructure::Store::Deck::DeckTreeSnapshotStore& DeckTreeSnapshotStore) noexcept
+        : m_DeckStore{ DeckStore }
         , m_DeckTreeSnapshotStore{ DeckTreeSnapshotStore } {
     }
 
@@ -45,7 +38,6 @@ public:
     [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const std::string&);
 
 private:
-    Infrastructure::Database::TransactionRunner& m_TransactionRunner;
     Infrastructure::Store::Deck::DeckStore& m_DeckStore;
     Infrastructure::Store::Deck::DeckTreeSnapshotStore& m_DeckTreeSnapshotStore;
 };
