@@ -1,3 +1,5 @@
+#if 0
+// Temporarily disabled during deck tree model refactor.
 #pragma once
 
 #include <QAbstractItemModel>
@@ -7,7 +9,7 @@
 #include <optional>
 #include <vector>
 
-#include "Domain/Deck/DeckTreeSnapshotNode.hpp"
+#include "Application/Domain/Deck/Data/DeckTreeSnapshotNode.hpp"
 
 namespace Presentation::Model {
 
@@ -57,11 +59,11 @@ public:
     [[nodiscard]] bool hasChildren(const QModelIndex& = QModelIndex{}) const noexcept override;
     void sort(int, Qt::SortOrder = Qt::AscendingOrder) noexcept override;
 
-    void ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>&&) noexcept;
+    void ReplaceAll(std::vector<Application::Domain::Deck::Data::DeckTreeSnapshotNode>&&) noexcept;
 
 private:
     struct DeckNode {
-        Domain::Deck::DeckTreeSnapshotNode m_DeckTreeNode;
+        Application::Domain::Deck::Data::DeckTreeSnapshotNode m_DeckTreeNode;
         std::optional<std::size_t> m_ParentDeckNodeIndex;
         std::size_t m_RowInParentIndex;
         std::vector<std::size_t> m_ChildDeckNodeIndexesVector;
@@ -80,3 +82,4 @@ private:
     [[nodiscard]] int CompareDeckNodes(std::size_t, std::size_t) const noexcept;
 };
 }
+#endif

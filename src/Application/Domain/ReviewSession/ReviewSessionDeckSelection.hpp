@@ -4,7 +4,7 @@
 #include <string>
 #include <utility>
 
-namespace Domain::ReviewSession {
+namespace Application::Domain::ReviewSession {
 
 struct ReviewSessionDeckSelection {
     enum class DeckSelectionTypeEnum : std::uint8_t {

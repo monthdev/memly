@@ -94,24 +94,21 @@ Global variables are disallowed.
 
 ## Type-Suffix Naming
 
-Named container variables and helper methods (not public API methods) whose
-names describe their container return type or the data they are working with
-must end with the concrete container type name.
+Favor using container/user-defined type suffixes for named variables and
+methods/functions besides for public API methods.
 
 Use suffixes such as `Vector`, `Array`, `Map`, `UnorderedMap`, `Set`, and
 `UnorderedSet` where they apply.
 
-`std::string` is grouped with primitive types and must not add a type suffix to
-names.
-
-Names for `std::string_view` values must end in `StringView`.
+`std::string` and `std::string_view` is grouped with primitive types and must
+not be used as a type suffix to names except for methods/functions where the
+emphasis is on the conversion to either of these two types.
 
 Named `std::expected` result variables must use the `Expected` suffix.
 
-Named `std::optional` values must use the `Optional` suffix.
+Named `std::variant` result variables must use the `Variant` suffix.
 
-Method and function names must not include `Optional` or `Expected` if that is
-their return type.
+Named `std::optional` values must use the `Optional` suffix.
 
 Methods and functions that return `std::optional` must begin with `Try`.
 
@@ -181,7 +178,7 @@ namespace.
 Use file-private free helpers in unnamed namespaces for logic that does not use
 class state.
 
-File-private helper function names in unnamed namespaces must use a `u_` prefix.
+File-private helper function names in unnamed namespaces must use an `a_` prefix.
 
 We want to keep header declaration surfaces very explicit but minimal which also
 acts as the testing surface.
@@ -190,9 +187,19 @@ acts as the testing surface.
 
 Lambdas must always declare their return type.
 
+## Callable Invocation
+
+Stored callables, callable template parameters, function pointers, and member
+function pointers must be invoked with `std::invoke`.
+
 ## Using
 
-`using` declarations and aliases are disallowed.
+`using` declarations are disallowed.
+
+`using` aliases are allowed where required by language mechanics such as
+template definition type surfaces.
+
+`using` aliases must not be used to shorten ordinary type names.
 
 ## Template Typenames
 

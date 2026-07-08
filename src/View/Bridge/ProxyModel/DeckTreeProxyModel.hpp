@@ -1,3 +1,5 @@
+#if 0
+// Temporarily disabled during deck tree proxy model refactor.
 #pragma once
 
 #include <QtQmlIntegration/qqmlintegration.h>
@@ -34,3 +36,4 @@ public:
 };
 
 }
+#endif

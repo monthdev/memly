@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Domain/ReviewSession/ReviewSessionListRow.hpp"
+#include "Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 class ReviewSessionListStore;
@@ -22,7 +22,7 @@ public:
     ReviewSessionListService& operator=(const ReviewSessionListService&) = delete;
     ReviewSessionListService& operator=(ReviewSessionListService&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionListRows();
+    [[nodiscard]] std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionListRows();
 
 private:
     Infrastructure::Store::ReviewSession::ReviewSessionListStore& m_ReviewSessionListStore;

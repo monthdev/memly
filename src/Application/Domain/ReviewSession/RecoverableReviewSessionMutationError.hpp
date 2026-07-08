@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace Domain::ReviewSession {
+namespace Application::Domain::ReviewSession {
 
 enum class RecoverableReviewSessionMutationErrorEnum : std::uint8_t {
     ReviewSessionNameLengthError,

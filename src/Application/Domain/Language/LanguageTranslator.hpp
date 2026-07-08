@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace Domain::Language {
+namespace Application::Domain::Language {
 enum class TargetLanguage : std::uint8_t {
     NoLanguage,
     Afrikaans,

@@ -1,8 +1,8 @@
-#include "Domain/Language/LanguageTranslator.hpp"
+#include "Application/Domain/Language/LanguageTranslator.hpp"
 
 #include <cstddef>
 
-namespace Domain::Language {
+namespace Application::Domain::Language {
 [[nodiscard]] const std::array<TargetLanguageInfo, 67>& GetSupportedTargetLanguages() noexcept {
     // TODO: Move array to unnamed namespace?
     static constexpr std::array<TargetLanguageInfo, 67> s_TargetLanguages{

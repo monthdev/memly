@@ -42,7 +42,7 @@ WITH RECURSIVE
           WHERE
             id = move_context.new_parent_deck_id
         ) THEN ERROR('Deck move would create a cycle')
-        WHEN move_context.new_parent_deck_target_language_code <> move_context.moved_deck_target_language_code THEN ERROR('Deck target language does not match parent deck')
+        WHEN move_context.new_parent_deck_target_language_code <> move_context.moved_deck_target_language_code THEN ERROR('Target language does not match parent deck')
         ELSE move_context.new_parent_deck_id
       END AS new_parent_deck_id
     FROM
@@ -58,4 +58,6 @@ SET
 FROM
   validated_move
 WHERE
-  decks.id = validated_move.moved_deck_id;
+  decks.id = validated_move.moved_deck_id
+RETURNING
+  decks.id::VARCHAR AS deck_id;

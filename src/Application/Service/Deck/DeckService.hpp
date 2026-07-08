@@ -1,26 +1,30 @@
 #pragma once
 
 #include <cstdint>
-#include <expected>
 #include <optional>
 #include <string>
-#include <vector>
+#include <string_view>
 
-#include "Domain/Deck/DeckTreeSnapshotNode.hpp"
-#include "Domain/Deck/RecoverableDeckError.hpp"
+#include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCache.hpp"
+#include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCacheLease.hpp"
+
+namespace Application::Domain::Deck::Index {
+class DeckTreeSnapshotIndex;
+}
 
 namespace Infrastructure::Store::Deck {
 class DeckStore;
-class DeckTreeSnapshotStore;
+class DeckSnapshotStore;
 }
 
 namespace Application::Service::Deck {
 
 class DeckService final {
 public:
-    DeckService(Infrastructure::Store::Deck::DeckStore& DeckStore, Infrastructure::Store::Deck::DeckTreeSnapshotStore& DeckTreeSnapshotStore) noexcept
+    DeckService(Infrastructure::Store::Deck::DeckStore& DeckStore, Infrastructure::Store::Deck::DeckSnapshotStore& DeckSnapshotStore) noexcept
         : m_DeckStore{ DeckStore }
-        , m_DeckTreeSnapshotStore{ DeckTreeSnapshotStore } {
+        , m_DeckSnapshotStore{ DeckSnapshotStore }
+        , m_DeckTreeSnapshotIndexCache{} {
     }
 
     ~DeckService() noexcept = default;
@@ -29,17 +33,23 @@ public:
     DeckService& operator=(const DeckService&) = delete;
     DeckService& operator=(DeckService&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> ReadDeckTreeSnapshotNodes(std::int64_t);
+    [[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease AcquireDeckTreeSnapshotIndexCacheLease();
+    [[nodiscard]] const Application::Domain::Deck::Index::DeckTreeSnapshotIndex&
+    GetDeckTreeSnapshotIndex(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease&) const noexcept;
 
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateRootDeck(const std::string&, std::uint8_t);
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> CreateChildDeck(const std::string&, const std::string&);
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> MoveDeck(const std::string&, const std::optional<std::string>&);
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> RenameDeck(const std::string&, const std::string&);
-    [[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeleteDeck(const std::string&);
+    [[nodiscard]] bool IsDeckNameLengthValid(const std::string_view) const noexcept;
+
+    void CreateRootDeck(const std::string&, std::uint8_t);
+    void CreateChildDeck(const std::string&, const std::string&);
+    void MoveDeck(const std::string&, const std::optional<std::string>&);
+    void RenameDeck(const std::string&, const std::string&);
+    void DeleteDeck(const std::string&);
+    void RefreshDeckTreeSnapshotIndexCache(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease&, std::int64_t);
 
 private:
     Infrastructure::Store::Deck::DeckStore& m_DeckStore;
-    Infrastructure::Store::Deck::DeckTreeSnapshotStore& m_DeckTreeSnapshotStore;
+    Infrastructure::Store::Deck::DeckSnapshotStore& m_DeckSnapshotStore;
+    Application::IndexCache::Deck::DeckTreeSnapshotIndexCache m_DeckTreeSnapshotIndexCache;
 };
 
 }

@@ -13,8 +13,8 @@
 #include "Application/Service/ReviewSession/ReviewSessionListService.hpp"
 #include "Application/Service/ReviewSession/ReviewSessionService.hpp"
 #include "Infrastructure/Database/DatabaseRuntime.hpp"
+#include "Infrastructure/Store/Deck/DeckSnapshotStore.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
-#include "Infrastructure/Store/Deck/DeckTreeSnapshotStore.hpp"
 #include "Infrastructure/Store/Library/LibraryClockStore.hpp"
 #include "Infrastructure/Store/ReviewSession/ReviewSessionListStore.hpp"
 #include "Infrastructure/Store/ReviewSession/ReviewSessionStore.hpp"
@@ -26,7 +26,7 @@ std::unique_ptr<Application::Invalidation::LibraryInvalidationChannel> RuntimeCo
 std::unique_ptr<Infrastructure::Store::Library::LibraryClockStore> RuntimeContext::s_LibraryClockStore{};
 std::unique_ptr<Application::Invalidation::LibraryInvalidationCoordinator> RuntimeContext::s_LibraryInvalidationCoordinator{};
 std::unique_ptr<Infrastructure::Store::Deck::DeckStore> RuntimeContext::s_DeckStore{};
-std::unique_ptr<Infrastructure::Store::Deck::DeckTreeSnapshotStore> RuntimeContext::s_DeckTreeSnapshotStore{};
+std::unique_ptr<Infrastructure::Store::Deck::DeckSnapshotStore> RuntimeContext::s_DeckSnapshotStore{};
 std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionListStore> RuntimeContext::s_ReviewSessionListStore{};
 std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionStore> RuntimeContext::s_ReviewSessionStore{};
 std::unique_ptr<Application::Service::Deck::DeckService> RuntimeContext::s_DeckService{};
@@ -40,7 +40,7 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     Q_ASSERT(s_LibraryClockStore == nullptr);
     Q_ASSERT(s_LibraryInvalidationCoordinator == nullptr);
     Q_ASSERT(s_DeckStore == nullptr);
-    Q_ASSERT(s_DeckTreeSnapshotStore == nullptr);
+    Q_ASSERT(s_DeckSnapshotStore == nullptr);
     Q_ASSERT(s_ReviewSessionListStore == nullptr);
     Q_ASSERT(s_ReviewSessionStore == nullptr);
     Q_ASSERT(s_DeckService == nullptr);
@@ -53,10 +53,10 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
     s_LibraryInvalidationCoordinator =
         std::make_unique<Application::Invalidation::LibraryInvalidationCoordinator>(*s_LibraryInvalidationChannel, *s_LibraryClockStore);
     s_DeckStore = std::make_unique<Infrastructure::Store::Deck::DeckStore>(s_DatabaseRuntime->GetDatabaseConnection());
-    s_DeckTreeSnapshotStore = std::make_unique<Infrastructure::Store::Deck::DeckTreeSnapshotStore>(s_DatabaseRuntime->GetDatabaseConnection());
+    s_DeckSnapshotStore = std::make_unique<Infrastructure::Store::Deck::DeckSnapshotStore>(s_DatabaseRuntime->GetDatabaseConnection());
     s_ReviewSessionListStore = std::make_unique<Infrastructure::Store::ReviewSession::ReviewSessionListStore>(s_DatabaseRuntime->GetDatabaseConnection());
     s_ReviewSessionStore = std::make_unique<Infrastructure::Store::ReviewSession::ReviewSessionStore>(s_DatabaseRuntime->GetDatabaseConnection());
-    s_DeckService = std::make_unique<Application::Service::Deck::DeckService>(*s_DeckStore, *s_DeckTreeSnapshotStore);
+    s_DeckService = std::make_unique<Application::Service::Deck::DeckService>(*s_DeckStore, *s_DeckSnapshotStore);
     s_ReviewSessionListService = std::make_unique<Application::Service::ReviewSession::ReviewSessionListService>(*s_ReviewSessionListStore);
     s_ReviewSessionService =
         std::make_unique<Application::Service::ReviewSession::ReviewSessionService>(s_DatabaseRuntime->GetTransactionRunner(), *s_ReviewSessionStore);

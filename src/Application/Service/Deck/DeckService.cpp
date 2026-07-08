@@ -1,70 +1,71 @@
 #include "Application/Service/Deck/DeckService.hpp"
 
 #include <cstdint>
-#include <expected>
+#include <optional>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
-#include "Domain/Deck/DeckConstraint.hpp"
+#include "Application/Domain/Deck/Constraint/DeckConstraint.hpp"
+#include "Application/Domain/Deck/Index/DeckTreeSnapshotIndex.hpp"
+#include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCacheLease.hpp"
+#include "Infrastructure/Store/Deck/DeckSnapshotStore.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
-#include "Infrastructure/Store/Deck/DeckTreeSnapshotStore.hpp"
 
 namespace Application::Service::Deck {
-namespace {
 
-[[nodiscard]] constexpr Domain::Deck::RecoverableDeckMutationErrorEnum
-u_RecoverableDeckIdErrorToMutationError(const Domain::Deck::RecoverableDeckIdErrorEnum RecoverableDeckIdError) noexcept {
-    switch (RecoverableDeckIdError) {
-    case Domain::Deck::RecoverableDeckIdErrorEnum::InvalidDeckIdError: {
-        return Domain::Deck::RecoverableDeckMutationErrorEnum::InvalidDeckIdError;
-    }
-    case Domain::Deck::RecoverableDeckIdErrorEnum::InvalidParentDeckIdError: {
-        return Domain::Deck::RecoverableDeckMutationErrorEnum::InvalidParentDeckIdError;
-    }
-    }
+[[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease DeckService::AcquireDeckTreeSnapshotIndexCacheLease() {
+    return m_DeckTreeSnapshotIndexCache.AcquireLease();
 }
 
+[[nodiscard]] const Application::Domain::Deck::Index::DeckTreeSnapshotIndex&
+DeckService::GetDeckTreeSnapshotIndex(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease& DeckTreeSnapshotIndexCacheLease) const noexcept {
+    return m_DeckTreeSnapshotIndexCache.GetIndex(DeckTreeSnapshotIndexCacheLease);
 }
 
-[[nodiscard]] std::vector<Domain::Deck::DeckTreeSnapshotNode> DeckService::ReadDeckTreeSnapshotNodes(const std::int64_t AsOfMillisecondsSinceEpoch) {
-    return m_DeckTreeSnapshotStore.ReadDeckTreeSnapshotNodes(AsOfMillisecondsSinceEpoch);
+[[nodiscard]] bool DeckService::IsDeckNameLengthValid(const std::string_view DeckName) const noexcept {
+    return Application::Domain::Deck::Constraint::IsDeckNameLengthValid(DeckName);
 }
 
-[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::CreateRootDeck(const std::string& DeckName,
-                                                                                                              const std::uint8_t TargetLanguageCode) {
-    if (not Domain::Deck::IsDeckNameLengthValid(DeckName)) {
-        return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
+void DeckService::CreateRootDeck(const std::string& DeckName, const std::uint8_t TargetLanguageCode) {
+    m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode);
+}
+
+void DeckService::CreateChildDeck(const std::string& DeckName, const std::string& ParentDeckId) {
+    m_DeckStore.CreateChildDeck(DeckName, ParentDeckId);
+}
+
+void DeckService::MoveDeck(const std::string& DeckId, const std::optional<std::string>& NewParentDeckId) {
+    m_DeckStore.MoveDeck(DeckId, NewParentDeckId);
+}
+
+void DeckService::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) {
+    m_DeckStore.RenameDeck(DeckId, NewDeckName);
+}
+
+void DeckService::DeleteDeck(const std::string& DeckId) {
+    m_DeckStore.DeleteDeck(DeckId);
+}
+
+void DeckService::RefreshDeckTreeSnapshotIndexCache(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease& DeckTreeSnapshotIndexCacheLease,
+                                                    const std::int64_t AsOfMillisecondsSinceEpoch) {
+    std::vector<Infrastructure::Store::Deck::DeckSnapshotStore::DeckSnapshotRecord> DeckSnapshotRecordVector{ m_DeckSnapshotStore.ReadDeckSnapshotRecords(
+        AsOfMillisecondsSinceEpoch) };
+    std::vector<Application::Domain::Deck::Index::DeckTreeSnapshotIndex::DeckTreeSnapshotNode> DeckTreeSnapshotNodeVector{};
+    DeckTreeSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
+    for (Infrastructure::Store::Deck::DeckSnapshotStore::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
+        DeckTreeSnapshotNodeVector.emplace_back(std::move(DeckSnapshotRecord.m_DeckId),
+                                                std::move(DeckSnapshotRecord.m_ParentDeckIdOptional),
+                                                std::move(DeckSnapshotRecord.m_DeckName),
+                                                DeckSnapshotRecord.m_CreatedAtMillisecondsSinceEpoch,
+                                                std::move(DeckSnapshotRecord.m_LastUpdatedAtMillisecondsSinceEpochOptional),
+                                                DeckSnapshotRecord.m_SelfDueNowCount,
+                                                DeckSnapshotRecord.m_SelfByTodayCount,
+                                                DeckSnapshotRecord.m_SelfTotalCount,
+                                                DeckSnapshotRecord.m_TargetLanguageCode);
     }
-    return m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode);
-}
-
-[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::CreateChildDeck(const std::string& DeckName,
-                                                                                                               const std::string& ParentDeckId) {
-    if (not Domain::Deck::IsDeckNameLengthValid(DeckName)) {
-        return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
-    }
-    return m_DeckStore.CreateChildDeck(DeckName, ParentDeckId);
-}
-
-[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::MoveDeck(const std::string& DeckId,
-                                                                                                        const std::optional<std::string>& NewParentDeckId) {
-    return m_DeckStore.MoveDeck(DeckId, NewParentDeckId);
-}
-
-[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::RenameDeck(const std::string& DeckId,
-                                                                                                          const std::string& NewDeckName) {
-    if (not Domain::Deck::IsDeckNameLengthValid(NewDeckName)) {
-        return std::unexpected{ Domain::Deck::RecoverableDeckMutationErrorEnum::DeckNameLengthError };
-    }
-    return m_DeckStore.RenameDeck(DeckId, NewDeckName);
-}
-
-[[nodiscard]] std::expected<void, Domain::Deck::RecoverableDeckMutationErrorEnum> DeckService::DeleteDeck(const std::string& DeckId) {
-    const std::expected<void, Domain::Deck::RecoverableDeckIdErrorEnum> DeleteDeckExpected{ m_DeckStore.DeleteDeck(DeckId) };
-    if (not DeleteDeckExpected.has_value()) {
-        return std::unexpected{ u_RecoverableDeckIdErrorToMutationError(DeleteDeckExpected.error()) };
-    }
-    return {};
+    m_DeckTreeSnapshotIndexCache.Refresh(DeckTreeSnapshotIndexCacheLease, std::move(DeckTreeSnapshotNodeVector));
 }
 
 }

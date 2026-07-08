@@ -16,4 +16,6 @@ WHERE
       id
     FROM
       deck_subtree
-  );
+  )
+RETURNING
+  id::VARCHAR AS deck_id;

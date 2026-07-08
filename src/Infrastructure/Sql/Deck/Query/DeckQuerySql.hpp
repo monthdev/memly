@@ -4,7 +4,5 @@
 
 namespace Infrastructure::Sql::Deck::Query {
 
-[[nodiscard]] std::string CheckDeckIdExistsSql();
-
-[[nodiscard]] std::string ReadDeckTreeSnapshotNodesSql();
+[[nodiscard]] std::string ReadDeckSnapshotRecordsSql();
 }

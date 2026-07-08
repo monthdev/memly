@@ -1,3 +1,5 @@
+#if 0
+// Temporarily disabled during deck page controller refactor.
 #pragma once
 
 #include <QObject>
@@ -54,3 +56,4 @@ private:
 };
 
 }
+#endif

@@ -1,3 +1,5 @@
+#if 0
+// Temporarily disabled during deck tree model refactor.
 #include "Presentation/Model/DeckTreeModel.hpp"
 
 #include <QString>
@@ -82,19 +84,19 @@ namespace Presentation::Model {
         case static_cast<int>(RoleEnum::DeckIdRole):
             return QString::fromStdString(CurrentDeckNode.m_DeckTreeNode.m_DeckId);
         case static_cast<int>(RoleEnum::ParentDeckIdRole):
-            if (not CurrentDeckNode.m_DeckTreeNode.m_ParentDeckId.has_value()) {
+            if (not CurrentDeckNode.m_DeckTreeNode.m_ParentDeckIdOptional.has_value()) {
                 return QString{};
             }
-            return QString::fromStdString(CurrentDeckNode.m_DeckTreeNode.m_ParentDeckId.value());
+            return QString::fromStdString(CurrentDeckNode.m_DeckTreeNode.m_ParentDeckIdOptional.value());
         case static_cast<int>(RoleEnum::DeckNameRole):
             return QString::fromStdString(CurrentDeckNode.m_DeckTreeNode.m_DeckName);
         case static_cast<int>(RoleEnum::CreatedAtMillisecondsSinceEpochRole):
             return CurrentDeckNode.m_DeckTreeNode.m_CreatedAtMillisecondsSinceEpoch;
         case static_cast<int>(RoleEnum::LastUpdatedAtMillisecondsSinceEpochRole):
-            if (not CurrentDeckNode.m_DeckTreeNode.m_LastUpdatedAtMillisecondsSinceEpoch.has_value()) {
+            if (not CurrentDeckNode.m_DeckTreeNode.m_LastUpdatedAtMillisecondsSinceEpochOptional.has_value()) {
                 return std::int64_t{};
             }
-            return CurrentDeckNode.m_DeckTreeNode.m_LastUpdatedAtMillisecondsSinceEpoch.value();
+            return CurrentDeckNode.m_DeckTreeNode.m_LastUpdatedAtMillisecondsSinceEpochOptional.value();
         case static_cast<int>(RoleEnum::SelfDueNowCountRole):
             return CurrentDeckNode.m_DeckTreeNode.m_SelfDueNowCount;
         case static_cast<int>(RoleEnum::SelfByTodayCountRole):
@@ -142,7 +144,7 @@ void DeckTreeModel::sort(const int Column, const Qt::SortOrder SortOrder) noexce
         return std::nullopt;
     }
     const std::size_t DeckNodeIndex{ static_cast<std::size_t>(Index.internalId()) };
-    Q_ASSERT(DeckNodeIndex < m_DeckNodesVector.size());
+    assert(DeckNodeIndex < m_DeckNodesVector.size());
     return m_DeckNodesVector.at(DeckNodeIndex);
 }
 
@@ -208,7 +210,7 @@ void DeckTreeModel::ApplyCurrentSort() {
     UpdateSiblingRowIndexes();
 }
 
-void DeckTreeModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>&& DeckTreeNodeVector) noexcept {
+void DeckTreeModel::ReplaceAll(std::vector<Application::Domain::Deck::Data::DeckTreeSnapshotNode>&& DeckTreeNodeVector) noexcept {
     Runtime::TryCatchWrapper([&]() -> void {
         std::vector<DeckNode> DeckNodesVector;
         std::vector<std::size_t> RootDeckNodeIndexesVector;
@@ -216,20 +218,20 @@ void DeckTreeModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>&&
         DeckNodesVector.reserve(DeckTreeNodeVector.size());
         RootDeckNodeIndexesVector.reserve(DeckTreeNodeVector.size());
         DeckNodeIndexByIdHash.reserve(DeckTreeNodeVector.size());
-        for (Domain::Deck::DeckTreeSnapshotNode& DeckTreeNode : DeckTreeNodeVector) {
+        for (Application::Domain::Deck::Data::DeckTreeSnapshotNode& DeckTreeNode : DeckTreeNodeVector) {
             const std::size_t DeckNodeIndex{ DeckNodesVector.size() };
             DeckNodeIndexByIdHash.emplace(DeckTreeNode.m_DeckId, DeckNodeIndex);
             DeckNodesVector.emplace_back(DeckNode{ std::move(DeckTreeNode), std::nullopt, 0, std::vector<std::size_t>{} });
         }
         for (std::size_t DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesVector.size(); ++DeckNodeIndex) {
             DeckNode& CurrentDeckNode{ DeckNodesVector.at(DeckNodeIndex) };
-            const std::optional<std::string>& ParentId{ CurrentDeckNode.m_DeckTreeNode.m_ParentDeckId };
-            if (not ParentId.has_value()) {
+            const std::optional<std::string>& ParentIdOptional{ CurrentDeckNode.m_DeckTreeNode.m_ParentDeckIdOptional };
+            if (not ParentIdOptional.has_value()) {
                 CurrentDeckNode.m_RowInParentIndex = RootDeckNodeIndexesVector.size();
                 RootDeckNodeIndexesVector.push_back(DeckNodeIndex);
                 continue;
             }
-            CurrentDeckNode.m_ParentDeckNodeIndex = DeckNodeIndexByIdHash.at(ParentId.value());
+            CurrentDeckNode.m_ParentDeckNodeIndex = DeckNodeIndexByIdHash.at(ParentIdOptional.value());
             CurrentDeckNode.m_RowInParentIndex = DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector.size();
             DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector.push_back(DeckNodeIndex);
         }
@@ -242,3 +244,4 @@ void DeckTreeModel::ReplaceAll(std::vector<Domain::Deck::DeckTreeSnapshotNode>&&
 }
 
 }
+#endif

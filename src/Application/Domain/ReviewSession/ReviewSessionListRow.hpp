@@ -5,7 +5,7 @@
 #include <string>
 #include <utility>
 
-namespace Domain::ReviewSession {
+namespace Application::Domain::ReviewSession {
 
 struct ReviewSessionListRow {
     ReviewSessionListRow(std::string&& ReviewSessionId,

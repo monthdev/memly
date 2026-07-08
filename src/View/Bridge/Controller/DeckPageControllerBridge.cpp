@@ -1,3 +1,5 @@
+#if 0
+// Temporarily disabled during deck page controller bridge refactor.
 #include "View/Bridge/Controller/DeckPageControllerBridge.hpp"
 
 #include <cstdint>
@@ -43,3 +45,4 @@ namespace {
 }
 
 }
+#endif

@@ -1,3 +1,5 @@
+#if 0
+// Temporarily disabled during deck tree proxy model refactor.
 #include "View/Bridge/ProxyModel/DeckTreeProxyModel.hpp"
 
 #include <QString>
@@ -52,3 +54,4 @@ void DeckTreeProxyModel::sort(const int Column, const Qt::SortOrder SortOrder) n
 }
 
 }
+#endif

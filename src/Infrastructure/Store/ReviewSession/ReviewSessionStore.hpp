@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
-#include "Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
+#include "Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
+#include "Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/ReviewSession/Mutation/ReviewSessionMutationSql.hpp"
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
@@ -58,15 +58,18 @@ public:
     ReviewSessionStore& operator=(const ReviewSessionStore&) = delete;
     ReviewSessionStore& operator=(ReviewSessionStore&&) = delete;
 
-    [[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
+    [[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
     CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&);
-    [[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    CreateOrReadExistingCustomReviewSession(const std::string&, const std::string&, const std::vector<Domain::ReviewSession::ReviewSessionDeckSelection>&);
-    [[nodiscard]] std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RenameReviewSession(const std::string&, const std::string&);
-    [[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
+    [[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
+    CreateOrReadExistingCustomReviewSession(const std::string&,
+                                            const std::string&,
+                                            const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>&);
+    [[nodiscard]] std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RenameReviewSession(const std::string&,
+                                                                                                                                   const std::string&);
+    [[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
     EditReviewSessionToDefault(const std::string&, const std::string&, const std::string&);
-    [[nodiscard]] std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<Domain::ReviewSession::ReviewSessionDeckSelection>&);
+    [[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
+    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>&);
     void UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string&);
     void DeleteReviewSession(const std::string&);
 
@@ -85,8 +88,10 @@ private:
 
     [[nodiscard]] std::optional<std::string> TryReadDefaultReviewSessionIdByRootDeckId(const std::string&);
     [[nodiscard]] std::optional<std::string> TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string&);
-    [[nodiscard]] std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    CreateCustomReviewSessionDeckSelection(const std::string&, const std::string&, Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum);
+    [[nodiscard]] std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
+    CreateCustomReviewSessionDeckSelection(const std::string&,
+                                           const std::string&,
+                                           Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum);
     void DeleteCustomReviewSessionDeckSelections(const std::string&);
 };
 

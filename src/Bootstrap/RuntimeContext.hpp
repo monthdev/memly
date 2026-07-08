@@ -28,7 +28,7 @@ class DatabaseRuntime;
 
 namespace Infrastructure::Store::Deck {
 class DeckStore;
-class DeckTreeSnapshotStore;
+class DeckSnapshotStore;
 }
 
 namespace Infrastructure::Store::Library {
@@ -64,7 +64,7 @@ private:
     static std::unique_ptr<Infrastructure::Store::Library::LibraryClockStore> s_LibraryClockStore;
     static std::unique_ptr<Application::Invalidation::LibraryInvalidationCoordinator> s_LibraryInvalidationCoordinator;
     static std::unique_ptr<Infrastructure::Store::Deck::DeckStore> s_DeckStore;
-    static std::unique_ptr<Infrastructure::Store::Deck::DeckTreeSnapshotStore> s_DeckTreeSnapshotStore;
+    static std::unique_ptr<Infrastructure::Store::Deck::DeckSnapshotStore> s_DeckSnapshotStore;
     static std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionListStore> s_ReviewSessionListStore;
     static std::unique_ptr<Infrastructure::Store::ReviewSession::ReviewSessionStore> s_ReviewSessionStore;
     static std::unique_ptr<Application::Service::Deck::DeckService> s_DeckService;

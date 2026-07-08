@@ -1,6 +1,3 @@
-CREATE MACRO IF NOT EXISTS deck_name_length_is_valid (deck_name) AS LENGTH(deck_name) > 0
-AND LENGTH(deck_name) <= 40;
-
 CREATE MACRO IF NOT EXISTS settings_name_length_is_valid (settings_name) AS LENGTH(settings_name) > 0
 AND LENGTH(settings_name) <= 40;
 
@@ -59,11 +56,11 @@ OR custom_name IS NOT NULL;
 CREATE MACRO IF NOT EXISTS deck_parent_is_valid (deck_id, parent_deck_id) AS parent_deck_id IS NULL
 OR parent_deck_id <> deck_id;
 
-CREATE MACRO IF NOT EXISTS due_time_after_last_review_time_is_valid (last_reviewed_at, due_at) AS (
+CREATE MACRO IF NOT EXISTS scheduled_due_time_after_last_review_time_is_valid (last_reviewed_at, scheduled_due_at) AS (
   last_reviewed_at IS NULL
-  AND due_at IS NULL
+  AND scheduled_due_at IS NULL
 )
-OR due_at > last_reviewed_at;
+OR scheduled_due_at > last_reviewed_at;
 
 CREATE TYPE scheduler_type AS ENUM('fsrs');
 
@@ -166,7 +163,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS deck_settings_ensure_single_default_idx ON dec
 CREATE TABLE IF NOT EXISTS decks (
   id UUID PRIMARY KEY DEFAULT UUIDV7 (),
   parent_deck_id UUID DEFAULT NULL CHECK (deck_parent_is_valid (id, parent_deck_id)),
-  name VARCHAR NOT NULL CHECK (deck_name_length_is_valid (name)),
+  name VARCHAR NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_updated_at TIMESTAMP CHECK (
     last_updated_at_time_is_valid (created_at, last_updated_at)
@@ -197,15 +194,15 @@ CREATE TABLE IF NOT EXISTS cards (
     last_updated_at_time_is_valid (created_at, last_updated_at)
   ),
   last_reviewed_at TIMESTAMP,
-  due_at TIMESTAMP CHECK (
-    due_time_after_last_review_time_is_valid (last_reviewed_at, due_at)
+  scheduled_due_at TIMESTAMP CHECK (
+    scheduled_due_time_after_last_review_time_is_valid (last_reviewed_at, scheduled_due_at)
   ),
   difficulty DOUBLE NOT NULL DEFAULT 0.0 CHECK (fsrs_difficulty_before_is_valid (difficulty)),
   stability DOUBLE NOT NULL DEFAULT 0.0 CHECK (fsrs_stability_before_is_valid (stability)),
   front_text VARCHAR NOT NULL CHECK (card_front_text_length_is_valid (front_text)),
-  front_normalized_text VARCHAR GENERATED ALWAYS AS (LOWER(STRIP_ACCENTS(NFC_NORMALIZE(front_text)))),
+  front_text_normalized_casefolded VARCHAR NOT NULL,
   back_text VARCHAR NOT NULL CHECK (card_back_text_length_is_valid (back_text)),
-  back_normalized_text VARCHAR GENERATED ALWAYS AS (LOWER(STRIP_ACCENTS(NFC_NORMALIZE(back_text)))),
+  back_text_normalized_casefolded VARCHAR NOT NULL,
   audio_path VARCHAR,
   user_flag UTINYINT NOT NULL DEFAULT 0 CHECK (user_flag_is_valid (user_flag)),
   UNIQUE (deck_id, front_text)

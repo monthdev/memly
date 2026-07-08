@@ -1,3 +1,5 @@
+#if 0
+// Temporarily disabled during deck page controller bridge refactor.
 #pragma once
 
 #include <QtQmlIntegration/qqmlintegration.h>
@@ -44,3 +46,4 @@ private:
 };
 
 }
+#endif

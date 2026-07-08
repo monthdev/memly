@@ -16,4 +16,6 @@ SELECT
   ?,
   default_deck_settings.deck_settings_id
 FROM
-  default_deck_settings;
+  default_deck_settings
+RETURNING
+  id::VARCHAR AS deck_id;

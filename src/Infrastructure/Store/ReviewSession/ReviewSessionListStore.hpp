@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "Domain/ReviewSession/ReviewSessionListRow.hpp"
+#include "Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
 
@@ -25,7 +25,7 @@ public:
     ReviewSessionListStore& operator=(const ReviewSessionListStore&) = delete;
     ReviewSessionListStore& operator=(ReviewSessionListStore&&) = delete;
 
-    [[nodiscard]] std::vector<Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionListRows();
+    [[nodiscard]] std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionListRows();
 
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionListRowsPreparedStatement;
