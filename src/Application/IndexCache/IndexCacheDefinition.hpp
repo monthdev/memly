@@ -6,7 +6,7 @@
 namespace Application::IndexCache {
 
 template <typename IndexCacheDefinitionType>
-class IndexCacheLifecycle;
+class IndexCacheBase;
 
 template <typename IndexCacheDefinitionType,
           typename IndexObjectType,
@@ -26,7 +26,7 @@ public:
     using IndexRefreshDataType = IndexRefreshDataObjectType;
 
 private:
-    friend class IndexCacheLifecycle<IndexCacheDefinitionType>;
+    friend class IndexCacheBase<IndexCacheDefinitionType>;
 
     static void RefreshIndex(IndexObjectType& Index, IndexRefreshDataObjectType&& IndexRefreshData) {
         std::invoke(RefreshIndexMethod, Index, std::move(IndexRefreshData));

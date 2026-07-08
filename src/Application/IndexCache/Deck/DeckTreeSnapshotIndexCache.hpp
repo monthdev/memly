@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCacheDefinition.hpp"
-#include "Application/IndexCache/IndexCacheLifecycle.hpp"
+#include "Application/IndexCache/IndexCacheBase.hpp"
 
 namespace Application::IndexCache::Deck {
 
-class DeckTreeSnapshotIndexCache final : public Application::IndexCache::IndexCacheLifecycle<DeckTreeSnapshotIndexCacheDefinition> {
+class DeckTreeSnapshotIndexCache final : public Application::IndexCache::IndexCacheBase<DeckTreeSnapshotIndexCacheDefinition> {
 public:
     DeckTreeSnapshotIndexCache() noexcept
-        : Application::IndexCache::IndexCacheLifecycle<DeckTreeSnapshotIndexCacheDefinition>{} {
+        : Application::IndexCache::IndexCacheBase<DeckTreeSnapshotIndexCacheDefinition>{} {
     }
 
     DeckTreeSnapshotIndexCache(const DeckTreeSnapshotIndexCache&) = delete;

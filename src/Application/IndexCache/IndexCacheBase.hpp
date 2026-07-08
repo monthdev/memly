@@ -8,7 +8,7 @@
 namespace Application::IndexCache {
 
 template <typename IndexCacheDefinitionType>
-class IndexCacheLifecycle {
+class IndexCacheBase {
 public:
     [[nodiscard]] typename IndexCacheDefinitionType::CacheLeaseType AcquireLease() {
         std::shared_ptr<typename IndexCacheDefinitionType::IndexType> IndexSharedPointer{ m_IndexWeakPointer.lock() };
@@ -30,14 +30,14 @@ public:
     }
 
 protected:
-    IndexCacheLifecycle() noexcept
+    IndexCacheBase() noexcept
         : m_IndexWeakPointer{} {
     }
 
-    IndexCacheLifecycle(const IndexCacheLifecycle&) = delete;
-    IndexCacheLifecycle(IndexCacheLifecycle&&) = delete;
-    IndexCacheLifecycle& operator=(const IndexCacheLifecycle&) = delete;
-    IndexCacheLifecycle& operator=(IndexCacheLifecycle&&) = delete;
+    IndexCacheBase(const IndexCacheBase&) = delete;
+    IndexCacheBase(IndexCacheBase&&) = delete;
+    IndexCacheBase& operator=(const IndexCacheBase&) = delete;
+    IndexCacheBase& operator=(IndexCacheBase&&) = delete;
 
 private:
     std::weak_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexWeakPointer;

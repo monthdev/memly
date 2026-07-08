@@ -6,7 +6,7 @@
 namespace Application::IndexCache {
 
 template <typename IndexCacheDefinitionType>
-class IndexCacheLifecycle;
+class IndexCacheBase;
 
 template <typename IndexCacheDefinitionType>
 class IndexCacheLease final {
@@ -18,7 +18,7 @@ public:
     IndexCacheLease& operator=(IndexCacheLease&&) = delete;
 
 private:
-    friend class IndexCacheLifecycle<IndexCacheDefinitionType>;
+    friend class IndexCacheBase<IndexCacheDefinitionType>;
 
     explicit IndexCacheLease(std::shared_ptr<typename IndexCacheDefinitionType::IndexType>&& IndexSharedPointer) noexcept
         : m_IndexSharedPointer{ std::move(IndexSharedPointer) } {

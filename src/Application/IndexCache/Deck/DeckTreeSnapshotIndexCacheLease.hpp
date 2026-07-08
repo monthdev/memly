@@ -7,7 +7,7 @@
 
 namespace Application::IndexCache {
 template <typename IndexCacheDefinitionType>
-class IndexCacheLifecycle;
+class IndexCacheBase;
 }
 
 namespace Application::IndexCache::Deck {
@@ -21,7 +21,7 @@ public:
     DeckTreeSnapshotIndexCacheLease& operator=(DeckTreeSnapshotIndexCacheLease&&) = delete;
 
 private:
-    friend class Application::IndexCache::IndexCacheLifecycle<DeckTreeSnapshotIndexCacheDefinition>;
+    friend class Application::IndexCache::IndexCacheBase<DeckTreeSnapshotIndexCacheDefinition>;
 
     explicit DeckTreeSnapshotIndexCacheLease(Application::IndexCache::IndexCacheLease<DeckTreeSnapshotIndexCacheDefinition>&& IndexCacheLease) noexcept
         : m_IndexCacheLease{ std::move(IndexCacheLease) } {
