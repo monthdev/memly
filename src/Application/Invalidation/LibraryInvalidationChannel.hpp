@@ -21,8 +21,6 @@ public:
         : QObject{ Parent }
         , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch()) } {
     }
-
-    ~LibraryInvalidationChannel() noexcept override = default;
     LibraryInvalidationChannel(const LibraryInvalidationChannel&) = delete;
     LibraryInvalidationChannel(LibraryInvalidationChannel&&) = delete;
     LibraryInvalidationChannel& operator=(const LibraryInvalidationChannel&) = delete;

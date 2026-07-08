@@ -12,7 +12,6 @@ template <typename IndexCacheDefinitionType>
 class IndexCacheLease final {
 public:
     IndexCacheLease() = delete;
-    ~IndexCacheLease() noexcept = default;
     IndexCacheLease(const IndexCacheLease&) = delete;
     IndexCacheLease(IndexCacheLease&&) noexcept = default;
     IndexCacheLease& operator=(const IndexCacheLease&) = delete;

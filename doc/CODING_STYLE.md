@@ -22,8 +22,13 @@ Lambda init-captures must use brace initialization.
 
 ## Header Declaration Surface
 
-Constructors and destructors must always be declared and implemented in the
-header even when the implementation is `= default`.
+Constructors must always be declared and implemented in the header even when the
+implementation is `= default`.
+
+Destructors must not be declared.
+
+Destructors are expected to be default behavior because ownership must be
+managed by RAII containers and member objects.
 
 Parameters must only be named where methods are implemented, not where methods
 are declared.
@@ -178,7 +183,8 @@ namespace.
 Use file-private free helpers in unnamed namespaces for logic that does not use
 class state.
 
-File-private helper function names in unnamed namespaces must use an `a_` prefix.
+File-private helper function names in unnamed namespaces must use an `a_`
+prefix.
 
 We want to keep header declaration surfaces very explicit but minimal which also
 acts as the testing surface.

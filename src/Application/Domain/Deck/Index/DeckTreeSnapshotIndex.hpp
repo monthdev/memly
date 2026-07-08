@@ -37,8 +37,6 @@ public:
             , m_SubtreeByTodayCount{ SelfByTodayCount }
             , m_SubtreeTotalCount{ SelfTotalCount } {
         }
-
-        ~DeckTreeSnapshotNode() noexcept = default;
         DeckTreeSnapshotNode(const DeckTreeSnapshotNode&) = delete;
         DeckTreeSnapshotNode(DeckTreeSnapshotNode&&) noexcept = default;
         DeckTreeSnapshotNode& operator=(const DeckTreeSnapshotNode&) = delete;
@@ -64,8 +62,6 @@ public:
         , m_ChildDeckNodePositionVectorByDeckNodePositionVector{}
         , m_DeckNodePositionByDeckIdUnorderedMap{} {
     }
-
-    ~DeckTreeSnapshotIndex() noexcept = default;
     DeckTreeSnapshotIndex(const DeckTreeSnapshotIndex&) = delete;
     DeckTreeSnapshotIndex(DeckTreeSnapshotIndex&&) = delete;
     DeckTreeSnapshotIndex& operator=(const DeckTreeSnapshotIndex&) = delete;

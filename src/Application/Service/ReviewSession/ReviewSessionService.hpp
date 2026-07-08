@@ -24,8 +24,6 @@ public:
         : m_TransactionRunner{ TransactionRunner }
         , m_ReviewSessionStore{ ReviewSessionStore } {
     }
-
-    ~ReviewSessionService() noexcept = default;
     ReviewSessionService(const ReviewSessionService&) = delete;
     ReviewSessionService(ReviewSessionService&&) = delete;
     ReviewSessionService& operator=(const ReviewSessionService&) = delete;

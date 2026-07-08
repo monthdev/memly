@@ -15,7 +15,6 @@ namespace Application::IndexCache::Deck {
 class DeckTreeSnapshotIndexCacheLease final {
 public:
     DeckTreeSnapshotIndexCacheLease() = delete;
-    ~DeckTreeSnapshotIndexCacheLease() noexcept = default;
     DeckTreeSnapshotIndexCacheLease(const DeckTreeSnapshotIndexCacheLease&) = delete;
     DeckTreeSnapshotIndexCacheLease(DeckTreeSnapshotIndexCacheLease&&) noexcept = default;
     DeckTreeSnapshotIndexCacheLease& operator=(const DeckTreeSnapshotIndexCacheLease&) = delete;

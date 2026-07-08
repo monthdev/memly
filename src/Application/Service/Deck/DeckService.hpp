@@ -26,8 +26,6 @@ public:
         , m_DeckSnapshotStore{ DeckSnapshotStore }
         , m_DeckTreeSnapshotIndexCache{} {
     }
-
-    ~DeckService() noexcept = default;
     DeckService(const DeckService&) = delete;
     DeckService(DeckService&&) = delete;
     DeckService& operator=(const DeckService&) = delete;

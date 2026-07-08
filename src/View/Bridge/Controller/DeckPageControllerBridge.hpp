@@ -25,8 +25,6 @@ public:
         , m_DeckPageController{ Bootstrap::RuntimeContext::GetRequiredLibraryInvalidationChannel(), Bootstrap::RuntimeContext::GetRequiredDeckService() }
         , m_DeckTreeProxyModel{ *m_DeckPageController.GetDeckTreeModel(), this } {
     }
-
-    ~DeckPageControllerBridge() noexcept override = default;
     DeckPageControllerBridge(const DeckPageControllerBridge&) = delete;
     DeckPageControllerBridge(DeckPageControllerBridge&&) = delete;
     DeckPageControllerBridge& operator=(const DeckPageControllerBridge&) = delete;

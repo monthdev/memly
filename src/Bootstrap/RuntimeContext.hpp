@@ -45,7 +45,6 @@ namespace Bootstrap {
 class RuntimeContext final {
 public:
     RuntimeContext() = delete;
-    ~RuntimeContext() = delete;
     RuntimeContext(const RuntimeContext&) = delete;
     RuntimeContext(RuntimeContext&&) = delete;
     RuntimeContext& operator=(const RuntimeContext&) = delete;

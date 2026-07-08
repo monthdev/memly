@@ -11,8 +11,6 @@ namespace Application::Domain::Text::Data {
 class [[nodiscard]] HumanTextInput final {
 public:
     [[nodiscard]] static HumanTextInput FromInput(const std::string&);
-
-    ~HumanTextInput() noexcept = default;
     HumanTextInput(const HumanTextInput&) = delete;
     HumanTextInput(HumanTextInput&&) noexcept = default;
     HumanTextInput& operator=(const HumanTextInput&) = delete;

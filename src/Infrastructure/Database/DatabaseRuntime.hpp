@@ -17,8 +17,6 @@ public:
         , m_TransactionRunner{ m_DatabaseConnection } {
         BootstrapDatabase();
     }
-
-    ~DatabaseRuntime() noexcept = default;
     DatabaseRuntime(const DatabaseRuntime&) = delete;
     DatabaseRuntime(DatabaseRuntime&&) = delete;
     DatabaseRuntime& operator=(const DatabaseRuntime&) = delete;

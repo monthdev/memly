@@ -17,7 +17,6 @@ class DeckTreeSnapshotIndexCacheDefinition final
                                                            &Application::Domain::Deck::Index::DeckTreeSnapshotIndex::RefreshFromDeckTreeSnapshotNodes> {
 public:
     DeckTreeSnapshotIndexCacheDefinition() = delete;
-    ~DeckTreeSnapshotIndexCacheDefinition() noexcept = default;
     DeckTreeSnapshotIndexCacheDefinition(const DeckTreeSnapshotIndexCacheDefinition&) = delete;
     DeckTreeSnapshotIndexCacheDefinition(DeckTreeSnapshotIndexCacheDefinition&&) = delete;
     DeckTreeSnapshotIndexCacheDefinition& operator=(const DeckTreeSnapshotIndexCacheDefinition&) = delete;

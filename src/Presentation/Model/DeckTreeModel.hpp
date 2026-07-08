@@ -44,8 +44,6 @@ public:
         , m_SortColumn{ -1 }
         , m_SortOrder{ Qt::AscendingOrder } {
     }
-
-    ~DeckTreeModel() noexcept override = default;
     DeckTreeModel(const DeckTreeModel&) = delete;
     DeckTreeModel(DeckTreeModel&&) = delete;
     DeckTreeModel& operator=(const DeckTreeModel&) = delete;

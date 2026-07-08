@@ -8,8 +8,6 @@ namespace Application::Domain::Text::Data {
 class [[nodiscard]] HumanText final {
 public:
     [[nodiscard]] static HumanText FromPersisted(std::string&&, std::string&&) noexcept;
-
-    ~HumanText() noexcept = default;
     HumanText(const HumanText&) = delete;
     HumanText(HumanText&&) noexcept = default;
     HumanText& operator=(const HumanText&) = delete;

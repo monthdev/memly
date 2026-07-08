@@ -36,8 +36,6 @@ public:
             , m_SelfTotalCount{ SelfTotalCount }
             , m_TargetLanguageCode{ TargetLanguageCode } {
         }
-
-        ~DeckSnapshotRecord() noexcept = default;
         DeckSnapshotRecord(const DeckSnapshotRecord&) = delete;
         DeckSnapshotRecord(DeckSnapshotRecord&&) noexcept = default;
         DeckSnapshotRecord& operator=(const DeckSnapshotRecord&) = delete;
@@ -58,8 +56,6 @@ public:
         : m_ReadDeckSnapshotRecordsPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Query::ReadDeckSnapshotRecordsSql()) } {
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadDeckSnapshotRecordsPreparedStatement);
     }
-
-    ~DeckSnapshotStore() noexcept = default;
     DeckSnapshotStore(const DeckSnapshotStore&) = delete;
     DeckSnapshotStore(DeckSnapshotStore&&) = delete;
     DeckSnapshotStore& operator=(const DeckSnapshotStore&) = delete;

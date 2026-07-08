@@ -18,8 +18,6 @@ public:
               Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionListRowsSql()) } {
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionListRowsPreparedStatement);
     }
-
-    ~ReviewSessionListStore() noexcept = default;
     ReviewSessionListStore(const ReviewSessionListStore&) = delete;
     ReviewSessionListStore(ReviewSessionListStore&&) = delete;
     ReviewSessionListStore& operator=(const ReviewSessionListStore&) = delete;

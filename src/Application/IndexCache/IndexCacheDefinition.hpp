@@ -16,7 +16,6 @@ template <typename IndexCacheDefinitionType,
 class IndexCacheDefinition {
 public:
     IndexCacheDefinition() = delete;
-    ~IndexCacheDefinition() noexcept = default;
     IndexCacheDefinition(const IndexCacheDefinition&) = delete;
     IndexCacheDefinition(IndexCacheDefinition&&) = delete;
     IndexCacheDefinition& operator=(const IndexCacheDefinition&) = delete;

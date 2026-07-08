@@ -15,8 +15,6 @@ public:
     explicit ReviewSessionListService(Infrastructure::Store::ReviewSession::ReviewSessionListStore& ReviewSessionListStore) noexcept
         : m_ReviewSessionListStore{ ReviewSessionListStore } {
     }
-
-    ~ReviewSessionListService() noexcept = default;
     ReviewSessionListService(const ReviewSessionListService&) = delete;
     ReviewSessionListService(ReviewSessionListService&&) = delete;
     ReviewSessionListService& operator=(const ReviewSessionListService&) = delete;

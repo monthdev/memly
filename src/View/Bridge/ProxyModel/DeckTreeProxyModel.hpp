@@ -23,8 +23,6 @@ public:
         : QIdentityProxyModel{ Parent } {
         setSourceModel(&DeckTreeModel);
     }
-
-    ~DeckTreeProxyModel() noexcept override = default;
     DeckTreeProxyModel(const DeckTreeProxyModel&) = delete;
     DeckTreeProxyModel(DeckTreeProxyModel&&) = delete;
     DeckTreeProxyModel& operator=(const DeckTreeProxyModel&) = delete;

@@ -31,8 +31,6 @@ public:
         LibraryInvalidationChannel.ConnectSnapshot(
             this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot, &DeckPageController::RefreshDeckTreeModel);
     }
-
-    ~DeckPageController() noexcept override = default;
     DeckPageController(const DeckPageController&) = delete;
     DeckPageController(DeckPageController&&) = delete;
     DeckPageController& operator=(const DeckPageController&) = delete;

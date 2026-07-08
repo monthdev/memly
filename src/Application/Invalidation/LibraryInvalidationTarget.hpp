@@ -17,8 +17,6 @@ public:
         : m_TargetBitset{} {
         Set(LibraryInvalidationTarget);
     }
-
-    ~LibraryInvalidationTargetBitset() noexcept = default;
     LibraryInvalidationTargetBitset(const LibraryInvalidationTargetBitset&) = delete;
     LibraryInvalidationTargetBitset(LibraryInvalidationTargetBitset&&) noexcept = default;
     LibraryInvalidationTargetBitset& operator=(const LibraryInvalidationTargetBitset&) = delete;

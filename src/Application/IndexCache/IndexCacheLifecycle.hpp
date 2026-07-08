@@ -33,8 +33,6 @@ protected:
     IndexCacheLifecycle() noexcept
         : m_IndexWeakPointer{} {
     }
-
-    ~IndexCacheLifecycle() noexcept = default;
     IndexCacheLifecycle(const IndexCacheLifecycle&) = delete;
     IndexCacheLifecycle(IndexCacheLifecycle&&) = delete;
     IndexCacheLifecycle& operator=(const IndexCacheLifecycle&) = delete;

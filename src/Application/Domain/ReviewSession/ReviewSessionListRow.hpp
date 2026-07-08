@@ -19,8 +19,6 @@ struct ReviewSessionListRow {
         , m_LastUpdatedAtMillisecondsSinceEpoch{ std::move(LastUpdatedAtMillisecondsSinceEpoch) }
         , m_LastCardReviewAtMillisecondsSinceEpoch{ std::move(LastCardReviewAtMillisecondsSinceEpoch) } {
     }
-
-    ~ReviewSessionListRow() noexcept = default;
     ReviewSessionListRow(const ReviewSessionListRow&) = delete;
     ReviewSessionListRow(ReviewSessionListRow&&) noexcept = default;
     ReviewSessionListRow& operator=(const ReviewSessionListRow&) = delete;
