@@ -10,6 +10,7 @@ public:
     DeckTreeSnapshotIndexCache() noexcept
         : Application::IndexCache::IndexCacheLifecycle<DeckTreeSnapshotIndexCacheDefinition>{} {
     }
+
     DeckTreeSnapshotIndexCache(const DeckTreeSnapshotIndexCache&) = delete;
     DeckTreeSnapshotIndexCache(DeckTreeSnapshotIndexCache&&) = delete;
     DeckTreeSnapshotIndexCache& operator=(const DeckTreeSnapshotIndexCache&) = delete;

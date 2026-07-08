@@ -18,6 +18,7 @@ public:
               Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionListRowsSql()) } {
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionListRowsPreparedStatement);
     }
+
     ReviewSessionListStore(const ReviewSessionListStore&) = delete;
     ReviewSessionListStore(ReviewSessionListStore&&) = delete;
     ReviewSessionListStore& operator=(const ReviewSessionListStore&) = delete;

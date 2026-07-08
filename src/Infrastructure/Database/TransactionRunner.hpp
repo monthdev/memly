@@ -25,6 +25,7 @@ public:
     explicit TransactionRunner(duckdb::Connection& DatabaseConnection) noexcept
         : m_DatabaseConnection{ DatabaseConnection } {
     }
+
     TransactionRunner(const TransactionRunner&) = delete;
     TransactionRunner(TransactionRunner&&) = delete;
     TransactionRunner& operator=(const TransactionRunner&) = delete;

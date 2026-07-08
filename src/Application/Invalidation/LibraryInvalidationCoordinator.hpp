@@ -28,6 +28,7 @@ public:
         connect(&m_LibraryInvalidationQTimer, &QTimer::timeout, this, &LibraryInvalidationCoordinator::HandleScheduledInvalidation);
         ScheduleNextLibraryInvalidation();
     }
+
     LibraryInvalidationCoordinator(const LibraryInvalidationCoordinator&) = delete;
     LibraryInvalidationCoordinator(LibraryInvalidationCoordinator&&) = delete;
     LibraryInvalidationCoordinator& operator=(const LibraryInvalidationCoordinator&) = delete;

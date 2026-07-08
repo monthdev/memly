@@ -51,6 +51,7 @@ public:
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement);
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
     }
+
     ReviewSessionStore(const ReviewSessionStore&) = delete;
     ReviewSessionStore(ReviewSessionStore&&) = delete;
     ReviewSessionStore& operator=(const ReviewSessionStore&) = delete;

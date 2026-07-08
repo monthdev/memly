@@ -17,6 +17,7 @@ public:
         , m_TransactionRunner{ m_DatabaseConnection } {
         BootstrapDatabase();
     }
+
     DatabaseRuntime(const DatabaseRuntime&) = delete;
     DatabaseRuntime(DatabaseRuntime&&) = delete;
     DatabaseRuntime& operator=(const DatabaseRuntime&) = delete;

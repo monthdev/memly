@@ -30,6 +30,7 @@ public:
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
     }
+
     DeckStore(const DeckStore&) = delete;
     DeckStore(DeckStore&&) = delete;
     DeckStore& operator=(const DeckStore&) = delete;

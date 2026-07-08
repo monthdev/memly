@@ -18,6 +18,7 @@ struct ReviewSessionDeckSelection {
         : m_DeckId{ std::move(DeckId) }
         , m_DeckSelectionType{ DeckSelectionType } {
     }
+
     ReviewSessionDeckSelection(const ReviewSessionDeckSelection&) = delete;
     ReviewSessionDeckSelection(ReviewSessionDeckSelection&&) noexcept = default;
     ReviewSessionDeckSelection& operator=(const ReviewSessionDeckSelection&) = delete;

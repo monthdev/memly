@@ -24,6 +24,7 @@ public:
         : m_TransactionRunner{ TransactionRunner }
         , m_ReviewSessionStore{ ReviewSessionStore } {
     }
+
     ReviewSessionService(const ReviewSessionService&) = delete;
     ReviewSessionService(ReviewSessionService&&) = delete;
     ReviewSessionService& operator=(const ReviewSessionService&) = delete;
