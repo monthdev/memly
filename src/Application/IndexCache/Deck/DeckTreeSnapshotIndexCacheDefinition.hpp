@@ -7,12 +7,8 @@
 
 namespace Application::IndexCache::Deck {
 
-class DeckTreeSnapshotIndexCacheLease;
-
 class DeckTreeSnapshotIndexCacheDefinition final
-    : public Application::IndexCache::IndexCacheDefinition<DeckTreeSnapshotIndexCacheDefinition,
-                                                           Application::Domain::Deck::Index::DeckTreeSnapshotIndex,
-                                                           DeckTreeSnapshotIndexCacheLease,
+    : public Application::IndexCache::IndexCacheDefinition<Application::Domain::Deck::Index::DeckTreeSnapshotIndex,
                                                            std::vector<Application::Domain::Deck::Index::DeckTreeSnapshotIndex::DeckTreeSnapshotNode>,
                                                            &Application::Domain::Deck::Index::DeckTreeSnapshotIndex::RefreshFromDeckTreeSnapshotNodes> {
 public:

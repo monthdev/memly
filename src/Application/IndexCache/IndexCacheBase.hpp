@@ -3,30 +3,44 @@
 #include <memory>
 #include <utility>
 
-#include "Application/IndexCache/IndexCacheLease.hpp"
-
 namespace Application::IndexCache {
 
 template <typename IndexCacheDefinitionType>
 class IndexCacheBase {
 public:
-    [[nodiscard]] typename IndexCacheDefinitionType::CacheLeaseType AcquireLease() {
+    class IndexCacheLease final {
+    public:
+        IndexCacheLease() = delete;
+        IndexCacheLease(const IndexCacheLease&) = delete;
+        IndexCacheLease(IndexCacheLease&&) noexcept = default;
+        IndexCacheLease& operator=(const IndexCacheLease&) = delete;
+        IndexCacheLease& operator=(IndexCacheLease&&) = delete;
+
+    private:
+        friend class IndexCacheBase;
+
+        explicit IndexCacheLease(std::shared_ptr<typename IndexCacheDefinitionType::IndexType>&& IndexSharedPointer) noexcept
+            : m_IndexSharedPointer{ std::move(IndexSharedPointer) } {
+        }
+
+        std::shared_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexSharedPointer;
+    };
+
+    [[nodiscard]] IndexCacheLease AcquireLease() {
         std::shared_ptr<typename IndexCacheDefinitionType::IndexType> IndexSharedPointer{ m_IndexWeakPointer.lock() };
         if (IndexSharedPointer == nullptr) {
             IndexSharedPointer = std::make_shared<typename IndexCacheDefinitionType::IndexType>();
             m_IndexWeakPointer = IndexSharedPointer;
         }
-        return typename IndexCacheDefinitionType::CacheLeaseType{ IndexCacheLease<IndexCacheDefinitionType>{ std::move(IndexSharedPointer) } };
+        return IndexCacheLease{ std::move(IndexSharedPointer) };
     }
 
-    void Refresh(const typename IndexCacheDefinitionType::CacheLeaseType& IndexCacheLease,
-                 typename IndexCacheDefinitionType::IndexRefreshDataType&& IndexRefreshData) {
-        IndexCacheDefinitionType::RefreshIndex(*IndexCacheLease.m_IndexCacheLease.m_IndexSharedPointer, std::move(IndexRefreshData));
+    void Refresh(const IndexCacheLease& IndexCacheLease, typename IndexCacheDefinitionType::IndexRefreshDataType&& IndexRefreshData) {
+        IndexCacheDefinitionType::RefreshIndex(*IndexCacheLease.m_IndexSharedPointer, std::move(IndexRefreshData));
     }
 
-    [[nodiscard]] const typename IndexCacheDefinitionType::IndexType&
-    GetIndex(const typename IndexCacheDefinitionType::CacheLeaseType& IndexCacheLease) const noexcept {
-        return *IndexCacheLease.m_IndexCacheLease.m_IndexSharedPointer;
+    [[nodiscard]] const typename IndexCacheDefinitionType::IndexType& GetIndex(const IndexCacheLease& IndexCacheLease) const noexcept {
+        return *IndexCacheLease.m_IndexSharedPointer;
     }
 
 protected:

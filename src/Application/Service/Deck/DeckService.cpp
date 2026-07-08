@@ -9,19 +9,13 @@
 
 #include "Application/Domain/Deck/Constraint/DeckConstraint.hpp"
 #include "Application/Domain/Deck/Index/DeckTreeSnapshotIndex.hpp"
-#include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCacheLease.hpp"
 #include "Infrastructure/Store/Deck/DeckSnapshotStore.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 
 namespace Application::Service::Deck {
 
-[[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease DeckService::AcquireDeckTreeSnapshotIndexCacheLease() {
+[[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease DeckService::AcquireDeckTreeSnapshotIndexCacheLease() {
     return m_DeckTreeSnapshotIndexCache.AcquireLease();
-}
-
-[[nodiscard]] const Application::Domain::Deck::Index::DeckTreeSnapshotIndex&
-DeckService::GetDeckTreeSnapshotIndex(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease& DeckTreeSnapshotIndexCacheLease) const noexcept {
-    return m_DeckTreeSnapshotIndexCache.GetIndex(DeckTreeSnapshotIndexCacheLease);
 }
 
 [[nodiscard]] bool DeckService::IsDeckNameLengthValid(const std::string_view DeckName) const noexcept {
@@ -48,8 +42,9 @@ void DeckService::DeleteDeck(const std::string& DeckId) {
     m_DeckStore.DeleteDeck(DeckId);
 }
 
-void DeckService::RefreshDeckTreeSnapshotIndexCache(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease& DeckTreeSnapshotIndexCacheLease,
-                                                    const std::int64_t AsOfMillisecondsSinceEpoch) {
+void DeckService::RefreshDeckTreeSnapshotIndexCache(
+    const Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease& DeckTreeSnapshotIndexCacheLease,
+    const std::int64_t AsOfMillisecondsSinceEpoch) {
     std::vector<Infrastructure::Store::Deck::DeckSnapshotStore::DeckSnapshotRecord> DeckSnapshotRecordVector{ m_DeckSnapshotStore.ReadDeckSnapshotRecords(
         AsOfMillisecondsSinceEpoch) };
     std::vector<Application::Domain::Deck::Index::DeckTreeSnapshotIndex::DeckTreeSnapshotNode> DeckTreeSnapshotNodeVector{};

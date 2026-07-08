@@ -6,7 +6,6 @@
 #include <string_view>
 
 #include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCache.hpp"
-#include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCacheLease.hpp"
 
 namespace Application::Domain::Deck::Index {
 class DeckTreeSnapshotIndex;
@@ -32,9 +31,7 @@ public:
     DeckService& operator=(const DeckService&) = delete;
     DeckService& operator=(DeckService&&) = delete;
 
-    [[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease AcquireDeckTreeSnapshotIndexCacheLease();
-    [[nodiscard]] const Application::Domain::Deck::Index::DeckTreeSnapshotIndex&
-    GetDeckTreeSnapshotIndex(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease&) const noexcept;
+    [[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease AcquireDeckTreeSnapshotIndexCacheLease();
 
     [[nodiscard]] bool IsDeckNameLengthValid(const std::string_view) const noexcept;
 
@@ -43,7 +40,7 @@ public:
     void MoveDeck(const std::string&, const std::optional<std::string>&);
     void RenameDeck(const std::string&, const std::string&);
     void DeleteDeck(const std::string&);
-    void RefreshDeckTreeSnapshotIndexCache(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCacheLease&, std::int64_t);
+    void RefreshDeckTreeSnapshotIndexCache(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease&, std::int64_t);
 
 private:
     Infrastructure::Store::Deck::DeckStore& m_DeckStore;

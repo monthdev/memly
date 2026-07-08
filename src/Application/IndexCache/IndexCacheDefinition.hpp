@@ -5,14 +5,7 @@
 
 namespace Application::IndexCache {
 
-template <typename IndexCacheDefinitionType>
-class IndexCacheBase;
-
-template <typename IndexCacheDefinitionType,
-          typename IndexObjectType,
-          typename CacheLeaseObjectType,
-          typename IndexRefreshDataObjectType,
-          void (IndexObjectType::*RefreshIndexMethod)(IndexRefreshDataObjectType&&)>
+template <typename IndexObjectType, typename IndexRefreshDataObjectType, void (IndexObjectType::*RefreshIndexMethod)(IndexRefreshDataObjectType&&)>
 class IndexCacheDefinition {
 public:
     IndexCacheDefinition() = delete;
@@ -22,11 +15,7 @@ public:
     IndexCacheDefinition& operator=(IndexCacheDefinition&&) = delete;
 
     using IndexType = IndexObjectType;
-    using CacheLeaseType = CacheLeaseObjectType;
     using IndexRefreshDataType = IndexRefreshDataObjectType;
-
-private:
-    friend class IndexCacheBase<IndexCacheDefinitionType>;
 
     static void RefreshIndex(IndexObjectType& Index, IndexRefreshDataObjectType&& IndexRefreshData) {
         std::invoke(RefreshIndexMethod, Index, std::move(IndexRefreshData));
