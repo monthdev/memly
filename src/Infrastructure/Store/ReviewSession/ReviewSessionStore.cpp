@@ -12,7 +12,7 @@
 #include "Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
-#include "Runtime/Crash.hpp"
+#include "Support/Runtime/Crash.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 namespace {
@@ -52,7 +52,7 @@ u_HandleRecoverableReviewSessionMutationError(duckdb::QueryResult& QueryResult) 
     if (ErrorMessage.contains("exclude_selection_conflict")) {
         return Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckExcludeSelectionError;
     }
-    Runtime::ThrowError(QueryResult.GetError());
+    Support::Runtime::ThrowError(QueryResult.GetError());
 }
 
 }

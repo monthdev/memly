@@ -4,7 +4,7 @@
 
 #include <QString>
 
-#include "Runtime/Crash.hpp"
+#include "Support/Runtime/Crash.hpp"
 
 namespace View::Bridge::ProxyModel {
 
@@ -31,7 +31,7 @@ void DeckTreeProxyModel::sort(const int Column, const Qt::SortOrder SortOrder) n
 }
 
 [[nodiscard]] QHash<int, QByteArray> DeckTreeProxyModel::roleNames() const noexcept {
-    return Runtime::TryCatchWrapper([&]() -> QHash<int, QByteArray> {
+    return Support::Runtime::TryCatchWrapper([&]() -> QHash<int, QByteArray> {
         static const QHash<int, QByteArray> s_DeckTreeRoleNameByRoleQHash{
             {                                                                                         Qt::DisplayRole,QByteArrayLiteral("display")                                                                                                                      },
             {                              static_cast<int>(Presentation::Model::DeckTreeModel::RoleEnum::DeckIdRole),              QByteArrayLiteral("deckId") },

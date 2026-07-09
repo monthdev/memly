@@ -10,14 +10,14 @@
 #include <memory>
 #include <string>
 
-#include "Runtime/Crash.hpp"
+#include "Support/Runtime/Crash.hpp"
 
 namespace Application::Domain::Text::Data {
 namespace {
 
 void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
     if (U_FAILURE(ErrorCode) not_eq 0) {
-        Runtime::ThrowError(u_errorName(ErrorCode));
+        Support::Runtime::ThrowError(u_errorName(ErrorCode));
     }
 }
 

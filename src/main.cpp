@@ -3,11 +3,11 @@
 #include <string_view>
 
 #include "Bootstrap/RuntimeContext.hpp"
-#include "Runtime/AppStoragePath.hpp"
-#include "Runtime/Crash.hpp"
+#include "Support/Runtime/AppStoragePath.hpp"
+#include "Support/Runtime/Crash.hpp"
 
 int main(int argc, char* argv[]) noexcept {
-    return Runtime::TryCatchWrapper([&]() -> int {
+    return Support::Runtime::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(Sql);
         QGuiApplication App{ argc, argv };
         constexpr std::string_view AppName{ "Memly" };
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) noexcept {
         App.setApplicationDisplayName(AppName.data());
         App.setOrganizationDomain(OrgName.data());
         App.setOrganizationName(OrgName.data());
-        Bootstrap::RuntimeContext::Initialize(Runtime::DatabaseFilePath());
+        Bootstrap::RuntimeContext::Initialize(Support::Runtime::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

@@ -2,7 +2,7 @@
 
 #include <QString>
 
-namespace Runtime {
+namespace Support::Runtime {
 [[nodiscard]] QString AudioDirectoryPath();
 
 [[nodiscard]] QString CrashLogFilePath();

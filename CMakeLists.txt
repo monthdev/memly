@@ -170,8 +170,9 @@ file(
   "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/*.[Hh]*"
 )
 
-file(GLOB RUNTIME_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Runtime/*.cpp")
-file(GLOB RUNTIME_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Runtime/*.[Hh]*")
+file(GLOB SUPPORT_RUNTIME_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/Runtime/*.cpp")
+file(GLOB SUPPORT_RUNTIME_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/Runtime/*.[Hh]*")
+file(GLOB SUPPORT_TYPE_POLICY_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/TypePolicy/*.[Hh]*")
 
 set(QML_DIR "${CMAKE_SOURCE_DIR}/src/View/Qml")
 file(GLOB QML_ROOT CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
@@ -374,8 +375,9 @@ add_library(
   ${INFRASTRUCTURE_STORE_HDR}
   ${INFRASTRUCTURE_SQL_CPP}
   ${INFRASTRUCTURE_SQL_HDR}
-  ${RUNTIME_CPP}
-  ${RUNTIME_HDR}
+  ${SUPPORT_RUNTIME_CPP}
+  ${SUPPORT_RUNTIME_HDR}
+  ${SUPPORT_TYPE_POLICY_HDR}
   $<TARGET_OBJECTS:memly_sql_resources>
 )
 memly_enable_clang_tidy(memly_core)

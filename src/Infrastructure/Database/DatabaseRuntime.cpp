@@ -9,7 +9,7 @@
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/Migration/MigrationSql.hpp"
 #include "Infrastructure/Sql/Seed/SeedSql.hpp"
-#include "Runtime/Crash.hpp"
+#include "Support/Runtime/Crash.hpp"
 
 namespace Infrastructure::Database {
 
@@ -32,12 +32,12 @@ void DatabaseRuntime::ApplySchemaMigrations() {
     }
     for (std::size_t I{ 0 }; I not_eq AppliedMigrationVersionVector.size(); ++I) {
         if (AppliedMigrationVersionVector.at(I) not_eq I + 1) {
-            Runtime::ThrowError("Unexpected applied migration version order");
+            Support::Runtime::ThrowError("Unexpected applied migration version order");
         }
     }
     std::array<std::reference_wrapper<std::string()>, 1> MigrationSqlFunctionArray{ Infrastructure::Sql::Migration::M01_InitialSchemaSql };
     if (AppliedMigrationVersionVector.size() > MigrationSqlFunctionArray.size()) {
-        Runtime::ThrowError("Unexpected number of applied migrations");
+        Support::Runtime::ThrowError("Unexpected number of applied migrations");
     }
     for (std::size_t UnappliedMigrationVersionIndex{ AppliedMigrationVersionVector.size() };
          UnappliedMigrationVersionIndex not_eq MigrationSqlFunctionArray.size();

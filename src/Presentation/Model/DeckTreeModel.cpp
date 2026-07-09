@@ -11,12 +11,12 @@
 #include <unordered_map>
 #include <utility>
 
-#include "Runtime/Crash.hpp"
+#include "Support/Runtime/Crash.hpp"
 
 namespace Presentation::Model {
 
 [[nodiscard]] QModelIndex DeckTreeModel::index(const int Row, const int Column, const QModelIndex& Parent) const noexcept {
-    return Runtime::TryCatchWrapper([&]() -> QModelIndex {
+    return Support::Runtime::TryCatchWrapper([&]() -> QModelIndex {
         if (not hasIndex(Row, Column, Parent)) {
             return QModelIndex{};
         }
@@ -27,7 +27,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] QModelIndex DeckTreeModel::parent(const QModelIndex& Index) const noexcept {
-    return Runtime::TryCatchWrapper([&]() -> QModelIndex {
+    return Support::Runtime::TryCatchWrapper([&]() -> QModelIndex {
         const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
             return QModelIndex{};
@@ -43,7 +43,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] int DeckTreeModel::rowCount(const QModelIndex& Parent) const noexcept {
-    return Runtime::TryCatchWrapper([&]() -> int {
+    return Support::Runtime::TryCatchWrapper([&]() -> int {
         if (Parent.column() > 0) {
             return 0;
         }
@@ -52,7 +52,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] int DeckTreeModel::columnCount(const QModelIndex& Parent) const noexcept {
-    return Runtime::TryCatchWrapper([&]() -> int {
+    return Support::Runtime::TryCatchWrapper([&]() -> int {
         if (Parent.isValid() and Parent.column() > 0) {
             return 0;
         }
@@ -61,7 +61,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] QVariant DeckTreeModel::data(const QModelIndex& Index, const int Role) const noexcept {
-    return Runtime::TryCatchWrapper([&]() -> QVariant {
+    return Support::Runtime::TryCatchWrapper([&]() -> QVariant {
         const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
             return QVariant{};
@@ -118,7 +118,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] bool DeckTreeModel::hasChildren(const QModelIndex& Parent) const noexcept {
-    return Runtime::TryCatchWrapper([&]() -> bool {
+    return Support::Runtime::TryCatchWrapper([&]() -> bool {
         if (Parent.column() > 0) {
             return false;
         }
@@ -127,7 +127,7 @@ namespace Presentation::Model {
 }
 
 void DeckTreeModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
-    Runtime::TryCatchWrapper([&]() -> void {
+    Support::Runtime::TryCatchWrapper([&]() -> void {
         if (Column < static_cast<int>(ColumnEnum::DeckNameColumn) or Column > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
             return;
         }
@@ -211,7 +211,7 @@ void DeckTreeModel::ApplyCurrentSort() {
 }
 
 void DeckTreeModel::ReplaceAll(std::vector<Application::Domain::Deck::Data::DeckTreeSnapshotNode>&& DeckTreeNodeVector) noexcept {
-    Runtime::TryCatchWrapper([&]() -> void {
+    Support::Runtime::TryCatchWrapper([&]() -> void {
         std::vector<DeckNode> DeckNodesVector;
         std::vector<std::size_t> RootDeckNodeIndexesVector;
         std::unordered_map<std::string, std::size_t> DeckNodeIndexByIdHash;
