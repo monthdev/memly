@@ -11,7 +11,7 @@
 
 #include "Application/Domain/Deck/Data/DeckTreeSnapshotNode.hpp"
 #include "Application/Service/Deck/DeckService.hpp"
-#include "Support/Runtime/Crash.hpp"
+#include "Support/Runtime/ExceptionBoundary.hpp"
 
 namespace Presentation::Controller {
 

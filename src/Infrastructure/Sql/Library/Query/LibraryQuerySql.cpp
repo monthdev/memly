@@ -1,10 +1,10 @@
 #include "LibraryQuerySql.hpp"
 
-#include "Infrastructure/Sql/SqlResourceBytes.hpp"
+#include "Support/Runtime/QtApp/QtAppResourceBytes.hpp"
 
 namespace Infrastructure::Sql::Library::Query {
 
 [[nodiscard]] std::string ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql() {
-    return ReadSqlResourceBytes(":/Sql/Library/Query/Statement/ReadNextLibraryInvalidationAtMillisecondsSinceEpoch.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Library/Query/Statement/ReadNextLibraryInvalidationAtMillisecondsSinceEpoch.sql");
 }
 }

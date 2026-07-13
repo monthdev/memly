@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "Support/Runtime/Crash.hpp"
+#include "Support/Runtime/ExceptionBoundary.hpp"
 
 namespace Presentation::Model {
 

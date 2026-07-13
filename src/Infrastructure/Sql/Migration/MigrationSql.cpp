@@ -1,22 +1,22 @@
 #include "MigrationSql.hpp"
 
-#include "Infrastructure/Sql/SqlResourceBytes.hpp"
+#include "Support/Runtime/QtApp/QtAppResourceBytes.hpp"
 
 namespace Infrastructure::Sql::Migration {
 
 [[nodiscard]] std::string M00_SchemaMigrationsLogSql() {
-    return ReadSqlResourceBytes(":/Sql/Migration/Statement/M00_SchemaMigrationsLog.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Migration/Statement/M00_SchemaMigrationsLog.sql");
 }
 
 [[nodiscard]] std::string M01_InitialSchemaSql() {
-    return ReadSqlResourceBytes(":/Sql/Migration/Statement/M01_InitialSchema.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Migration/Statement/M01_InitialSchema.sql");
 }
 
 [[nodiscard]] std::string CreateSchemaMigrationsLogEntrySql() {
-    return ReadSqlResourceBytes(":/Sql/Migration/Statement/CreateSchemaMigrationsLogEntry.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Migration/Statement/CreateSchemaMigrationsLogEntry.sql");
 }
 
 [[nodiscard]] std::string ReadSchemaMigrationsLogSql() {
-    return ReadSqlResourceBytes(":/Sql/Migration/Statement/ReadSchemaMigrationsLog.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Migration/Statement/ReadSchemaMigrationsLog.sql");
 }
 }

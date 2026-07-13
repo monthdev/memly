@@ -4,7 +4,7 @@
 
 #include <QString>
 
-#include "Support/Runtime/Crash.hpp"
+#include "Support/Runtime/ExceptionBoundary.hpp"
 
 namespace View::Bridge::ProxyModel {
 

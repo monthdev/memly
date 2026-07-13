@@ -7,7 +7,7 @@
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Infrastructure/Store/Library/LibraryClockStore.hpp"
-#include "Support/Runtime/Crash.hpp"
+#include "Support/Runtime/ExceptionBoundary.hpp"
 
 namespace Application::Invalidation {
 

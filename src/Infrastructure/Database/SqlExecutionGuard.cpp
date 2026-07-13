@@ -2,19 +2,19 @@
 
 #include <duckdb.hpp>
 
-#include "Support/Runtime/Crash.hpp"
+#include "Support/Runtime/ThrowMemlyException.hpp"
 
 namespace Infrastructure::Database {
 
 void ThrowOnQueryResultError(duckdb::QueryResult& QueryResult, const std::source_location& SourceLocation) {
     if (QueryResult.HasError()) {
-        Support::Runtime::ThrowError(QueryResult.GetError(), SourceLocation);
+        Support::Runtime::ThrowMemlyException(QueryResult.GetError(), SourceLocation);
     }
 }
 
 void ThrowOnPreparedStatementError(duckdb::PreparedStatement& PreparedStatement, const std::source_location& SourceLocation) {
     if (PreparedStatement.HasError()) {
-        Support::Runtime::ThrowError(PreparedStatement.GetError(), SourceLocation);
+        Support::Runtime::ThrowMemlyException(PreparedStatement.GetError(), SourceLocation);
     }
 }
 
@@ -22,7 +22,7 @@ void ThrowOnMutationNoOp(duckdb::QueryResult& QueryResult, const std::string_vie
     if (QueryResult.begin() not_eq QueryResult.end()) {
         return;
     }
-    Support::Runtime::ThrowError(ErrorMessage, SourceLocation);
+    Support::Runtime::ThrowMemlyException(ErrorMessage, SourceLocation);
 }
 
 }

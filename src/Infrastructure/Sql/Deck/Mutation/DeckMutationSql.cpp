@@ -1,34 +1,34 @@
 #include "DeckMutationSql.hpp"
 
-#include "Infrastructure/Sql/SqlResourceBytes.hpp"
+#include "Support/Runtime/QtApp/QtAppResourceBytes.hpp"
 
 namespace Infrastructure::Sql::Deck::Mutation {
 
 [[nodiscard]] std::string CreateRootDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Mutation/Statement/CreateRootDeck.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/CreateRootDeck.sql");
 }
 
 [[nodiscard]] std::string CreateChildDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Mutation/Statement/CreateChildDeck.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/CreateChildDeck.sql");
 }
 
 [[nodiscard]] std::string MoveDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeck.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeck.sql");
 }
 
 [[nodiscard]] std::string RenameDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Mutation/Statement/RenameDeck.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/RenameDeck.sql");
 }
 
 [[nodiscard]] std::string DeleteDeckCardReviewsSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeckCardReviews.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeckCardReviews.sql");
 }
 
 [[nodiscard]] std::string DeleteDeckCardsSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeckCards.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeckCards.sql");
 }
 
 [[nodiscard]] std::string DeleteDeckSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeck.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeck.sql");
 }
 }

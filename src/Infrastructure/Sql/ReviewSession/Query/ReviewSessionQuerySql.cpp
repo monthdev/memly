@@ -1,18 +1,18 @@
 #include "ReviewSessionQuerySql.hpp"
 
-#include "Infrastructure/Sql/SqlResourceBytes.hpp"
+#include "Support/Runtime/QtApp/QtAppResourceBytes.hpp"
 
 namespace Infrastructure::Sql::ReviewSession::Query {
 
 [[nodiscard]] std::string ReadReviewSessionListRowsSql() {
-    return ReadSqlResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadReviewSessionListRows.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadReviewSessionListRows.sql");
 }
 
 [[nodiscard]] std::string ReadDefaultReviewSessionIdByRootDeckIdSql() {
-    return ReadSqlResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadDefaultReviewSessionIdByRootDeckId.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadDefaultReviewSessionIdByRootDeckId.sql");
 }
 
 [[nodiscard]] std::string ReadReviewSessionIdByReviewSessionDefinitionKeySql() {
-    return ReadSqlResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadReviewSessionIdByReviewSessionDefinitionKey.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadReviewSessionIdByReviewSessionDefinitionKey.sql");
 }
 }

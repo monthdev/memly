@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <QString>
 #include <memory>
+#include <string_view>
 
 namespace Application::Invalidation {
 class LibraryInvalidationChannel;
@@ -50,7 +50,7 @@ public:
     RuntimeContext& operator=(const RuntimeContext&) = delete;
     RuntimeContext& operator=(RuntimeContext&&) = delete;
 
-    static void Initialize(const QString&);
+    static void Initialize(const std::string_view);
 
     [[nodiscard]] static Application::Invalidation::LibraryInvalidationChannel& GetRequiredLibraryInvalidationChannel() noexcept;
     [[nodiscard]] static Application::Service::Deck::DeckService& GetRequiredDeckService() noexcept;

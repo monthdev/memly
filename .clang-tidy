@@ -1,5 +1,6 @@
 Checks: >
   -*,
+  bugprone-unused-local-non-trivial-variable,
   misc-use-anonymous-namespace,
   modernize-return-braced-init-list,
   readability-implicit-bool-conversion,
@@ -8,6 +9,10 @@ Checks: >
   readability-operators-representation
 WarningsAsErrors: "*"
 CheckOptions:
+  - {
+      key: bugprone-unused-local-non-trivial-variable.IncludeTypes,
+      value: ".*",
+    }
   - {
       key: readability-implicit-bool-conversion.AllowIntegerConditions,
       value: "false",

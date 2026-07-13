@@ -10,14 +10,14 @@
 #include <memory>
 #include <string>
 
-#include "Support/Runtime/Crash.hpp"
+#include "Support/Runtime/ThrowMemlyException.hpp"
 
 namespace Application::Domain::Text::Data {
 namespace {
 
 void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
     if (U_FAILURE(ErrorCode) not_eq 0) {
-        Support::Runtime::ThrowError(u_errorName(ErrorCode));
+        Support::Runtime::ThrowMemlyException(u_errorName(ErrorCode));
     }
 }
 

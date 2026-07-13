@@ -1,10 +1,10 @@
 #include "DeckQuerySql.hpp"
 
-#include "Infrastructure/Sql/SqlResourceBytes.hpp"
+#include "Support/Runtime/QtApp/QtAppResourceBytes.hpp"
 
 namespace Infrastructure::Sql::Deck::Query {
 
 [[nodiscard]] std::string ReadDeckSnapshotRecordsSql() {
-    return ReadSqlResourceBytes(":/Sql/Deck/Query/Statement/ReadDeckSnapshotRecords.sql");
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Query/Statement/ReadDeckSnapshotRecords.sql");
 }
 }

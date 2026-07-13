@@ -1,16 +1,15 @@
 #pragma once
 
-#include <QtLogging>
 #include <concepts>
+#include <cstdlib>
+#include <exception>
 #include <functional>
-#include <source_location>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 
 namespace Support::Runtime {
-[[noreturn]] void ThrowError(const std::string_view = std::string_view{}, const std::source_location& = std::source_location::current());
-
-void LogError(const std::string_view);
+void LogException(const std::string_view) noexcept;
 
 template <typename FunctionType>
     requires std::invocable<FunctionType&&>
@@ -18,12 +17,11 @@ std::invoke_result_t<FunctionType&&> TryCatchWrapper(FunctionType&& Function) no
     try {
         return std::invoke(std::forward<FunctionType>(Function));
     } catch (const std::exception& Exception) {
-        LogError(Exception.what());
-        qFatal("%s", Exception.what());
+        LogException(Exception.what());
+        std::abort();
     } catch (...) {
-        constexpr std::string_view What{ "Unknown exception" };
-        LogError(What);
-        qFatal("%s", What.data());
+        LogException("Unknown exception caught");
+        std::abort();
     }
 }
 }

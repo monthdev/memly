@@ -132,6 +132,18 @@ them.
 
 Convert between standard library types and Qt types at the boundary.
 
+## Qt Dependency Boundary
+
+Presentation and View layers own normal Qt and QML integration.
+
+`main.cpp` may use Qt for process startup and QML engine bootstrap.
+
+Support/Runtime/QtApp may use Qt internally for Qt app runtime support such as
+app paths and Qt resources.
+
+Other layers must avoid Qt types in public APIs and must avoid direct Qt
+includes in implementation file. Use the Support/Runtime/QtApp boundary instead.
+
 ## Container Access
 
 Use read-only container accessors when not modifying container data.
@@ -177,6 +189,18 @@ Source-owned namespaces must match the folder nesting under `src/`.
 
 Unnamed helper namespaces must be nested inside the matching source-owned
 namespace.
+
+## CMake Source Lists
+
+CMake glob variables must represent exactly one source-tree folder.
+
+Do not use recursive globs for source, header, QML, or SQL file lists.
+
+Split subfolders into their own glob variables instead of adding multiple folder
+patterns to one variable.
+
+Order glob declarations and target source lists by source-tree order so the
+build file mirrors the repository layout.
 
 ## Unnamed Namespace Helpers
 

@@ -3,8 +3,8 @@
 #include <string_view>
 
 #include "Bootstrap/RuntimeContext.hpp"
-#include "Support/Runtime/AppStoragePath.hpp"
-#include "Support/Runtime/Crash.hpp"
+#include "Support/Runtime/ExceptionBoundary.hpp"
+#include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
 
 int main(int argc, char* argv[]) noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> int {
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) noexcept {
         App.setApplicationDisplayName(AppName.data());
         App.setOrganizationDomain(OrgName.data());
         App.setOrganizationName(OrgName.data());
-        Bootstrap::RuntimeContext::Initialize(Support::Runtime::DatabaseFilePath());
+        Bootstrap::RuntimeContext::Initialize(Support::Runtime::QtApp::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

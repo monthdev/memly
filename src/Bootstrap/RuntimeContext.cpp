@@ -5,7 +5,7 @@
 
 #include "Bootstrap/RuntimeContext.hpp"
 
-#include <QtGlobal>
+#include <cassert>
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
@@ -33,21 +33,21 @@ std::unique_ptr<Application::Service::Deck::DeckService> RuntimeContext::s_DeckS
 std::unique_ptr<Application::Service::ReviewSession::ReviewSessionListService> RuntimeContext::s_ReviewSessionListService{};
 std::unique_ptr<Application::Service::ReviewSession::ReviewSessionService> RuntimeContext::s_ReviewSessionService{};
 
-void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
-    Q_ASSERT(not DatabaseFilePath.isEmpty());
-    Q_ASSERT(s_DatabaseRuntime == nullptr);
-    Q_ASSERT(s_LibraryInvalidationChannel == nullptr);
-    Q_ASSERT(s_LibraryClockStore == nullptr);
-    Q_ASSERT(s_LibraryInvalidationCoordinator == nullptr);
-    Q_ASSERT(s_DeckStore == nullptr);
-    Q_ASSERT(s_DeckSnapshotStore == nullptr);
-    Q_ASSERT(s_ReviewSessionListStore == nullptr);
-    Q_ASSERT(s_ReviewSessionStore == nullptr);
-    Q_ASSERT(s_DeckService == nullptr);
-    Q_ASSERT(s_ReviewSessionListService == nullptr);
-    Q_ASSERT(s_ReviewSessionService == nullptr);
+void RuntimeContext::Initialize(const std::string_view DatabaseFilePath) {
+    assert(not DatabaseFilePath.empty());
+    assert(s_DatabaseRuntime == nullptr);
+    assert(s_LibraryInvalidationChannel == nullptr);
+    assert(s_LibraryClockStore == nullptr);
+    assert(s_LibraryInvalidationCoordinator == nullptr);
+    assert(s_DeckStore == nullptr);
+    assert(s_DeckSnapshotStore == nullptr);
+    assert(s_ReviewSessionListStore == nullptr);
+    assert(s_ReviewSessionStore == nullptr);
+    assert(s_DeckService == nullptr);
+    assert(s_ReviewSessionListService == nullptr);
+    assert(s_ReviewSessionService == nullptr);
 
-    s_DatabaseRuntime = std::make_unique<Infrastructure::Database::DatabaseRuntime>(DatabaseFilePath.toStdString());
+    s_DatabaseRuntime = std::make_unique<Infrastructure::Database::DatabaseRuntime>(DatabaseFilePath);
     s_LibraryInvalidationChannel = std::make_unique<Application::Invalidation::LibraryInvalidationChannel>();
     s_LibraryClockStore = std::make_unique<Infrastructure::Store::Library::LibraryClockStore>(s_DatabaseRuntime->GetDatabaseConnection());
     s_LibraryInvalidationCoordinator =
@@ -63,22 +63,22 @@ void RuntimeContext::Initialize(const QString& DatabaseFilePath) {
 }
 
 [[nodiscard]] Application::Invalidation::LibraryInvalidationChannel& RuntimeContext::GetRequiredLibraryInvalidationChannel() noexcept {
-    Q_ASSERT(s_LibraryInvalidationChannel not_eq nullptr);
+    assert(s_LibraryInvalidationChannel not_eq nullptr);
     return *s_LibraryInvalidationChannel;
 }
 
 [[nodiscard]] Application::Service::Deck::DeckService& RuntimeContext::GetRequiredDeckService() noexcept {
-    Q_ASSERT(s_DeckService not_eq nullptr);
+    assert(s_DeckService not_eq nullptr);
     return *s_DeckService;
 }
 
 [[nodiscard]] Application::Service::ReviewSession::ReviewSessionListService& RuntimeContext::GetRequiredReviewSessionListService() noexcept {
-    Q_ASSERT(s_ReviewSessionListService not_eq nullptr);
+    assert(s_ReviewSessionListService not_eq nullptr);
     return *s_ReviewSessionListService;
 }
 
 [[nodiscard]] Application::Service::ReviewSession::ReviewSessionService& RuntimeContext::GetRequiredReviewSessionService() noexcept {
-    Q_ASSERT(s_ReviewSessionService not_eq nullptr);
+    assert(s_ReviewSessionService not_eq nullptr);
     return *s_ReviewSessionService;
 }
 
