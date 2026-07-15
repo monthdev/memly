@@ -88,8 +88,8 @@ state must not be enforced with assertions. Instead, throw an exception when
 such a failure cannot be recovered from at the current boundary and is not part
 of a typed recoverable result surface.
 
-Validate/assert user input and other untrusted values at their input boundary
-before converting them into internal state. Downstream code may then assert the
+Validate user input and other untrusted values at their input boundary before
+converting them into internal state. Downstream code may then assert the
 established invariant instead of repeatedly validating it as a runtime error.
 
 Do not add both an assertion and a runtime error check for the same invariant
