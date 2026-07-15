@@ -33,7 +33,7 @@ std::unique_ptr<Application::Service::Deck::DeckService> RuntimeContext::s_DeckS
 std::unique_ptr<Application::Service::ReviewSession::ReviewSessionListService> RuntimeContext::s_ReviewSessionListService{};
 std::unique_ptr<Application::Service::ReviewSession::ReviewSessionService> RuntimeContext::s_ReviewSessionService{};
 
-void RuntimeContext::Initialize(const std::string_view DatabaseFilePath) {
+void RuntimeContext::Initialize(const std::string& DatabaseFilePath) {
     assert(not DatabaseFilePath.empty());
     assert(s_DatabaseRuntime == nullptr);
     assert(s_LibraryInvalidationChannel == nullptr);

@@ -18,7 +18,7 @@ void ThrowOnPreparedStatementError(duckdb::PreparedStatement& PreparedStatement,
     }
 }
 
-void ThrowOnMutationNoOp(duckdb::QueryResult& QueryResult, const std::string_view ErrorMessage, const std::source_location& SourceLocation) {
+void ThrowOnMutationNoOp(duckdb::QueryResult& QueryResult, const char* const ErrorMessage, const std::source_location& SourceLocation) {
     if (QueryResult.begin() not_eq QueryResult.end()) {
         return;
     }

@@ -5,8 +5,8 @@
 #include <cassert>
 
 namespace Support::Runtime::QtApp {
-[[nodiscard]] std::string ReadQtAppResourceBytes(const std::string_view QtResourcePath) {
-    QResource Resource{ QtResourcePath.data() };
+[[nodiscard]] std::string ReadQtAppResourceBytes(const char* const QtResourcePath) {
+    QResource Resource{ QtResourcePath };
     assert(Resource.isValid());
     const QByteArray ResourceBytes{ Resource.uncompressedData() };
     assert(not ResourceBytes.isNull());

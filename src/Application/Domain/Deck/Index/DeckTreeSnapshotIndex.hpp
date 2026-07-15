@@ -71,12 +71,12 @@ public:
 
     [[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeSnapshotNode>> TryGetDeckTreeSnapshotNode(const std::optional<std::string>&) const;
 
-    [[nodiscard]] std::vector<std::string_view> GetSubtreeDeckIds(const std::string_view) const;
+    [[nodiscard]] std::vector<std::string_view> GetSubtreeDeckIds(const std::string&) const;
 
-    [[nodiscard]] bool DoesDuplicateSiblingDeckNameExist(const std::optional<std::string>&, const std::string_view) const;
-    [[nodiscard]] bool WouldMoveDeckBeNoOp(const std::string_view, const std::optional<std::string>&) const;
-    [[nodiscard]] bool WouldMoveDeckCreateDeckTreeCycle(const std::string_view, const std::optional<std::string>&) const;
-    [[nodiscard]] bool WouldMoveDeckCreateTargetLanguageMismatch(const std::string_view, const std::optional<std::string>&) const;
+    [[nodiscard]] bool DoesDuplicateSiblingDeckNameExist(const std::optional<std::string>&, const std::string&) const;
+    [[nodiscard]] bool WouldMoveDeckBeNoOp(const std::string&, const std::optional<std::string>&) const;
+    [[nodiscard]] bool WouldMoveDeckCreateDeckTreeCycle(const std::string&, const std::optional<std::string>&) const;
+    [[nodiscard]] bool WouldMoveDeckCreateTargetLanguageMismatch(const std::string&, const std::optional<std::string>&) const;
 
     void RefreshFromDeckTreeSnapshotNodes(std::vector<DeckTreeSnapshotNode>&&);
 
@@ -86,7 +86,7 @@ private:
     std::vector<std::vector<std::size_t>> m_ChildDeckNodePositionVectorByDeckNodePositionVector;
     std::unordered_map<std::string_view, std::size_t> m_DeckNodePositionByDeckIdUnorderedMap;
 
-    [[nodiscard]] std::size_t GetDeckNodePosition(const std::string_view) const;
+    [[nodiscard]] std::size_t GetDeckNodePosition(const std::string&) const;
     [[nodiscard]] const std::vector<std::size_t>& GetChildDeckNodePositionVector(const std::optional<std::string>&) const;
 
     void AccumulateSubtreeCounts(std::size_t);

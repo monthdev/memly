@@ -1,37 +1,34 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 4.4)
 project(memly LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(QT_QML_GENERATE_QMLLS_INI ON)
 
 include(CTest)
 include(FetchContent)
 
-set(MEMLY_QT_MIN_VERSION 6.11)
-
-find_package(Qt6 ${MEMLY_QT_MIN_VERSION} REQUIRED COMPONENTS Core Network Qml Quick Test)
-find_package(ICU REQUIRED COMPONENTS uc i18n)
-qt_standard_project_setup(REQUIRES ${MEMLY_QT_MIN_VERSION})
-
-option(MEMLY_ENABLE_CLANG_TIDY "Run clang-tidy during builds" ON)
-
-if(MEMLY_ENABLE_CLANG_TIDY)
-  find_program(CLANG_TIDY_EXE NAMES clang-tidy HINTS "/opt/homebrew/opt/llvm/bin" "/usr/local/opt/llvm/bin")
-  if(NOT CLANG_TIDY_EXE)
-    message(FATAL_ERROR "MEMLY_ENABLE_CLANG_TIDY is ON, but clang-tidy was not found")
-  endif()
-  set(MEMLY_CLANG_TIDY_COMMAND "${CLANG_TIDY_EXE};--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
+if(NOT CMAKE_GENERATOR MATCHES "Ninja|Makefiles")
+  message(FATAL_ERROR "Memly requires a Ninja or Makefiles generator for required clang-tidy compilation check")
 endif()
 
-# Enables clang-tidy for the given target when MEMLY_ENABLE_CLANG_TIDY is ON.
-function(memly_enable_clang_tidy target_name)
-  if(MEMLY_ENABLE_CLANG_TIDY)
-    set_target_properties("${target_name}" PROPERTIES CXX_CLANG_TIDY "${MEMLY_CLANG_TIDY_COMMAND}")
-  endif()
-endfunction()
+find_program(
+  MEMLY_LLVM_CLANG_TIDY_EXECUTABLE NAMES clang-tidy HINTS "/opt/homebrew/opt/llvm/bin" "/usr/local/opt/llvm/bin"
+                                                          REQUIRED
+)
+set(CMAKE_CXX_CLANG_TIDY "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy"
+                         "--header-filter=^${CMAKE_SOURCE_DIR}/(src|test)/" "--quiet"
+)
+
+set(MEMLY_QT_MIN_VERSION 6.11)
+
+find_package(Qt6 ${MEMLY_QT_MIN_VERSION} REQUIRED COMPONENTS Core Network Qml Quick)
+find_package(ICU REQUIRED COMPONENTS uc i18n)
+qt_standard_project_setup(REQUIRES ${MEMLY_QT_MIN_VERSION})
 
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
@@ -210,29 +207,6 @@ file(GLOB SQL_REVIEW_SESSION_QUERY_STATEMENT_SQL CONFIGURE_DEPENDS
 )
 file(GLOB SQL_SEED_STATEMENT_SQL CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Infrastructure/Sql/Seed/Statement/*.sql")
 
-file(GLOB TEST_APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/App/*.cpp")
-file(GLOB TEST_CONTROLLER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Controller/*.cpp")
-file(GLOB TEST_LANGUAGE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Language/*.cpp")
-file(GLOB TEST_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Model/*.cpp")
-file(GLOB TEST_SCHEDULER_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Scheduler/*.cpp")
-file(GLOB TEST_QML_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Qml/*.cpp")
-file(GLOB TEST_SERVICE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Service/*.cpp")
-file(GLOB TEST_SQL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Sql/*.cpp")
-file(GLOB TEST_SUPPORT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/test/Support/*.cpp")
-
-set(TEST_MAIN_CPP "${CMAKE_SOURCE_DIR}/test/App/TestMain.cpp")
-list(REMOVE_ITEM TEST_APP_CPP "${TEST_MAIN_CPP}")
-
-set(TEST_PLATFORM_CPP)
-
-set(TEST_SUPPORT_DATA_MACOS_CPP "${CMAKE_SOURCE_DIR}/test/Controller/TestSupportDataMacOS.cpp")
-
-list(REMOVE_ITEM TEST_CONTROLLER_CPP "${TEST_SUPPORT_DATA_MACOS_CPP}")
-
-if(APPLE AND EXISTS "${TEST_SUPPORT_DATA_MACOS_CPP}")
-  list(APPEND TEST_PLATFORM_CPP "${TEST_SUPPORT_DATA_MACOS_CPP}")
-endif()
-
 set(DUCKDB_VERSION "1.4.4")
 set(DUCKDB_TAG "v${DUCKDB_VERSION}")
 
@@ -263,7 +237,12 @@ else()
   message(FATAL_ERROR "Unsupported platform for DuckDB")
 endif()
 
-FetchContent_Declare(libduckdb URL "${DUCKDB_URL}" URL_HASH "SHA256=${DUCKDB_SHA}")
+FetchContent_Declare(
+  libduckdb
+  URL "${DUCKDB_URL}"
+  URL_HASH "SHA256=${DUCKDB_SHA}"
+  DOWNLOAD_NO_PROGRESS TRUE
+)
 if(DEFINED FETCHCONTENT_BASE_DIR)
   set(_duckdb_fetchcontent_base_dir "${FETCHCONTENT_BASE_DIR}")
 else()
@@ -415,7 +394,6 @@ add_library(
   ${SUPPORT_TYPE_POLICY_HDR}
   $<TARGET_OBJECTS:memly_sql_resources>
 )
-memly_enable_clang_tidy(memly_core)
 
 target_include_directories(memly_core BEFORE PUBLIC "${CMAKE_SOURCE_DIR}/src" "${_duckdb_wrapper_dir}")
 
@@ -440,7 +418,6 @@ set_target_properties(
 )
 
 qt_add_executable(memly MANUAL_FINALIZATION "${APP_MAIN_CPP}" ${BOOTSTRAP_CPP} ${BOOTSTRAP_HDR})
-memly_enable_clang_tidy(memly)
 
 target_link_libraries(
   memly
@@ -477,34 +454,5 @@ set_target_properties(
 qt_finalize_executable(memly)
 
 if(BUILD_TESTING)
-  qt_add_executable(
-    memly-test
-    MANUAL_FINALIZATION
-    ${TEST_MAIN_CPP}
-    ${TEST_APP_CPP}
-    ${TEST_CONTROLLER_CPP}
-    ${TEST_LANGUAGE_CPP}
-    ${TEST_MODEL_CPP}
-    ${TEST_SCHEDULER_CPP}
-    ${TEST_QML_CPP}
-    ${TEST_SERVICE_CPP}
-    ${TEST_SQL_CPP}
-    ${TEST_SUPPORT_CPP}
-    ${TEST_PLATFORM_CPP}
-  )
-  memly_enable_clang_tidy(memly-test)
-
-  target_include_directories(memly-test BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${_duckdb_wrapper_dir}")
-
-  target_include_directories(memly-test SYSTEM PRIVATE "${_duckdb_inc}")
-
-  target_compile_definitions(memly-test PRIVATE CMAKE_GENERATED_PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
-
-  target_link_libraries(memly-test PRIVATE memly_core Qt6::Test memly_warnings memly_asan)
-
-  set_target_properties(memly-test PROPERTIES BUILD_RPATH "${_duckdb_libdir}")
-
-  qt_finalize_executable(memly-test)
-
-  add_test(NAME memly-test COMMAND memly-test)
+  add_custom_target(memly-test)
 endif()

@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -18,7 +17,7 @@ namespace Application::Service::Deck {
     return m_DeckTreeSnapshotIndexCache.AcquireLease();
 }
 
-[[nodiscard]] bool DeckService::IsDeckNameLengthValid(const std::string_view DeckName) const noexcept {
+[[nodiscard]] bool DeckService::IsDeckNameLengthValid(const std::string& DeckName) const noexcept {
     return Application::Domain::Deck::Constraint::IsDeckNameLengthValid(DeckName);
 }
 

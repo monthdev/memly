@@ -5,16 +5,15 @@
 #include <cstdint>
 #include <expected>
 #include <optional>
-#include <string_view>
 
 namespace View::Bridge::Controller {
 namespace {
 
-[[nodiscard]] QString u_DeckPageControllerExpectedToQString(const std::expected<void, std::string_view>& DeckPageControllerExpected) noexcept {
+[[nodiscard]] QString u_DeckPageControllerExpectedToQString(const std::expected<void, const char*>& DeckPageControllerExpected) noexcept {
     if (DeckPageControllerExpected.has_value()) {
         return QString{};
     }
-    return QString::fromUtf8(DeckPageControllerExpected.error().data());
+    return QString::fromUtf8(DeckPageControllerExpected.error());
 }
 
 }

@@ -3,7 +3,6 @@
 #include <duckdb.hpp>
 
 #include <string>
-#include <string_view>
 
 #include "Infrastructure/Database/TransactionRunner.hpp"
 
@@ -11,8 +10,8 @@ namespace Infrastructure::Database {
 
 class DatabaseRuntime final {
 public:
-    explicit DatabaseRuntime(const std::string_view DatabaseFilePathStringView)
-        : m_Database{ std::string{ DatabaseFilePathStringView } }
+    explicit DatabaseRuntime(const std::string& DatabaseFilePath)
+        : m_Database{ DatabaseFilePath }
         , m_DatabaseConnection{ m_Database }
         , m_TransactionRunner{ m_DatabaseConnection } {
         BootstrapDatabase();

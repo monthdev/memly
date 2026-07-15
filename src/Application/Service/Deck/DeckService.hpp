@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <optional>
 #include <string>
-#include <string_view>
 
 #include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCache.hpp"
 
@@ -33,7 +32,7 @@ public:
 
     [[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease AcquireDeckTreeSnapshotIndexCacheLease();
 
-    [[nodiscard]] bool IsDeckNameLengthValid(const std::string_view) const noexcept;
+    [[nodiscard]] bool IsDeckNameLengthValid(const std::string&) const noexcept;
 
     void CreateRootDeck(const std::string&, std::uint8_t);
     void CreateChildDeck(const std::string&, const std::string&);

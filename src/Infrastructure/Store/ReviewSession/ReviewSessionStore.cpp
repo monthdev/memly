@@ -6,7 +6,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include "Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
@@ -17,7 +16,7 @@
 namespace Infrastructure::Store::ReviewSession {
 namespace {
 
-[[nodiscard]] constexpr std::string_view u_ReviewSessionDeckSelectionTypeToString(
+[[nodiscard]] constexpr const char* u_ReviewSessionDeckSelectionTypeToString(
     const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) noexcept {
     switch (DeckSelectionType) {
     case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Self:
@@ -36,7 +35,7 @@ u_HandleRecoverableReviewSessionMutationError(duckdb::QueryResult& QueryResult) 
     if (not QueryResult.HasError()) {
         return std::nullopt;
     }
-    const std::string_view ErrorMessage{ QueryResult.GetError() };
+    const std::string& ErrorMessage{ QueryResult.GetError() };
     if (ErrorMessage.contains("review_session_custom_name_is_valid(\"custom_name\")")) {
         return Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::ReviewSessionNameLengthError;
     }
@@ -204,9 +203,9 @@ ReviewSessionStore::CreateCustomReviewSessionDeckSelection(
     const std::string& ReviewSessionId,
     const std::string& DeckId,
     const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) {
-    const std::string_view DeckSelectionTypeString{ u_ReviewSessionDeckSelectionTypeToString(DeckSelectionType) };
+    const char* const DeckSelectionTypeString{ u_ReviewSessionDeckSelectionTypeToString(DeckSelectionType) };
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_CreateCustomReviewSessionDeckSelectionPreparedStatement->Execute(
-        ReviewSessionId, DeckId, DeckSelectionTypeString.data()) };
+        ReviewSessionId, DeckId, DeckSelectionTypeString) };
     return u_HandleRecoverableReviewSessionMutationError(*QueryResult);
 }
 

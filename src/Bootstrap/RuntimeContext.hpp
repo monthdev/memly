@@ -6,7 +6,7 @@
 #pragma once
 
 #include <memory>
-#include <string_view>
+#include <string>
 
 namespace Application::Invalidation {
 class LibraryInvalidationChannel;
@@ -50,7 +50,7 @@ public:
     RuntimeContext& operator=(const RuntimeContext&) = delete;
     RuntimeContext& operator=(RuntimeContext&&) = delete;
 
-    static void Initialize(const std::string_view);
+    static void Initialize(const std::string&);
 
     [[nodiscard]] static Application::Invalidation::LibraryInvalidationChannel& GetRequiredLibraryInvalidationChannel() noexcept;
     [[nodiscard]] static Application::Service::Deck::DeckService& GetRequiredDeckService() noexcept;

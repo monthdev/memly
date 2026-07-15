@@ -1,4 +1,9 @@
 ---
+Diagnostics:
+  ClangTidy:
+    FastCheckFilter: None
+
+---
 If:
   PathMatch: ^build/_deps/.*
 

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <bitset>
+#include <array>
+#include <cassert>
 #include <cstddef>
 #include <utility>
 
@@ -14,7 +15,7 @@ enum class LibraryInvalidationTargetEnum : std::size_t {
 class LibraryInvalidationTargetBitset final {
 public:
     LibraryInvalidationTargetBitset(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept
-        : m_TargetBitset{} {
+        : m_TargetArray{} {
         Set(LibraryInvalidationTarget);
     }
 
@@ -24,7 +25,8 @@ public:
     LibraryInvalidationTargetBitset& operator=(LibraryInvalidationTargetBitset&&) = delete;
 
     [[nodiscard]] bool Contains(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) const noexcept {
-        return m_TargetBitset.test(std::to_underlying(LibraryInvalidationTarget));
+        assert(std::to_underlying(LibraryInvalidationTarget) < m_TargetArray.size());
+        return m_TargetArray[std::to_underlying(LibraryInvalidationTarget)];
     }
 
 private:
@@ -32,10 +34,11 @@ private:
     friend LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetBitset&&, LibraryInvalidationTargetEnum) noexcept;
 
     void Set(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept {
-        m_TargetBitset.set(std::to_underlying(LibraryInvalidationTarget));
+        assert(std::to_underlying(LibraryInvalidationTarget) < m_TargetArray.size());
+        m_TargetArray[std::to_underlying(LibraryInvalidationTarget)] = true;
     }
 
-    std::bitset<std::to_underlying(LibraryInvalidationTargetEnum::TargetCount)> m_TargetBitset{};
+    std::array<bool, std::to_underlying(LibraryInvalidationTargetEnum::TargetCount)> m_TargetArray{};
 };
 
 [[nodiscard]] inline LibraryInvalidationTargetBitset operator|(const LibraryInvalidationTargetEnum LeftLibraryInvalidationTarget,

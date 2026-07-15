@@ -1,6 +1,7 @@
 Checks: >
   -*,
-  bugprone-unused-local-non-trivial-variable,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
   misc-use-anonymous-namespace,
   modernize-return-braced-init-list,
   readability-implicit-bool-conversion,
@@ -12,18 +13,6 @@ CheckOptions:
   - {
       key: bugprone-unused-local-non-trivial-variable.IncludeTypes,
       value: ".*",
-    }
-  - {
-      key: readability-implicit-bool-conversion.AllowIntegerConditions,
-      value: "false",
-    }
-  - {
-      key: readability-implicit-bool-conversion.AllowPointerConditions,
-      value: "false",
-    }
-  - {
-      key: readability-braces-around-statements.ShortStatementLines,
-      value: "0",
     }
   - {
       key: readability-operators-representation.BinaryOperators,

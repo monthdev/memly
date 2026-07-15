@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 
 namespace Application::Domain::Deck::Constraint {
 
-[[nodiscard]] bool IsDeckNameLengthValid(const std::string_view) noexcept;
+[[nodiscard]] bool IsDeckNameLengthValid(const std::string&) noexcept;
 
 }

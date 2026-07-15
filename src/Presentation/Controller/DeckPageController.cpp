@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <expected>
 #include <optional>
-#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -24,38 +23,38 @@ void DeckPageController::RefreshDeckTreeModel(const std::int64_t AsOfMillisecond
     });
 }
 
-[[nodiscard]] std::expected<void, std::string_view> DeckPageController::CreateRootDeck(const std::string& DeckName,
-                                                                                       const std::uint8_t TargetLanguageCode) noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+[[nodiscard]] std::expected<void, const char*> DeckPageController::CreateRootDeck(const std::string& DeckName,
+                                                                                  const std::uint8_t TargetLanguageCode) noexcept {
+    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.CreateRootDeck(DeckName, TargetLanguageCode);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, std::string_view> DeckPageController::CreateChildDeck(const std::string& DeckName, const std::string& ParentDeckId) noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+[[nodiscard]] std::expected<void, const char*> DeckPageController::CreateChildDeck(const std::string& DeckName, const std::string& ParentDeckId) noexcept {
+    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.CreateChildDeck(DeckName, ParentDeckId);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, std::string_view> DeckPageController::MoveDeck(const std::string& DeckId,
-                                                                                 const std::optional<std::string>& NewParentDeckId) noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+[[nodiscard]] std::expected<void, const char*> DeckPageController::MoveDeck(const std::string& DeckId,
+                                                                            const std::optional<std::string>& NewParentDeckId) noexcept {
+    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.MoveDeck(DeckId, NewParentDeckId);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, std::string_view> DeckPageController::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+[[nodiscard]] std::expected<void, const char*> DeckPageController::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) noexcept {
+    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.RenameDeck(DeckId, NewDeckName);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, std::string_view> DeckPageController::DeleteDeck(const std::string& DeckId) noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, std::string_view> {
+[[nodiscard]] std::expected<void, const char*> DeckPageController::DeleteDeck(const std::string& DeckId) noexcept {
+    return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.DeleteDeck(DeckId);
         return {};
     });

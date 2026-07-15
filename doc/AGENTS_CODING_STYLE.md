@@ -42,9 +42,6 @@ Non-trivial owning values must not be copied into parameters by value.
 
 Use rvalue reference parameters when the callee consumes ownership.
 
-Value parameters only apply for `const std::string_view` as described in the
-string view rule.
-
 ## Attributes, Specifiers, Qualifiers, And Qt Metadata Macros
 
 Classes, data-time object structs, methods, members, parameters, free functions,
@@ -78,6 +75,25 @@ Qt types and callable surfaces must use `Q_OBJECT`, `Q_GADGET`, `Q_NAMESPACE`,
 `Q_PROPERTY`, `Q_SIGNAL`, `Q_SLOT`, `Q_INVOKABLE`, `Q_ENUM`, `Q_FLAG`,
 `Q_DECLARE_FLAGS`, `QML_ANONYMOUS`, `QML_ELEMENT`, `QML_NAMED_ELEMENT`,
 `QML_SINGLETON`, and `QML_UNCREATABLE` where they apply.
+
+## Programming Errors And Runtime Errors
+
+Conditions that can fail only when Memly code is incorrect must be enforced with
+debug assertions. This includes violated internal preconditions, postconditions,
+invariants, invalid internal enum values, and impossible control states. Do not
+throw exceptions for programming errors.
+
+Conditions that can fail during correct execution because of external or runtime
+state must not be enforced with assertions. Instead, throw an exception when
+such a failure cannot be recovered from at the current boundary and is not part
+of a typed recoverable result surface.
+
+Validate/assert user input and other untrusted values at their input boundary
+before converting them into internal state. Downstream code may then assert the
+established invariant instead of repeatedly validating it as a runtime error.
+
+Do not add both an assertion and a runtime error check for the same invariant
+unless they enforce distinct boundaries.
 
 ## QML Bridge Surface
 
@@ -152,19 +168,23 @@ Use `.at()` instead of `operator[]` for non-mutating element access.
 
 Use `operator[]` only for intentional mutation.
 
-## String Views
+## String Types
 
-Read-only string API parameters must use `const std::string_view` instead of
-C-style string pointer or array types.
+Read-only string parameters must use `const std::string&` when their inputs are
+already `std::string` objects.
 
-Named string constants must use `std::string_view` when they need a name.
+Read-only string parameters must use `const std::string_view` when the same API
+intentionally accepts either `std::string` objects or string literals or when a
+non-allocating control path requires explicit string size information.
 
-Named `std::string_view` values used at C and Qt string boundaries are expected
-to wrap the complete null-terminated string, not a substring. Passing `.data()`
-to the boundary is the convention.
+String parameters must use `const char* const` when the control path already
+receives a character pointer or string literal and introducing an owning string
+container would cause a needless heap allocation. Named string constants on such
+control paths must also use `const char* const`.
 
-Do not name `std::string_view` values if they are immediately being passed as a
-parameter just a single time.
+Stored `std::string_view` values must only appear in explicitly non-owning
+containers or data types whose owner and invalidation boundary are enforced by
+their design.
 
 ## Forward Declarations
 
