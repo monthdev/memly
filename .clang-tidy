@@ -3,6 +3,7 @@ Checks: >
   bugprone-*,
   -bugprone-easily-swappable-parameters,
   clang-analyzer-*,
+  concurrency-*,
   misc-use-anonymous-namespace,
   modernize-return-braced-init-list,
   readability-implicit-bool-conversion,

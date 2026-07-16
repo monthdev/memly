@@ -13,15 +13,19 @@ include(CTest)
 include(FetchContent)
 
 if(NOT CMAKE_GENERATOR MATCHES "Ninja|Makefiles")
-  message(FATAL_ERROR "Memly requires a Ninja or Makefiles generator for required clang-tidy compilation check")
+  message(FATAL_ERROR "Memly requires a Ninja or Makefiles generator for the required clang-tidy lint build")
 endif()
 
 find_program(
   MEMLY_LLVM_CLANG_TIDY_EXECUTABLE NAMES clang-tidy HINTS "/opt/homebrew/opt/llvm/bin" "/usr/local/opt/llvm/bin"
                                                           REQUIRED
 )
-set(CMAKE_CXX_CLANG_TIDY "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy"
-                         "--header-filter=^${CMAKE_SOURCE_DIR}/(src|test)/" "--quiet"
+cmake_path(GET MEMLY_LLVM_CLANG_TIDY_EXECUTABLE PARENT_PATH MEMLY_LLVM_BINARY_DIRECTORY)
+find_program(
+  MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE
+  NAMES run-clang-tidy
+  HINTS "${MEMLY_LLVM_BINARY_DIRECTORY}"
+  NO_DEFAULT_PATH REQUIRED
 )
 
 set(MEMLY_QT_MIN_VERSION 6.11)
@@ -455,4 +459,22 @@ qt_finalize_executable(memly)
 
 if(BUILD_TESTING)
   add_custom_target(memly-test)
+endif()
+
+add_custom_target(
+  memly-clang-tidy
+  COMMAND
+    "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -clang-tidy-binary
+    "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
+    "^${CMAKE_SOURCE_DIR}/(src|test)/" -quiet "^${CMAKE_SOURCE_DIR}/(src|test)/.*\\.cpp$"
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  COMMENT "Run clang-tidy on Memly C++ translation units"
+  VERBATIM
+)
+
+add_dependencies(memly_sql_resources memly-clang-tidy)
+add_dependencies(memly_core memly-clang-tidy)
+add_dependencies(memly memly-clang-tidy)
+if(BUILD_TESTING)
+  add_dependencies(memly-test memly-clang-tidy)
 endif()
