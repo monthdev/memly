@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -69,8 +68,6 @@ public:
     DeckForestSnapshotIndex& operator=(const DeckForestSnapshotIndex&) = delete;
     DeckForestSnapshotIndex& operator=(DeckForestSnapshotIndex&&) = delete;
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const DeckForestSnapshotNode>> TryGetDeckForestSnapshotNode(const std::optional<std::string>&) const;
-
     [[nodiscard]] std::vector<std::string_view> GetSubtreeDeckIds(const std::string&) const;
 
     [[nodiscard]] bool DoesDuplicateSiblingDeckNameExist(const std::optional<std::string>&, const std::string&) const;
@@ -87,7 +84,6 @@ private:
     std::unordered_map<std::string_view, std::size_t> m_DeckNodePositionByDeckIdUnorderedMap;
 
     [[nodiscard]] std::size_t GetDeckNodePosition(const std::string&) const;
-    [[nodiscard]] const std::vector<std::size_t>& GetChildDeckNodePositionVector(const std::optional<std::string>&) const;
 
     void AccumulateSubtreeCounts();
 };

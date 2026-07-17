@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -17,22 +16,6 @@ namespace Application::Domain::Deck::Index {
         DeckId) };
     assert(DeckNodePositionByDeckIdIterator not_eq m_DeckNodePositionByDeckIdUnorderedMap.end());
     return DeckNodePositionByDeckIdIterator->second;
-}
-
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckForestSnapshotIndex::DeckForestSnapshotNode>>
-DeckForestSnapshotIndex::TryGetDeckForestSnapshotNode(const std::optional<std::string>& DeckIdOptional) const {
-    if (not DeckIdOptional.has_value()) {
-        return std::nullopt;
-    }
-    return std::cref(m_DeckForestSnapshotNodeVector.at(GetDeckNodePosition(DeckIdOptional.value())));
-}
-
-[[nodiscard]] const std::vector<std::size_t>&
-DeckForestSnapshotIndex::GetChildDeckNodePositionVector(const std::optional<std::string>& ParentDeckIdOptional) const {
-    if (not ParentDeckIdOptional.has_value()) {
-        return m_RootDeckNodePositionVector;
-    }
-    return m_ChildDeckNodePositionVectorByDeckNodePositionVector.at(GetDeckNodePosition(ParentDeckIdOptional.value()));
 }
 
 [[nodiscard]] std::vector<std::string_view> DeckForestSnapshotIndex::GetSubtreeDeckIds(const std::string& DeckId) const {
@@ -97,8 +80,9 @@ void DeckForestSnapshotIndex::AccumulateSubtreeCounts() {
 
 [[nodiscard]] bool DeckForestSnapshotIndex::DoesDuplicateSiblingDeckNameExist(const std::optional<std::string>& ParentDeckIdOptional,
                                                                               const std::string& DeckName) const {
-    const std::vector<std::size_t>& SiblingDeckNodePositionVector{ GetChildDeckNodePositionVector(ParentDeckIdOptional) };
-    for (const std::size_t DeckNodePosition : SiblingDeckNodePositionVector) {
+    for (const std::size_t DeckNodePosition : ParentDeckIdOptional.has_value() ?
+                                                  m_ChildDeckNodePositionVectorByDeckNodePositionVector.at(GetDeckNodePosition(ParentDeckIdOptional.value())) :
+                                                  m_RootDeckNodePositionVector) {
         if (m_DeckForestSnapshotNodeVector.at(DeckNodePosition).m_DeckName == DeckName) {
             return true;
         }
@@ -113,15 +97,20 @@ void DeckForestSnapshotIndex::AccumulateSubtreeCounts() {
 
 [[nodiscard]] bool DeckForestSnapshotIndex::WouldMoveDeckCreateCycle(const std::string& MovingDeckId,
                                                                      const std::optional<std::string>& NewParentDeckIdOptional) const {
-    std::optional<std::reference_wrapper<const DeckForestSnapshotNode>> CurrentDeckNodeOptional{ TryGetDeckForestSnapshotNode(NewParentDeckIdOptional) };
-    while (CurrentDeckNodeOptional.has_value()) {
-        const DeckForestSnapshotNode& CurrentDeckNode{ CurrentDeckNodeOptional.value().get() };
+    if (not NewParentDeckIdOptional.has_value()) {
+        return false;
+    }
+    std::size_t CurrentDeckNodePosition{ GetDeckNodePosition(NewParentDeckIdOptional.value()) };
+    while (true) {
+        const DeckForestSnapshotNode& CurrentDeckNode{ m_DeckForestSnapshotNodeVector.at(CurrentDeckNodePosition) };
         if (CurrentDeckNode.m_DeckId == MovingDeckId) {
             return true;
         }
-        CurrentDeckNodeOptional = TryGetDeckForestSnapshotNode(CurrentDeckNode.m_ParentDeckIdOptional);
+        if (not CurrentDeckNode.m_ParentDeckIdOptional.has_value()) {
+            return false;
+        }
+        CurrentDeckNodePosition = GetDeckNodePosition(CurrentDeckNode.m_ParentDeckIdOptional.value());
     }
-    return false;
 }
 
 [[nodiscard]] bool DeckForestSnapshotIndex::WouldMoveDeckCreateTargetLanguageMismatch(const std::string& DeckId,
