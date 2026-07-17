@@ -4,10 +4,10 @@
 #include <optional>
 #include <string>
 
-#include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCache.hpp"
+#include "Application/IndexCache/Deck/DeckForestSnapshotIndexCache.hpp"
 
 namespace Application::Domain::Deck::Index {
-class DeckTreeSnapshotIndex;
+class DeckForestSnapshotIndex;
 }
 
 namespace Infrastructure::Store::Deck {
@@ -22,7 +22,7 @@ public:
     DeckService(Infrastructure::Store::Deck::DeckStore& DeckStore, Infrastructure::Store::Deck::DeckSnapshotStore& DeckSnapshotStore) noexcept
         : m_DeckStore{ DeckStore }
         , m_DeckSnapshotStore{ DeckSnapshotStore }
-        , m_DeckTreeSnapshotIndexCache{} {
+        , m_DeckForestSnapshotIndexCache{} {
     }
 
     DeckService(const DeckService&) = delete;
@@ -30,7 +30,7 @@ public:
     DeckService& operator=(const DeckService&) = delete;
     DeckService& operator=(DeckService&&) = delete;
 
-    [[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease AcquireDeckTreeSnapshotIndexCacheLease();
+    [[nodiscard]] Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease AcquireDeckForestSnapshotIndexCacheLease();
 
     [[nodiscard]] bool IsDeckNameLengthValid(const std::string&) const noexcept;
 
@@ -39,12 +39,12 @@ public:
     void MoveDeck(const std::string&, const std::optional<std::string>&);
     void RenameDeck(const std::string&, const std::string&);
     void DeleteDeck(const std::string&);
-    void RefreshDeckTreeSnapshotIndexCache(const Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease&, std::int64_t);
+    void RefreshDeckForestSnapshotIndexCache(const Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease&, std::int64_t);
 
 private:
     Infrastructure::Store::Deck::DeckStore& m_DeckStore;
     Infrastructure::Store::Deck::DeckSnapshotStore& m_DeckSnapshotStore;
-    Application::IndexCache::Deck::DeckTreeSnapshotIndexCache m_DeckTreeSnapshotIndexCache;
+    Application::IndexCache::Deck::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
 };
 
 }

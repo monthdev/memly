@@ -10,7 +10,7 @@
 #include <string>
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
-#include "Presentation/Model/DeckTreeModel.hpp"
+#include "Presentation/Model/DeckForestModel.hpp"
 
 namespace Application::Service::Deck {
 class DeckService;
@@ -27,17 +27,17 @@ public:
                                 QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_DeckService{ DeckService }
-        , m_DeckTreeModel{ this } {
+        , m_DeckForestModel{ this } {
         LibraryInvalidationChannel.ConnectSnapshot(
-            this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckTreeSnapshot, &DeckPageController::RefreshDeckTreeModel);
+            this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckForestSnapshot, &DeckPageController::RefreshDeckForestModel);
     }
     DeckPageController(const DeckPageController&) = delete;
     DeckPageController(DeckPageController&&) = delete;
     DeckPageController& operator=(const DeckPageController&) = delete;
     DeckPageController& operator=(DeckPageController&&) = delete;
 
-    [[nodiscard]] Presentation::Model::DeckTreeModel* GetDeckTreeModel() noexcept {
-        return &m_DeckTreeModel;
+    [[nodiscard]] Presentation::Model::DeckForestModel* GetDeckForestModel() noexcept {
+        return &m_DeckForestModel;
     }
 
     [[nodiscard]] std::expected<void, const char*> CreateRootDeck(const std::string&, std::uint8_t) noexcept;
@@ -48,9 +48,9 @@ public:
 
 private:
     Application::Service::Deck::DeckService& m_DeckService;
-    Presentation::Model::DeckTreeModel m_DeckTreeModel;
+    Presentation::Model::DeckForestModel m_DeckForestModel;
 
-    void RefreshDeckTreeModel(std::int64_t) noexcept;
+    void RefreshDeckForestModel(std::int64_t) noexcept;
 };
 
 }

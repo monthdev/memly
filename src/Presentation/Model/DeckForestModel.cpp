@@ -1,6 +1,6 @@
 #if 0
-// Temporarily disabled during deck tree model refactor.
-#include "Presentation/Model/DeckTreeModel.hpp"
+// Temporarily disabled during deck forest model refactor.
+#include "Presentation/Model/DeckForestModel.hpp"
 
 #include <qstring.h>
 
@@ -16,7 +16,7 @@
 
 namespace Presentation::Model {
 
-[[nodiscard]] QModelIndex DeckTreeModel::index(const int Row, const int Column, const QModelIndex& Parent) const noexcept {
+[[nodiscard]] QModelIndex DeckForestModel::index(const int Row, const int Column, const QModelIndex& Parent) const noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> QModelIndex {
         if (not hasIndex(Row, Column, Parent)) {
             return QModelIndex{};
@@ -27,7 +27,7 @@ namespace Presentation::Model {
     });
 }
 
-[[nodiscard]] QModelIndex DeckTreeModel::parent(const QModelIndex& Index) const noexcept {
+[[nodiscard]] QModelIndex DeckForestModel::parent(const QModelIndex& Index) const noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> QModelIndex {
         const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
@@ -43,7 +43,7 @@ namespace Presentation::Model {
     });
 }
 
-[[nodiscard]] int DeckTreeModel::rowCount(const QModelIndex& Parent) const noexcept {
+[[nodiscard]] int DeckForestModel::rowCount(const QModelIndex& Parent) const noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> int {
         if (Parent.column() > 0) {
             return 0;
@@ -52,7 +52,7 @@ namespace Presentation::Model {
     });
 }
 
-[[nodiscard]] int DeckTreeModel::columnCount(const QModelIndex& Parent) const noexcept {
+[[nodiscard]] int DeckForestModel::columnCount(const QModelIndex& Parent) const noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> int {
         if (Parent.isValid() and Parent.column() > 0) {
             return 0;
@@ -61,7 +61,7 @@ namespace Presentation::Model {
     });
 }
 
-[[nodiscard]] QVariant DeckTreeModel::data(const QModelIndex& Index, const int Role) const noexcept {
+[[nodiscard]] QVariant DeckForestModel::data(const QModelIndex& Index, const int Role) const noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> QVariant {
         const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
@@ -72,53 +72,53 @@ namespace Presentation::Model {
         case Qt::DisplayRole:
             switch (Index.column()) {
             case static_cast<int>(ColumnEnum::DeckNameColumn):
-                return QString::fromStdString(CurrentDeckNode.m_DeckTreeNode.m_DeckName);
+                return QString::fromStdString(CurrentDeckNode.m_DeckForestSnapshotNode.m_DeckName);
             case static_cast<int>(ColumnEnum::SubtreeDueNowCountColumn):
-                return CurrentDeckNode.m_DeckTreeNode.m_SubtreeDueNowCount;
+                return CurrentDeckNode.m_DeckForestSnapshotNode.m_SubtreeDueNowCount;
             case static_cast<int>(ColumnEnum::SubtreeByTodayCountColumn):
-                return CurrentDeckNode.m_DeckTreeNode.m_SubtreeByTodayCount;
+                return CurrentDeckNode.m_DeckForestSnapshotNode.m_SubtreeByTodayCount;
             case static_cast<int>(ColumnEnum::SubtreeTotalCountColumn):
-                return CurrentDeckNode.m_DeckTreeNode.m_SubtreeTotalCount;
+                return CurrentDeckNode.m_DeckForestSnapshotNode.m_SubtreeTotalCount;
             default:
                 return QVariant{};
             }
         case static_cast<int>(RoleEnum::DeckIdRole):
-            return QString::fromStdString(CurrentDeckNode.m_DeckTreeNode.m_DeckId);
+            return QString::fromStdString(CurrentDeckNode.m_DeckForestSnapshotNode.m_DeckId);
         case static_cast<int>(RoleEnum::ParentDeckIdRole):
-            if (not CurrentDeckNode.m_DeckTreeNode.m_ParentDeckIdOptional.has_value()) {
+            if (not CurrentDeckNode.m_DeckForestSnapshotNode.m_ParentDeckIdOptional.has_value()) {
                 return QString{};
             }
-            return QString::fromStdString(CurrentDeckNode.m_DeckTreeNode.m_ParentDeckIdOptional.value());
+            return QString::fromStdString(CurrentDeckNode.m_DeckForestSnapshotNode.m_ParentDeckIdOptional.value());
         case static_cast<int>(RoleEnum::DeckNameRole):
-            return QString::fromStdString(CurrentDeckNode.m_DeckTreeNode.m_DeckName);
+            return QString::fromStdString(CurrentDeckNode.m_DeckForestSnapshotNode.m_DeckName);
         case static_cast<int>(RoleEnum::CreatedAtMillisecondsSinceEpochRole):
-            return CurrentDeckNode.m_DeckTreeNode.m_CreatedAtMillisecondsSinceEpoch;
+            return CurrentDeckNode.m_DeckForestSnapshotNode.m_CreatedAtMillisecondsSinceEpoch;
         case static_cast<int>(RoleEnum::LastUpdatedAtMillisecondsSinceEpochRole):
-            if (not CurrentDeckNode.m_DeckTreeNode.m_LastUpdatedAtMillisecondsSinceEpochOptional.has_value()) {
+            if (not CurrentDeckNode.m_DeckForestSnapshotNode.m_LastUpdatedAtMillisecondsSinceEpochOptional.has_value()) {
                 return std::int64_t{};
             }
-            return CurrentDeckNode.m_DeckTreeNode.m_LastUpdatedAtMillisecondsSinceEpochOptional.value();
+            return CurrentDeckNode.m_DeckForestSnapshotNode.m_LastUpdatedAtMillisecondsSinceEpochOptional.value();
         case static_cast<int>(RoleEnum::SelfDueNowCountRole):
-            return CurrentDeckNode.m_DeckTreeNode.m_SelfDueNowCount;
+            return CurrentDeckNode.m_DeckForestSnapshotNode.m_SelfDueNowCount;
         case static_cast<int>(RoleEnum::SelfByTodayCountRole):
-            return CurrentDeckNode.m_DeckTreeNode.m_SelfByTodayCount;
+            return CurrentDeckNode.m_DeckForestSnapshotNode.m_SelfByTodayCount;
         case static_cast<int>(RoleEnum::SelfTotalCountRole):
-            return CurrentDeckNode.m_DeckTreeNode.m_SelfTotalCount;
+            return CurrentDeckNode.m_DeckForestSnapshotNode.m_SelfTotalCount;
         case static_cast<int>(RoleEnum::SubtreeDueNowCountRole):
-            return CurrentDeckNode.m_DeckTreeNode.m_SubtreeDueNowCount;
+            return CurrentDeckNode.m_DeckForestSnapshotNode.m_SubtreeDueNowCount;
         case static_cast<int>(RoleEnum::SubtreeByTodayCountRole):
-            return CurrentDeckNode.m_DeckTreeNode.m_SubtreeByTodayCount;
+            return CurrentDeckNode.m_DeckForestSnapshotNode.m_SubtreeByTodayCount;
         case static_cast<int>(RoleEnum::SubtreeTotalCountRole):
-            return CurrentDeckNode.m_DeckTreeNode.m_SubtreeTotalCount;
+            return CurrentDeckNode.m_DeckForestSnapshotNode.m_SubtreeTotalCount;
         case static_cast<int>(RoleEnum::TargetLanguageCodeRole):
-            return static_cast<unsigned int>(CurrentDeckNode.m_DeckTreeNode.m_TargetLanguageCode);
+            return static_cast<unsigned int>(CurrentDeckNode.m_DeckForestSnapshotNode.m_TargetLanguageCode);
         default:
             return QVariant{};
         }
     });
 }
 
-[[nodiscard]] bool DeckTreeModel::hasChildren(const QModelIndex& Parent) const noexcept {
+[[nodiscard]] bool DeckForestModel::hasChildren(const QModelIndex& Parent) const noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> bool {
         if (Parent.column() > 0) {
             return false;
@@ -127,7 +127,7 @@ namespace Presentation::Model {
     });
 }
 
-void DeckTreeModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
+void DeckForestModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
     Support::Runtime::TryCatchWrapper([&]() -> void {
         if (Column < static_cast<int>(ColumnEnum::DeckNameColumn) or Column > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
             return;
@@ -140,7 +140,7 @@ void DeckTreeModel::sort(const int Column, const Qt::SortOrder SortOrder) noexce
     });
 }
 
-[[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeModel::DeckNode>> DeckTreeModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
+[[nodiscard]] std::optional<std::reference_wrapper<const DeckForestModel::DeckNode>> DeckForestModel::TryGetDeckNode(const QModelIndex& Index) const noexcept {
     if (not Index.isValid()) {
         return std::nullopt;
     }
@@ -149,7 +149,7 @@ void DeckTreeModel::sort(const int Column, const Qt::SortOrder SortOrder) noexce
     return m_DeckNodesVector.at(DeckNodeIndex);
 }
 
-[[nodiscard]] const std::vector<std::size_t>& DeckTreeModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const {
+[[nodiscard]] const std::vector<std::size_t>& DeckForestModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const {
     if (not Parent.isValid()) {
         return m_RootDeckNodeIndexesVector;
     }
@@ -157,7 +157,7 @@ void DeckTreeModel::sort(const int Column, const Qt::SortOrder SortOrder) noexce
     return ParentDeckNode.m_ChildDeckNodeIndexesVector;
 }
 
-[[nodiscard]] int DeckTreeModel::CompareDeckNodes(const std::size_t LeftDeckNodeIndex, const std::size_t RightDeckNodeIndex) const noexcept {
+[[nodiscard]] int DeckForestModel::CompareDeckNodes(const std::size_t LeftDeckNodeIndex, const std::size_t RightDeckNodeIndex) const noexcept {
     const DeckNode& LeftDeckNode{ m_DeckNodesVector.at(LeftDeckNodeIndex) };
     const DeckNode& RightDeckNode{ m_DeckNodesVector.at(RightDeckNodeIndex) };
     const auto CompareDeckNodeCounts{ [](const std::uint32_t LeftDeckNodeCount, const std::uint32_t RightDeckNodeCount) static noexcept -> int {
@@ -165,19 +165,19 @@ void DeckTreeModel::sort(const int Column, const Qt::SortOrder SortOrder) noexce
     } };
     switch (m_SortColumn) {
     case static_cast<int>(ColumnEnum::DeckNameColumn):
-        return LeftDeckNode.m_DeckTreeNode.m_DeckName.compare(RightDeckNode.m_DeckTreeNode.m_DeckName);
+        return LeftDeckNode.m_DeckForestSnapshotNode.m_DeckName.compare(RightDeckNode.m_DeckForestSnapshotNode.m_DeckName);
     case static_cast<int>(ColumnEnum::SubtreeDueNowCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeNode.m_SubtreeDueNowCount, RightDeckNode.m_DeckTreeNode.m_SubtreeDueNowCount);
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckForestSnapshotNode.m_SubtreeDueNowCount, RightDeckNode.m_DeckForestSnapshotNode.m_SubtreeDueNowCount);
     case static_cast<int>(ColumnEnum::SubtreeByTodayCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeNode.m_SubtreeByTodayCount, RightDeckNode.m_DeckTreeNode.m_SubtreeByTodayCount);
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckForestSnapshotNode.m_SubtreeByTodayCount, RightDeckNode.m_DeckForestSnapshotNode.m_SubtreeByTodayCount);
     case static_cast<int>(ColumnEnum::SubtreeTotalCountColumn):
-        return CompareDeckNodeCounts(LeftDeckNode.m_DeckTreeNode.m_SubtreeTotalCount, RightDeckNode.m_DeckTreeNode.m_SubtreeTotalCount);
+        return CompareDeckNodeCounts(LeftDeckNode.m_DeckForestSnapshotNode.m_SubtreeTotalCount, RightDeckNode.m_DeckForestSnapshotNode.m_SubtreeTotalCount);
     default:
         return 0;
     }
 }
 
-void DeckTreeModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>& SiblingDeckNodeIndexes) {
+void DeckForestModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>& SiblingDeckNodeIndexes) {
     std::stable_sort(SiblingDeckNodeIndexes.begin(),
                      SiblingDeckNodeIndexes.end(),
                      [this](const std::size_t LeftDeckNodeIndex, const std::size_t RightDeckNodeIndex) noexcept -> bool {
@@ -189,7 +189,7 @@ void DeckTreeModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>& Sibling
                      });
 }
 
-void DeckTreeModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& ParentDeckNodeIndex) noexcept {
+void DeckForestModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& ParentDeckNodeIndex) noexcept {
     std::vector<std::size_t>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex.has_value() ?
                                                           m_DeckNodesVector.at(ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector :
                                                           m_RootDeckNodeIndexesVector };
@@ -200,7 +200,7 @@ void DeckTreeModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& Pa
     }
 }
 
-void DeckTreeModel::ApplyCurrentSort() {
+void DeckForestModel::ApplyCurrentSort() {
     if (m_SortColumn < static_cast<int>(ColumnEnum::DeckNameColumn) or m_SortColumn > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
         return;
     }
@@ -211,22 +211,22 @@ void DeckTreeModel::ApplyCurrentSort() {
     UpdateSiblingRowIndexes();
 }
 
-void DeckTreeModel::ReplaceAll(std::vector<Application::Domain::Deck::Data::DeckTreeSnapshotNode>&& DeckTreeNodeVector) noexcept {
+void DeckForestModel::ReplaceAll(std::vector<Application::Domain::Deck::Data::DeckForestSnapshotNode>&& DeckForestSnapshotNodeVector) noexcept {
     Support::Runtime::TryCatchWrapper([&]() -> void {
         std::vector<DeckNode> DeckNodesVector;
         std::vector<std::size_t> RootDeckNodeIndexesVector;
         std::unordered_map<std::string, std::size_t> DeckNodeIndexByIdHash;
-        DeckNodesVector.reserve(DeckTreeNodeVector.size());
-        RootDeckNodeIndexesVector.reserve(DeckTreeNodeVector.size());
-        DeckNodeIndexByIdHash.reserve(DeckTreeNodeVector.size());
-        for (Application::Domain::Deck::Data::DeckTreeSnapshotNode& DeckTreeNode : DeckTreeNodeVector) {
+        DeckNodesVector.reserve(DeckForestSnapshotNodeVector.size());
+        RootDeckNodeIndexesVector.reserve(DeckForestSnapshotNodeVector.size());
+        DeckNodeIndexByIdHash.reserve(DeckForestSnapshotNodeVector.size());
+        for (Application::Domain::Deck::Data::DeckForestSnapshotNode& DeckForestSnapshotNode : DeckForestSnapshotNodeVector) {
             const std::size_t DeckNodeIndex{ DeckNodesVector.size() };
-            DeckNodeIndexByIdHash.emplace(DeckTreeNode.m_DeckId, DeckNodeIndex);
-            DeckNodesVector.emplace_back(DeckNode{ std::move(DeckTreeNode), std::nullopt, 0, std::vector<std::size_t>{} });
+            DeckNodeIndexByIdHash.emplace(DeckForestSnapshotNode.m_DeckId, DeckNodeIndex);
+            DeckNodesVector.emplace_back(DeckNode{ std::move(DeckForestSnapshotNode), std::nullopt, 0, std::vector<std::size_t>{} });
         }
         for (std::size_t DeckNodeIndex{ 0 }; DeckNodeIndex < DeckNodesVector.size(); ++DeckNodeIndex) {
             DeckNode& CurrentDeckNode{ DeckNodesVector.at(DeckNodeIndex) };
-            const std::optional<std::string>& ParentIdOptional{ CurrentDeckNode.m_DeckTreeNode.m_ParentDeckIdOptional };
+            const std::optional<std::string>& ParentIdOptional{ CurrentDeckNode.m_DeckForestSnapshotNode.m_ParentDeckIdOptional };
             if (not ParentIdOptional.has_value()) {
                 CurrentDeckNode.m_RowInParentIndex = RootDeckNodeIndexesVector.size();
                 RootDeckNodeIndexesVector.push_back(DeckNodeIndex);

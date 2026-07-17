@@ -8,7 +8,7 @@
 namespace Application::Invalidation {
 
 enum class LibraryInvalidationTargetEnum : std::size_t {
-    DeckTreeSnapshot,
+    DeckForestSnapshot,
     TargetCount
 };
 

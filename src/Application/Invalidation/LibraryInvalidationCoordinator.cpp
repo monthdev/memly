@@ -31,7 +31,7 @@ void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndCurrentSnapshotE
 }
 
 void LibraryInvalidationCoordinator::HandleScheduledInvalidation() noexcept {
-    InvalidateWithRescheduleAndCurrentSnapshotEpoch(LibraryInvalidationTargetEnum::DeckTreeSnapshot);
+    InvalidateWithRescheduleAndCurrentSnapshotEpoch(LibraryInvalidationTargetEnum::DeckForestSnapshot);
 }
 
 void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept {

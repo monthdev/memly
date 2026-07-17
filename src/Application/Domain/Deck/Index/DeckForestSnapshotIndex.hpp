@@ -12,18 +12,18 @@
 
 namespace Application::Domain::Deck::Index {
 
-class DeckTreeSnapshotIndex final {
+class DeckForestSnapshotIndex final {
 public:
-    struct DeckTreeSnapshotNode final {
-        DeckTreeSnapshotNode(std::string&& DeckId,
-                             std::optional<std::string>&& ParentDeckIdOptional,
-                             std::string&& DeckName,
-                             const std::int64_t CreatedAtMillisecondsSinceEpoch,
-                             std::optional<std::int64_t>&& LastUpdatedAtMillisecondsSinceEpochOptional,
-                             const std::uint32_t SelfDueNowCount,
-                             const std::uint32_t SelfByTodayCount,
-                             const std::uint32_t SelfTotalCount,
-                             const std::uint8_t TargetLanguageCode)
+    struct DeckForestSnapshotNode final {
+        DeckForestSnapshotNode(std::string&& DeckId,
+                               std::optional<std::string>&& ParentDeckIdOptional,
+                               std::string&& DeckName,
+                               const std::int64_t CreatedAtMillisecondsSinceEpoch,
+                               std::optional<std::int64_t>&& LastUpdatedAtMillisecondsSinceEpochOptional,
+                               const std::uint32_t SelfDueNowCount,
+                               const std::uint32_t SelfByTodayCount,
+                               const std::uint32_t SelfTotalCount,
+                               const std::uint8_t TargetLanguageCode)
             : m_DeckId{ std::move(DeckId) }
             , m_ParentDeckIdOptional{ std::move(ParentDeckIdOptional) }
             , m_DeckName{ std::move(DeckName) }
@@ -38,10 +38,10 @@ public:
             , m_SubtreeTotalCount{ SelfTotalCount } {
         }
 
-        DeckTreeSnapshotNode(const DeckTreeSnapshotNode&) = delete;
-        DeckTreeSnapshotNode(DeckTreeSnapshotNode&&) noexcept = default;
-        DeckTreeSnapshotNode& operator=(const DeckTreeSnapshotNode&) = delete;
-        DeckTreeSnapshotNode& operator=(DeckTreeSnapshotNode&&) noexcept = default;
+        DeckForestSnapshotNode(const DeckForestSnapshotNode&) = delete;
+        DeckForestSnapshotNode(DeckForestSnapshotNode&&) noexcept = default;
+        DeckForestSnapshotNode& operator=(const DeckForestSnapshotNode&) = delete;
+        DeckForestSnapshotNode& operator=(DeckForestSnapshotNode&&) noexcept = default;
 
         std::string m_DeckId;
         std::optional<std::string> m_ParentDeckIdOptional;
@@ -57,31 +57,31 @@ public:
         std::uint32_t m_SubtreeTotalCount;
     };
 
-    DeckTreeSnapshotIndex() noexcept
-        : m_DeckTreeSnapshotNodeVector{}
+    DeckForestSnapshotIndex() noexcept
+        : m_DeckForestSnapshotNodeVector{}
         , m_RootDeckNodePositionVector{}
         , m_ChildDeckNodePositionVectorByDeckNodePositionVector{}
         , m_DeckNodePositionByDeckIdUnorderedMap{} {
     }
 
-    DeckTreeSnapshotIndex(const DeckTreeSnapshotIndex&) = delete;
-    DeckTreeSnapshotIndex(DeckTreeSnapshotIndex&&) = delete;
-    DeckTreeSnapshotIndex& operator=(const DeckTreeSnapshotIndex&) = delete;
-    DeckTreeSnapshotIndex& operator=(DeckTreeSnapshotIndex&&) = delete;
+    DeckForestSnapshotIndex(const DeckForestSnapshotIndex&) = delete;
+    DeckForestSnapshotIndex(DeckForestSnapshotIndex&&) = delete;
+    DeckForestSnapshotIndex& operator=(const DeckForestSnapshotIndex&) = delete;
+    DeckForestSnapshotIndex& operator=(DeckForestSnapshotIndex&&) = delete;
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const DeckTreeSnapshotNode>> TryGetDeckTreeSnapshotNode(const std::optional<std::string>&) const;
+    [[nodiscard]] std::optional<std::reference_wrapper<const DeckForestSnapshotNode>> TryGetDeckForestSnapshotNode(const std::optional<std::string>&) const;
 
     [[nodiscard]] std::vector<std::string_view> GetSubtreeDeckIds(const std::string&) const;
 
     [[nodiscard]] bool DoesDuplicateSiblingDeckNameExist(const std::optional<std::string>&, const std::string&) const;
     [[nodiscard]] bool WouldMoveDeckBeNoOp(const std::string&, const std::optional<std::string>&) const;
-    [[nodiscard]] bool WouldMoveDeckCreateDeckTreeCycle(const std::string&, const std::optional<std::string>&) const;
+    [[nodiscard]] bool WouldMoveDeckCreateCycle(const std::string&, const std::optional<std::string>&) const;
     [[nodiscard]] bool WouldMoveDeckCreateTargetLanguageMismatch(const std::string&, const std::optional<std::string>&) const;
 
-    void RefreshFromDeckTreeSnapshotNodes(std::vector<DeckTreeSnapshotNode>&&);
+    void RefreshFromDeckForestSnapshotNodes(std::vector<DeckForestSnapshotNode>&&);
 
 private:
-    std::vector<DeckTreeSnapshotNode> m_DeckTreeSnapshotNodeVector;
+    std::vector<DeckForestSnapshotNode> m_DeckForestSnapshotNodeVector;
     std::vector<std::size_t> m_RootDeckNodePositionVector;
     std::vector<std::vector<std::size_t>> m_ChildDeckNodePositionVectorByDeckNodePositionVector;
     std::unordered_map<std::string_view, std::size_t> m_DeckNodePositionByDeckIdUnorderedMap;

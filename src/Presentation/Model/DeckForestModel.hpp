@@ -1,5 +1,5 @@
 #if 0
-// Temporarily disabled during deck tree model refactor.
+// Temporarily disabled during deck forest model refactor.
 #pragma once
 
 #include <qabstractitemmodel.h>
@@ -10,11 +10,11 @@
 #include <optional>
 #include <vector>
 
-#include "Application/Domain/Deck/Data/DeckTreeSnapshotNode.hpp"
+#include "Application/Domain/Deck/Data/DeckForestSnapshotNode.hpp"
 
 namespace Presentation::Model {
 
-class DeckTreeModel final : public QAbstractItemModel {
+class DeckForestModel final : public QAbstractItemModel {
     Q_OBJECT
 
 public:
@@ -40,15 +40,15 @@ public:
         SubtreeTotalCountColumn
     };
 
-    explicit DeckTreeModel(QObject* Parent = nullptr) noexcept
+    explicit DeckForestModel(QObject* Parent = nullptr) noexcept
         : QAbstractItemModel{ Parent }
         , m_SortColumn{ -1 }
         , m_SortOrder{ Qt::AscendingOrder } {
     }
-    DeckTreeModel(const DeckTreeModel&) = delete;
-    DeckTreeModel(DeckTreeModel&&) = delete;
-    DeckTreeModel& operator=(const DeckTreeModel&) = delete;
-    DeckTreeModel& operator=(DeckTreeModel&&) = delete;
+    DeckForestModel(const DeckForestModel&) = delete;
+    DeckForestModel(DeckForestModel&&) = delete;
+    DeckForestModel& operator=(const DeckForestModel&) = delete;
+    DeckForestModel& operator=(DeckForestModel&&) = delete;
 
     [[nodiscard]] QModelIndex index(int, int, const QModelIndex& = QModelIndex{}) const noexcept override;
     [[nodiscard]] QModelIndex parent(const QModelIndex&) const noexcept override;
@@ -58,11 +58,11 @@ public:
     [[nodiscard]] bool hasChildren(const QModelIndex& = QModelIndex{}) const noexcept override;
     void sort(int, Qt::SortOrder = Qt::AscendingOrder) noexcept override;
 
-    void ReplaceAll(std::vector<Application::Domain::Deck::Data::DeckTreeSnapshotNode>&&) noexcept;
+    void ReplaceAll(std::vector<Application::Domain::Deck::Data::DeckForestSnapshotNode>&&) noexcept;
 
 private:
     struct DeckNode {
-        Application::Domain::Deck::Data::DeckTreeSnapshotNode m_DeckTreeNode;
+        Application::Domain::Deck::Data::DeckForestSnapshotNode m_DeckForestSnapshotNode;
         std::optional<std::size_t> m_ParentDeckNodeIndex;
         std::size_t m_RowInParentIndex;
         std::vector<std::size_t> m_ChildDeckNodeIndexesVector;

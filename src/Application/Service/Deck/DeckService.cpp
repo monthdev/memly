@@ -7,15 +7,15 @@
 #include <vector>
 
 #include "Application/Domain/Deck/Constraint/DeckConstraint.hpp"
-#include "Application/Domain/Deck/Index/DeckTreeSnapshotIndex.hpp"
-#include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCache.hpp"
+#include "Application/Domain/Deck/Index/DeckForestSnapshotIndex.hpp"
+#include "Application/IndexCache/Deck/DeckForestSnapshotIndexCache.hpp"
 #include "Infrastructure/Store/Deck/DeckSnapshotStore.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 
 namespace Application::Service::Deck {
 
-[[nodiscard]] Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease DeckService::AcquireDeckTreeSnapshotIndexCacheLease() {
-    return m_DeckTreeSnapshotIndexCache.AcquireLease();
+[[nodiscard]] Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease DeckService::AcquireDeckForestSnapshotIndexCacheLease() {
+    return m_DeckForestSnapshotIndexCache.AcquireLease();
 }
 
 [[nodiscard]] bool DeckService::IsDeckNameLengthValid(const std::string& DeckName) const noexcept {
@@ -42,25 +42,25 @@ void DeckService::DeleteDeck(const std::string& DeckId) {
     m_DeckStore.DeleteDeck(DeckId);
 }
 
-void DeckService::RefreshDeckTreeSnapshotIndexCache(
-    const Application::IndexCache::Deck::DeckTreeSnapshotIndexCache::IndexCacheLease& DeckTreeSnapshotIndexCacheLease,
+void DeckService::RefreshDeckForestSnapshotIndexCache(
+    const Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease& DeckForestSnapshotIndexCacheLease,
     const std::int64_t AsOfMillisecondsSinceEpoch) {
     std::vector<Infrastructure::Store::Deck::DeckSnapshotStore::DeckSnapshotRecord> DeckSnapshotRecordVector{ m_DeckSnapshotStore.ReadDeckSnapshotRecords(
         AsOfMillisecondsSinceEpoch) };
-    std::vector<Application::Domain::Deck::Index::DeckTreeSnapshotIndex::DeckTreeSnapshotNode> DeckTreeSnapshotNodeVector{};
-    DeckTreeSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
+    std::vector<Application::Domain::Deck::Index::DeckForestSnapshotIndex::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
+    DeckForestSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
     for (Infrastructure::Store::Deck::DeckSnapshotStore::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
-        DeckTreeSnapshotNodeVector.emplace_back(std::move(DeckSnapshotRecord.m_DeckId),
-                                                std::move(DeckSnapshotRecord.m_ParentDeckIdOptional),
-                                                std::move(DeckSnapshotRecord.m_DeckName),
-                                                DeckSnapshotRecord.m_CreatedAtMillisecondsSinceEpoch,
-                                                std::move(DeckSnapshotRecord.m_LastUpdatedAtMillisecondsSinceEpochOptional),
-                                                DeckSnapshotRecord.m_SelfDueNowCount,
-                                                DeckSnapshotRecord.m_SelfByTodayCount,
-                                                DeckSnapshotRecord.m_SelfTotalCount,
-                                                DeckSnapshotRecord.m_TargetLanguageCode);
+        DeckForestSnapshotNodeVector.emplace_back(std::move(DeckSnapshotRecord.m_DeckId),
+                                                  std::move(DeckSnapshotRecord.m_ParentDeckIdOptional),
+                                                  std::move(DeckSnapshotRecord.m_DeckName),
+                                                  DeckSnapshotRecord.m_CreatedAtMillisecondsSinceEpoch,
+                                                  std::move(DeckSnapshotRecord.m_LastUpdatedAtMillisecondsSinceEpochOptional),
+                                                  DeckSnapshotRecord.m_SelfDueNowCount,
+                                                  DeckSnapshotRecord.m_SelfByTodayCount,
+                                                  DeckSnapshotRecord.m_SelfTotalCount,
+                                                  DeckSnapshotRecord.m_TargetLanguageCode);
     }
-    m_DeckTreeSnapshotIndexCache.Refresh(DeckTreeSnapshotIndexCacheLease, std::move(DeckTreeSnapshotNodeVector));
+    m_DeckForestSnapshotIndexCache.Refresh(DeckForestSnapshotIndexCacheLease, std::move(DeckForestSnapshotNodeVector));
 }
 
 }

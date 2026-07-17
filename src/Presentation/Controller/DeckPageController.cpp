@@ -8,18 +8,18 @@
 #include <utility>
 #include <vector>
 
-#include "Application/Domain/Deck/Data/DeckTreeSnapshotNode.hpp"
+#include "Application/Domain/Deck/Data/DeckForestSnapshotNode.hpp"
 #include "Application/Service/Deck/DeckService.hpp"
 #include "Support/Runtime/ExceptionBoundary.hpp"
 
 namespace Presentation::Controller {
 
-void DeckPageController::RefreshDeckTreeModel(const std::int64_t AsOfMillisecondsSinceEpoch) noexcept {
+void DeckPageController::RefreshDeckForestModel(const std::int64_t AsOfMillisecondsSinceEpoch) noexcept {
     Support::Runtime::TryCatchWrapper([&]() -> void {
-        std::vector<Application::Domain::Deck::Data::DeckTreeSnapshotNode> DeckTreeNodeVector{
-            m_DeckService.ReadDeckTreeSnapshotNodes(AsOfMillisecondsSinceEpoch)
+        std::vector<Application::Domain::Deck::Data::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{
+            m_DeckService.ReadDeckForestSnapshotNodes(AsOfMillisecondsSinceEpoch)
         };
-        m_DeckTreeModel.ReplaceAll(std::move(DeckTreeNodeVector));
+        m_DeckForestModel.ReplaceAll(std::move(DeckForestSnapshotNodeVector));
     });
 }
 
