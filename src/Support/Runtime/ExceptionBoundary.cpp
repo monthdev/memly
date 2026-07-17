@@ -1,7 +1,10 @@
 #include "Support/Runtime/ExceptionBoundary.hpp"
 
 #include <cstddef>
+#include <exception>
 #include <fstream>
+#include <ios>
+#include <string_view>
 
 #if defined(_WIN32)
 #include <io.h>

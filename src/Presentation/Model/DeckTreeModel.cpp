@@ -2,7 +2,8 @@
 // Temporarily disabled during deck tree model refactor.
 #include "Presentation/Model/DeckTreeModel.hpp"
 
-#include <QString>
+#include <qstring.h>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>

@@ -2,6 +2,8 @@
 
 #include <duckdb.hpp>
 
+#include <source_location>
+
 #include "Support/Runtime/ThrowMemlyException.hpp"
 
 namespace Infrastructure::Database {

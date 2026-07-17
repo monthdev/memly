@@ -1,4 +1,4 @@
-# Memly Coding Style
+# Memly Coding Guide
 
 ## Constructor Parameter and Member Ordering
 
@@ -85,8 +85,8 @@ throw exceptions for programming errors.
 
 Conditions that can fail during correct execution because of external or runtime
 state must not be enforced with assertions. Instead, throw an exception when
-such a failure cannot be recovered from at the current boundary and is not part
-of a typed recoverable result surface.
+such a failure cannot be recovered at the current boundary and is not part of a
+typed recoverable result surface.
 
 Validate user input and other untrusted values at their input boundary before
 converting them into internal state. Downstream code may then assert the
@@ -94,6 +94,21 @@ established invariant instead of repeatedly validating it as a runtime error.
 
 Do not add both an assertion and a runtime error check for the same invariant
 unless they enforce distinct boundaries.
+
+## Database Trust Boundary
+
+Memly assumes that its database is modified only through Memly database control
+paths. External modification and database-file tampering are outside the
+supported runtime contract.
+
+Values read from the database may be assumed to satisfy the schema and the
+application invariants established by Memly write paths. Conditions that can
+fail only because those invariants were violated by incorrect Memly code (or
+external modification of database file) must be enforced with debug assertions
+rather than runtime corruption checks.
+
+This assumption does not apply to database engine failures. Those remain runtime
+errors at the appropriate database boundary.
 
 ## QML Bridge Surface
 
@@ -147,6 +162,12 @@ resource, Qt signal, and method override boundaries where the Qt API requires
 them.
 
 Convert between standard library types and Qt types at the boundary.
+
+## Qt Header Includes
+
+Qt includes must use public physical header paths without a module prefix, such
+as `<qobject.h>`. Do not use forwarding headers such as `<QObject>` or umbrella
+module headers such as `<QtCore>`.
 
 ## Qt Dependency Boundary
 

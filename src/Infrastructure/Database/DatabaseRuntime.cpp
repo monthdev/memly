@@ -1,9 +1,14 @@
 #include "Infrastructure/Database/DatabaseRuntime.hpp"
 
+#include <algorithm>
 #include <array>
+#include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <ranges>
+#include <string>
 #include <vector>
 
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
@@ -25,21 +30,18 @@ void DatabaseRuntime::ApplySchemaMigrations() {
     ThrowOnQueryResultError(*QueryResult);
     QueryResult = m_DatabaseConnection.Query(Infrastructure::Sql::Migration::ReadSchemaMigrationsLogSql());
     ThrowOnQueryResultError(*QueryResult);
-    std::vector<std::size_t> AppliedMigrationVersionVector{};
+    std::vector<std::size_t> AppliedMigrationVersionSequenceVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };
-        AppliedMigrationVersionVector.push_back(QueryResultRow.GetValue<std::uint32_t>(0));
+        AppliedMigrationVersionSequenceVector.push_back(QueryResultRow.GetValue<std::uint32_t>(0));
     }
-    for (std::size_t I{ 0 }; I not_eq AppliedMigrationVersionVector.size(); ++I) {
-        if (AppliedMigrationVersionVector.at(I) not_eq I + 1) {
-            Support::Runtime::ThrowMemlyException("Unexpected applied migration version order");
-        }
-    }
-    std::array<std::reference_wrapper<std::string()>, 1> MigrationSqlFunctionArray{ Infrastructure::Sql::Migration::M01_InitialSchemaSql };
-    if (AppliedMigrationVersionVector.size() > MigrationSqlFunctionArray.size()) {
+    assert(std::ranges::equal(AppliedMigrationVersionSequenceVector,
+                              std::views::iota(std::size_t{ 1 }, AppliedMigrationVersionSequenceVector.size() + std::size_t{ 1 })));
+    const std::array<std::reference_wrapper<std::string()>, 1> MigrationSqlFunctionArray{ Infrastructure::Sql::Migration::M01_InitialSchemaSql };
+    if (AppliedMigrationVersionSequenceVector.size() > MigrationSqlFunctionArray.size()) {
         Support::Runtime::ThrowMemlyException("Unexpected number of applied migrations");
     }
-    for (std::size_t UnappliedMigrationVersionIndex{ AppliedMigrationVersionVector.size() };
+    for (std::size_t UnappliedMigrationVersionIndex{ AppliedMigrationVersionSequenceVector.size() };
          UnappliedMigrationVersionIndex not_eq MigrationSqlFunctionArray.size();
          ++UnappliedMigrationVersionIndex) {
         const std::string& MigrationSql{ std::invoke(MigrationSqlFunctionArray.at(UnappliedMigrationVersionIndex)) };
@@ -52,9 +54,9 @@ void DatabaseRuntime::ApplySchemaMigrations() {
 }
 
 void DatabaseRuntime::SeedTableDefaults() {
-    std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ Infrastructure::Sql::Seed::CreateDefaultFsrs7SchedulerSql,
-                                                                               Infrastructure::Sql::Seed::CreateDefaultFsrs7SettingsSql,
-                                                                               Infrastructure::Sql::Seed::CreateDefaultDeckSettingsSql };
+    const std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ Infrastructure::Sql::Seed::CreateDefaultFsrs7SchedulerSql,
+                                                                                     Infrastructure::Sql::Seed::CreateDefaultFsrs7SettingsSql,
+                                                                                     Infrastructure::Sql::Seed::CreateDefaultDeckSettingsSql };
     for (const std::reference_wrapper<std::string()>& SeedSqlFunction : SeedSqlFunctionArray) {
         std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(std::invoke(SeedSqlFunction)) };
         ThrowOnQueryResultError(*QueryResult);

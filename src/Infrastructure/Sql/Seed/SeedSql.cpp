@@ -1,5 +1,7 @@
 #include "SeedSql.hpp"
 
+#include <string>
+
 #include "Support/Runtime/QtApp/QtAppResourceBytes.hpp"
 
 namespace Infrastructure::Sql::Seed {

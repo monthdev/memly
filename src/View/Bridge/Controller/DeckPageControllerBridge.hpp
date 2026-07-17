@@ -2,11 +2,10 @@
 // Temporarily disabled during deck page controller bridge refactor.
 #pragma once
 
-#include <QtQmlIntegration/qqmlintegration.h>
-
-#include <QObject>
-#include <QString>
-#include <QtTypes>
+#include <qobject.h>
+#include <qqmlintegration.h>
+#include <qstring.h>
+#include <qtypes.h>
 
 #include "Bootstrap/RuntimeContext.hpp"
 #include "Presentation/Controller/DeckPageController.hpp"

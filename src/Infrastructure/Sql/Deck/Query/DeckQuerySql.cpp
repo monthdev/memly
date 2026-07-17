@@ -1,5 +1,7 @@
 #include "DeckQuerySql.hpp"
 
+#include <string>
+
 #include "Support/Runtime/QtApp/QtAppResourceBytes.hpp"
 
 namespace Infrastructure::Sql::Deck::Query {

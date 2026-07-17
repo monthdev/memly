@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
 

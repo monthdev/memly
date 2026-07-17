@@ -6,6 +6,8 @@
 #include "Bootstrap/RuntimeContext.hpp"
 
 #include <cassert>
+#include <memory>
+#include <string>
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"

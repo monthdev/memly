@@ -1,11 +1,14 @@
 #include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
 
-#include <QDateTime>
+#include <qdatetime.h>
+#include <qtmetamacros.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <optional>
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
+#include "Application/Invalidation/LibraryInvalidationTarget.hpp"
 #include "Infrastructure/Store/Library/LibraryClockStore.hpp"
 #include "Support/Runtime/ExceptionBoundary.hpp"
 

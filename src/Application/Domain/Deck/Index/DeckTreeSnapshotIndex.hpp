@@ -89,7 +89,7 @@ private:
     [[nodiscard]] std::size_t GetDeckNodePosition(const std::string&) const;
     [[nodiscard]] const std::vector<std::size_t>& GetChildDeckNodePositionVector(const std::optional<std::string>&) const;
 
-    void AccumulateSubtreeCounts(std::size_t);
+    void AccumulateSubtreeCounts();
 };
 
 }

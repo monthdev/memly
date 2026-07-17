@@ -2,8 +2,9 @@
 // Temporarily disabled during deck tree model refactor.
 #pragma once
 
-#include <QAbstractItemModel>
-#include <QVariant>
+#include <qabstractitemmodel.h>
+#include <qvariant.h>
+
 #include <cstddef>
 #include <functional>
 #include <optional>

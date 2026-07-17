@@ -1,7 +1,9 @@
 #include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
 
-#include <QDir>
-#include <QStandardPaths>
+#include <qdir.h>
+#include <qstandardpaths.h>
+
+#include <string>
 
 namespace Support::Runtime::QtApp {
 namespace {

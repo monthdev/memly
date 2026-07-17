@@ -2,7 +2,8 @@
 // Temporarily disabled during deck page controller refactor.
 #pragma once
 
-#include <QObject>
+#include <qobject.h>
+
 #include <cstdint>
 #include <expected>
 #include <optional>

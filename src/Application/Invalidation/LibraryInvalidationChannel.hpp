@@ -1,7 +1,8 @@
 #pragma once
 
-#include <QDateTime>
-#include <QObject>
+#include <qdatetime.h>
+#include <qobject.h>
+
 #include <cstdint>
 #include <functional>
 #include <type_traits>

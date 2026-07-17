@@ -2,13 +2,12 @@
 // Temporarily disabled during deck tree proxy model refactor.
 #pragma once
 
-#include <QtQmlIntegration/qqmlintegration.h>
-
-#include <QByteArray>
-#include <QHash>
-#include <QIdentityProxyModel>
-#include <QModelIndex>
-#include <QVariant>
+#include <qabstractitemmodel.h>
+#include <qbytearray.h>
+#include <qhash.h>
+#include <qidentityproxymodel.h>
+#include <qqmlintegration.h>
+#include <qvariant.h>
 
 #include "Presentation/Model/DeckTreeModel.hpp"
 

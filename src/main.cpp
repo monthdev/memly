@@ -1,5 +1,9 @@
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include <qcoreapplication.h>
+#include <qguiapplication.h>
+#include <qnamespace.h>
+#include <qobject.h>
+#include <qqmlapplicationengine.h>
+#include <qtresource.h>
 
 #include "Bootstrap/RuntimeContext.hpp"
 #include "Support/Runtime/ExceptionBoundary.hpp"
@@ -8,7 +12,7 @@
 int main(int argc, char* argv[]) noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(Sql);
-        QGuiApplication App{ argc, argv };
+        const QGuiApplication App{ argc, argv };
         constexpr const char* const AppName{ "Memly" };
         constexpr const char* const OrgName{ "MemlyProject" };
         App.setApplicationName(AppName);

@@ -8,6 +8,7 @@
 #include <limits>
 #include <source_location>
 #include <string_view>
+#include <system_error>
 
 namespace Support::Runtime {
 void MemlyException::ConstructErrorMessage(const std::string_view ErrorMessage, const std::source_location& SourceLocation) noexcept {

@@ -65,21 +65,33 @@ void DeckTreeSnapshotIndex::RefreshFromDeckTreeSnapshotNodes(std::vector<DeckTre
             m_RootDeckNodePositionVector.push_back(DeckNodePosition);
             continue;
         }
+        /// \note `GetDeckNodePosition()` asserts that the parent deck ID exists while constructing the adjacency list.
         const std::size_t ParentDeckNodePosition{ GetDeckNodePosition(CurrentDeckTreeSnapshotNode.m_ParentDeckIdOptional.value()) };
         m_ChildDeckNodePositionVectorByDeckNodePositionVector.at(ParentDeckNodePosition).push_back(DeckNodePosition);
     }
-    for (const std::size_t RootDeckNodePosition : m_RootDeckNodePositionVector) { AccumulateSubtreeCounts(RootDeckNodePosition); }
+    AccumulateSubtreeCounts();
 }
 
-void DeckTreeSnapshotIndex::AccumulateSubtreeCounts(const std::size_t DeckNodePosition) {
-    DeckTreeSnapshotNode& CurrentDeckTreeSnapshotNode{ m_DeckTreeSnapshotNodeVector.at(DeckNodePosition) };
-    const std::vector<std::size_t>& ChildDeckNodePositionVector{ m_ChildDeckNodePositionVectorByDeckNodePositionVector.at(DeckNodePosition) };
-    for (const std::size_t ChildDeckNodePosition : ChildDeckNodePositionVector) {
-        AccumulateSubtreeCounts(ChildDeckNodePosition);
-        const DeckTreeSnapshotNode& ChildDeckTreeSnapshotNode{ m_DeckTreeSnapshotNodeVector.at(ChildDeckNodePosition) };
-        CurrentDeckTreeSnapshotNode.m_SubtreeDueNowCount += ChildDeckTreeSnapshotNode.m_SubtreeDueNowCount;
-        CurrentDeckTreeSnapshotNode.m_SubtreeByTodayCount += ChildDeckTreeSnapshotNode.m_SubtreeByTodayCount;
-        CurrentDeckTreeSnapshotNode.m_SubtreeTotalCount += ChildDeckTreeSnapshotNode.m_SubtreeTotalCount;
+void DeckTreeSnapshotIndex::AccumulateSubtreeCounts() {
+    std::vector<std::size_t> ParentBeforeChildDeckNodePositionVector{ m_RootDeckNodePositionVector };
+    ParentBeforeChildDeckNodePositionVector.reserve(m_DeckTreeSnapshotNodeVector.size());
+    for (std::size_t DeckNodePositionIndex{ 0 }; DeckNodePositionIndex not_eq ParentBeforeChildDeckNodePositionVector.size(); ++DeckNodePositionIndex) {
+        ParentBeforeChildDeckNodePositionVector.append_range(
+            m_ChildDeckNodePositionVectorByDeckNodePositionVector.at(ParentBeforeChildDeckNodePositionVector.at(DeckNodePositionIndex)));
+    }
+    /// \note Reachability from root detects cycles under the one-parent invariant.
+    assert(ParentBeforeChildDeckNodePositionVector.size() == m_DeckTreeSnapshotNodeVector.size());
+    for (std::size_t RemainingDeckNodePositionCount{ ParentBeforeChildDeckNodePositionVector.size() }; RemainingDeckNodePositionCount > 0;
+         --RemainingDeckNodePositionCount) {
+        const std::size_t DeckNodePosition{ ParentBeforeChildDeckNodePositionVector.at(RemainingDeckNodePositionCount - 1) };
+        DeckTreeSnapshotNode& CurrentDeckTreeSnapshotNode{ m_DeckTreeSnapshotNodeVector.at(DeckNodePosition) };
+        const std::vector<std::size_t>& ChildDeckNodePositionVector{ m_ChildDeckNodePositionVectorByDeckNodePositionVector.at(DeckNodePosition) };
+        for (const std::size_t ChildDeckNodePosition : ChildDeckNodePositionVector) {
+            const DeckTreeSnapshotNode& ChildDeckTreeSnapshotNode{ m_DeckTreeSnapshotNodeVector.at(ChildDeckNodePosition) };
+            CurrentDeckTreeSnapshotNode.m_SubtreeDueNowCount += ChildDeckTreeSnapshotNode.m_SubtreeDueNowCount;
+            CurrentDeckTreeSnapshotNode.m_SubtreeByTodayCount += ChildDeckTreeSnapshotNode.m_SubtreeByTodayCount;
+            CurrentDeckTreeSnapshotNode.m_SubtreeTotalCount += ChildDeckTreeSnapshotNode.m_SubtreeTotalCount;
+        }
     }
 }
 

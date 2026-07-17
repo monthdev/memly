@@ -1,5 +1,6 @@
 #include "Application/Domain/Language/LanguageTranslator.hpp"
 
+#include <array>
 #include <cstddef>
 
 namespace Application::Domain::Language {

@@ -8,6 +8,7 @@
 
 #include "Application/Domain/Deck/Constraint/DeckConstraint.hpp"
 #include "Application/Domain/Deck/Index/DeckTreeSnapshotIndex.hpp"
+#include "Application/IndexCache/Deck/DeckTreeSnapshotIndexCache.hpp"
 #include "Infrastructure/Store/Deck/DeckSnapshotStore.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 

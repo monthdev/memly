@@ -1,12 +1,15 @@
 #include "Support/Runtime/QtApp/QtAppResourceBytes.hpp"
 
-#include <QByteArray>
-#include <QResource>
+#include <qbytearray.h>
+#include <qresource.h>
+
 #include <cassert>
+#include <cstddef>
+#include <string>
 
 namespace Support::Runtime::QtApp {
 [[nodiscard]] std::string ReadQtAppResourceBytes(const char* const QtResourcePath) {
-    QResource Resource{ QtResourcePath };
+    const QResource Resource{ QtResourcePath };
     assert(Resource.isValid());
     const QByteArray ResourceBytes{ Resource.uncompressedData() };
     assert(not ResourceBytes.isNull());

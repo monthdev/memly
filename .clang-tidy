@@ -4,7 +4,7 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   clang-analyzer-*,
   concurrency-*,
-  misc-use-anonymous-namespace,
+  misc-*,
   modernize-return-braced-init-list,
   readability-implicit-bool-conversion,
   readability-isolate-declaration,
@@ -15,6 +15,10 @@ CheckOptions:
   - {
       key: bugprone-unused-local-non-trivial-variable.IncludeTypes,
       value: ".*",
+    }
+  - {
+      key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic,
+      value: "true",
     }
   - {
       key: readability-operators-representation.BinaryOperators,

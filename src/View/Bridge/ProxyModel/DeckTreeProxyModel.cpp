@@ -2,7 +2,7 @@
 // Temporarily disabled during deck tree proxy model refactor.
 #include "View/Bridge/ProxyModel/DeckTreeProxyModel.hpp"
 
-#include <QString>
+#include <qstring.h>
 
 #include "Support/Runtime/ExceptionBoundary.hpp"
 

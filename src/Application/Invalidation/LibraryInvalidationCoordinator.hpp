@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QObject>
-#include <QTimer>
+#include <qobject.h>
+#include <qtimer.h>
 
 #include "Application/Invalidation/LibraryInvalidationTarget.hpp"
 
