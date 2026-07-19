@@ -3,12 +3,12 @@
 #include <array>
 #include <cassert>
 #include <concepts>
-#include <cstddef>
+#include <cstdint>
 #include <utility>
 
 namespace Application::Invalidation {
 
-enum class LibraryInvalidationTargetEnum : std::size_t {
+enum class LibraryInvalidationTargetEnum : std::uint8_t {
     DeckForestSnapshot,
     TargetCount
 };
@@ -26,7 +26,7 @@ public:
     }
 
     explicit LibraryInvalidationTargetBitset(const LibraryInvalidationTargetBitset&) = delete;
-    explicit LibraryInvalidationTargetBitset(LibraryInvalidationTargetBitset&&) noexcept = default;
+    explicit LibraryInvalidationTargetBitset(LibraryInvalidationTargetBitset&&) noexcept = delete;
     auto operator=(const LibraryInvalidationTargetBitset&) -> LibraryInvalidationTargetBitset& = delete;
     auto operator=(LibraryInvalidationTargetBitset&&) -> LibraryInvalidationTargetBitset& = delete;
 

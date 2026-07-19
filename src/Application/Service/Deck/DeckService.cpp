@@ -55,7 +55,7 @@ void DeckService::RefreshDeckForestSnapshotIndexCache(
                                                   std::move(DeckSnapshotRecord.m_ParentDeckIdOptional),
                                                   std::move(DeckSnapshotRecord.m_DeckName),
                                                   DeckSnapshotRecord.m_CreatedAtMillisecondsSinceEpoch,
-                                                  std::move(DeckSnapshotRecord.m_LastUpdatedAtMillisecondsSinceEpochOptional),
+                                                  DeckSnapshotRecord.m_LastUpdatedAtMillisecondsSinceEpochOptional,
                                                   DeckSnapshotRecord.m_SelfDueNowCount,
                                                   DeckSnapshotRecord.m_SelfByTodayCount,
                                                   DeckSnapshotRecord.m_SelfTotalCount,

@@ -25,7 +25,7 @@ struct DeckForestSnapshotNode final {
                                     std::optional<std::string>&& ParentDeckIdOptional,
                                     std::string&& DeckName,
                                     const std::int64_t CreatedAtMillisecondsSinceEpoch,
-                                    std::optional<std::int64_t>&& LastUpdatedAtMillisecondsSinceEpochOptional,
+                                    const std::optional<std::int64_t>& LastUpdatedAtMillisecondsSinceEpochOptional,
                                     const std::uint32_t SelfDueNowCount,
                                     const std::uint32_t SelfByTodayCount,
                                     const std::uint32_t SelfTotalCount,
@@ -34,7 +34,7 @@ struct DeckForestSnapshotNode final {
         , m_ParentDeckIdOptional{ std::move(ParentDeckIdOptional) }
         , m_DeckName{ std::move(DeckName) }
         , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
-        , m_LastUpdatedAtMillisecondsSinceEpochOptional{ std::move(LastUpdatedAtMillisecondsSinceEpochOptional) }
+        , m_LastUpdatedAtMillisecondsSinceEpochOptional{ LastUpdatedAtMillisecondsSinceEpochOptional }
         , m_SelfDueNowCount{ SelfDueNowCount }
         , m_SelfByTodayCount{ SelfByTodayCount }
         , m_SelfTotalCount{ SelfTotalCount }

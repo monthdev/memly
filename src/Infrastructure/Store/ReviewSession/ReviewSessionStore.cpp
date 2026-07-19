@@ -90,7 +90,8 @@ u_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
     if (RecoverableReviewSessionMutationError.has_value()) {
         return std::unexpected{ RecoverableReviewSessionMutationError.value() };
     }
-    const std::string NewCustomReviewSessionId{ (*QueryResult->begin()).GetValue<std::string>(0) };
+    // TODO: The fact that this can't be marked const to allow automatic move at the end suggests separate helper method
+    std::string NewCustomReviewSessionId{ (*QueryResult->begin()).GetValue<std::string>(0) };
     for (const Application::Domain::ReviewSession::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
         RecoverableReviewSessionMutationError = CreateCustomReviewSessionDeckSelection(
             NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
