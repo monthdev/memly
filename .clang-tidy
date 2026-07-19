@@ -10,7 +10,9 @@ Checks: >
   readability-implicit-bool-conversion,
   readability-isolate-declaration,
   readability-braces-around-statements,
-  readability-operators-representation
+  readability-operators-representation,
+  custom-always-explicit-constructor,
+  custom-no-default-member-initializer
 WarningsAsErrors: "*"
 CheckOptions:
   - {
@@ -29,3 +31,27 @@ CheckOptions:
       key: readability-operators-representation.OverloadedOperators,
       value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
     }
+CustomChecks:
+  - Name: always-explicit-constructor
+    Query: |
+      match cxxConstructorDecl(
+        unless(isImplicit()),
+        unless(isTemplateInstantiation()),
+        unless(isExplicit()),
+        unless(isExpansionInSystemHeader())
+      ).bind("constructor")
+    Diagnostic:
+      - BindName: constructor
+        Message: constructor must be declared explicit
+        Level: Warning
+  - Name: no-default-member-initializer
+    Query: |
+      match fieldDecl(
+        hasInClassInitializer(anything()),
+        unless(isImplicit()),
+        unless(isExpansionInSystemHeader())
+      ).bind("field")
+    Diagnostic:
+      - BindName: field
+        Message: default member initializers are disallowed; initialize this member in each constructor initializer list
+        Level: Warning

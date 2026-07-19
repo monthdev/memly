@@ -28,6 +28,23 @@ find_program(
   NO_DEFAULT_PATH REQUIRED
 )
 
+set(MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy")
+file(
+  GENERATE
+  OUTPUT "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
+  CONTENT "#!/bin/sh\nexec \"${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}\" --experimental-custom-checks \"$@\"\n"
+          FILE_PERMISSIONS
+          OWNER_READ
+          OWNER_WRITE
+          OWNER_EXECUTE
+          GROUP_READ
+          GROUP_EXECUTE
+          WORLD_READ
+          WORLD_EXECUTE
+          NEWLINE_STYLE
+          UNIX
+)
+
 set(MEMLY_QT_MIN_VERSION 6.11)
 
 find_package(Qt6 ${MEMLY_QT_MIN_VERSION} REQUIRED COMPONENTS Core Network Qml Quick)
@@ -483,11 +500,12 @@ add_custom_command(
   OUTPUT "${MEMLY_CLANG_TIDY_STAMP}"
   COMMAND
     "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -clang-tidy-binary
-    "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
+    "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
     "^${CMAKE_SOURCE_DIR}/(src|test)/" -quiet "^${CMAKE_SOURCE_DIR}/(src|test)/.*\\.cpp$"
   COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_CLANG_TIDY_STAMP}"
   DEPENDS "${CMAKE_SOURCE_DIR}/.clang-tidy" "${CMAKE_BINARY_DIR}/compile_commands.json"
-          "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" ${MEMLY_CXX_SOURCE_FILES}
+          "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
+          "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" ${MEMLY_CXX_SOURCE_FILES}
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMENT "Run clang-tidy on Memly C++ translation units"
   VERBATIM
