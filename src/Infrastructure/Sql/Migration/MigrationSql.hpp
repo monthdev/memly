@@ -4,11 +4,11 @@
 
 namespace Infrastructure::Sql::Migration {
 
-[[nodiscard]] std::string M00_SchemaMigrationsLogSql();
+[[nodiscard]] auto M00_SchemaMigrationsLogSql() -> std::string;
 
-[[nodiscard]] std::string M01_InitialSchemaSql();
+[[nodiscard]] auto M01_InitialSchemaSql() -> std::string;
 
-[[nodiscard]] std::string CreateSchemaMigrationsLogEntrySql();
+[[nodiscard]] auto CreateSchemaMigrationsLogEntrySql() -> std::string;
 
-[[nodiscard]] std::string ReadSchemaMigrationsLogSql();
+[[nodiscard]] auto ReadSchemaMigrationsLogSql() -> std::string;
 }

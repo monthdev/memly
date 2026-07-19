@@ -4,6 +4,6 @@
 
 namespace Application::Domain::Deck::Constraint {
 
-[[nodiscard]] bool IsDeckNameLengthValid(const std::string&) noexcept;
+[[nodiscard]] auto IsDeckNameLengthValid(const std::string&) noexcept -> bool;
 
 }

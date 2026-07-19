@@ -2,6 +2,7 @@
 
 #include <qobject.h>
 #include <qtimer.h>
+#include <qtmetamacros.h>
 
 #include "Application/Invalidation/LibraryInvalidationTarget.hpp"
 
@@ -15,11 +16,15 @@ class LibraryInvalidationChannel;
 
 class LibraryInvalidationCoordinator final : public QObject {
     Q_OBJECT
+private:
+    LibraryInvalidationChannel& m_LibraryInvalidationChannel;
+    Infrastructure::Store::Library::LibraryClockStore& m_LibraryClockStore;
+    QTimer m_LibraryInvalidationQTimer;
 
 public:
-    LibraryInvalidationCoordinator(LibraryInvalidationChannel& LibraryInvalidationChannel,
-                                   Infrastructure::Store::Library::LibraryClockStore& LibraryClockStore,
-                                   QObject* Parent = nullptr)
+    explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel& LibraryInvalidationChannel,
+                                            Infrastructure::Store::Library::LibraryClockStore& LibraryClockStore,
+                                            QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
         , m_LibraryClockStore{ LibraryClockStore }
@@ -29,20 +34,16 @@ public:
         ScheduleNextLibraryInvalidation();
     }
 
-    LibraryInvalidationCoordinator(const LibraryInvalidationCoordinator&) = delete;
-    LibraryInvalidationCoordinator(LibraryInvalidationCoordinator&&) = delete;
-    LibraryInvalidationCoordinator& operator=(const LibraryInvalidationCoordinator&) = delete;
-    LibraryInvalidationCoordinator& operator=(LibraryInvalidationCoordinator&&) = delete;
+    explicit LibraryInvalidationCoordinator(const LibraryInvalidationCoordinator&) = delete;
+    explicit LibraryInvalidationCoordinator(LibraryInvalidationCoordinator&&) = delete;
+    auto operator=(const LibraryInvalidationCoordinator&) -> LibraryInvalidationCoordinator& = delete;
+    auto operator=(LibraryInvalidationCoordinator&&) -> LibraryInvalidationCoordinator& = delete;
 
     void Invalidate(const LibraryInvalidationTargetBitset&) noexcept;
     void InvalidateWithReschedule(const LibraryInvalidationTargetBitset&) noexcept;
     void InvalidateWithRescheduleAndCurrentSnapshotEpoch(const LibraryInvalidationTargetBitset&) noexcept;
 
 private:
-    LibraryInvalidationChannel& m_LibraryInvalidationChannel;
-    Infrastructure::Store::Library::LibraryClockStore& m_LibraryClockStore;
-    QTimer m_LibraryInvalidationQTimer;
-
     void HandleScheduledInvalidation() noexcept;
     void ScheduleNextLibraryInvalidation() noexcept;
 };

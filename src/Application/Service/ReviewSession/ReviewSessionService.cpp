@@ -12,19 +12,19 @@
 
 namespace Application::Service::ReviewSession {
 
-[[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey) {
+[[nodiscard]] auto ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey)
+    -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
             return m_ReviewSessionStore.CreateOrReadExistingDefaultReviewSession(RootDeckId, ReviewSessionDefinitionKey);
         });
 }
 
-[[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionService::CreateOrReadExistingCustomReviewSession(
+[[nodiscard]] auto ReviewSessionService::CreateOrReadExistingCustomReviewSession(
     const std::string& ReviewSessionName,
     const std::string& ReviewSessionDefinitionKey,
-    const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
+    const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
+    -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
             return m_ReviewSessionStore.CreateOrReadExistingCustomReviewSession(
@@ -32,8 +32,8 @@ ReviewSessionService::CreateOrReadExistingCustomReviewSession(
         });
 }
 
-[[nodiscard]] std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionService::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName) {
+[[nodiscard]] auto ReviewSessionService::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName)
+    -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
         const std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{
             m_ReviewSessionStore.RenameReviewSession(ReviewSessionId, ReviewSessionName)
@@ -45,37 +45,37 @@ ReviewSessionService::RenameReviewSession(const std::string& ReviewSessionId, co
     });
 }
 
-[[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionService::EditReviewSessionToDefault(const std::string& CurrentReviewSessionId,
-                                                 const std::string& RootDeckId,
-                                                 const std::string& ReviewSessionDefinitionKey) {
+[[nodiscard]] auto ReviewSessionService::EditReviewSessionToDefault(const std::string& CurrentReviewSessionId,
+                                                                    const std::string& RootDeckId,
+                                                                    const std::string& ReviewSessionDefinitionKey)
+    -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
             return m_ReviewSessionStore.EditReviewSessionToDefault(CurrentReviewSessionId, RootDeckId, ReviewSessionDefinitionKey);
         });
 }
 
-[[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionService::EditReviewSessionToCustom(
+[[nodiscard]] auto ReviewSessionService::EditReviewSessionToCustom(
     const std::string& CurrentReviewSessionId,
     const std::string& ReviewSessionDefinitionKey,
-    const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector) {
+    const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
+    -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
             return m_ReviewSessionStore.EditReviewSessionToCustom(CurrentReviewSessionId, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
         });
 }
 
-[[nodiscard]] std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionService::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId) {
+[[nodiscard]] auto ReviewSessionService::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId)
+    -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
         m_ReviewSessionStore.UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(ReviewSessionId);
         return {};
     });
 }
 
-[[nodiscard]] std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-ReviewSessionService::DeleteReviewSession(const std::string& ReviewSessionId) {
+[[nodiscard]] auto ReviewSessionService::DeleteReviewSession(const std::string& ReviewSessionId)
+    -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
         m_ReviewSessionStore.DeleteReviewSession(ReviewSessionId);
         return {};

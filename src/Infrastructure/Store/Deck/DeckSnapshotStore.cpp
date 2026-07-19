@@ -9,10 +9,11 @@
 #include <vector>
 
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
+#include "Infrastructure/Store/Deck/DeckSnapshotRecord.hpp"
 
 namespace Infrastructure::Store::Deck {
 
-[[nodiscard]] std::vector<DeckSnapshotStore::DeckSnapshotRecord> DeckSnapshotStore::ReadDeckSnapshotRecords(const std::int64_t AsOfMillisecondsSinceEpoch) {
+[[nodiscard]] auto DeckSnapshotStore::ReadDeckSnapshotRecords(const std::int64_t AsOfMillisecondsSinceEpoch) -> std::vector<DeckSnapshotRecord> {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadDeckSnapshotRecordsPreparedStatement->Execute(AsOfMillisecondsSinceEpoch) };
     Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     std::vector<DeckSnapshotRecord> DeckSnapshotRecordVector{};

@@ -78,11 +78,28 @@ enum class TargetLanguage : std::uint8_t {
 struct TargetLanguageInfo {
     TargetLanguage m_Language;
     std::string_view m_GoogleTranslateCode;
-    std::string_view m_GoogleTtsLangCode;
-    std::string_view m_GoogleTtsTld;
-    std::string_view m_GuiName;
+    std::string_view m_GoogleTextToSpeechLanguageCode;
+    std::string_view m_GoogleTextToSpeechTopLevelDomain;
+    std::string_view m_DisplayName; // TODO: Should struct really hold the gui display name?
+
+    explicit constexpr TargetLanguageInfo(const TargetLanguage Language,
+                                          const std::string_view GoogleTranslateCode,
+                                          const std::string_view GoogleTextToSpeechLanguageCode,
+                                          const std::string_view GoogleTextToSpeechTopLevelDomain,
+                                          const std::string_view DisplayName) noexcept
+        : m_Language{ Language }
+        , m_GoogleTranslateCode{ GoogleTranslateCode }
+        , m_GoogleTextToSpeechLanguageCode{ GoogleTextToSpeechLanguageCode }
+        , m_GoogleTextToSpeechTopLevelDomain{ GoogleTextToSpeechTopLevelDomain }
+        , m_DisplayName{ DisplayName } {
+    }
+
+    explicit TargetLanguageInfo(const TargetLanguageInfo&) = delete;
+    explicit TargetLanguageInfo(TargetLanguageInfo&&) noexcept = default;
+    auto operator=(const TargetLanguageInfo&) -> TargetLanguageInfo& = delete;
+    auto operator=(TargetLanguageInfo&&) -> TargetLanguageInfo& = delete;
 };
 
-[[nodiscard]] const std::array<TargetLanguageInfo, 67>& GetSupportedTargetLanguages() noexcept;
-[[nodiscard]] const TargetLanguageInfo& GetTargetLanguageInfo(TargetLanguage);
+[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, 67>&;
+[[nodiscard]] auto GetTargetLanguageInfo(TargetLanguage) -> const TargetLanguageInfo&;
 }

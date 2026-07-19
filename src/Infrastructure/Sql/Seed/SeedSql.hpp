@@ -4,9 +4,9 @@
 
 namespace Infrastructure::Sql::Seed {
 
-[[nodiscard]] std::string CreateDefaultFsrs7SchedulerSql();
+[[nodiscard]] auto CreateDefaultFsrs7SchedulerSql() -> std::string;
 
-[[nodiscard]] std::string CreateDefaultFsrs7SettingsSql();
+[[nodiscard]] auto CreateDefaultFsrs7SettingsSql() -> std::string;
 
-[[nodiscard]] std::string CreateDefaultDeckSettingsSql();
+[[nodiscard]] auto CreateDefaultDeckSettingsSql() -> std::string;
 }

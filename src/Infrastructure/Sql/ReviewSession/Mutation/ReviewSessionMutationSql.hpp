@@ -4,21 +4,21 @@
 
 namespace Infrastructure::Sql::ReviewSession::Mutation {
 
-[[nodiscard]] std::string CreateCustomReviewSessionSql();
+[[nodiscard]] auto CreateCustomReviewSessionSql() -> std::string;
 
-[[nodiscard]] std::string CreateDefaultReviewSessionSql();
+[[nodiscard]] auto CreateDefaultReviewSessionSql() -> std::string;
 
-[[nodiscard]] std::string CreateCustomReviewSessionDeckSelectionSql();
+[[nodiscard]] auto CreateCustomReviewSessionDeckSelectionSql() -> std::string;
 
-[[nodiscard]] std::string RenameReviewSessionSql();
+[[nodiscard]] auto RenameReviewSessionSql() -> std::string;
 
-[[nodiscard]] std::string UpdateReviewSessionToDefaultSql();
+[[nodiscard]] auto UpdateReviewSessionToDefaultSql() -> std::string;
 
-[[nodiscard]] std::string UpdateReviewSessionToCustomSql();
+[[nodiscard]] auto UpdateReviewSessionToCustomSql() -> std::string;
 
-[[nodiscard]] std::string UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql();
+[[nodiscard]] auto UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql() -> std::string;
 
-[[nodiscard]] std::string DeleteCustomReviewSessionDeckSelectionsSql();
+[[nodiscard]] auto DeleteCustomReviewSessionDeckSelectionsSql() -> std::string;
 
-[[nodiscard]] std::string DeleteReviewSessionSql();
+[[nodiscard]] auto DeleteReviewSessionSql() -> std::string;
 }

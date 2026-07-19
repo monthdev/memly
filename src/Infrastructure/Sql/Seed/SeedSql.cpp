@@ -6,15 +6,15 @@
 
 namespace Infrastructure::Sql::Seed {
 
-[[nodiscard]] std::string CreateDefaultFsrs7SchedulerSql() {
+[[nodiscard]] auto CreateDefaultFsrs7SchedulerSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Seed/Statement/CreateDefaultFsrs7Scheduler.sql");
 }
 
-[[nodiscard]] std::string CreateDefaultFsrs7SettingsSql() {
+[[nodiscard]] auto CreateDefaultFsrs7SettingsSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Seed/Statement/CreateDefaultFsrs7Settings.sql");
 }
 
-[[nodiscard]] std::string CreateDefaultDeckSettingsSql() {
+[[nodiscard]] auto CreateDefaultDeckSettingsSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Seed/Statement/CreateDefaultDeckSettings.sql");
 }
 }

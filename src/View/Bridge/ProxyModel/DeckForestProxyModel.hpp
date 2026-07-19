@@ -22,8 +22,8 @@ public:
         : QIdentityProxyModel{ Parent } {
         setSourceModel(&DeckForestModel);
     }
-    DeckForestProxyModel(const DeckForestProxyModel&) = delete;
-    DeckForestProxyModel(DeckForestProxyModel&&) = delete;
+    explicit DeckForestProxyModel(const DeckForestProxyModel&) = delete;
+    explicit DeckForestProxyModel(DeckForestProxyModel&&) = delete;
     DeckForestProxyModel& operator=(const DeckForestProxyModel&) = delete;
     DeckForestProxyModel& operator=(DeckForestProxyModel&&) = delete;
 

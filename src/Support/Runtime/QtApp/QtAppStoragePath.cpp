@@ -7,25 +7,25 @@
 
 namespace Support::Runtime::QtApp {
 namespace {
-[[nodiscard]] std::string a_EnsureDirectory(const QString& Directory) {
+[[nodiscard]] auto a_EnsureDirectory(const QString& Directory) -> std::string {
     QDir().mkpath(Directory);
     return Directory.toStdString();
 }
 
-[[nodiscard]] std::string a_BaseDirectoryPath() {
+[[nodiscard]] auto a_BaseDirectoryPath() -> std::string {
     return a_EnsureDirectory(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 }
 }
 
-[[nodiscard]] std::string AudioDirectoryPath() {
+[[nodiscard]] auto AudioDirectoryPath() -> std::string {
     return a_EnsureDirectory(QString::fromStdString(a_BaseDirectoryPath() + "/Audio"));
 }
 
-[[nodiscard]] std::string ExceptionLogFilePath() {
+[[nodiscard]] auto ExceptionLogFilePath() -> std::string {
     return a_BaseDirectoryPath() + "/exception.log";
 }
 
-[[nodiscard]] std::string DatabaseFilePath() {
+[[nodiscard]] auto DatabaseFilePath() -> std::string {
     return a_BaseDirectoryPath() + "/memly.duckdb";
 }
 }

@@ -6,40 +6,40 @@
 
 namespace Infrastructure::Sql::ReviewSession::Mutation {
 
-[[nodiscard]] std::string CreateCustomReviewSessionSql() {
+[[nodiscard]] auto CreateCustomReviewSessionSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/CreateCustomReviewSession.sql");
 }
 
-[[nodiscard]] std::string CreateDefaultReviewSessionSql() {
+[[nodiscard]] auto CreateDefaultReviewSessionSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/CreateDefaultReviewSession.sql");
 }
 
-[[nodiscard]] std::string CreateCustomReviewSessionDeckSelectionSql() {
+[[nodiscard]] auto CreateCustomReviewSessionDeckSelectionSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/CreateCustomReviewSessionDeckSelection.sql");
 }
 
-[[nodiscard]] std::string RenameReviewSessionSql() {
+[[nodiscard]] auto RenameReviewSessionSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/RenameReviewSession.sql");
 }
 
-[[nodiscard]] std::string UpdateReviewSessionToDefaultSql() {
+[[nodiscard]] auto UpdateReviewSessionToDefaultSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/UpdateReviewSessionToDefault.sql");
 }
 
-[[nodiscard]] std::string UpdateReviewSessionToCustomSql() {
+[[nodiscard]] auto UpdateReviewSessionToCustomSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/UpdateReviewSessionToCustom.sql");
 }
 
-[[nodiscard]] std::string UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql() {
+[[nodiscard]] auto UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(
         ":/Sql/ReviewSession/Mutation/Statement/UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch.sql");
 }
 
-[[nodiscard]] std::string DeleteCustomReviewSessionDeckSelectionsSql() {
+[[nodiscard]] auto DeleteCustomReviewSessionDeckSelectionsSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/DeleteCustomReviewSessionDeckSelections.sql");
 }
 
-[[nodiscard]] std::string DeleteReviewSessionSql() {
+[[nodiscard]] auto DeleteReviewSessionSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/DeleteReviewSession.sql");
 }
 }

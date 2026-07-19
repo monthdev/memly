@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <utility>
 
@@ -13,45 +14,32 @@ enum class LibraryInvalidationTargetEnum : std::size_t {
 };
 
 class LibraryInvalidationTargetBitset final {
+private:
+    std::array<bool, std::to_underlying(LibraryInvalidationTargetEnum::TargetCount)> m_TargetArray;
+
 public:
-    LibraryInvalidationTargetBitset(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept
+    template <typename... LibraryInvalidationTargetType>
+        requires(sizeof...(LibraryInvalidationTargetType) > 0 and (std::same_as<LibraryInvalidationTargetType, LibraryInvalidationTargetEnum> and ...))
+    explicit LibraryInvalidationTargetBitset(const LibraryInvalidationTargetType... LibraryInvalidationTargets) noexcept
         : m_TargetArray{} {
-        Set(LibraryInvalidationTarget);
+        (Set(LibraryInvalidationTargets), ...);
     }
 
-    LibraryInvalidationTargetBitset(const LibraryInvalidationTargetBitset&) = delete;
-    LibraryInvalidationTargetBitset(LibraryInvalidationTargetBitset&&) noexcept = default;
-    LibraryInvalidationTargetBitset& operator=(const LibraryInvalidationTargetBitset&) = delete;
-    LibraryInvalidationTargetBitset& operator=(LibraryInvalidationTargetBitset&&) = delete;
+    explicit LibraryInvalidationTargetBitset(const LibraryInvalidationTargetBitset&) = delete;
+    explicit LibraryInvalidationTargetBitset(LibraryInvalidationTargetBitset&&) noexcept = default;
+    auto operator=(const LibraryInvalidationTargetBitset&) -> LibraryInvalidationTargetBitset& = delete;
+    auto operator=(LibraryInvalidationTargetBitset&&) -> LibraryInvalidationTargetBitset& = delete;
 
-    [[nodiscard]] bool Contains(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) const noexcept {
+    [[nodiscard]] auto Contains(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) const noexcept -> bool {
         assert(std::to_underlying(LibraryInvalidationTarget) < m_TargetArray.size());
         return m_TargetArray[std::to_underlying(LibraryInvalidationTarget)];
     }
 
 private:
-    friend LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetEnum, LibraryInvalidationTargetEnum) noexcept;
-    friend LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetBitset&&, LibraryInvalidationTargetEnum) noexcept;
-
     void Set(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept {
         assert(std::to_underlying(LibraryInvalidationTarget) < m_TargetArray.size());
         m_TargetArray[std::to_underlying(LibraryInvalidationTarget)] = true;
     }
-
-    std::array<bool, std::to_underlying(LibraryInvalidationTargetEnum::TargetCount)> m_TargetArray{};
 };
-
-[[nodiscard]] inline LibraryInvalidationTargetBitset operator|(const LibraryInvalidationTargetEnum LeftLibraryInvalidationTarget,
-                                                               const LibraryInvalidationTargetEnum RightLibraryInvalidationTarget) noexcept {
-    LibraryInvalidationTargetBitset LibraryInvalidationTargetBitset{ LeftLibraryInvalidationTarget };
-    LibraryInvalidationTargetBitset.Set(RightLibraryInvalidationTarget);
-    return LibraryInvalidationTargetBitset;
-}
-
-[[nodiscard]] inline LibraryInvalidationTargetBitset operator|(LibraryInvalidationTargetBitset&& LibraryInvalidationTargetBitset,
-                                                               const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept {
-    LibraryInvalidationTargetBitset.Set(LibraryInvalidationTarget);
-    return std::move(LibraryInvalidationTargetBitset);
-}
 
 }

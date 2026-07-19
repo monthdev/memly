@@ -7,14 +7,14 @@ namespace Application::IndexCache::Deck {
 
 class DeckForestSnapshotIndexCache final : public Application::IndexCache::IndexCacheBase<DeckForestSnapshotIndexCacheDefinition> {
 public:
-    DeckForestSnapshotIndexCache() noexcept
+    explicit DeckForestSnapshotIndexCache() noexcept
         : Application::IndexCache::IndexCacheBase<DeckForestSnapshotIndexCacheDefinition>{} {
     }
 
-    DeckForestSnapshotIndexCache(const DeckForestSnapshotIndexCache&) = delete;
-    DeckForestSnapshotIndexCache(DeckForestSnapshotIndexCache&&) = delete;
-    DeckForestSnapshotIndexCache& operator=(const DeckForestSnapshotIndexCache&) = delete;
-    DeckForestSnapshotIndexCache& operator=(DeckForestSnapshotIndexCache&&) = delete;
+    explicit DeckForestSnapshotIndexCache(const DeckForestSnapshotIndexCache&) = delete;
+    explicit DeckForestSnapshotIndexCache(DeckForestSnapshotIndexCache&&) = delete;
+    auto operator=(const DeckForestSnapshotIndexCache&) -> DeckForestSnapshotIndexCache& = delete;
+    auto operator=(DeckForestSnapshotIndexCache&&) -> DeckForestSnapshotIndexCache& = delete;
 };
 
 }

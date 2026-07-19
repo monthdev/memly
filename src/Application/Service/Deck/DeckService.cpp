@@ -7,18 +7,19 @@
 #include <vector>
 
 #include "Application/Domain/Deck/Constraint/DeckConstraint.hpp"
-#include "Application/Domain/Deck/Index/DeckForestSnapshotIndex.hpp"
+#include "Application/Domain/Deck/Index/DeckForestSnapshotNode.hpp"
 #include "Application/IndexCache/Deck/DeckForestSnapshotIndexCache.hpp"
+#include "Infrastructure/Store/Deck/DeckSnapshotRecord.hpp"
 #include "Infrastructure/Store/Deck/DeckSnapshotStore.hpp"
 #include "Infrastructure/Store/Deck/DeckStore.hpp"
 
 namespace Application::Service::Deck {
 
-[[nodiscard]] Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease DeckService::AcquireDeckForestSnapshotIndexCacheLease() {
+[[nodiscard]] auto DeckService::AcquireDeckForestSnapshotIndexCacheLease() -> Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease {
     return m_DeckForestSnapshotIndexCache.AcquireLease();
 }
 
-[[nodiscard]] bool DeckService::IsDeckNameLengthValid(const std::string& DeckName) const noexcept {
+[[nodiscard]] auto DeckService::IsDeckNameLengthValid(const std::string& DeckName) const noexcept -> bool {
     return Application::Domain::Deck::Constraint::IsDeckNameLengthValid(DeckName);
 }
 
@@ -45,11 +46,11 @@ void DeckService::DeleteDeck(const std::string& DeckId) {
 void DeckService::RefreshDeckForestSnapshotIndexCache(
     const Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease& DeckForestSnapshotIndexCacheLease,
     const std::int64_t AsOfMillisecondsSinceEpoch) {
-    std::vector<Infrastructure::Store::Deck::DeckSnapshotStore::DeckSnapshotRecord> DeckSnapshotRecordVector{ m_DeckSnapshotStore.ReadDeckSnapshotRecords(
+    std::vector<Infrastructure::Store::Deck::DeckSnapshotRecord> DeckSnapshotRecordVector{ m_DeckSnapshotStore.ReadDeckSnapshotRecords(
         AsOfMillisecondsSinceEpoch) };
-    std::vector<Application::Domain::Deck::Index::DeckForestSnapshotIndex::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
+    std::vector<Application::Domain::Deck::Index::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
     DeckForestSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
-    for (Infrastructure::Store::Deck::DeckSnapshotStore::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
+    for (Infrastructure::Store::Deck::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
         DeckForestSnapshotNodeVector.emplace_back(std::move(DeckSnapshotRecord.m_DeckId),
                                                   std::move(DeckSnapshotRecord.m_ParentDeckIdOptional),
                                                   std::move(DeckSnapshotRecord.m_DeckName),

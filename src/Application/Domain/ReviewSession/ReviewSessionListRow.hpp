@@ -8,11 +8,17 @@
 namespace Application::Domain::ReviewSession {
 
 struct ReviewSessionListRow {
-    ReviewSessionListRow(std::string&& ReviewSessionId,
-                         std::string&& ReviewSessionName,
-                         const std::int64_t CreatedAtMillisecondsSinceEpoch,
-                         std::optional<std::int64_t>&& LastUpdatedAtMillisecondsSinceEpoch,
-                         std::optional<std::int64_t>&& LastCardReviewAtMillisecondsSinceEpoch)
+    std::string m_ReviewSessionId;
+    std::string m_ReviewSessionName;
+    std::int64_t m_CreatedAtMillisecondsSinceEpoch;
+    std::optional<std::int64_t> m_LastUpdatedAtMillisecondsSinceEpoch;
+    std::optional<std::int64_t> m_LastCardReviewAtMillisecondsSinceEpoch;
+
+    explicit ReviewSessionListRow(std::string&& ReviewSessionId,
+                                  std::string&& ReviewSessionName,
+                                  const std::int64_t CreatedAtMillisecondsSinceEpoch,
+                                  std::optional<std::int64_t>&& LastUpdatedAtMillisecondsSinceEpoch,
+                                  std::optional<std::int64_t>&& LastCardReviewAtMillisecondsSinceEpoch)
         : m_ReviewSessionId{ std::move(ReviewSessionId) }
         , m_ReviewSessionName{ std::move(ReviewSessionName) }
         , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
@@ -20,16 +26,10 @@ struct ReviewSessionListRow {
         , m_LastCardReviewAtMillisecondsSinceEpoch{ std::move(LastCardReviewAtMillisecondsSinceEpoch) } {
     }
 
-    ReviewSessionListRow(const ReviewSessionListRow&) = delete;
-    ReviewSessionListRow(ReviewSessionListRow&&) noexcept = default;
-    ReviewSessionListRow& operator=(const ReviewSessionListRow&) = delete;
-    ReviewSessionListRow& operator=(ReviewSessionListRow&&) noexcept = default;
-
-    std::string m_ReviewSessionId;
-    std::string m_ReviewSessionName;
-    std::int64_t m_CreatedAtMillisecondsSinceEpoch;
-    std::optional<std::int64_t> m_LastUpdatedAtMillisecondsSinceEpoch;
-    std::optional<std::int64_t> m_LastCardReviewAtMillisecondsSinceEpoch;
+    explicit ReviewSessionListRow(const ReviewSessionListRow&) = delete;
+    explicit ReviewSessionListRow(ReviewSessionListRow&&) noexcept = default;
+    auto operator=(const ReviewSessionListRow&) -> ReviewSessionListRow& = delete;
+    auto operator=(ReviewSessionListRow&&) -> ReviewSessionListRow& = delete;
 };
 
 }

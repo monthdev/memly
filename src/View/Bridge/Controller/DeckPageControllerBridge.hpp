@@ -18,14 +18,18 @@ class DeckPageControllerBridge : public QObject {
     Q_PROPERTY(View::Bridge::ProxyModel::DeckForestProxyModel* deckForestModel READ GetDeckForestProxyModel CONSTANT)
     QML_NAMED_ELEMENT(DeckPageController)
 
+private:
+    Presentation::Controller::DeckPageController m_DeckPageController;
+    View::Bridge::ProxyModel::DeckForestProxyModel m_DeckForestProxyModel;
+
 public:
     explicit DeckPageControllerBridge(QObject* Parent = nullptr)
         : QObject{ Parent }
         , m_DeckPageController{ Bootstrap::RuntimeContext::GetRequiredLibraryInvalidationChannel(), Bootstrap::RuntimeContext::GetRequiredDeckService() }
         , m_DeckForestProxyModel{ *m_DeckPageController.GetDeckForestModel(), this } {
     }
-    DeckPageControllerBridge(const DeckPageControllerBridge&) = delete;
-    DeckPageControllerBridge(DeckPageControllerBridge&&) = delete;
+    explicit DeckPageControllerBridge(const DeckPageControllerBridge&) = delete;
+    explicit DeckPageControllerBridge(DeckPageControllerBridge&&) = delete;
     DeckPageControllerBridge& operator=(const DeckPageControllerBridge&) = delete;
     DeckPageControllerBridge& operator=(DeckPageControllerBridge&&) = delete;
 
@@ -36,10 +40,6 @@ public:
     [[nodiscard]] Q_INVOKABLE QString MoveDeck(const QString&, const QString& = QString{}) noexcept;
     [[nodiscard]] Q_INVOKABLE QString RenameDeck(const QString&, const QString&) noexcept;
     [[nodiscard]] Q_INVOKABLE QString DeleteDeck(const QString&) noexcept;
-
-private:
-    Presentation::Controller::DeckPageController m_DeckPageController;
-    View::Bridge::ProxyModel::DeckForestProxyModel m_DeckForestProxyModel;
 };
 
 }

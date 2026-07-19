@@ -13,6 +13,15 @@
 namespace Infrastructure::Store::Deck {
 
 class DeckStore final {
+private:
+    std::unique_ptr<duckdb::PreparedStatement> m_CreateRootDeckPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_CreateChildDeckPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_MoveDeckPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_RenameDeckPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckCardReviewsPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckCardsPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckPreparedStatement;
+
 public:
     explicit DeckStore(duckdb::Connection& DatabaseConnection)
         : m_CreateRootDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::CreateRootDeckSql()) }
@@ -31,25 +40,16 @@ public:
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
     }
 
-    DeckStore(const DeckStore&) = delete;
-    DeckStore(DeckStore&&) = delete;
-    DeckStore& operator=(const DeckStore&) = delete;
-    DeckStore& operator=(DeckStore&&) = delete;
+    explicit DeckStore(const DeckStore&) = delete;
+    explicit DeckStore(DeckStore&&) = delete;
+    auto operator=(const DeckStore&) -> DeckStore& = delete;
+    auto operator=(DeckStore&&) -> DeckStore& = delete;
 
     void CreateRootDeck(const std::string&, std::uint8_t);
     void CreateChildDeck(const std::string&, const std::string&);
     void MoveDeck(const std::string&, const std::optional<std::string>&);
     void RenameDeck(const std::string&, const std::string&);
     void DeleteDeck(const std::string&);
-
-private:
-    std::unique_ptr<duckdb::PreparedStatement> m_CreateRootDeckPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_CreateChildDeckPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_MoveDeckPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_RenameDeckPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckCardReviewsPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckCardsPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_DeleteDeckPreparedStatement;
 };
 
 }

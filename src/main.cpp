@@ -9,7 +9,7 @@
 #include "Support/Runtime/ExceptionBoundary.hpp"
 #include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
 
-int main(int argc, char* argv[]) noexcept {
+auto main(int argc, char** argv) noexcept -> int {
     return Support::Runtime::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(Sql);
         const QGuiApplication App{ argc, argv };

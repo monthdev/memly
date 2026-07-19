@@ -9,6 +9,11 @@
 namespace Infrastructure::Database {
 
 class DatabaseRuntime final {
+private:
+    duckdb::DuckDB m_Database;
+    duckdb::Connection m_DatabaseConnection;
+    TransactionRunner m_TransactionRunner;
+
 public:
     explicit DatabaseRuntime(const std::string& DatabaseFilePath)
         : m_Database{ DatabaseFilePath }
@@ -17,16 +22,16 @@ public:
         BootstrapDatabase();
     }
 
-    DatabaseRuntime(const DatabaseRuntime&) = delete;
-    DatabaseRuntime(DatabaseRuntime&&) = delete;
-    DatabaseRuntime& operator=(const DatabaseRuntime&) = delete;
-    DatabaseRuntime& operator=(DatabaseRuntime&&) = delete;
+    explicit DatabaseRuntime(const DatabaseRuntime&) = delete;
+    explicit DatabaseRuntime(DatabaseRuntime&&) = delete;
+    auto operator=(const DatabaseRuntime&) -> DatabaseRuntime& = delete;
+    auto operator=(DatabaseRuntime&&) -> DatabaseRuntime& = delete;
 
-    [[nodiscard]] duckdb::Connection& GetDatabaseConnection() noexcept {
+    [[nodiscard]] auto GetDatabaseConnection() noexcept -> duckdb::Connection& {
         return m_DatabaseConnection;
     }
 
-    [[nodiscard]] TransactionRunner& GetTransactionRunner() noexcept {
+    [[nodiscard]] auto GetTransactionRunner() noexcept -> TransactionRunner& {
         return m_TransactionRunner;
     }
 
@@ -34,10 +39,6 @@ private:
     void BootstrapDatabase();
     void ApplySchemaMigrations();
     void SeedTableDefaults();
-
-    duckdb::DuckDB m_Database;
-    duckdb::Connection m_DatabaseConnection;
-    TransactionRunner m_TransactionRunner;
 };
 
 }

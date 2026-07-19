@@ -3,9 +3,9 @@
 #include <string>
 
 namespace Support::Runtime::QtApp {
-[[nodiscard]] std::string AudioDirectoryPath();
+[[nodiscard]] auto AudioDirectoryPath() -> std::string;
 
-[[nodiscard]] std::string ExceptionLogFilePath();
+[[nodiscard]] auto ExceptionLogFilePath() -> std::string;
 
-[[nodiscard]] std::string DatabaseFilePath();
+[[nodiscard]] auto DatabaseFilePath() -> std::string;
 }

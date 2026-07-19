@@ -5,15 +5,15 @@
 
 namespace Application::Domain::Text::Data {
 
-[[nodiscard]] HumanText HumanText::FromPersisted(std::string&& NormalizedText, std::string&& NormalizedCaseFoldedText) noexcept {
+[[nodiscard]] auto HumanText::FromPersisted(std::string&& NormalizedText, std::string&& NormalizedCaseFoldedText) noexcept -> HumanText {
     return HumanText{ std::move(NormalizedText), std::move(NormalizedCaseFoldedText) };
 }
 
-[[nodiscard]] const std::string& HumanText::GetNormalizedStdString() const noexcept {
+[[nodiscard]] auto HumanText::GetNormalizedStdString() const noexcept -> const std::string& {
     return m_NormalizedText;
 }
 
-[[nodiscard]] const std::string& HumanText::GetNormalizedCaseFoldedStdString() const noexcept {
+[[nodiscard]] auto HumanText::GetNormalizedCaseFoldedStdString() const noexcept -> const std::string& {
     return m_NormalizedCaseFoldedText;
 }
 

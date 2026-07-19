@@ -6,15 +6,15 @@
 
 namespace Infrastructure::Sql::ReviewSession::Query {
 
-[[nodiscard]] std::string ReadReviewSessionListRowsSql() {
+[[nodiscard]] auto ReadReviewSessionListRowsSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadReviewSessionListRows.sql");
 }
 
-[[nodiscard]] std::string ReadDefaultReviewSessionIdByRootDeckIdSql() {
+[[nodiscard]] auto ReadDefaultReviewSessionIdByRootDeckIdSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadDefaultReviewSessionIdByRootDeckId.sql");
 }
 
-[[nodiscard]] std::string ReadReviewSessionIdByReviewSessionDefinitionKeySql() {
+[[nodiscard]] auto ReadReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadReviewSessionIdByReviewSessionDefinitionKey.sql");
 }
 }

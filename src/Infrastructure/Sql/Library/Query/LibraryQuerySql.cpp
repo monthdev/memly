@@ -6,7 +6,7 @@
 
 namespace Infrastructure::Sql::Library::Query {
 
-[[nodiscard]] std::string ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql() {
+[[nodiscard]] auto ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Library/Query/Statement/ReadNextLibraryInvalidationAtMillisecondsSinceEpoch.sql");
 }
 }

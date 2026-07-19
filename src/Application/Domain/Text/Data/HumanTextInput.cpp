@@ -21,7 +21,7 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
     }
 }
 
-[[nodiscard]] icu::UnicodeString a_NormalizeText(const icu::UnicodeString& UnicodeString) {
+[[nodiscard]] auto a_NormalizeText(const icu::UnicodeString& UnicodeString) -> icu::UnicodeString {
     UErrorCode ErrorCode{ U_ZERO_ERROR };
     const icu::Normalizer2* NormalizerPointer{ icu::Normalizer2::getNFCInstance(ErrorCode) };
     a_ThrowOnIcuError(ErrorCode);
@@ -33,11 +33,11 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
 
 }
 
-[[nodiscard]] HumanTextInput HumanTextInput::FromInput(const std::string& Text) {
+[[nodiscard]] auto HumanTextInput::FromInput(const std::string& Text) -> HumanTextInput {
     return HumanTextInput{ a_NormalizeText(icu::UnicodeString::fromUTF8(Text)) };
 }
 
-[[nodiscard]] std::size_t HumanTextInput::ComputeGraphemeClusterLength() const {
+[[nodiscard]] auto HumanTextInput::ComputeGraphemeClusterLength() const -> std::size_t {
     thread_local std::unique_ptr<icu::BreakIterator> s_BreakIteratorUniquePointer{ []() -> std::unique_ptr<icu::BreakIterator> {
         UErrorCode ErrorCode{ U_ZERO_ERROR };
         std::unique_ptr<icu::BreakIterator> BreakIteratorUniquePointer{ icu::BreakIterator::createCharacterInstance(icu::Locale::getRoot(), ErrorCode) };
@@ -52,13 +52,13 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
     return GraphemeClusterLength;
 }
 
-[[nodiscard]] std::string HumanTextInput::ToNormalizedStdString() const {
+[[nodiscard]] auto HumanTextInput::ToNormalizedStdString() const -> std::string {
     std::string Text{};
     m_NormalizedUnicodeString.toUTF8String(Text);
     return Text;
 }
 
-[[nodiscard]] std::string HumanTextInput::ToNormalizedCaseFoldedStdString() && {
+[[nodiscard]] auto HumanTextInput::ToNormalizedCaseFoldedStdString() && -> std::string {
     std::string Text{};
     m_NormalizedUnicodeString.foldCase().toUTF8String(Text);
     return Text;

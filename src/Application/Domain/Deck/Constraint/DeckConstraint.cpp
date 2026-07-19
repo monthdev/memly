@@ -12,7 +12,7 @@ constexpr std::size_t u_DeckNameMaximumLength{ 40 };
 
 }
 
-[[nodiscard]] bool IsDeckNameLengthValid(const std::string& DeckName) noexcept {
+[[nodiscard]] auto IsDeckNameLengthValid(const std::string& DeckName) noexcept -> bool {
     assert(not DeckName.empty());
     return DeckName.size() <= u_DeckNameMaximumLength;
 }

@@ -12,6 +12,9 @@
 namespace Infrastructure::Store::Library {
 
 class LibraryClockStore final {
+private:
+    std::unique_ptr<duckdb::PreparedStatement> m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
+
 public:
     explicit LibraryClockStore(duckdb::Connection& DatabaseConnection)
         : m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
@@ -19,15 +22,12 @@ public:
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement);
     }
 
-    LibraryClockStore(const LibraryClockStore&) = delete;
-    LibraryClockStore(LibraryClockStore&&) = delete;
-    LibraryClockStore& operator=(const LibraryClockStore&) = delete;
-    LibraryClockStore& operator=(LibraryClockStore&&) = delete;
+    explicit LibraryClockStore(const LibraryClockStore&) = delete;
+    explicit LibraryClockStore(LibraryClockStore&&) = delete;
+    auto operator=(const LibraryClockStore&) -> LibraryClockStore& = delete;
+    auto operator=(LibraryClockStore&&) -> LibraryClockStore& = delete;
 
-    [[nodiscard]] std::optional<std::int64_t> ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(std::int64_t);
-
-private:
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
+    [[nodiscard]] auto ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(std::int64_t) -> std::optional<std::int64_t>;
 };
 
 }

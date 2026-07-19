@@ -13,27 +13,56 @@ namespace Infrastructure::Database {
 class TransactionRunner final {
 private:
     template <typename>
-    struct IsStdExpectedType : std::false_type {};
+    struct IsStdExpectedType : std::false_type {
+        explicit constexpr IsStdExpectedType() noexcept
+            : std::false_type{} {
+        }
+
+        explicit IsStdExpectedType(const IsStdExpectedType&) = delete;
+        explicit IsStdExpectedType(IsStdExpectedType&&) = delete;
+        auto operator=(const IsStdExpectedType&) -> IsStdExpectedType& = delete;
+        auto operator=(IsStdExpectedType&&) -> IsStdExpectedType& = delete;
+    };
 
     template <typename SuccessType, typename ErrorType>
-    struct IsStdExpectedType<std::expected<SuccessType, ErrorType>> : std::true_type {};
+    struct IsStdExpectedType<std::expected<SuccessType, ErrorType>> : std::true_type {
+        explicit constexpr IsStdExpectedType() noexcept
+            : std::true_type{} {
+        }
+
+        explicit IsStdExpectedType(const IsStdExpectedType&) = delete;
+        explicit IsStdExpectedType(IsStdExpectedType&&) = delete;
+        auto operator=(const IsStdExpectedType&) -> IsStdExpectedType& = delete;
+        auto operator=(IsStdExpectedType&&) -> IsStdExpectedType& = delete;
+    };
 
     template <typename>
-    struct AlwaysFalseType : std::false_type {};
+    struct AlwaysFalseType : std::false_type {
+        explicit constexpr AlwaysFalseType() noexcept
+            : std::false_type{} {
+        }
+
+        explicit AlwaysFalseType(const AlwaysFalseType&) = delete;
+        explicit AlwaysFalseType(AlwaysFalseType&&) = delete;
+        auto operator=(const AlwaysFalseType&) -> AlwaysFalseType& = delete;
+        auto operator=(AlwaysFalseType&&) -> AlwaysFalseType& = delete;
+    };
+
+    duckdb::Connection& m_DatabaseConnection;
 
 public:
     explicit TransactionRunner(duckdb::Connection& DatabaseConnection) noexcept
         : m_DatabaseConnection{ DatabaseConnection } {
     }
 
-    TransactionRunner(const TransactionRunner&) = delete;
-    TransactionRunner(TransactionRunner&&) = delete;
-    TransactionRunner& operator=(const TransactionRunner&) = delete;
-    TransactionRunner& operator=(TransactionRunner&&) = delete;
+    explicit TransactionRunner(const TransactionRunner&) = delete;
+    explicit TransactionRunner(TransactionRunner&&) = delete;
+    auto operator=(const TransactionRunner&) -> TransactionRunner& = delete;
+    auto operator=(TransactionRunner&&) -> TransactionRunner& = delete;
 
     template <typename ServiceMethodType>
         requires std::invocable<ServiceMethodType&&>
-    [[nodiscard]] std::invoke_result_t<ServiceMethodType&&> TransactionWrapper(ServiceMethodType&& ServiceMethod) {
+    [[nodiscard]] auto TransactionWrapper(ServiceMethodType&& ServiceMethod) -> std::invoke_result_t<ServiceMethodType&&> {
         m_DatabaseConnection.BeginTransaction();
         try {
             if constexpr (std::is_void_v<std::invoke_result_t<ServiceMethodType&&>>) {
@@ -56,9 +85,6 @@ public:
             throw;
         }
     }
-
-private:
-    duckdb::Connection& m_DatabaseConnection;
 };
 
 }

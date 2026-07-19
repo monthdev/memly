@@ -8,11 +8,26 @@ match the ordering found in `RuntimeContext`.
 See \ref RuntimeContext.hpp "RuntimeContext.hpp" and \ref RuntimeContext.cpp
 "RuntimeContext.cpp".
 
-## Constructor Member Construction
+## Constructor Base And Member Construction
 
-Constructor member construction must use brace-initialized construction in the
-initializer list. Class members must not be initialized anywhere else but the
-initializer list.
+Every non-deleted, non-defaulted constructor must explicitly brace-initialize
+every direct base class and every non-static data member in its initializer
+list. A most-derived constructor must also explicitly brace-initialize every
+virtual base class.
+
+Initializer lists must follow the actual initialization order: virtual base
+classes first, direct base classes in base-specifier order next, and non-static
+data members in declaration order last.
+
+Explicitly defaulted copy and move constructors are exempt because `= default`
+cannot be combined with an initializer list and delegates memberwise
+construction to the language.
+
+Default member initializers are disallowed. An explicitly defaulted default
+constructor may only be used when the class has no direct base classes or
+non-static data members.
+
+Delegating constructors are disallowed.
 
 ## Variable Initialization
 
@@ -25,6 +40,11 @@ Lambda init-captures must use brace initialization.
 Constructors must always be declared and implemented in the header even when the
 implementation is `= default`.
 
+Default constructors must not be declared `= delete` outside
+`Support::SpecialMemberPolicy::NonInstantiableMixin`. Non-instantiable types
+must rely on the inherited policy instead of redeclaring the deleted default
+constructor.
+
 Destructors must not be declared.
 
 Destructors are expected to be default behavior because ownership must be
@@ -32,6 +52,21 @@ managed by RAII containers and member objects.
 
 Parameters must only be named where methods are implemented, not where methods
 are declared.
+
+## Class Declaration Ordering
+
+The body of every class and struct must begin with class-level Qt metadata
+macros when applicable followed by all friend declarations.
+
+Classes with private nested types or private data members must use a `private:`
+section as their first access section. Nested types required to declare data
+members must appear first, followed by the data members in their required
+declaration order which determines the construction order of non-static data
+members. This data-member-first ordering applies to structs as well as classes.
+
+Constructor declarations must immediately follow the data-member block under
+their intended `private:`, `protected:`, or `public:` access. All remaining
+class or struct declarations must follow the constructors.
 
 ## Parameter Passing
 
@@ -51,8 +86,10 @@ exception specifications, constraints, and Qt metadata macros.
 Class and data-time object struct declarations must use `final` and
 `[[nodiscard]]` where they apply.
 
-Constructors and conversion operators must use `explicit` where implicit
-conversion is not part of the intended API.
+Every constructor must use `explicit`, including default, multi-parameter, copy,
+and move constructors.
+
+Conversion operators are disallowed.
 
 Methods and free functions must use `[[nodiscard]]`, `[[noreturn]]`,
 `constexpr`, `consteval`, `inline`, `static`, `virtual`, `override`, `final`,

@@ -8,11 +8,11 @@ namespace Application::IndexCache {
 template <typename IndexObjectType, typename IndexRefreshDataObjectType, void (IndexObjectType::*RefreshIndexMethod)(IndexRefreshDataObjectType&&)>
 class IndexCacheDefinition {
 public:
-    IndexCacheDefinition() = delete;
-    IndexCacheDefinition(const IndexCacheDefinition&) = delete;
-    IndexCacheDefinition(IndexCacheDefinition&&) = delete;
-    IndexCacheDefinition& operator=(const IndexCacheDefinition&) = delete;
-    IndexCacheDefinition& operator=(IndexCacheDefinition&&) = delete;
+    explicit IndexCacheDefinition() = delete;
+    explicit IndexCacheDefinition(const IndexCacheDefinition&) = delete;
+    explicit IndexCacheDefinition(IndexCacheDefinition&&) = delete;
+    auto operator=(const IndexCacheDefinition&) -> IndexCacheDefinition& = delete;
+    auto operator=(IndexCacheDefinition&&) -> IndexCacheDefinition& = delete;
 
     using IndexType = IndexObjectType;
     using IndexRefreshDataType = IndexRefreshDataObjectType;

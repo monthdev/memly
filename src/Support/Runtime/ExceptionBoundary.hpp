@@ -13,7 +13,7 @@ void LogException(const std::string_view) noexcept;
 
 template <typename FunctionType>
     requires std::invocable<FunctionType&&>
-std::invoke_result_t<FunctionType&&> TryCatchWrapper(FunctionType&& Function) noexcept {
+auto TryCatchWrapper(FunctionType&& Function) noexcept -> std::invoke_result_t<FunctionType&&> {
     try {
         return std::invoke(std::forward<FunctionType>(Function));
     } catch (const std::exception& Exception) {

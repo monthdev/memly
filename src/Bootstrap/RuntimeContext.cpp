@@ -64,22 +64,22 @@ void RuntimeContext::Initialize(const std::string& DatabaseFilePath) {
         std::make_unique<Application::Service::ReviewSession::ReviewSessionService>(s_DatabaseRuntime->GetTransactionRunner(), *s_ReviewSessionStore);
 }
 
-[[nodiscard]] Application::Invalidation::LibraryInvalidationChannel& RuntimeContext::GetRequiredLibraryInvalidationChannel() noexcept {
+[[nodiscard]] auto RuntimeContext::GetRequiredLibraryInvalidationChannel() noexcept -> Application::Invalidation::LibraryInvalidationChannel& {
     assert(s_LibraryInvalidationChannel not_eq nullptr);
     return *s_LibraryInvalidationChannel;
 }
 
-[[nodiscard]] Application::Service::Deck::DeckService& RuntimeContext::GetRequiredDeckService() noexcept {
+[[nodiscard]] auto RuntimeContext::GetRequiredDeckService() noexcept -> Application::Service::Deck::DeckService& {
     assert(s_DeckService not_eq nullptr);
     return *s_DeckService;
 }
 
-[[nodiscard]] Application::Service::ReviewSession::ReviewSessionListService& RuntimeContext::GetRequiredReviewSessionListService() noexcept {
+[[nodiscard]] auto RuntimeContext::GetRequiredReviewSessionListService() noexcept -> Application::Service::ReviewSession::ReviewSessionListService& {
     assert(s_ReviewSessionListService not_eq nullptr);
     return *s_ReviewSessionListService;
 }
 
-[[nodiscard]] Application::Service::ReviewSession::ReviewSessionService& RuntimeContext::GetRequiredReviewSessionService() noexcept {
+[[nodiscard]] auto RuntimeContext::GetRequiredReviewSessionService() noexcept -> Application::Service::ReviewSession::ReviewSessionService& {
     assert(s_ReviewSessionService not_eq nullptr);
     return *s_ReviewSessionService;
 }

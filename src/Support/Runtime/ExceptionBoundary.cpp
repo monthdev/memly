@@ -20,7 +20,7 @@
 
 namespace Support::Runtime {
 namespace {
-[[nodiscard]] std::ptrdiff_t a_WriteStdErrBytes(const char* const Bytes, const std::size_t ByteCount) noexcept {
+[[nodiscard]] auto a_WriteStdErrBytes(const char* const Bytes, const std::size_t ByteCount) noexcept -> std::ptrdiff_t {
 #if defined(_WIN32)
     return ::_write(::_fileno(stderr), Bytes, static_cast<unsigned int>(std::min(ByteCount, static_cast<std::size_t>(std::numeric_limits<int>::max()))));
 #else

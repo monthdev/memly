@@ -21,6 +21,10 @@ namespace Presentation::Controller {
 class DeckPageController final : public QObject {
     Q_OBJECT
 
+private:
+    Application::Service::Deck::DeckService& m_DeckService;
+    Presentation::Model::DeckForestModel m_DeckForestModel;
+
 public:
     explicit DeckPageController(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
                                 Application::Service::Deck::DeckService& DeckService,
@@ -31,8 +35,8 @@ public:
         LibraryInvalidationChannel.ConnectSnapshot(
             this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckForestSnapshot, &DeckPageController::RefreshDeckForestModel);
     }
-    DeckPageController(const DeckPageController&) = delete;
-    DeckPageController(DeckPageController&&) = delete;
+    explicit DeckPageController(const DeckPageController&) = delete;
+    explicit DeckPageController(DeckPageController&&) = delete;
     DeckPageController& operator=(const DeckPageController&) = delete;
     DeckPageController& operator=(DeckPageController&&) = delete;
 
@@ -47,9 +51,6 @@ public:
     [[nodiscard]] std::expected<void, const char*> DeleteDeck(const std::string&) noexcept;
 
 private:
-    Application::Service::Deck::DeckService& m_DeckService;
-    Presentation::Model::DeckForestModel m_DeckForestModel;
-
     void RefreshDeckForestModel(std::int64_t) noexcept;
 };
 

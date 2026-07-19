@@ -7,26 +7,39 @@ namespace Application::IndexCache {
 
 template <typename IndexCacheDefinitionType>
 class IndexCacheBase {
+private:
+    std::weak_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexWeakPointer;
+
+protected:
+    explicit IndexCacheBase() noexcept
+        : m_IndexWeakPointer{} {
+    }
+
 public:
+    explicit IndexCacheBase(const IndexCacheBase&) = delete;
+    explicit IndexCacheBase(IndexCacheBase&&) = delete;
+    auto operator=(const IndexCacheBase&) -> IndexCacheBase& = delete;
+    auto operator=(IndexCacheBase&&) -> IndexCacheBase& = delete;
+
     class IndexCacheLease final {
-    public:
-        IndexCacheLease() = delete;
-        IndexCacheLease(const IndexCacheLease&) = delete;
-        IndexCacheLease(IndexCacheLease&&) noexcept = default;
-        IndexCacheLease& operator=(const IndexCacheLease&) = delete;
-        IndexCacheLease& operator=(IndexCacheLease&&) = delete;
+        friend class IndexCacheBase;
 
     private:
-        friend class IndexCacheBase;
+        std::shared_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexSharedPointer;
 
         explicit IndexCacheLease(std::shared_ptr<typename IndexCacheDefinitionType::IndexType>&& IndexSharedPointer) noexcept
             : m_IndexSharedPointer{ std::move(IndexSharedPointer) } {
         }
 
-        std::shared_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexSharedPointer;
+    public:
+        explicit IndexCacheLease() = delete;
+        explicit IndexCacheLease(const IndexCacheLease&) = delete;
+        explicit IndexCacheLease(IndexCacheLease&&) noexcept = default;
+        auto operator=(const IndexCacheLease&) -> IndexCacheLease& = delete;
+        auto operator=(IndexCacheLease&&) -> IndexCacheLease& = delete;
     };
 
-    [[nodiscard]] IndexCacheLease AcquireLease() {
+    [[nodiscard]] auto AcquireLease() -> IndexCacheLease {
         std::shared_ptr<typename IndexCacheDefinitionType::IndexType> IndexSharedPointer{ m_IndexWeakPointer.lock() };
         if (IndexSharedPointer == nullptr) {
             IndexSharedPointer = std::make_shared<typename IndexCacheDefinitionType::IndexType>();
@@ -39,22 +52,9 @@ public:
         IndexCacheDefinitionType::RefreshIndex(*IndexCacheLease.m_IndexSharedPointer, std::move(IndexRefreshData));
     }
 
-    [[nodiscard]] const typename IndexCacheDefinitionType::IndexType& GetIndex(const IndexCacheLease& IndexCacheLease) const noexcept {
+    [[nodiscard]] auto GetIndex(const IndexCacheLease& IndexCacheLease) const noexcept -> const typename IndexCacheDefinitionType::IndexType& {
         return *IndexCacheLease.m_IndexSharedPointer;
     }
-
-protected:
-    IndexCacheBase() noexcept
-        : m_IndexWeakPointer{} {
-    }
-
-    IndexCacheBase(const IndexCacheBase&) = delete;
-    IndexCacheBase(IndexCacheBase&&) = delete;
-    IndexCacheBase& operator=(const IndexCacheBase&) = delete;
-    IndexCacheBase& operator=(IndexCacheBase&&) = delete;
-
-private:
-    std::weak_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexWeakPointer;
 };
 
 }

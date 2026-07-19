@@ -211,7 +211,7 @@ void DeckForestModel::ApplyCurrentSort() {
     UpdateSiblingRowIndexes();
 }
 
-void DeckForestModel::ReplaceAll(std::vector<Application::Domain::Deck::Data::DeckForestSnapshotNode>&& DeckForestSnapshotNodeVector) noexcept {
+void DeckForestModel::ReplaceAll(std::vector<Application::Domain::Deck::Index::DeckForestSnapshotNode>&& DeckForestSnapshotNodeVector) noexcept {
     Support::Runtime::TryCatchWrapper([&]() -> void {
         std::vector<DeckNode> DeckNodesVector;
         std::vector<std::size_t> RootDeckNodeIndexesVector;
@@ -219,7 +219,7 @@ void DeckForestModel::ReplaceAll(std::vector<Application::Domain::Deck::Data::De
         DeckNodesVector.reserve(DeckForestSnapshotNodeVector.size());
         RootDeckNodeIndexesVector.reserve(DeckForestSnapshotNodeVector.size());
         DeckNodeIndexByIdHash.reserve(DeckForestSnapshotNodeVector.size());
-        for (Application::Domain::Deck::Data::DeckForestSnapshotNode& DeckForestSnapshotNode : DeckForestSnapshotNodeVector) {
+        for (Application::Domain::Deck::Index::DeckForestSnapshotNode& DeckForestSnapshotNode : DeckForestSnapshotNodeVector) {
             const std::size_t DeckNodeIndex{ DeckNodesVector.size() };
             DeckNodeIndexByIdHash.emplace(DeckForestSnapshotNode.m_DeckId, DeckNodeIndex);
             DeckNodesVector.emplace_back(DeckNode{ std::move(DeckForestSnapshotNode), std::nullopt, 0, std::vector<std::size_t>{} });

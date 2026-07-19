@@ -4,5 +4,5 @@
 
 namespace Infrastructure::Sql::Deck::Query {
 
-[[nodiscard]] std::string ReadDeckSnapshotRecordsSql();
+[[nodiscard]] auto ReadDeckSnapshotRecordsSql() -> std::string;
 }

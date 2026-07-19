@@ -11,20 +11,20 @@ class ReviewSessionListStore;
 namespace Application::Service::ReviewSession {
 
 class ReviewSessionListService final {
+private:
+    Infrastructure::Store::ReviewSession::ReviewSessionListStore& m_ReviewSessionListStore;
+
 public:
     explicit ReviewSessionListService(Infrastructure::Store::ReviewSession::ReviewSessionListStore& ReviewSessionListStore) noexcept
         : m_ReviewSessionListStore{ ReviewSessionListStore } {
     }
 
-    ReviewSessionListService(const ReviewSessionListService&) = delete;
-    ReviewSessionListService(ReviewSessionListService&&) = delete;
-    ReviewSessionListService& operator=(const ReviewSessionListService&) = delete;
-    ReviewSessionListService& operator=(ReviewSessionListService&&) = delete;
+    explicit ReviewSessionListService(const ReviewSessionListService&) = delete;
+    explicit ReviewSessionListService(ReviewSessionListService&&) = delete;
+    auto operator=(const ReviewSessionListService&) -> ReviewSessionListService& = delete;
+    auto operator=(ReviewSessionListService&&) -> ReviewSessionListService& = delete;
 
-    [[nodiscard]] std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionListRows();
-
-private:
-    Infrastructure::Store::ReviewSession::ReviewSessionListStore& m_ReviewSessionListStore;
+    [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSession::ReviewSessionListRow>;
 };
 
 }

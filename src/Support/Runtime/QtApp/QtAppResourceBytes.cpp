@@ -8,7 +8,7 @@
 #include <string>
 
 namespace Support::Runtime::QtApp {
-[[nodiscard]] std::string ReadQtAppResourceBytes(const char* const QtResourcePath) {
+[[nodiscard]] auto ReadQtAppResourceBytes(const char* const QtResourcePath) -> std::string {
     const QResource Resource{ QtResourcePath };
     assert(Resource.isValid());
     const QByteArray ResourceBytes{ Resource.uncompressedData() };

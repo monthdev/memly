@@ -12,6 +12,9 @@
 namespace Infrastructure::Store::ReviewSession {
 
 class ReviewSessionListStore final {
+private:
+    std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionListRowsPreparedStatement;
+
 public:
     explicit ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
         : m_ReadReviewSessionListRowsPreparedStatement{ DatabaseConnection.Prepare(
@@ -19,15 +22,12 @@ public:
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionListRowsPreparedStatement);
     }
 
-    ReviewSessionListStore(const ReviewSessionListStore&) = delete;
-    ReviewSessionListStore(ReviewSessionListStore&&) = delete;
-    ReviewSessionListStore& operator=(const ReviewSessionListStore&) = delete;
-    ReviewSessionListStore& operator=(ReviewSessionListStore&&) = delete;
+    explicit ReviewSessionListStore(const ReviewSessionListStore&) = delete;
+    explicit ReviewSessionListStore(ReviewSessionListStore&&) = delete;
+    auto operator=(const ReviewSessionListStore&) -> ReviewSessionListStore& = delete;
+    auto operator=(ReviewSessionListStore&&) -> ReviewSessionListStore& = delete;
 
-    [[nodiscard]] std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReadReviewSessionListRows();
-
-private:
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionListRowsPreparedStatement;
+    [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSession::ReviewSessionListRow>;
 };
 
 }

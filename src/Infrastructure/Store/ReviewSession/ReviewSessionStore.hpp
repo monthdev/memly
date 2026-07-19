@@ -17,6 +17,19 @@
 namespace Infrastructure::Store::ReviewSession {
 
 class ReviewSessionStore final {
+private:
+    std::unique_ptr<duckdb::PreparedStatement> m_CreateCustomReviewSessionPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_CreateDefaultReviewSessionPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_CreateCustomReviewSessionDeckSelectionPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_RenameReviewSessionPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionToDefaultPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionToCustomPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_DeleteReviewSessionPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement;
+    std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
+
 public:
     explicit ReviewSessionStore(duckdb::Connection& DatabaseConnection)
         : m_CreateCustomReviewSessionPreparedStatement{ DatabaseConnection.Prepare(
@@ -52,45 +65,34 @@ public:
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
     }
 
-    ReviewSessionStore(const ReviewSessionStore&) = delete;
-    ReviewSessionStore(ReviewSessionStore&&) = delete;
-    ReviewSessionStore& operator=(const ReviewSessionStore&) = delete;
-    ReviewSessionStore& operator=(ReviewSessionStore&&) = delete;
+    explicit ReviewSessionStore(const ReviewSessionStore&) = delete;
+    explicit ReviewSessionStore(ReviewSessionStore&&) = delete;
+    auto operator=(const ReviewSessionStore&) -> ReviewSessionStore& = delete;
+    auto operator=(ReviewSessionStore&&) -> ReviewSessionStore& = delete;
 
-    [[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&);
-    [[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    CreateOrReadExistingCustomReviewSession(const std::string&,
-                                            const std::string&,
-                                            const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>&);
-    [[nodiscard]] std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RenameReviewSession(const std::string&,
-                                                                                                                                   const std::string&);
-    [[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    EditReviewSessionToDefault(const std::string&, const std::string&, const std::string&);
-    [[nodiscard]] std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>&);
+    [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
+        -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+    [[nodiscard]] auto CreateOrReadExistingCustomReviewSession(const std::string&,
+                                                               const std::string&,
+                                                               const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>&)
+        -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+    [[nodiscard]] auto RenameReviewSession(const std::string&, const std::string&)
+        -> std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+    [[nodiscard]] auto EditReviewSessionToDefault(const std::string&, const std::string&, const std::string&)
+        -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+    [[nodiscard]] auto
+    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>&)
+        -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     void UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string&);
     void DeleteReviewSession(const std::string&);
 
 private:
-    std::unique_ptr<duckdb::PreparedStatement> m_CreateCustomReviewSessionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_CreateDefaultReviewSessionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_CreateCustomReviewSessionDeckSelectionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_RenameReviewSessionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionToDefaultPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionToCustomPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_DeleteReviewSessionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
-
-    [[nodiscard]] std::optional<std::string> TryReadDefaultReviewSessionIdByRootDeckId(const std::string&);
-    [[nodiscard]] std::optional<std::string> TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string&);
-    [[nodiscard]] std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>
-    CreateCustomReviewSessionDeckSelection(const std::string&,
-                                           const std::string&,
-                                           Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum);
+    [[nodiscard]] auto TryReadDefaultReviewSessionIdByRootDeckId(const std::string&) -> std::optional<std::string>;
+    [[nodiscard]] auto TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string&) -> std::optional<std::string>;
+    [[nodiscard]] auto CreateCustomReviewSessionDeckSelection(const std::string&,
+                                                              const std::string&,
+                                                              Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum)
+        -> std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     void DeleteCustomReviewSessionDeckSelections(const std::string&);
 };
 

@@ -43,20 +43,6 @@ class ReviewSessionStore;
 namespace Bootstrap {
 
 class RuntimeContext final {
-public:
-    RuntimeContext() = delete;
-    RuntimeContext(const RuntimeContext&) = delete;
-    RuntimeContext(RuntimeContext&&) = delete;
-    RuntimeContext& operator=(const RuntimeContext&) = delete;
-    RuntimeContext& operator=(RuntimeContext&&) = delete;
-
-    static void Initialize(const std::string&);
-
-    [[nodiscard]] static Application::Invalidation::LibraryInvalidationChannel& GetRequiredLibraryInvalidationChannel() noexcept;
-    [[nodiscard]] static Application::Service::Deck::DeckService& GetRequiredDeckService() noexcept;
-    [[nodiscard]] static Application::Service::ReviewSession::ReviewSessionListService& GetRequiredReviewSessionListService() noexcept;
-    [[nodiscard]] static Application::Service::ReviewSession::ReviewSessionService& GetRequiredReviewSessionService() noexcept;
-
 private:
     static std::unique_ptr<Infrastructure::Database::DatabaseRuntime> s_DatabaseRuntime;
     static std::unique_ptr<Application::Invalidation::LibraryInvalidationChannel> s_LibraryInvalidationChannel;
@@ -69,6 +55,20 @@ private:
     static std::unique_ptr<Application::Service::Deck::DeckService> s_DeckService;
     static std::unique_ptr<Application::Service::ReviewSession::ReviewSessionListService> s_ReviewSessionListService;
     static std::unique_ptr<Application::Service::ReviewSession::ReviewSessionService> s_ReviewSessionService;
+
+public:
+    explicit RuntimeContext() = delete;
+    explicit RuntimeContext(const RuntimeContext&) = delete;
+    explicit RuntimeContext(RuntimeContext&&) = delete;
+    auto operator=(const RuntimeContext&) -> RuntimeContext& = delete;
+    auto operator=(RuntimeContext&&) -> RuntimeContext& = delete;
+
+    static void Initialize(const std::string&);
+
+    [[nodiscard]] static auto GetRequiredLibraryInvalidationChannel() noexcept -> Application::Invalidation::LibraryInvalidationChannel&;
+    [[nodiscard]] static auto GetRequiredDeckService() noexcept -> Application::Service::Deck::DeckService&;
+    [[nodiscard]] static auto GetRequiredReviewSessionListService() noexcept -> Application::Service::ReviewSession::ReviewSessionListService&;
+    [[nodiscard]] static auto GetRequiredReviewSessionService() noexcept -> Application::Service::ReviewSession::ReviewSessionService&;
 };
 
 }

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <qdatetime.h>
+#include <qnamespace.h>
 #include <qobject.h>
+#include <qtmetamacros.h>
 
 #include <cstdint>
 #include <functional>
@@ -16,6 +18,10 @@ class LibraryInvalidationCoordinator;
 
 class LibraryInvalidationChannel final : public QObject {
     Q_OBJECT
+    friend class LibraryInvalidationCoordinator;
+
+private:
+    std::int64_t m_CurrentSnapshotAsOfMillisecondsSinceEpoch;
 
 public:
     explicit LibraryInvalidationChannel(QObject* Parent = nullptr)
@@ -23,10 +29,10 @@ public:
         , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch()) } {
     }
 
-    LibraryInvalidationChannel(const LibraryInvalidationChannel&) = delete;
-    LibraryInvalidationChannel(LibraryInvalidationChannel&&) = delete;
-    LibraryInvalidationChannel& operator=(const LibraryInvalidationChannel&) = delete;
-    LibraryInvalidationChannel& operator=(LibraryInvalidationChannel&&) = delete;
+    explicit LibraryInvalidationChannel(const LibraryInvalidationChannel&) = delete;
+    explicit LibraryInvalidationChannel(LibraryInvalidationChannel&&) = delete;
+    auto operator=(const LibraryInvalidationChannel&) -> LibraryInvalidationChannel& = delete;
+    auto operator=(LibraryInvalidationChannel&&) -> LibraryInvalidationChannel& = delete;
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*>
@@ -53,8 +59,6 @@ public:
 private:
     Q_SIGNAL void InvalidationSignal(const LibraryInvalidationTargetBitset&);
 
-    friend class LibraryInvalidationCoordinator;
-
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_nothrow_invocable_v<ControllerRefreshMethodType&>
     void ConnectInvalidationSignal(ControllerType* ControllerPointer,
@@ -73,8 +77,6 @@ private:
             },
             Qt::DirectConnection);
     }
-
-    std::int64_t m_CurrentSnapshotAsOfMillisecondsSinceEpoch;
 };
 
 }

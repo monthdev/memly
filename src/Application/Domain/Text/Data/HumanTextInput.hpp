@@ -9,23 +9,24 @@
 namespace Application::Domain::Text::Data {
 
 class [[nodiscard]] HumanTextInput final {
-public:
-    [[nodiscard]] static HumanTextInput FromInput(const std::string&);
-    HumanTextInput(const HumanTextInput&) = delete;
-    HumanTextInput(HumanTextInput&&) noexcept = default;
-    HumanTextInput& operator=(const HumanTextInput&) = delete;
-    HumanTextInput& operator=(HumanTextInput&&) noexcept = default;
-
-    [[nodiscard]] std::size_t ComputeGraphemeClusterLength() const;
-    [[nodiscard]] std::string ToNormalizedStdString() const;
-    [[nodiscard]] std::string ToNormalizedCaseFoldedStdString() &&;
-
 private:
+    icu::UnicodeString m_NormalizedUnicodeString;
+
     explicit HumanTextInput(icu::UnicodeString&& NormalizedUnicodeString) noexcept
         : m_NormalizedUnicodeString{ std::move(NormalizedUnicodeString) } {
     }
 
-    icu::UnicodeString m_NormalizedUnicodeString;
+public:
+    explicit HumanTextInput(const HumanTextInput&) = delete;
+    explicit HumanTextInput(HumanTextInput&&) noexcept = default;
+    auto operator=(const HumanTextInput&) -> HumanTextInput& = delete;
+    auto operator=(HumanTextInput&&) -> HumanTextInput& = delete;
+
+    [[nodiscard]] static auto FromInput(const std::string&) -> HumanTextInput;
+
+    [[nodiscard]] auto ComputeGraphemeClusterLength() const -> std::size_t;
+    [[nodiscard]] auto ToNormalizedStdString() const -> std::string;
+    [[nodiscard]] auto ToNormalizedCaseFoldedStdString() && -> std::string;
 };
 
 }

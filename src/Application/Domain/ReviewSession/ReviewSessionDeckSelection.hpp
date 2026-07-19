@@ -14,18 +14,18 @@ struct ReviewSessionDeckSelection {
         ExcludeSubtree
     };
 
-    ReviewSessionDeckSelection(std::string&& DeckId, const DeckSelectionTypeEnum DeckSelectionType)
+    std::string m_DeckId;
+    DeckSelectionTypeEnum m_DeckSelectionType;
+
+    explicit ReviewSessionDeckSelection(std::string&& DeckId, const DeckSelectionTypeEnum DeckSelectionType)
         : m_DeckId{ std::move(DeckId) }
         , m_DeckSelectionType{ DeckSelectionType } {
     }
 
-    ReviewSessionDeckSelection(const ReviewSessionDeckSelection&) = delete;
-    ReviewSessionDeckSelection(ReviewSessionDeckSelection&&) noexcept = default;
-    ReviewSessionDeckSelection& operator=(const ReviewSessionDeckSelection&) = delete;
-    ReviewSessionDeckSelection& operator=(ReviewSessionDeckSelection&&) noexcept = default;
-
-    std::string m_DeckId;
-    DeckSelectionTypeEnum m_DeckSelectionType;
+    explicit ReviewSessionDeckSelection(const ReviewSessionDeckSelection&) = delete;
+    explicit ReviewSessionDeckSelection(ReviewSessionDeckSelection&&) noexcept = default;
+    auto operator=(const ReviewSessionDeckSelection&) -> ReviewSessionDeckSelection& = delete;
+    auto operator=(ReviewSessionDeckSelection&&) -> ReviewSessionDeckSelection& = delete;
 };
 
 }

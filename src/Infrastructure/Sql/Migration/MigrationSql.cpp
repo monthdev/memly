@@ -6,19 +6,19 @@
 
 namespace Infrastructure::Sql::Migration {
 
-[[nodiscard]] std::string M00_SchemaMigrationsLogSql() {
+[[nodiscard]] auto M00_SchemaMigrationsLogSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Migration/Statement/M00_SchemaMigrationsLog.sql");
 }
 
-[[nodiscard]] std::string M01_InitialSchemaSql() {
+[[nodiscard]] auto M01_InitialSchemaSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Migration/Statement/M01_InitialSchema.sql");
 }
 
-[[nodiscard]] std::string CreateSchemaMigrationsLogEntrySql() {
+[[nodiscard]] auto CreateSchemaMigrationsLogEntrySql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Migration/Statement/CreateSchemaMigrationsLogEntry.sql");
 }
 
-[[nodiscard]] std::string ReadSchemaMigrationsLogSql() {
+[[nodiscard]] auto ReadSchemaMigrationsLogSql() -> std::string {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Migration/Statement/ReadSchemaMigrationsLog.sql");
 }
 }

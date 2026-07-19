@@ -4,17 +4,17 @@
 
 namespace Infrastructure::Sql::Deck::Mutation {
 
-[[nodiscard]] std::string CreateRootDeckSql();
+[[nodiscard]] auto CreateRootDeckSql() -> std::string;
 
-[[nodiscard]] std::string CreateChildDeckSql();
+[[nodiscard]] auto CreateChildDeckSql() -> std::string;
 
-[[nodiscard]] std::string MoveDeckSql();
+[[nodiscard]] auto MoveDeckSql() -> std::string;
 
-[[nodiscard]] std::string RenameDeckSql();
+[[nodiscard]] auto RenameDeckSql() -> std::string;
 
-[[nodiscard]] std::string DeleteDeckCardReviewsSql();
+[[nodiscard]] auto DeleteDeckCardReviewsSql() -> std::string;
 
-[[nodiscard]] std::string DeleteDeckCardsSql();
+[[nodiscard]] auto DeleteDeckCardsSql() -> std::string;
 
-[[nodiscard]] std::string DeleteDeckSql();
+[[nodiscard]] auto DeleteDeckSql() -> std::string;
 }

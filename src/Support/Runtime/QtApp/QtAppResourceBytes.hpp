@@ -3,5 +3,5 @@
 #include <string>
 
 namespace Support::Runtime::QtApp {
-[[nodiscard]] std::string ReadQtAppResourceBytes(const char* const);
+[[nodiscard]] auto ReadQtAppResourceBytes(const char* const) -> std::string;
 }
