@@ -1,5 +1,6 @@
-#if 0
 // Temporarily disabled during deck forest proxy model refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #pragma once
 
 #include <qabstractitemmodel.h>

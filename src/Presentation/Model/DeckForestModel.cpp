@@ -1,5 +1,6 @@
-#if 0
 // Temporarily disabled during deck forest model refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "Presentation/Model/DeckForestModel.hpp"
 
 #include <qstring.h>

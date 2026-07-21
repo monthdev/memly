@@ -21,7 +21,7 @@ public:
     auto operator=(const IndexCacheBase&) -> IndexCacheBase& = delete;
     auto operator=(IndexCacheBase&&) -> IndexCacheBase& = delete;
 
-    class IndexCacheLease final {
+    class [[nodiscard]] IndexCacheLease final {
         friend class IndexCacheBase;
 
     private:

@@ -1,5 +1,6 @@
-#if 0
 // Temporarily disabled during deck page controller bridge refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "View/Bridge/Controller/DeckPageControllerBridge.hpp"
 
 #include <cstdint>

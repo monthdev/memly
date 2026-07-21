@@ -4,5 +4,5 @@
 #include <string_view>
 
 namespace Support::Runtime {
-[[noreturn]] void ThrowMemlyException(const std::string_view, const std::source_location& = std::source_location::current());
+[[noreturn]] void ThrowMemlyException(std::string_view, const std::source_location& = std::source_location::current());
 }

@@ -19,11 +19,13 @@ namespace Infrastructure::Store::ReviewSession {
     std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListRowVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };
+        // NOLINTBEGIN(readability-magic-numbers)
         ReviewSessionListRowVector.emplace_back(QueryResultRow.GetValue<std::string>(0),
                                                 QueryResultRow.GetValue<std::string>(1),
                                                 QueryResultRow.GetValue<std::int64_t>(2),
                                                 QueryResultRow.IsNull(3) ? std::nullopt : std::make_optional(QueryResultRow.GetValue<std::int64_t>(3)),
                                                 QueryResultRow.IsNull(4) ? std::nullopt : std::make_optional(QueryResultRow.GetValue<std::int64_t>(4)));
+        // NOLINTEND(readability-magic-numbers)
     }
     return ReviewSessionListRowVector;
 }

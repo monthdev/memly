@@ -7,7 +7,7 @@
 
 namespace Application::Invalidation {
 
-enum class LibraryInvalidationTargetEnum : std::uint8_t {
+enum class [[nodiscard]] LibraryInvalidationTargetEnum : std::uint8_t {
     DeckForestSnapshot,
     TargetCount
 };

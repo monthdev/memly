@@ -10,12 +10,23 @@ Checks: >
   performance-*,
   portability-*,
   -portability-avoid-pragma-once,
-  readability-implicit-bool-conversion,
-  readability-isolate-declaration,
-  readability-braces-around-statements,
-  readability-operators-representation,
-  custom-always-explicit-constructor,
-  custom-no-default-member-initializer
+  readability-*,
+  -readability-named-parameter,
+  -readability-redundant-member-init,
+  -readability-redundant-typename,
+  -readability-use-concise-preprocessor-directives,
+  custom-memly-always-explicit-constructor,
+  custom-memly-braced-constructor-initializer,
+  custom-memly-braced-variable-initialization,
+  custom-memly-complete-constructor-initializer-list,
+  custom-memly-no-default-member-initializer,
+  custom-memly-no-delegating-constructor,
+  custom-memly-no-named-lambda,
+  custom-memly-no-named-declaration-parameter,
+  custom-memly-nodiscard-callable,
+  custom-memly-nodiscard-enum,
+  custom-memly-nodiscard-returned-record,
+  custom-memly-no-stateful-defaulted-default-constructor
 WarningsAsErrors: "*"
 CheckOptions:
   - {
@@ -26,6 +37,7 @@ CheckOptions:
       key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic,
       value: "true",
     }
+  - { key: readability-magic-numbers.IgnoredIntegerValues, value: "1" }
   - {
       key: readability-operators-representation.BinaryOperators,
       value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
@@ -35,7 +47,7 @@ CheckOptions:
       value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
     }
 CustomChecks:
-  - Name: always-explicit-constructor
+  - Name: memly-always-explicit-constructor
     Query: |
       match cxxConstructorDecl(
         unless(isImplicit()),
@@ -47,7 +59,83 @@ CustomChecks:
       - BindName: constructor
         Message: constructor must be declared explicit
         Level: Warning
-  - Name: no-default-member-initializer
+  - Name: memly-braced-constructor-initializer
+    Query: |
+      match cxxConstructorDecl(
+        unless(isImplicit()),
+        unless(isDeleted()),
+        unless(isDefaulted()),
+        unless(isDelegatingConstructor()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        forEachConstructorInitializer(
+          cxxCtorInitializer(
+            isWritten(),
+            unless(
+              withInitializer(
+                ignoringImplicit(
+                  anyOf(
+                    initListExpr(),
+                    cxxConstructExpr(isListInitialization())
+                  )
+                )
+              )
+            )
+          ).bind("initializer")
+        )
+      )
+    Diagnostic:
+      - BindName: initializer
+        Message: constructor initializers must use brace initialization
+        Level: Warning
+  - Name: memly-braced-variable-initialization
+    Query: |
+      match varDecl(
+        isDefinition(),
+        unless(parmVarDecl()),
+        unless(isImplicit()),
+        unless(isExceptionVariable()),
+        unless(isExpansionInSystemHeader()),
+        unless(
+          hasParent(
+            declStmt(
+              hasParent(cxxForRangeStmt())
+            )
+          )
+        ),
+        unless(
+          hasInitializer(
+            ignoringImplicit(
+              anyOf(
+                initListExpr(),
+                cxxConstructExpr(isListInitialization())
+              )
+            )
+          )
+        )
+      ).bind("variable")
+    Diagnostic:
+      - BindName: variable
+        Message: named variable definitions must use brace initialization
+        Level: Warning
+  - Name: memly-complete-constructor-initializer-list
+    Query: |
+      match cxxConstructorDecl(
+        unless(isImplicit()),
+        unless(isDeleted()),
+        unless(isDefaulted()),
+        unless(isDelegatingConstructor()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        hasAnyConstructorInitializer(
+          unless(isWritten())
+        )
+      ).bind("constructor")
+    Diagnostic:
+      - BindName: constructor
+        Message: constructor must explicitly initialize every direct base and non-static data member
+        Level: Warning
+  - Name: memly-no-default-member-initializer
     Query: |
       match fieldDecl(
         hasInClassInitializer(anything()),
@@ -57,4 +145,146 @@ CustomChecks:
     Diagnostic:
       - BindName: field
         Message: default member initializers are disallowed; initialize this member in each constructor initializer list
+        Level: Warning
+  - Name: memly-no-delegating-constructor
+    Query: |
+      match cxxConstructorDecl(
+        unless(isImplicit()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        isDelegatingConstructor()
+      ).bind("constructor")
+    Diagnostic:
+      - BindName: constructor
+        Message: delegating constructors are disallowed
+        Level: Warning
+  - Name: memly-no-named-lambda
+    Query: |
+      match varDecl(
+        unless(parmVarDecl()),
+        unless(isImplicit()),
+        unless(isExpansionInSystemHeader()),
+        matchesName("^::.+$"),
+        hasType(
+          qualType(
+            hasUnqualifiedDesugaredType(
+              recordType(
+                hasDeclaration(
+                  cxxRecordDecl(isLambda())
+                )
+              )
+            )
+          )
+        )
+      ).bind("variable")
+    Diagnostic:
+      - BindName: variable
+        Message: named lambda closure variables are disallowed; pass the lambda directly or use a reusable helper
+        Level: Warning
+  - Name: memly-no-named-declaration-parameter
+    Query: |
+      match functionDecl(
+        unless(isDefinition()),
+        unless(isImplicit()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        forEach(
+          parmVarDecl(
+            matchesName("^::.+$")
+          ).bind("parameter")
+        )
+      )
+    Diagnostic:
+      - BindName: parameter
+        Message: parameters must be unnamed in function declarations
+        Level: Warning
+  - Name: memly-nodiscard-callable
+    Query: |
+      match functionDecl(
+        unless(isImplicit()),
+        unless(isDeleted()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        unless(isExpandedFromMacro("Q_OBJECT")),
+        unless(isMain()),
+        unless(cxxConstructorDecl()),
+        unless(cxxDestructorDecl()),
+        unless(
+          cxxMethodDecl(
+            ofClass(
+              cxxRecordDecl(isLambda())
+            )
+          )
+        ),
+        unless(returns(voidType())),
+        unless(hasAttr("attr::NoReturn")),
+        unless(hasAttr("attr::WarnUnusedResult"))
+      ).bind("callable")
+    Diagnostic:
+      - BindName: callable
+        Message: non-void callables must be declared [[nodiscard]]
+        Level: Warning
+  - Name: memly-nodiscard-enum
+    Query: |
+      match enumDecl(
+        isDefinition(),
+        unless(isImplicit()),
+        unless(isExpansionInSystemHeader()),
+        matchesName("^::.+$"),
+        unless(hasAttr("attr::WarnUnusedResult"))
+      ).bind("enum")
+    Diagnostic:
+      - BindName: enum
+        Message: enum types must be declared [[nodiscard]]
+        Level: Warning
+  - Name: memly-nodiscard-returned-record
+    Query: |
+      match functionDecl(
+        unless(isImplicit()),
+        unless(isDeleted()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        returns(
+          qualType(
+            hasUnqualifiedDesugaredType(
+              recordType(
+                hasDeclaration(
+                  cxxRecordDecl(
+                    isDefinition(),
+                    unless(isImplicit()),
+                    unless(isLambda()),
+                    unless(isTemplateInstantiation()),
+                    unless(isExpansionInSystemHeader()),
+                    unless(hasAttr("attr::WarnUnusedResult"))
+                  ).bind("result_type")
+                )
+              )
+            )
+          )
+        )
+      )
+    Diagnostic:
+      - BindName: result_type
+        Message: record types returned by value must be declared [[nodiscard]]
+        Level: Warning
+  - Name: memly-no-stateful-defaulted-default-constructor
+    Query: |
+      match cxxConstructorDecl(
+        unless(isImplicit()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        isDefaulted(),
+        isDefaultConstructor(),
+        ofClass(
+          cxxRecordDecl(
+            anyOf(
+              has(fieldDecl()),
+              hasDirectBase(cxxBaseSpecifier())
+            )
+          )
+        )
+      ).bind("constructor")
+    Diagnostic:
+      - BindName: constructor
+        Message: a default constructor with direct bases or non-static data members must use an explicit initializer list instead of = default
         Level: Warning

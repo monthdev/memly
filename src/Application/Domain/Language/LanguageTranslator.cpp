@@ -2,11 +2,12 @@
 
 #include <array>
 #include <cstddef>
+#include <utility>
 
 namespace Application::Domain::Language {
-[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, 67>& {
+[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguage::Count)>& {
     // TODO: Move array to unnamed namespace?
-    static constexpr std::array<TargetLanguageInfo, 67> s_TargetLanguages{
+    static constexpr std::array<TargetLanguageInfo, std::to_underlying(TargetLanguage::Count)> s_TargetLanguages{
         {
          TargetLanguageInfo{ TargetLanguage::NoLanguage, "", "", "", "(No Language)" },
          TargetLanguageInfo{ TargetLanguage::Afrikaans, "af", "af", "", "Afrikaans" },
@@ -77,7 +78,6 @@ namespace Application::Domain::Language {
          TargetLanguageInfo{ TargetLanguage::ChineseTraditional, "zh-tw", "zh-TW", "", "Chinese (Traditional)" },
          }
     };
-    static_assert(s_TargetLanguages.size() == 67);
     return s_TargetLanguages;
 }
 

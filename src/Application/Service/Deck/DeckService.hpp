@@ -37,7 +37,7 @@ public:
 
     [[nodiscard]] auto AcquireDeckForestSnapshotIndexCacheLease() -> Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease;
 
-    [[nodiscard]] auto IsDeckNameLengthValid(const std::string&) const noexcept -> bool;
+    [[nodiscard]] static auto IsDeckNameLengthValid(const std::string&) noexcept -> bool;
 
     void CreateRootDeck(const std::string&, std::uint8_t);
     void CreateChildDeck(const std::string&, const std::string&);

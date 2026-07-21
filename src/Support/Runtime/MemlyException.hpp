@@ -9,7 +9,7 @@
 namespace Support::Runtime {
 class [[nodiscard]] MemlyException final : public std::exception {
 private:
-    inline static constexpr std::size_t s_ErrorMessageCapacity{ 1024 };
+    static constexpr std::size_t s_ErrorMessageCapacity{ 1024 };
 
     std::array<char, s_ErrorMessageCapacity + 1> m_ErrorMessageArray;
     std::size_t m_ErrorMessageSize;
@@ -30,7 +30,7 @@ public:
     [[nodiscard]] auto what() const noexcept -> const char* override;
 
 private:
-    void ConstructErrorMessage(const std::string_view, const std::source_location&) noexcept;
-    void AppendErrorMessage(const std::string_view) noexcept;
+    void ConstructErrorMessage(std::string_view, const std::source_location&) noexcept;
+    void AppendErrorMessage(std::string_view) noexcept;
 };
 }

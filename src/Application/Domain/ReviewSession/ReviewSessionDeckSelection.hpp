@@ -7,7 +7,7 @@
 namespace Application::Domain::ReviewSession {
 
 struct ReviewSessionDeckSelection {
-    enum class DeckSelectionTypeEnum : std::uint8_t {
+    enum class [[nodiscard]] DeckSelectionTypeEnum : std::uint8_t {
         Self,
         Subtree,
         ExcludeSelf,

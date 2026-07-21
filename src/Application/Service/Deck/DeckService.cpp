@@ -19,7 +19,7 @@ namespace Application::Service::Deck {
     return m_DeckForestSnapshotIndexCache.AcquireLease();
 }
 
-[[nodiscard]] auto DeckService::IsDeckNameLengthValid(const std::string& DeckName) const noexcept -> bool {
+[[nodiscard]] auto DeckService::IsDeckNameLengthValid(const std::string& DeckName) noexcept -> bool {
     return Application::Domain::Deck::Constraint::IsDeckNameLengthValid(DeckName);
 }
 

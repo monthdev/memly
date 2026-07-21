@@ -1,5 +1,6 @@
 #include "Application/Domain/Deck/Index/DeckForestSnapshotIndex.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <optional>
@@ -80,14 +81,10 @@ void DeckForestSnapshotIndex::AccumulateSubtreeCounts() {
 
 [[nodiscard]] auto DeckForestSnapshotIndex::DoesDuplicateSiblingDeckNameExist(const std::optional<std::string>& ParentDeckIdOptional,
                                                                               const std::string& DeckName) const -> bool {
-    for (const std::size_t DeckNodePosition : ParentDeckIdOptional.has_value() ?
-                                                  m_ChildDeckNodePositionVectorByDeckNodePositionVector.at(GetDeckNodePosition(ParentDeckIdOptional.value())) :
-                                                  m_RootDeckNodePositionVector) {
-        if (m_DeckForestSnapshotNodeVector.at(DeckNodePosition).m_DeckName == DeckName) {
-            return true;
-        }
-    }
-    return false;
+    return std::ranges::any_of(
+        ParentDeckIdOptional.has_value() ? m_ChildDeckNodePositionVectorByDeckNodePositionVector.at(GetDeckNodePosition(ParentDeckIdOptional.value())) :
+                                           m_RootDeckNodePositionVector,
+        [this, &DeckName](const std::size_t DeckNodePosition) -> bool { return m_DeckForestSnapshotNodeVector.at(DeckNodePosition).m_DeckName == DeckName; });
 }
 
 [[nodiscard]] auto DeckForestSnapshotIndex::WouldMoveDeckBeNoOp(const std::string& MovingDeckId,

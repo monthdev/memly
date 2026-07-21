@@ -12,13 +12,13 @@
 auto main(int argc, char** argv) noexcept -> int {
     return Support::Runtime::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(Sql);
-        const QGuiApplication App{ argc, argv };
-        constexpr const char* const AppName{ "Memly" };
-        constexpr const char* const OrgName{ "MemlyProject" };
-        App.setApplicationName(AppName);
-        App.setApplicationDisplayName(AppName);
-        App.setOrganizationDomain(OrgName);
-        App.setOrganizationName(OrgName);
+        [[maybe_unused]] const QGuiApplication QtApplicationLifetime{ argc, argv };
+        constexpr const char* AppName{ "Memly" };
+        constexpr const char* OrgName{ "MemlyProject" };
+        QCoreApplication::setApplicationName(AppName);
+        QGuiApplication::setApplicationDisplayName(AppName);
+        QCoreApplication::setOrganizationDomain(OrgName);
+        QCoreApplication::setOrganizationName(OrgName);
         Bootstrap::RuntimeContext::Initialize(Support::Runtime::QtApp::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
@@ -28,6 +28,6 @@ auto main(int argc, char** argv) noexcept -> int {
             []() -> void { QCoreApplication::exit(-1); },
             Qt::QueuedConnection);
         AppEngine.loadFromModule(AppName, "MainWindow");
-        return App.exec();
+        return QGuiApplication::exec();
     });
 }

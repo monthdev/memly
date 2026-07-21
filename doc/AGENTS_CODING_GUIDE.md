@@ -31,7 +31,10 @@ Delegating constructors are disallowed.
 
 ## Variable Initialization
 
-Named variables must use brace initialization.
+Named variable definitions must use direct-list initialization. Copy
+initialization, copy-list initialization, parenthesized initialization, and
+omitted initialization are disallowed wherever the language permits an explicit
+initializer.
 
 Lambda init-captures must use brace initialization.
 
@@ -60,6 +63,15 @@ managed by RAII containers and member objects.
 
 Parameters must only be named where methods are implemented, not where methods
 are declared.
+
+## Service Method State
+
+Services group the internal domain operations as the domain API and capability
+surface used to build application commands; they do not represent stateful
+domain entities. Public service methods that do not require service instance
+state or dependencies must be declared `static`. Such methods remain on the
+service API instead of becoming file-private helpers solely because they are
+static.
 
 ## Class Declaration Ordering
 
@@ -92,17 +104,19 @@ and lambdas must use applicable C++ attributes, specifiers, qualifiers,
 exception specifications, constraints, and Qt metadata macros.
 
 Class and data-time object struct declarations must use `final` and
-`[[nodiscard]]` where they apply.
+`[[nodiscard]]` where they apply. Class, struct, and enum types returned by
+value must use `[[nodiscard]]`. Enum types must always use `[[nodiscard]]`.
 
 Every constructor must use `explicit`, including default, multi-parameter, copy,
 and move constructors.
 
 Conversion operators are disallowed.
 
-Methods and free functions must use `[[nodiscard]]`, `[[noreturn]]`,
-`constexpr`, `consteval`, `inline`, `static`, `virtual`, `override`, `final`,
-`const`, lvalue reference qualifiers, rvalue reference qualifiers, `noexcept`,
-and trailing return types where they apply.
+Every non-void method and free function must use `[[nodiscard]]`. Methods and
+free functions must use `[[noreturn]]`, `constexpr`, `consteval`, `inline`,
+`static`, `virtual`, `override`, `final`, `const`, lvalue reference qualifiers,
+rvalue reference qualifiers, `noexcept`, and trailing return types where they
+apply.
 
 Templated methods, free functions, and lambdas must use `requires` clauses where
 constraints apply.
@@ -154,6 +168,10 @@ rather than runtime corruption checks.
 
 This assumption does not apply to database engine failures. Those remain runtime
 errors at the appropriate database boundary.
+
+Positional DuckDB query-result decoders may suppress `readability-magic-numbers`
+with a paired `NOLINTBEGIN` and `NOLINTEND` around the narrow decoding
+expression.
 
 ## QML Bridge Surface
 
@@ -239,14 +257,18 @@ Use `operator[]` only for intentional mutation.
 Read-only string parameters must use `const std::string&` when their inputs are
 already `std::string` objects.
 
-Read-only string parameters must use `const std::string_view` when the same API
-intentionally accepts either `std::string` objects or string literals or when a
-non-allocating control path requires explicit string size information.
+Read-only string-view parameters must be passed by value as `std::string_view`
+when the same API intentionally accepts either `std::string` objects or string
+literals or when a non-allocating control path requires explicit string size
+information. Implementations should explicily add top-level `const` to the
+parameter as a local qualifier to the definition.
 
 String parameters must use `const char* const` when the control path already
 receives a character pointer or string literal and introducing an owning string
 container would cause a needless heap allocation. Named string constants on such
-control paths must also use `const char* const`.
+control paths must use `const char* const`, or `constexpr const char*` when
+constant evaluation applies because `constexpr` already supplies the pointer's
+top-level constness.
 
 Stored `std::string_view` values must only appear in explicitly non-owning
 containers or data types whose owner and invalidation boundary are enforced by
@@ -276,6 +298,19 @@ Source-owned namespaces must match the folder nesting under `src/`.
 Unnamed helper namespaces must be nested inside the matching source-owned
 namespace.
 
+## Preprocessor Directives
+
+Conditional preprocessor directives must use the explicit `#if defined(Macro)`
+and `#if not defined(Macro)` forms instead of `#ifdef` and `#ifndef`.
+
+## Lint Enforcement
+
+Memly-specific lint enforcement must remain expressible through `.clang-tidy`
+YAML, including its query-based custom checks. Do not introduce compiled
+clang-tidy extensions or a separate regular-expression or text-based style
+linter solely to enforce coding-guide rules. Rules that the YAML interface
+cannot enforce must remain documented conventions.
+
 ## CMake Source Lists
 
 CMake glob variables must represent exactly one source-tree folder.
@@ -303,6 +338,11 @@ acts as the testing surface.
 
 Lambdas must always declare their return type.
 
+Named lambda closure variables are disallowed. Lambda expressions must be passed
+directly to their consumer or immediately invoked. Reusable callable logic must
+use an unnamed-namespace `a_` helper or a private method when class state or
+private types are required.
+
 ## Callable Invocation
 
 Stored callables, callable template parameters, function pointers, and member
@@ -321,3 +361,6 @@ template definition type surfaces.
 
 Template typenames must always end in `*Type` and must be named what the
 template type is intended to represent.
+
+Dependent qualified type names must explicitly use `typename` even in type-only
+contexts where the language permits the keyword to be omitted.

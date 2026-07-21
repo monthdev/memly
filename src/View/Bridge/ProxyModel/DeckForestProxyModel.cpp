@@ -1,5 +1,6 @@
-#if 0
 // Temporarily disabled during deck forest proxy model refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "View/Bridge/ProxyModel/DeckForestProxyModel.hpp"
 
 #include <qstring.h>

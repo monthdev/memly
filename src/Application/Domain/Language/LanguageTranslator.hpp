@@ -3,9 +3,10 @@
 #include <array>
 #include <cstdint>
 #include <string_view>
+#include <utility>
 
 namespace Application::Domain::Language {
-enum class TargetLanguage : std::uint8_t {
+enum class [[nodiscard]] TargetLanguage : std::uint8_t {
     NoLanguage,
     Afrikaans,
     Amharic,
@@ -72,7 +73,8 @@ enum class TargetLanguage : std::uint8_t {
     Vietnamese,
     Cantonese,
     ChineseSimplified,
-    ChineseTraditional
+    ChineseTraditional,
+    Count
 };
 
 struct TargetLanguageInfo {
@@ -100,6 +102,6 @@ struct TargetLanguageInfo {
     auto operator=(TargetLanguageInfo&&) -> TargetLanguageInfo& = delete;
 };
 
-[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, 67>&;
+[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguage::Count)>&;
 [[nodiscard]] auto GetTargetLanguageInfo(TargetLanguage) -> const TargetLanguageInfo&;
 }

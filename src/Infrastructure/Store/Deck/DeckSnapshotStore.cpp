@@ -19,6 +19,7 @@ namespace Infrastructure::Store::Deck {
     std::vector<DeckSnapshotRecord> DeckSnapshotRecordVector{};
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
         const auto& QueryResultRow{ *QueryResultIterator };
+        // NOLINTBEGIN(readability-magic-numbers)
         DeckSnapshotRecordVector.emplace_back(QueryResultRow.GetValue<std::string>(0),
                                               QueryResultRow.IsNull(1) ? std::nullopt : std::make_optional(QueryResultRow.GetValue<std::string>(1)),
                                               QueryResultRow.GetValue<std::string>(2),
@@ -28,6 +29,7 @@ namespace Infrastructure::Store::Deck {
                                               QueryResultRow.GetValue<std::uint32_t>(6),
                                               QueryResultRow.GetValue<std::uint32_t>(7),
                                               QueryResultRow.GetValue<std::uint8_t>(8));
+        // NOLINTEND(readability-magic-numbers)
     }
     return DeckSnapshotRecordVector;
 }
