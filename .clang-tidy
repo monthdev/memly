@@ -8,6 +8,8 @@ Checks: >
   modernize-*,
   -modernize-use-default-member-init,
   performance-*,
+  portability-*,
+  -portability-avoid-pragma-once,
   readability-implicit-bool-conversion,
   readability-isolate-declaration,
   readability-braces-around-statements,
