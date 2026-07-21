@@ -4,6 +4,7 @@
 #include <exception>
 #include <fstream>
 #include <ios>
+#include <span>
 #include <string_view>
 
 #if defined(_WIN32)
@@ -29,13 +30,14 @@ namespace {
 }
 
 void a_WriteToStdErr(const std::string_view ErrorMessage) noexcept {
+    const std::span ErrorMessageSpan{ ErrorMessage };
     std::size_t TotalWrittenSize{ 0 };
     std::ptrdiff_t WrittenSize{ 0 };
-    while (TotalWrittenSize < ErrorMessage.size() and
-           (WrittenSize = a_WriteStdErrBytes(ErrorMessage.data() + TotalWrittenSize, ErrorMessage.size() - TotalWrittenSize)) > 0) {
+    while (TotalWrittenSize < ErrorMessageSpan.size() and
+           (WrittenSize = a_WriteStdErrBytes(ErrorMessageSpan.subspan(TotalWrittenSize).data(), ErrorMessageSpan.size() - TotalWrittenSize)) > 0) {
         TotalWrittenSize += static_cast<std::size_t>(WrittenSize);
     }
-    if (TotalWrittenSize == ErrorMessage.size()) {
+    if (TotalWrittenSize == ErrorMessageSpan.size()) {
         static_cast<void>(a_WriteStdErrBytes("\n", 1));
     }
 }

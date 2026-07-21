@@ -40,6 +40,14 @@ Lambda init-captures must use brace initialization.
 Constructors must always be declared and implemented in the header even when the
 implementation is `= default`.
 
+Function bodies must only appear in headers for constructors and templates.
+Every non-templated non-constructor method and free function must be declared in
+the header and implemented in the matching source file, including trivial
+one-line accessors.
+
+Explicitly defaulted and deleted special-member declarations remain in headers
+because they do not contain function bodies.
+
 Default constructors must not be declared `= delete` outside
 `Support::SpecialMemberPolicy::NonInstantiableMixin`. Non-instantiable types
 must rely on the inherited policy instead of redeclaring the deleted default
@@ -113,7 +121,7 @@ Qt types and callable surfaces must use `Q_OBJECT`, `Q_GADGET`, `Q_NAMESPACE`,
 `Q_DECLARE_FLAGS`, `QML_ANONYMOUS`, `QML_ELEMENT`, `QML_NAMED_ELEMENT`,
 `QML_SINGLETON`, and `QML_UNCREATABLE` where they apply.
 
-## Programming Errors And Runtime Errors
+## Programming Errors Versus Runtime Errors
 
 Conditions that can fail only when Memly code is incorrect must be enforced with
 debug assertions. This includes violated internal preconditions, postconditions,

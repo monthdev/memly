@@ -31,6 +31,23 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
     return NormalizedUnicodeString;
 }
 
+[[nodiscard]] auto a_GetThreadLocalIcuBreakIterator() -> icu::BreakIterator& {
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#endif
+    thread_local std::unique_ptr<icu::BreakIterator> s_IcuBreakIteratorUniquePointer{ []() -> std::unique_ptr<icu::BreakIterator> {
+        UErrorCode ErrorCode{ U_ZERO_ERROR };
+        std::unique_ptr<icu::BreakIterator> IcuBreakIteratorUniquePointer{ icu::BreakIterator::createCharacterInstance(icu::Locale::getRoot(), ErrorCode) };
+        a_ThrowOnIcuError(ErrorCode);
+        return IcuBreakIteratorUniquePointer;
+    }() };
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+    return *s_IcuBreakIteratorUniquePointer;
+}
+
 }
 
 [[nodiscard]] auto HumanTextInput::FromInput(const std::string& Text) -> HumanTextInput {
@@ -38,17 +55,11 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
 }
 
 [[nodiscard]] auto HumanTextInput::ComputeGraphemeClusterLength() const -> std::size_t {
-    thread_local std::unique_ptr<icu::BreakIterator> s_BreakIteratorUniquePointer{ []() -> std::unique_ptr<icu::BreakIterator> {
-        UErrorCode ErrorCode{ U_ZERO_ERROR };
-        std::unique_ptr<icu::BreakIterator> BreakIteratorUniquePointer{ icu::BreakIterator::createCharacterInstance(icu::Locale::getRoot(), ErrorCode) };
-        a_ThrowOnIcuError(ErrorCode);
-        return BreakIteratorUniquePointer;
-    }() };
-    icu::BreakIterator& BreakIterator{ *s_BreakIteratorUniquePointer };
-    BreakIterator.setText(m_NormalizedUnicodeString);
+    icu::BreakIterator& IcuBreakIterator{ a_GetThreadLocalIcuBreakIterator() };
+    IcuBreakIterator.setText(m_NormalizedUnicodeString);
     std::size_t GraphemeClusterLength{ 0 };
-    BreakIterator.first();
-    while (BreakIterator.next() not_eq icu::BreakIterator::DONE) { ++GraphemeClusterLength; }
+    IcuBreakIterator.first();
+    while (IcuBreakIterator.next() not_eq icu::BreakIterator::DONE) { ++GraphemeClusterLength; }
     return GraphemeClusterLength;
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <cassert>
 #include <concepts>
 #include <cstdint>
 #include <utility>
@@ -30,16 +29,10 @@ public:
     auto operator=(const LibraryInvalidationTargetBitset&) -> LibraryInvalidationTargetBitset& = delete;
     auto operator=(LibraryInvalidationTargetBitset&&) -> LibraryInvalidationTargetBitset& = delete;
 
-    [[nodiscard]] auto Contains(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) const noexcept -> bool {
-        assert(std::to_underlying(LibraryInvalidationTarget) < m_TargetArray.size());
-        return m_TargetArray[std::to_underlying(LibraryInvalidationTarget)];
-    }
+    [[nodiscard]] auto Contains(LibraryInvalidationTargetEnum) const noexcept -> bool;
 
 private:
-    void Set(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) noexcept {
-        assert(std::to_underlying(LibraryInvalidationTarget) < m_TargetArray.size());
-        m_TargetArray[std::to_underlying(LibraryInvalidationTarget)] = true;
-    }
+    void Set(LibraryInvalidationTargetEnum) noexcept;
 };
 
 }

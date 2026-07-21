@@ -27,9 +27,7 @@ public:
     auto operator=(const MemlyException&) -> MemlyException& = delete;
     auto operator=(MemlyException&&) -> MemlyException& = delete;
 
-    [[nodiscard]] auto what() const noexcept -> const char* override {
-        return m_ErrorMessageArray.data();
-    }
+    [[nodiscard]] auto what() const noexcept -> const char* override;
 
 private:
     void ConstructErrorMessage(const std::string_view, const std::source_location&) noexcept;

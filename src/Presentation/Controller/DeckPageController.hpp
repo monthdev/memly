@@ -40,9 +40,7 @@ public:
     DeckPageController& operator=(const DeckPageController&) = delete;
     DeckPageController& operator=(DeckPageController&&) = delete;
 
-    [[nodiscard]] Presentation::Model::DeckForestModel* GetDeckForestModel() noexcept {
-        return &m_DeckForestModel;
-    }
+    [[nodiscard]] auto GetDeckForestModel() noexcept -> Presentation::Model::DeckForestModel*;
 
     [[nodiscard]] std::expected<void, const char*> CreateRootDeck(const std::string&, std::uint8_t) noexcept;
     [[nodiscard]] std::expected<void, const char*> CreateChildDeck(const std::string&, const std::string&) noexcept;

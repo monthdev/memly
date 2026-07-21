@@ -1,5 +1,7 @@
 #include "Infrastructure/Database/DatabaseRuntime.hpp"
 
+#include <duckdb.hpp>
+
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -12,11 +14,20 @@
 #include <vector>
 
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/TransactionRunner.hpp"
 #include "Infrastructure/Sql/Migration/MigrationSql.hpp"
 #include "Infrastructure/Sql/Seed/SeedSql.hpp"
 #include "Support/Runtime/ThrowMemlyException.hpp"
 
 namespace Infrastructure::Database {
+
+[[nodiscard]] auto DatabaseRuntime::GetDatabaseConnection() noexcept -> duckdb::Connection& {
+    return m_DatabaseConnection;
+}
+
+[[nodiscard]] auto DatabaseRuntime::GetTransactionRunner() noexcept -> TransactionRunner& {
+    return m_TransactionRunner;
+}
 
 void DatabaseRuntime::BootstrapDatabase() {
     m_TransactionRunner.TransactionWrapper([this]() -> void {

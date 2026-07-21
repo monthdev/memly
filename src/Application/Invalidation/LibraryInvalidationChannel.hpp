@@ -69,10 +69,10 @@ private:
             this,
             &LibraryInvalidationChannel::InvalidationSignal,
             ControllerPointer,
-            [ControllerLibraryInvalidationTarget, ControllerRefreshMethod{ std::forward<ControllerRefreshMethodType>(ControllerRefreshMethod) }](
+            [ControllerLibraryInvalidationTarget, CapturedControllerRefreshMethod{ std::forward<ControllerRefreshMethodType>(ControllerRefreshMethod) }](
                 const LibraryInvalidationTargetBitset& CoordinatorLibraryInvalidationTargetBitset) noexcept -> void {
                 if (CoordinatorLibraryInvalidationTargetBitset.Contains(ControllerLibraryInvalidationTarget)) {
-                    std::invoke(ControllerRefreshMethod);
+                    std::invoke(CapturedControllerRefreshMethod);
                 }
             },
             Qt::DirectConnection);

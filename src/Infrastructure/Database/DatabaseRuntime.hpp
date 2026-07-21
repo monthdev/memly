@@ -27,13 +27,8 @@ public:
     auto operator=(const DatabaseRuntime&) -> DatabaseRuntime& = delete;
     auto operator=(DatabaseRuntime&&) -> DatabaseRuntime& = delete;
 
-    [[nodiscard]] auto GetDatabaseConnection() noexcept -> duckdb::Connection& {
-        return m_DatabaseConnection;
-    }
-
-    [[nodiscard]] auto GetTransactionRunner() noexcept -> TransactionRunner& {
-        return m_TransactionRunner;
-    }
+    [[nodiscard]] auto GetDatabaseConnection() noexcept -> duckdb::Connection&;
+    [[nodiscard]] auto GetTransactionRunner() noexcept -> TransactionRunner&;
 
 private:
     void BootstrapDatabase();

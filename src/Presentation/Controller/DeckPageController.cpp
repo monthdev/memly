@@ -14,6 +14,10 @@
 
 namespace Presentation::Controller {
 
+[[nodiscard]] auto DeckPageController::GetDeckForestModel() noexcept -> Presentation::Model::DeckForestModel* {
+    return &m_DeckForestModel;
+}
+
 void DeckPageController::RefreshDeckForestModel(const std::int64_t AsOfMillisecondsSinceEpoch) noexcept {
     Support::Runtime::TryCatchWrapper([&]() -> void {
         std::vector<Application::Domain::Deck::Index::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{

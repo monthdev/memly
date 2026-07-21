@@ -2,10 +2,12 @@
 
 #include <duckdb.hpp>
 
+#include <cassert>
 #include <expected>
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
@@ -28,6 +30,9 @@ u_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
         return "exclude_self";
     case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSubtree:
         return "exclude_subtree";
+    default:
+        assert(false);
+        std::unreachable();
     }
 }
 
@@ -108,11 +113,10 @@ u_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
     std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{
         u_HandleRecoverableReviewSessionMutationError(*QueryResult)
     };
-    if (RecoverableReviewSessionMutationError.has_value()) {
-        return RecoverableReviewSessionMutationError;
+    if (not RecoverableReviewSessionMutationError.has_value()) {
+        Infrastructure::Database::ThrowOnMutationNoOp(*QueryResult, "Review session rename did not update a review session");
     }
-    Infrastructure::Database::ThrowOnMutationNoOp(*QueryResult, "Review session rename did not update a review session");
-    return std::nullopt;
+    return RecoverableReviewSessionMutationError;
 }
 
 [[nodiscard]] auto ReviewSessionStore::EditReviewSessionToDefault(const std::string& CurrentReviewSessionId,
