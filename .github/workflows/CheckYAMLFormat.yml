@@ -1,4 +1,4 @@
-name: Check Markdown Format
+name: Check YAML Format
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  markdown-format:
+  yml-format:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Collect target Markdown files
+      - name: Collect target YAML files
         id: files
         env:
           BEFORE_SHA: ${{ github.event.before }}
@@ -47,26 +47,26 @@ jobs:
               .prettierrc.yaml \
               .prettierrc.yml \
               prettier.config.js \
-              .github/workflows/CheckMarkdownFormat.yml
+              .github/workflows/CheckYAMLFormat.yml
           )
 
           if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
-            echo "Markdown check configuration changed; checking all Markdown files."
-            git ls-files '*.md' '*.markdown' > /tmp/markdown_files.txt
+            echo "YAML check configuration changed; checking all YAML files."
+            git ls-files '*.yaml' '*.yml' > /tmp/yaml_files.txt
           else
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              '*.md' '*.markdown' > /tmp/markdown_files.txt
+              '*.yaml' '*.yml' > /tmp/yaml_files.txt
           fi
 
-          if [[ ! -s /tmp/markdown_files.txt ]]; then
+          if [[ ! -s /tmp/yaml_files.txt ]]; then
             echo "has_files=false" >> "$GITHUB_OUTPUT"
-            echo "No Markdown files changed."
+            echo "No YAML files changed."
             exit 0
           fi
 
           echo "has_files=true" >> "$GITHUB_OUTPUT"
-          echo "Target Markdown files:"
-          cat /tmp/markdown_files.txt
+          echo "Target YAML files:"
+          cat /tmp/yaml_files.txt
 
       - name: Set up Node.js
         if: steps.files.outputs.has_files == 'true'
@@ -74,11 +74,11 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Check Markdown formatting
+      - name: Check YAML formatting
         if: steps.files.outputs.has_files == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t FILES < /tmp/markdown_files.txt
+          mapfile -t FILES < /tmp/yaml_files.txt
           npx --yes "prettier@${PRETTIER_VERSION}" --version
           npx --yes "prettier@${PRETTIER_VERSION}" --check "${FILES[@]}"

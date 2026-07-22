@@ -1,4 +1,4 @@
-name: Build Doxygen
+name: Check Doxygen
 
 on:
   pull_request:
@@ -6,9 +6,13 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   doxygen:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -18,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y doxygen graphviz
+          sudo apt-get install --no-install-recommends -y doxygen graphviz
           doxygen --version
           dot -V
 

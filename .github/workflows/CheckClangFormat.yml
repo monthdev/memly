@@ -6,77 +6,105 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   clang-format:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LLVM_MAJOR: "22"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Install clang-format 22 (apt.llvm.org)
-        shell: bash
+      - name: Collect target C/C++ files
+        id: files
         env:
-          LLVM_MAJOR: "22"
+          BEFORE_SHA: ${{ github.event.before }}
+          PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
         run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            BASE_SHA="$PULL_REQUEST_BASE_SHA"
+          else
+            BASE_SHA="${BEFORE_SHA:-}"
+            if [[ -z "$BASE_SHA" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+              BASE_SHA="$(git hash-object -t tree /dev/null)"
+            fi
+          fi
+
+          CXX_PATHS=(
+            ':(glob)**/*.c'
+            ':(glob)**/*.cc'
+            ':(glob)**/*.cpp'
+            ':(glob)**/*.cxx'
+            ':(glob)**/*.h'
+            ':(glob)**/*.hh'
+            ':(glob)**/*.hpp'
+            ':(glob)**/*.hxx'
+            ':(glob)**/*.m'
+            ':(glob)**/*.mm'
+          )
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .clang-format \
+              .github/workflows/CheckClangFormat.yml
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "ClangFormat check configuration changed; checking all C/C++ files."
+            git ls-files "${CXX_PATHS[@]}" > /tmp/clang_format_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              "${CXX_PATHS[@]}" > /tmp/clang_format_files.txt
+          fi
+
+          if [[ ! -s /tmp/clang_format_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No C/C++ files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target C/C++ files:"
+          cat /tmp/clang_format_files.txt
+
+      - name: Install clang-format ${{ env.LLVM_MAJOR }}
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y wget gnupg lsb-release software-properties-common
-          # Add LLVM repo and metadata for the selected clang-format major.
+          sudo apt-get install --no-install-recommends -y wget gnupg lsb-release software-properties-common
           wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
           sudo bash /tmp/llvm.sh "$LLVM_MAJOR"
           sudo apt-get update
-          PKG="clang-format-${LLVM_MAJOR}"
-          sudo apt-get install -y "$PKG"
-          CF_BIN="/usr/bin/${PKG}"
-          echo "CF_BIN=$CF_BIN" >> "$GITHUB_ENV"
-          VERSION_OUTPUT=$("$CF_BIN" --version)
+          CLANG_FORMAT_PACKAGE="clang-format-${LLVM_MAJOR}"
+          sudo apt-get install --no-install-recommends -y "$CLANG_FORMAT_PACKAGE"
+          CLANG_FORMAT_EXECUTABLE="/usr/bin/${CLANG_FORMAT_PACKAGE}"
+          echo "CLANG_FORMAT_EXECUTABLE=$CLANG_FORMAT_EXECUTABLE" >> "$GITHUB_ENV"
+          VERSION_OUTPUT="$("$CLANG_FORMAT_EXECUTABLE" --version)"
           echo "$VERSION_OUTPUT"
           if [[ "$VERSION_OUTPUT" != *"version ${LLVM_MAJOR}."* ]]; then
             echo "::error::Expected clang-format $LLVM_MAJOR.x, got: $VERSION_OUTPUT"
             exit 1
           fi
-          # Show any conflicting shims on PATH for debugging
-          type -a clang-format || true
 
-      - name: Determine diff base
-        id: base
+      - name: Check C/C++ formatting
+        if: steps.files.outputs.has_files == 'true'
         shell: bash
         run: |
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            git fetch origin "${GITHUB_BASE_REF}" --depth=1
-            MB=$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")
-          else
-            MB="${GITHUB_EVENT_BEFORE:-}"
-            if [[ -z "$MB" || "$MB" == "0000000000000000000000000000000000000000" ]]; then
-              MB=$(git rev-parse HEAD~1)
-            fi
-          fi
-          echo "mb=$MB" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          mapfile -t FILES < /tmp/clang_format_files.txt
+          : "${CLANG_FORMAT_EXECUTABLE:?CLANG_FORMAT_EXECUTABLE not set}"
 
-      - name: Run clang-format on changed files
-        shell: bash
-        run: |
-          MB="${{ steps.base.outputs.mb }}"
-          mapfile -t FILES < <(git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
-            | grep -E '\.(c|cc|cpp|cxx|h|hh|hpp|hxx|m|mm)$' || true)
-
-          if [[ ${#FILES[@]} -eq 0 ]]; then
-            echo "No C/C++ files changed."
-            exit 0
-          fi
-
-          : "${CF_BIN:?CF_BIN not set}"
-          "$CF_BIN" --version
-
-          FAIL=0
-          for f in "${FILES[@]}"; do
-            "$CF_BIN" --dry-run -Werror -style=file "$f" || FAIL=1
-          done
-
-          if [[ $FAIL -ne 0 ]]; then
+          if ! "$CLANG_FORMAT_EXECUTABLE" --dry-run -Werror -style=file "${FILES[@]}"; then
             echo "::error::Some files are not formatted. Run: clang-format -i -style=file <file>..."
-            echo "Changed files checked:"
-            printf '%s\n' "${FILES[@]}"
             exit 1
           fi

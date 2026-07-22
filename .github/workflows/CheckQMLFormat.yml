@@ -6,9 +6,13 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   qml-format:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       QT_VERSION: "6.11.1"
       QT_ARCH: "linux_gcc_64"
@@ -20,18 +24,63 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Collect target QML files
+        id: files
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BASE_SHA="$PULL_REQUEST_BASE_SHA"
+          else
+            BASE_SHA="${BEFORE_SHA:-}"
+            if [[ -z "$BASE_SHA" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+              BASE_SHA="$(git hash-object -t tree /dev/null)"
+            fi
+          fi
+
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .qmlformat.ini \
+              .github/workflows/CheckQMLFormat.yml
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "QML format check configuration changed; checking all QML files."
+            git ls-files '*.qml' > /tmp/qml_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              '*.qml' > /tmp/qml_files.txt
+          fi
+
+          if [[ ! -s /tmp/qml_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No QML files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target QML files:"
+          cat /tmp/qml_files.txt
+
       - name: Set up Python
+        if: steps.files.outputs.has_files == 'true'
         uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
       - name: Cache Qt
+        if: steps.files.outputs.has_files == 'true'
         uses: actions/cache@v5
         with:
           path: ${{ env.QT_DIR }}
           key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
 
       - name: Install aqtinstall
+        if: steps.files.outputs.has_files == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -40,6 +89,7 @@ jobs:
           python -m aqt version
 
       - name: Install Qt ${{ env.QT_VERSION }}
+        if: steps.files.outputs.has_files == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -50,13 +100,14 @@ jobs:
           fi
 
       - name: Locate qmlformat
+        if: steps.files.outputs.has_files == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
-          QMLFORMAT_BIN="$(find "$QT_DIR" -type f -name qmlformat | sort | head -n1)"
+          QMLFORMAT_BIN="${QT_DIR}/${QT_VERSION}/gcc_64/bin/qmlformat"
           if [[ -z "$QMLFORMAT_BIN" || ! -x "$QMLFORMAT_BIN" ]]; then
-            echo "::error::qmlformat not found under QT_DIR=$QT_DIR"
+            echo "::error::qmlformat not found at $QMLFORMAT_BIN"
             exit 1
           fi
 
@@ -66,54 +117,22 @@ jobs:
 
           "$QMLFORMAT_BIN" --version
 
-      - name: Determine diff base
-        id: base
+      - name: Check QML formatting
+        if: steps.files.outputs.has_files == 'true'
         shell: bash
         run: |
           set -euo pipefail
-
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            git fetch origin "${GITHUB_BASE_REF}" --depth=1
-            MB="$(git merge-base HEAD "origin/${GITHUB_BASE_REF}")"
-          else
-            MB="${GITHUB_EVENT_BEFORE:-}"
-            if [[ -z "$MB" || "$MB" == "0000000000000000000000000000000000000000" ]]; then
-              MB="$(git rev-parse HEAD~1)"
-            fi
-          fi
-
-          echo "mb=$MB" >> "$GITHUB_OUTPUT"
-
-      - name: Run qmlformat on changed files
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          MB="${{ steps.base.outputs.mb }}"
-          mapfile -t FILES < <(
-            git diff --name-only --diff-filter=ACMRT "$MB"...HEAD \
-              | grep -E '\.qml$' || true
-          )
-
-          if [[ ${#FILES[@]} -eq 0 ]]; then
-            echo "No QML files changed."
-            exit 0
-          fi
-
+          mapfile -t FILES < /tmp/qml_files.txt
           : "${QMLFORMAT_BIN:?QMLFORMAT_BIN not set}"
-          "$QMLFORMAT_BIN" --version
-
           FAIL=0
-          TMP_DIR="$(mktemp -d)"
-          trap 'rm -rf "$TMP_DIR"' EXIT
+          FORMATTED_FILE="$(mktemp)"
+          trap 'rm -f "$FORMATTED_FILE"' EXIT
 
           for f in "${FILES[@]}"; do
-            OUT="$TMP_DIR/$(basename "$f")"
-
             echo "Checking $f"
-            "$QMLFORMAT_BIN" "$f" > "$OUT"
+            "$QMLFORMAT_BIN" --settings .qmlformat.ini "$f" > "$FORMATTED_FILE"
 
-            if ! diff -u "$f" "$OUT"; then
+            if ! diff -u "$f" "$FORMATTED_FILE"; then
               echo "::error file=$f::File is not properly formatted with qmlformat"
               FAIL=1
             fi
@@ -121,7 +140,5 @@ jobs:
 
           if [[ $FAIL -ne 0 ]]; then
             echo "::error::Some files are not formatted. Run qmlformat from Qt ${QT_VERSION} and compare the diff above."
-            echo "Changed files checked:"
-            printf '%s\n' "${FILES[@]}"
             exit 1
           fi

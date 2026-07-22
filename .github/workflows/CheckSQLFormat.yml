@@ -2,12 +2,19 @@ name: Check SQL Format
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   sql-format:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SQL_FORMATTER_VERSION: "15.8.2"
 
     steps:
       - name: Checkout
@@ -15,37 +22,82 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect changed SQL files
-        id: changed-sql
-        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
-        with:
-          files: |
-            **/*.sql
-          separator: "\n"
-          safe_output: false
+      - name: Collect target SQL files
+        id: files
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: No SQL changes
-        if: steps.changed-sql.outputs.any_changed != 'true'
-        run: echo "No .sql files changed."
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BASE_SHA="$PULL_REQUEST_BASE_SHA"
+          else
+            BASE_SHA="${BEFORE_SHA:-}"
+            if [[ -z "$BASE_SHA" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+              BASE_SHA="$(git hash-object -t tree /dev/null)"
+            fi
+          fi
+
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .github/workflows/CheckSQLFormat.yml
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "SQL format check configuration changed; checking all SQL files."
+            git ls-files '*.sql' > /tmp/sql_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              '*.sql' > /tmp/sql_files.txt
+          fi
+
+          if [[ ! -s /tmp/sql_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No SQL files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target SQL files:"
+          cat /tmp/sql_files.txt
 
       - name: Set up Node.js
-        if: steps.changed-sql.outputs.any_changed == 'true'
+        if: steps.files.outputs.has_files == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: "24"
 
       - name: Install sql-formatter
-        if: steps.changed-sql.outputs.any_changed == 'true'
-        run: npm install --global sql-formatter
-
-      - name: Verify SQL formatting
-        if: steps.changed-sql.outputs.any_changed == 'true'
-        env:
-          ChangedSqlFiles: ${{ steps.changed-sql.outputs.all_changed_files }}
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
         run: |
-          while IFS= read -r File; do
-            [ -n "$File" ] || continue
-            sql-formatter -l duckdb --fix "$File"
-          done <<< "$ChangedSqlFiles"
+          set -euo pipefail
+          npm install --global "sql-formatter@${SQL_FORMATTER_VERSION}"
+          sql-formatter --version
 
-          git diff --exit-code -- $ChangedSqlFiles
+      - name: Check SQL formatting
+        if: steps.files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/sql_files.txt
+          FAIL=0
+          FORMATTED_FILE="$(mktemp)"
+          trap 'rm -f "$FORMATTED_FILE"' EXIT
+
+          for f in "${FILES[@]}"; do
+            echo "Checking $f"
+            sql-formatter --language duckdb "$f" > "$FORMATTED_FILE"
+
+            if ! diff -u "$f" "$FORMATTED_FILE"; then
+              echo "::error file=$f::File is not properly formatted with sql-formatter"
+              FAIL=1
+            fi
+          done
+
+          if [[ $FAIL -ne 0 ]]; then
+            echo "::error::Some SQL files are not formatted. Run: sql-formatter --language duckdb --fix <file>..."
+            exit 1
+          fi
