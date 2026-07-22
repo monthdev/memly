@@ -1,29 +1,27 @@
 #pragma once
 
-#include <array>
 #include <concepts>
 #include <cstdint>
-#include <utility>
 
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Application::Invalidation {
 
 enum class [[nodiscard]] LibraryInvalidationTargetEnum : std::uint8_t {
-    DeckForestSnapshot,
-    TargetCount
+    DeckForestSnapshot = std::uint8_t{ 1 } << std::uint8_t{ 0 },
+    TargetEnd = std::uint8_t{ 1 } << std::uint8_t{ 1 }
 };
 
 class LibraryInvalidationTargetBitset final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    std::array<bool, std::to_underlying(LibraryInvalidationTargetEnum::TargetCount)> m_TargetArray;
+    std::uint8_t m_TargetBitMask;
 
 public:
     template <typename... LibraryInvalidationTargetType>
         requires(sizeof...(LibraryInvalidationTargetType) > 0 and (std::same_as<LibraryInvalidationTargetType, LibraryInvalidationTargetEnum> and ...))
     explicit LibraryInvalidationTargetBitset(const LibraryInvalidationTargetType... LibraryInvalidationTargets) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_TargetArray{} {
+        , m_TargetBitMask{} {
         (Set(LibraryInvalidationTargets), ...);
     }
 
