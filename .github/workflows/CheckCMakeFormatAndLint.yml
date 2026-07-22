@@ -1,4 +1,4 @@
-name: Check CMake Format
+name: Check CMake Format and Lint
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  cmake-format:
+  cmake-format-and-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -84,10 +84,4 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t FILES < /tmp/cmake_files.txt
-
-          OUTPUT="$(cmake-lint --suppress-decorations -c .cmakelintrc "${FILES[@]}" 2>&1 || true)"
-          printf '%s\n' "$OUTPUT"
-
-          if echo "$OUTPUT" | grep -Eq '\b[CEW][0-9]{4}\b'; then
-            exit 1
-          fi
+          cmake-lint --suppress-decorations -c .cmakelintrc -- "${FILES[@]}"

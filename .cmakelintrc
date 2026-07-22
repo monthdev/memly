@@ -1,1 +1,2 @@
-filter=-
+include:
+  - .cmake-format.yaml
