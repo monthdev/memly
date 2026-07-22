@@ -35,10 +35,10 @@ namespace Presentation::Model {
             return QModelIndex{};
         }
         const DeckNode& CurrentDeckNode{ CurrentDeckNodeOptional.value().get() };
-        if (not CurrentDeckNode.m_ParentDeckNodeIndex.has_value()) {
+        if (not CurrentDeckNode.m_ParentDeckNodeIndexOptional.has_value()) {
             return QModelIndex{};
         }
-        const std::size_t ParentDeckNodeIndex{ CurrentDeckNode.m_ParentDeckNodeIndex.value() };
+        const std::size_t ParentDeckNodeIndex{ CurrentDeckNode.m_ParentDeckNodeIndexOptional.value() };
         const DeckNode& ParentDeckNode{ m_DeckNodesVector.at(ParentDeckNodeIndex) };
         return createIndex(static_cast<int>(ParentDeckNode.m_RowInParentIndex), 0, static_cast<quintptr>(ParentDeckNodeIndex));
     });
@@ -190,9 +190,9 @@ void DeckForestModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>& Sibli
                      });
 }
 
-void DeckForestModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& ParentDeckNodeIndex) noexcept {
-    std::vector<std::size_t>& SiblingDeckNodeIndexes{ ParentDeckNodeIndex.has_value() ?
-                                                          m_DeckNodesVector.at(ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector :
+void DeckForestModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& ParentDeckNodeIndexOptional) noexcept {
+    std::vector<std::size_t>& SiblingDeckNodeIndexes{ ParentDeckNodeIndexOptional.has_value() ?
+                                                          m_DeckNodesVector.at(ParentDeckNodeIndexOptional.value()).m_ChildDeckNodeIndexesVector :
                                                           m_RootDeckNodeIndexesVector };
     for (std::size_t SiblingDeckRow{ 0 }; SiblingDeckRow < SiblingDeckNodeIndexes.size(); ++SiblingDeckRow) {
         DeckNode& ChildDeckNode{ m_DeckNodesVector.at(SiblingDeckNodeIndexes.at(SiblingDeckRow)) };
@@ -233,9 +233,9 @@ void DeckForestModel::ReplaceAll(std::vector<Application::Domain::Deck::Index::D
                 RootDeckNodeIndexesVector.push_back(DeckNodeIndex);
                 continue;
             }
-            CurrentDeckNode.m_ParentDeckNodeIndex = DeckNodeIndexByIdHash.at(ParentIdOptional.value());
-            CurrentDeckNode.m_RowInParentIndex = DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector.size();
-            DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndex.value()).m_ChildDeckNodeIndexesVector.push_back(DeckNodeIndex);
+            CurrentDeckNode.m_ParentDeckNodeIndexOptional = DeckNodeIndexByIdHash.at(ParentIdOptional.value());
+            CurrentDeckNode.m_RowInParentIndex = DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndexOptional.value()).m_ChildDeckNodeIndexesVector.size();
+            DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndexOptional.value()).m_ChildDeckNodeIndexesVector.push_back(DeckNodeIndex);
         }
         beginResetModel();
         m_DeckNodesVector = std::move(DeckNodesVector);

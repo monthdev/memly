@@ -24,17 +24,17 @@ class DeckForestModel final : public QAbstractItemModel, private Support::Specia
 private:
     struct DeckNode : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
         Application::Domain::Deck::Index::DeckForestSnapshotNode m_DeckForestSnapshotNode;
-        std::optional<std::size_t> m_ParentDeckNodeIndex;
+        std::optional<std::size_t> m_ParentDeckNodeIndexOptional;
         std::size_t m_RowInParentIndex;
         std::vector<std::size_t> m_ChildDeckNodeIndexesVector;
 
         explicit DeckNode(Application::Domain::Deck::Index::DeckForestSnapshotNode&& DeckForestSnapshotNode,
-                 std::optional<std::size_t>&& ParentDeckNodeIndex,
+                 std::optional<std::size_t>&& ParentDeckNodeIndexOptional,
                  const std::size_t RowInParentIndex,
                  std::vector<std::size_t>&& ChildDeckNodeIndexesVector) noexcept
             : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
             , m_DeckForestSnapshotNode{ std::move(DeckForestSnapshotNode) }
-            , m_ParentDeckNodeIndex{ std::move(ParentDeckNodeIndex) }
+            , m_ParentDeckNodeIndexOptional{ std::move(ParentDeckNodeIndexOptional) }
             , m_RowInParentIndex{ RowInParentIndex }
             , m_ChildDeckNodeIndexesVector{ std::move(ChildDeckNodeIndexesVector) } {
         }

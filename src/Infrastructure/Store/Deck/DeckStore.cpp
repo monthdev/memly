@@ -24,9 +24,9 @@ void DeckStore::CreateChildDeck(const std::string& DeckName, const std::string& 
     assert(QueryResult->begin() not_eq QueryResult->end());
 }
 
-void DeckStore::MoveDeck(const std::string& DeckId, const std::optional<std::string>& NewParentDeckId) {
+void DeckStore::MoveDeck(const std::string& DeckId, const std::optional<std::string>& NewParentDeckIdOptional) {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_MoveDeckPreparedStatement->Execute(
-        DeckId, NewParentDeckId.has_value() ? duckdb::Value{ NewParentDeckId.value() } : duckdb::Value{ nullptr }) };
+        DeckId, NewParentDeckIdOptional.has_value() ? duckdb::Value{ NewParentDeckIdOptional.value() } : duckdb::Value{ nullptr }) };
     Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     assert(QueryResult->begin() not_eq QueryResult->end());
 }

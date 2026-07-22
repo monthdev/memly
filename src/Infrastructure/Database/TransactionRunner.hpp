@@ -14,7 +14,7 @@ namespace Infrastructure::Database {
 
 class TransactionRunner final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    template <typename>
+    template <typename CandidateType>
     struct IsStdExpectedType : std::false_type, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
         explicit constexpr IsStdExpectedType() noexcept
             : std::false_type{}
@@ -30,7 +30,7 @@ private:
         }
     };
 
-    template <typename>
+    template <typename DependentType>
     struct AlwaysFalseType : std::false_type, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
         explicit constexpr AlwaysFalseType() noexcept
             : std::false_type{}
@@ -55,13 +55,13 @@ public:
                 std::invoke(std::forward<ServiceMethodType>(ServiceMethod));
                 m_DatabaseConnection.Commit();
             } else if constexpr (IsStdExpectedType<std::remove_cvref_t<std::invoke_result_t<ServiceMethodType&&>>>::value) {
-                std::invoke_result_t<ServiceMethodType&&> Result{ std::invoke(std::forward<ServiceMethodType>(ServiceMethod)) };
-                if (Result.has_value()) {
+                std::invoke_result_t<ServiceMethodType&&> ResultExpected{ std::invoke(std::forward<ServiceMethodType>(ServiceMethod)) };
+                if (ResultExpected.has_value()) {
                     m_DatabaseConnection.Commit();
                 } else {
                     m_DatabaseConnection.Rollback();
                 }
-                return Result;
+                return ResultExpected;
             } else {
                 static_assert(AlwaysFalseType<std::invoke_result_t<ServiceMethodType&&>>::value,
                               "TransactionWrapper only supports void or std::expected return types");

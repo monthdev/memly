@@ -35,11 +35,11 @@ namespace Application::Service::ReviewSession {
 [[nodiscard]] auto ReviewSessionService::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName)
     -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-        const std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationError{
+        const std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
             m_ReviewSessionStore.RenameReviewSession(ReviewSessionId, ReviewSessionName)
         };
-        if (RecoverableReviewSessionMutationError.has_value()) {
-            return std::unexpected{ RecoverableReviewSessionMutationError.value() };
+        if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
+            return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
         }
         return {};
     });

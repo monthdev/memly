@@ -1,390 +1,274 @@
-# Memly Coding Guide
-
-## Constructor Parameter and Member Ordering
-
-Constructor parameter and member ordering of `RuntimeContext`-owned objects must
-match the ordering found in `RuntimeContext`.
-
-See \ref RuntimeContext.hpp "RuntimeContext.hpp" and \ref RuntimeContext.cpp
-"RuntimeContext.cpp".
-
-## Constructor Base And Member Construction
-
-Every non-deleted, non-defaulted constructor must explicitly brace-initialize
-every direct base class and every non-static data member in its initializer
-list. A most-derived constructor must also explicitly brace-initialize every
-virtual base class.
-
-Initializer lists must follow the actual initialization order: virtual base
-classes first, direct base classes in base-specifier order next, and non-static
-data members in declaration order last.
-
-Explicitly defaulted copy and move constructors are exempt because `= default`
-cannot be combined with an initializer list and delegates memberwise
-construction to the language.
-
-Default member initializers are disallowed. An explicitly defaulted default
-constructor may only be used when the class has no direct base classes or
-non-static data members.
-
-Delegating constructors are disallowed.
-
-## Variable Initialization
-
-Named variable definitions must use direct-list initialization. Copy
-initialization, copy-list initialization, parenthesized initialization, and
-omitted initialization are disallowed wherever the language permits an explicit
-initializer.
-
-Lambda init-captures must use brace initialization.
-
-## Header Declaration Surface
-
-Constructors must always be declared and implemented in the header even when the
-implementation is `= default` or `= delete`.
-
-Types that inherit `NonInstantiableMixin` must explicitly reiterate their
-ordinary default constructor `= delete`, even though the inherited policy
-already makes it implicitly deleted. This declaration is the visual marker that
-the type cannot be instantiated. Other types must not declare a deleted ordinary
-default constructor solely because they expose different ordinary constructors.
-
-Function bodies must only appear in headers for constructors and templates.
-Every non-templated non-constructor method and free function must be declared in
-the header and implemented in the matching source file, including trivial
-one-line accessors.
-
-Explicitly defaulted and deleted special-member declarations remain in headers
-because they do not contain function bodies.
-
-Destructors must not be declared by policy consumers. The special-member policy
-mixins must explicitly default their protected destructors so the mixins
-themselves satisfy the Rule of Five.
-
-Destructors are expected to be default behavior because ownership must be
-managed by RAII containers and member objects.
-
-Parameters must only be named where methods are implemented, not where methods
-are declared.
-
-## Service Method State
-
-Services group the internal domain operations as the domain API and capability
-surface used to build application commands; they do not represent stateful
-domain entities. Public service methods that do not require service instance
-state or dependencies must be declared `static`. Such methods remain on the
-service API instead of becoming file-private helpers solely because they are
-static.
-
-## Class Declaration Ordering
-
-The body of every class and struct must begin with class-level Qt metadata
-macros when applicable followed by all friend declarations.
-
-Classes with private nested types or private data members must use a `private:`
-section as their first access section. Nested types required to declare data
-members must appear first, followed by the data members in their required
-declaration order which determines the construction order of non-static data
-members. This data-member-first ordering applies to structs as well as classes.
-
-Constructor declarations must immediately follow the data-member block under
-their intended `private:`, `protected:`, or `public:` access. All remaining
-class or struct declarations must follow the constructors.
-
-## Parameter Passing
-
-Parameters must be trivial primitive value copies, references, or rvalue
-references.
-
-Non-trivial owning values must not be copied into parameters by value.
-
-Use rvalue reference parameters when the callee consumes ownership.
-
-## Attributes, Specifiers, Qualifiers, And Qt Metadata Macros
-
-Classes, data-time object structs, methods, members, parameters, free functions,
-and lambdas must use applicable C++ attributes, specifiers, qualifiers,
-exception specifications, constraints, and Qt metadata macros.
-
-Class and data-time object struct declarations must use `final` and
-`[[nodiscard]]` where they apply. Class, struct, and enum types returned by
-value must use `[[nodiscard]]`. Enum types must always use `[[nodiscard]]`.
-
-Every constructor must use `explicit`, including default, multi-parameter, copy,
-and move constructors.
-
-Conversion operators are disallowed.
-
-Every non-void method and free function must use `[[nodiscard]]`. Methods and
-free functions must use `[[noreturn]]`, `constexpr`, `consteval`, `inline`,
-`static`, `virtual`, `override`, `final`, `const`, lvalue reference qualifiers,
-rvalue reference qualifiers, `noexcept`, and trailing return types where they
-apply.
-
-Templated methods, free functions, and lambdas must use `requires` clauses where
-constraints apply.
-
-Members must use `const`, `static`, `inline`, `constexpr`, and `constinit` where
-they apply.
-
-Parameters must use `const`, pointer or reference constness, and default
-arguments where they apply.
-
-Lambdas must use explicit return types, explicit template parameter lists,
-`constexpr`, `consteval`, `static`, `noexcept`, and attributes where they apply.
-
-Qt types and callable surfaces must use `Q_OBJECT`, `Q_GADGET`, `Q_NAMESPACE`,
-`Q_PROPERTY`, `Q_SIGNAL`, `Q_SLOT`, `Q_INVOKABLE`, `Q_ENUM`, `Q_FLAG`,
-`Q_DECLARE_FLAGS`, `QML_ANONYMOUS`, `QML_ELEMENT`, `QML_NAMED_ELEMENT`,
-`QML_SINGLETON`, and `QML_UNCREATABLE` where they apply.
-
-## Programming Errors Versus Runtime Errors
-
-Conditions that can fail only when Memly code is incorrect must be enforced with
-debug assertions. This includes violated internal preconditions, postconditions,
-invariants, invalid internal enum values, and impossible control states. Do not
-throw exceptions for programming errors.
-
-Conditions that can fail during correct execution because of external or runtime
-state must not be enforced with assertions. Instead, throw an exception when
-such a failure cannot be recovered at the current boundary and is not part of a
-typed recoverable result surface.
-
-Validate user input and other untrusted values at their input boundary before
-converting them into internal state. Downstream code may then assert the
-established invariant instead of repeatedly validating it as a runtime error.
-
-Do not add both an assertion and a runtime error check for the same invariant
-unless they enforce distinct boundaries.
-
-## Database Trust Boundary
-
-Memly assumes that its database is modified only through Memly database control
-paths. External modification and database-file tampering are outside the
-supported runtime contract.
-
-Values read from the database may be assumed to satisfy the schema and the
-application invariants established by Memly write paths. Conditions that can
-fail only because those invariants were violated by incorrect Memly code (or
-external modification of database file) must be enforced with debug assertions
-rather than runtime corruption checks.
-
-This assumption does not apply to database engine failures. Those remain runtime
-errors at the appropriate database boundary.
-
-Positional DuckDB query-result decoders may suppress `readability-magic-numbers`
-with a paired `NOLINTBEGIN` and `NOLINTEND` around the narrow decoding
-expression.
-
-## QML Bridge Surface
-
-QML bridge state, object, model, and metadata surfaces must be exposed through
-`Q_PROPERTY`.
-
-Stable object and model pointers exposed through `Q_PROPERTY` must use
-`CONSTANT` when the pointer identity does not change.
-
-QML bridge application commands must use `Q_INVOKABLE`.
-
-## Data Naming Prefixes
-
-Instance data members must use an `m_` prefix.
-
-Static data members and function-local static variables must use an `s_` prefix.
-
-Global variables are disallowed.
-
-## Type-Suffix Naming
-
-Favor using container/user-defined type suffixes for named variables and
-methods/functions besides for public API methods.
-
-Use suffixes such as `Vector`, `Array`, `Map`, `UnorderedMap`, `Set`, and
-`UnorderedSet` where they apply.
-
-`std::string` and `std::string_view` is grouped with primitive types and must
-not be used as a type suffix to names except for methods/functions where the
-emphasis is on the conversion to either of these two types.
-
-Named `std::expected` result variables must use the `Expected` suffix.
-
-Named `std::variant` result variables must use the `Variant` suffix.
-
-Named `std::optional` values must use the `Optional` suffix.
-
-Methods and functions that return `std::optional` must begin with `Try`.
-
-Associative container names must name the lookup relationship before the
-container suffix such as `DeckNodeIndexByDeckIdUnorderedMap`.
-
-Enum class type names must end in `Enum`.
-
-## Qt Types And Containers
-
-Application code must use standard library types and containers.
-
-Qt types and containers must only appear at Qt framework, QML bridge, Qt
-resource, Qt signal, and method override boundaries where the Qt API requires
-them.
-
-Convert between standard library types and Qt types at the boundary.
-
-## Qt Header Includes
-
-Qt includes must use public physical header paths without a module prefix, such
-as `<qobject.h>`. Do not use forwarding headers such as `<QObject>` or umbrella
-module headers such as `<QtCore>`.
-
-## Qt Dependency Boundary
-
-Presentation and View layers own normal Qt and QML integration.
-
-`main.cpp` may use Qt for process startup and QML engine bootstrap.
-
-Support/Runtime/QtApp may use Qt internally for Qt app runtime support such as
-app paths and Qt resources.
-
-Other layers must avoid Qt types in public APIs and must avoid direct Qt
-includes in implementation file. Use the Support/Runtime/QtApp boundary instead.
-
-## Container Access
-
-Use read-only container accessors when not modifying container data.
-
-Use `.at()` instead of `operator[]` for non-mutating element access.
-
-Use `operator[]` only for intentional mutation.
-
-Use `operator[]` for needed non-throwing bounded access when a preceding
-assertion enforces the internal index invariant. Narrowly suppress
-`cppcoreguidelines-pro-bounds-constant-array-index` and
-`cppcoreguidelines-pro-bounds-avoid-unchecked-container-access` on the exact
-access expression.
-
-## String Types
-
-Read-only string parameters must use `const std::string&` when their inputs are
-already `std::string` objects.
-
-Read-only string-view parameters must be passed by value as `std::string_view`
-when the same API intentionally accepts either `std::string` objects or string
-literals or when a non-allocating control path requires explicit string size
-information. Implementations should explicily add top-level `const` to the
-parameter as a local qualifier to the definition.
-
-String parameters must use `const char* const` when the control path already
-receives a character pointer or string literal and introducing an owning string
-container would cause a needless heap allocation. Named string constants on such
-control paths must use `const char* const`, or `constexpr const char*` when
-constant evaluation applies because `constexpr` already supplies the pointer's
-top-level constness.
-
-Stored `std::string_view` values must only appear in explicitly non-owning
-containers or data types whose owner and invalidation boundary are enforced by
-their design.
-
-## Forward Declarations
-
-Use forward declarations where the header only needs an incomplete type.
-
-## Copy And Move Surface
-
-Every Memly class and data-time object struct must obtain one effective special
-member policy from `Support::SpecialMemberPolicy`:
+# Memly Agent Coding Guide
+
+## Runtime Composition and Services
+
+Constructor parameters and data members of `RuntimeContext`-owned objects must
+follow their order in `RuntimeContext`. See \ref RuntimeContext.hpp
+"RuntimeContext.hpp" and \ref RuntimeContext.cpp "RuntimeContext.cpp".
+
+Services form the domain capability surface used by application commands; they
+do not model stateful domain entities. A state-free operation remains on its
+service when it belongs to that domain surface instead of becoming a
+file-private helper merely because it does not use instance state.
+
+## Initialization and Construction
+
+Every Memly type must explicitly declare an ordinary constructor
+(`custom-memly-declared-ordinary-constructor`). Constructor definitions must
+remain in headers, including `= default` and `= delete` definitions
+(`custom-memly-constructor-definition-in-header`).
+
+Every non-deleted, non-defaulted constructor must explicitly initialize every
+direct base, every non-static data member, and every virtual base for which it
+is the most-derived constructor
+(`custom-memly-complete-constructor-initializer-list`). Each constructor
+initializer uses brace initialization
+(`custom-memly-braced-constructor-initializer`). Default member initializers are
+disallowed (`custom-memly-no-default-member-initializer`), as are delegating
+constructors (`custom-memly-no-delegating-constructor`). A default constructor
+may use `= default` only when the type has no direct bases or non-static data
+members (`custom-memly-no-stateful-defaulted-default-constructor`); explicitly
+defaulted copy and move constructors remain allowed.
+
+Named variable definitions and lambda init-captures must use brace
+initialization (`custom-memly-braced-variable-initialization`) and direct-list
+spelling wherever the language permits it.
+
+Every constructor, including copy and move constructors, must be `explicit`
+(`custom-memly-always-explicit-constructor`). Conversion operators are
+disallowed (`custom-memly-conversion-operator`).
+
+## Special-Member Policy
+
+Every Memly class and data-carrying struct must obtain a policy from
+`Support::SpecialMemberPolicy` (`custom-memly-required-special-member-policy`):
 
 - `NoCopyNoMoveMixin` for runtime objects with stable identity or state.
 - `NoCopyMoveConstructOnlyMixin` for transferable values that may be move
-  constructed but must not be copied or assigned.
+  constructed but cannot be copied or assigned.
 - `NonInstantiableMixin` for static-only types.
 
-Types without a Memly base that already supplies the required policy must
-privately inherit the policy mixin directly. Derived Memly types must inherit
-the policy transitively from an existing policy-bearing Memly base rather than
-introducing a duplicate policy-base subobject.
+A type without a policy-bearing Memly base must inherit its policy directly. Any
+directly inherited policy mixin must be private
+(`custom-memly-private-direct-special-member-policy`). A derived Memly type must
+inherit the policy transitively from an existing policy-bearing base. Exactly
+one effective policy is allowed: different policies and direct repetition of a
+policy already inherited through another base are rejected
+(`custom-memly-nonconflicting-special-member-policy`). A same-policy diamond
+through two ordinary bases is also disallowed but cannot be detected by the
+current YAML matcher.
 
-Consumer types must not redeclare the copy constructor, move constructor, copy
-assignment operator, or move assignment operator already determined by their
-inherited policy. Only `NonInstantiableMixin` consumers reiterate their ordinary
-default constructor `= delete` according to the header-declaration rule.
+Policy consumers must not redeclare copy or move constructors or copy or move
+assignment operators (`custom-memly-no-consumer-special-member`), and must not
+declare destructors (`custom-memly-no-consumer-destructor`). Each policy mixin
+must explicitly default a protected destructor
+(`custom-memly-policy-mixin-destructor`).
 
-## Auto
+A `NonInstantiableMixin` consumer must explicitly reiterate its ordinary default
+constructor `= delete` as the visual marker that it cannot be instantiated
+(`custom-memly-explicit-non-instantiable-default-constructor`). Other consumers
+must not delete an ordinary default constructor
+(`custom-memly-deleted-default-constructor-only-for-non-instantiable`).
 
-`auto` is disallowed except where the language or API requires it such as
-lambdas, APIs that expose private types, or otherwise unnameable types.
+## Declaration Layout and Definition Placement
 
-Local lambdas and DuckDB query result iterators are examples of required `auto`
-usage.
+Class-level Qt metadata macros come first inside a class or struct, followed by
+friend declarations.
 
-## Namespace
+When a type has private nested types or data members, its first access block
+must be `private:`. Nested types needed by data-member declarations come first,
+then data members in construction order. This data-member-first rule applies to
+structs as well as classes.
 
-Source-owned namespaces must match the folder nesting under `src/`.
+Constructors immediately follow the data-member block under their intended
+access. All remaining declarations follow the constructors.
 
-Unnamed helper namespaces must be nested inside the matching source-owned
-namespace.
+Headers may contain bodies only for constructors and templates. Every ordinary
+non-template method and free function, including a one-line accessor, is
+declared in its header and defined in the corresponding source file
+(`custom-memly-no-header-function-definition`). Defaulted and deleted
+special-member declarations remain in headers because they have no function
+body.
 
-## Preprocessor Directives
+Function declaration parameters are unnamed
+(`custom-memly-no-named-declaration-parameter`); parameters are named at the
+definition.
 
-Conditional preprocessor directives must use the explicit `#if defined(Macro)`
-and `#if not defined(Macro)` forms instead of `#ifdef` and `#ifndef`.
+## Parameters, Ownership, and Strings
 
-## Lint Enforcement
+Pass scalars and small non-owning value types by value. Pass non-trivial owning
+values by reference, and use an rvalue reference when the callee consumes
+ownership. Do not copy non-trivial owning values into parameters by value.
 
-Memly-specific lint enforcement must remain expressible through `.clang-tidy`
-YAML, including its query-based custom checks. Do not introduce compiled
-clang-tidy extensions or a separate regular-expression or text-based style
-linter solely to enforce coding-guide rules. Rules that the YAML interface
-cannot enforce must remain documented conventions.
+Use `const std::string&` when a read-only input is already an owning string. Use
+`std::string_view` by value when an API intentionally accepts either strings or
+literals, or when a non-allocating path needs explicit size information
+(`custom-memly-string-view-parameter-by-value`). Add top-level `const` to a
+by-value `std::string_view` parameter at its definition
+(`custom-memly-string-view-definition-parameter-const`).
 
-## CMake Source Lists
+Use `const char* const` when the control path already receives a character
+pointer or literal and introducing an owning string would allocate needlessly.
+Named string constants on that path use `const char* const`, or
+`constexpr const char*` when constant evaluation applies.
 
-CMake glob variables must represent exactly one source-tree folder.
+Stored `std::string_view` values belong only in explicitly non-owning types or
+containers whose owner and invalidation boundary are enforced by their design.
 
-Do not use recursive globs for source, header, QML, or SQL file lists.
+## Result and Callable Contracts
 
-Split subfolders into their own glob variables instead of adding multiple folder
-patterns to one variable.
+Every non-deleted, non-void method and free function other than `main` is
+`[[nodiscard]]` (`custom-memly-nodiscard-callable`). Every enum is
+`[[nodiscard]]` (`custom-memly-nodiscard-enum`), as is every Memly class or
+struct returned by value (`custom-memly-nodiscard-returned-record`). Lambdas are
+exempt from the callable-level requirement because they are immediately consumed
+under the lambda policy below.
+
+Recoverable operation APIs expose success-oriented results. When a call can
+return a recoverable error, it returns `std::expected<SuccessType, ErrorType>`;
+use `std::expected<void, ErrorType>` when success carries no value.
+`std::optional<T>` represents absence within a successful result and never
+serves as an error channel.
+
+## Error and Database Boundaries
+
+Use debug assertions for conditions that can fail only when Memly code is
+incorrect: violated internal preconditions, postconditions, invariants, invalid
+internal enum values, and impossible control states. Do not throw for a
+programming error.
+
+Do not assert conditions that can fail during correct execution because of
+external or runtime state. Throw when such a failure cannot be recovered at the
+current boundary and is not represented by a typed recoverable result.
+
+Validate user input and other untrusted values at their input boundary before
+converting them into internal state. Downstream code may assert the established
+invariant instead of repeating runtime validation. Do not add both an assertion
+and a runtime check for one invariant unless they protect distinct boundaries.
+
+Memly assumes its database is modified only through Memly database control
+paths. External modification and database-file tampering are outside the
+supported runtime contract. Values read from the database may therefore be
+assumed to satisfy schema and application invariants established by Memly write
+paths. Violations of those invariants are programming errors; database-engine
+failures remain runtime errors at the database boundary.
+
+Positional DuckDB result decoding may narrowly suppress both
+`cppcoreguidelines-avoid-magic-numbers` and `readability-magic-numbers` with a
+paired `NOLINTBEGIN` and `NOLINTEND` around the decoding expression.
+
+## Qt and QML Boundaries
+
+Presentation and View own UI-facing Qt and QML integration. Focused Application
+runtime-coordination modules may use Qt when their behavior depends on the Qt
+event loop, signals, or timers; keep those dependencies contained and out of
+domain, service, store, and database contracts. `main.cpp` owns process startup
+and QML engine bootstrap. `Support/Runtime/QtApp` contains Qt adapters for
+application runtime support such as standard paths and embedded resources.
+
+Use standard-library types and containers at non-Qt-facing boundaries. Qt types
+and containers appear only in explicitly Qt-bound modules or where Qt framework,
+QML, resource, signal, timer, event-loop, or override interfaces require them,
+with conversion at that boundary.
+
+TODO: The two paragraphs above will be subject to change as architecture has not
+solidified yet.
+
+QML bridge state, objects, models, and metadata are exposed through
+`Q_PROPERTY`. Stable object and model pointers use `CONSTANT` when their
+identity does not change. QML bridge application commands use `Q_INVOKABLE`.
+
+Qt includes use public physical header paths without a module prefix, such as
+`<qobject.h>`. Do not use forwarding headers such as `<QObject>` or umbrella
+module headers such as `<QtCore>`.
+
+## Containers and Non-Owning Access
+
+Use read-only container accessors when data is not being modified. Use `.at()`
+instead of `operator[]` for non-mutating element access, and use `operator[]`
+for intentional mutation.
+
+Non-throwing bounded access may use `operator[]` after an assertion establishes
+the internal index invariant. Narrowly suppress
+`cppcoreguidelines-pro-bounds-constant-array-index` and
+`cppcoreguidelines-pro-bounds-avoid-unchecked-container-access` on that exact
+expression.
+
+## Naming
+
+Global and namespace-scope variables are disallowed
+(`custom-memly-no-namespace-variable`).
+
+Use container or user-defined type suffixes for non-public-API names when the
+suffix materially clarifies representation. Relevant standard-container suffixes
+include `Vector`, `Array`, `Map`, `UnorderedMap`, `Set`, and `UnorderedSet`.
+`std::string` and `std::string_view` do not add type suffixes except when a
+callable name emphasizes conversion to that representation.
+
+Named `std::expected`, `std::variant`, and `std::optional` values end in
+`Expected`, `Variant`, and `Optional`, respectively
+(`custom-memly-expected-value-suffix`, `custom-memly-variant-value-suffix`,
+`custom-memly-optional-value-suffix`). A lookup or probe returning
+`std::optional` begins with `Try` when an empty result means that the requested
+value was not found.
+
+Associative-container names state the lookup relationship before the container
+suffix, such as `DeckNodeIndexByDeckIdUnorderedMap`.
+
+Type template parameters are named for the role they represent. Their names end
+in `Type` (`custom-memly-type-template-parameter-name`).
+
+## Namespaces and File-Private Code
+
+Namespaces for code under `src/` mirror its folder nesting. An unnamed helper
+namespace is nested inside that matching namespace. The custom matcher enforces
+the minimum structural requirement that it have a Memly namespace ancestor
+(`custom-memly-unnamed-namespace-nesting`). Namespace-scope helper functions use
+an `a_` prefix (`custom-memly-unnamed-namespace-helper-prefix`).
+
+## Lambdas, Callables, and Type Spelling
+
+Lambdas always declare their return type. Named lambda closure variables are
+disallowed (`custom-memly-no-named-lambda`); pass a lambda directly to its
+consumer or invoke it immediately. Reusable callable logic belongs in an
+unnamed-namespace `a_` helper, or in a private method when it needs class state
+or private types.
+
+Invoke stored callables, callable template parameters, function pointers, and
+member-function pointers with `std::invoke`.
+
+Deduced variable types through `auto` are disallowed unless the type is
+unnameable or the language or API requires deduction. Keep each exception narrow
+and explicit; DuckDB query-result iterators are the current example
+(`custom-memly-no-deduced-variable-type`).
+
+Using-declarations and using-directives are disallowed
+(`custom-memly-no-using-declaration`). Type aliases are allowed only where
+language mechanics require them, not to shorten ordinary type names.
+
+Dependent qualified type names explicitly use `typename`, including type-only
+contexts where the language permits omission.
+
+## Preprocessor Spelling
+
+Conditional directives use `#if defined(Macro)` and `#if not defined(Macro)`,
+not `#ifdef` and `#ifndef`.
+
+## CMake Source Organization
+
+Each CMake glob variable represents exactly one source-tree folder. Do not use
+recursive globs or combine multiple folder patterns in one variable. Split
+subfolders into their own variables.
 
 Order glob declarations and target source lists by source-tree order so the
 build file mirrors the repository layout.
 
-## Unnamed Namespace Helpers
+## Lint Policy
 
-Use file-private free helpers in unnamed namespaces for logic that does not use
-class state.
+Memly-specific lint enforcement must remain expressible in `.clang-tidy` YAML,
+including query-based custom checks. Do not introduce compiled clang-tidy
+extensions or a separate text-based style linter solely to enforce this guide.
+Rules beyond the YAML interface remain documented conventions.
 
-File-private helper function names in unnamed namespaces must use an `a_`
-prefix.
-
-We want to keep header declaration surfaces very explicit but minimal which also
-acts as the testing surface.
-
-## Lambdas
-
-Lambdas must always declare their return type.
-
-Named lambda closure variables are disallowed. Lambda expressions must be passed
-directly to their consumer or immediately invoked. Reusable callable logic must
-use an unnamed-namespace `a_` helper or a private method when class state or
-private types are required.
-
-## Callable Invocation
-
-Stored callables, callable template parameters, function pointers, and member
-function pointers must be invoked with `std::invoke`.
-
-## Using
-
-`using` declarations are disallowed.
-
-`using` aliases are allowed where required by language mechanics such as
-template definition type surfaces.
-
-`using` aliases must not be used to shorten ordinary type names.
-
-## Template Typenames
-
-Template typenames must always end in `*Type` and must be named what the
-template type is intended to represent.
-
-Dependent qualified type names must explicitly use `typename` even in type-only
-contexts where the language permits the keyword to be omitted.
+Keep unavoidable `NOLINT` exceptions local to the exact declaration or
+expression and name the suppressed check.

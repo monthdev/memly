@@ -15,6 +15,7 @@ namespace Infrastructure::Store::Library {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement->Execute(
         AsOfMillisecondsSinceEpoch) };
     Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
+    // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
     const auto QueryResultIterator{ QueryResult->begin() };
     if ((*QueryResultIterator).IsNull(0)) {
         return std::nullopt;

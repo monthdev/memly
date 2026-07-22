@@ -8,7 +8,7 @@
 #include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
 
 namespace Application::Domain::Language {
-enum class [[nodiscard]] TargetLanguage : std::uint8_t {
+enum class [[nodiscard]] TargetLanguageEnum : std::uint8_t {
     NoLanguage,
     Afrikaans,
     Amharic,
@@ -80,13 +80,13 @@ enum class [[nodiscard]] TargetLanguage : std::uint8_t {
 };
 
 struct TargetLanguageInfo : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
-    TargetLanguage m_Language;
+    TargetLanguageEnum m_Language;
     std::string_view m_GoogleTranslateCode;
     std::string_view m_GoogleTextToSpeechLanguageCode;
     std::string_view m_GoogleTextToSpeechTopLevelDomain;
     std::string_view m_DisplayName; // TODO: Should struct really hold the gui display name?
 
-    explicit constexpr TargetLanguageInfo(const TargetLanguage Language,
+    explicit constexpr TargetLanguageInfo(const TargetLanguageEnum Language,
                                           const std::string_view GoogleTranslateCode,
                                           const std::string_view GoogleTextToSpeechLanguageCode,
                                           const std::string_view GoogleTextToSpeechTopLevelDomain,
@@ -100,6 +100,6 @@ struct TargetLanguageInfo : private Support::SpecialMemberPolicy::NoCopyMoveCons
     }
 };
 
-[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguage::Count)>&;
-[[nodiscard]] auto GetTargetLanguageInfo(TargetLanguage) -> const TargetLanguageInfo&;
+[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Count)>&;
+[[nodiscard]] auto GetTargetLanguageInfo(TargetLanguageEnum) -> const TargetLanguageInfo&;
 }

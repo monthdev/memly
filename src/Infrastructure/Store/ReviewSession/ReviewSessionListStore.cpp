@@ -17,7 +17,9 @@ namespace Infrastructure::Store::ReviewSession {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionListRowsPreparedStatement->Execute() };
     Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
     std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListRowVector{};
+    // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
+        // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
         const auto& QueryResultRow{ *QueryResultIterator };
         // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         ReviewSessionListRowVector.emplace_back(QueryResultRow.GetValue<std::string>(0),

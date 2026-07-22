@@ -44,9 +44,9 @@ void DeckPageController::RefreshDeckForestModel(const std::int64_t AsOfMilliseco
 }
 
 [[nodiscard]] std::expected<void, const char*> DeckPageController::MoveDeck(const std::string& DeckId,
-                                                                            const std::optional<std::string>& NewParentDeckId) noexcept {
+                                                                            const std::optional<std::string>& NewParentDeckIdOptional) noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
-        m_DeckService.MoveDeck(DeckId, NewParentDeckId);
+        m_DeckService.MoveDeck(DeckId, NewParentDeckIdOptional);
         return {};
     });
 }

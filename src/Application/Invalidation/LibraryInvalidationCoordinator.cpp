@@ -37,14 +37,14 @@ void LibraryInvalidationCoordinator::HandleScheduledInvalidation() noexcept {
 void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept {
     Support::Runtime::TryCatchWrapper([&]() -> void {
         m_LibraryInvalidationQTimer.stop();
-        const std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpoch{
+        const std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpochOptional{
             m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch)
         };
-        if (not NextLibraryInvalidationAtMillisecondsSinceEpoch.has_value()) {
+        if (not NextLibraryInvalidationAtMillisecondsSinceEpochOptional.has_value()) {
             return;
         }
         const std::int64_t LibraryInvalidationDelayMilliseconds{ std::max<std::int64_t>(
-            0, NextLibraryInvalidationAtMillisecondsSinceEpoch.value() - static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch())) };
+            0, NextLibraryInvalidationAtMillisecondsSinceEpochOptional.value() - static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch())) };
         m_LibraryInvalidationQTimer.start(static_cast<int>(LibraryInvalidationDelayMilliseconds));
     });
 }

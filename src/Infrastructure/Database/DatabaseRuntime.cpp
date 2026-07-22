@@ -42,7 +42,9 @@ void DatabaseRuntime::ApplySchemaMigrations() {
     QueryResult = m_DatabaseConnection.Query(Infrastructure::Sql::Migration::ReadSchemaMigrationsLogSql());
     ThrowOnQueryResultError(*QueryResult);
     std::vector<std::size_t> AppliedMigrationVersionSequenceVector{};
+    // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
     for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
+        // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
         const auto& QueryResultRow{ *QueryResultIterator };
         AppliedMigrationVersionSequenceVector.push_back(QueryResultRow.GetValue<std::uint32_t>(0));
     }
