@@ -5,10 +5,11 @@
 #include <string>
 
 #include "Infrastructure/Database/TransactionRunner.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Infrastructure::Database {
 
-class DatabaseRuntime final {
+class DatabaseRuntime final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     duckdb::DuckDB m_Database;
     duckdb::Connection m_DatabaseConnection;
@@ -16,16 +17,12 @@ private:
 
 public:
     explicit DatabaseRuntime(const std::string& DatabaseFilePath)
-        : m_Database{ DatabaseFilePath }
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_Database{ DatabaseFilePath }
         , m_DatabaseConnection{ m_Database }
         , m_TransactionRunner{ m_DatabaseConnection } {
         BootstrapDatabase();
     }
-
-    explicit DatabaseRuntime(const DatabaseRuntime&) = delete;
-    explicit DatabaseRuntime(DatabaseRuntime&&) = delete;
-    auto operator=(const DatabaseRuntime&) -> DatabaseRuntime& = delete;
-    auto operator=(DatabaseRuntime&&) -> DatabaseRuntime& = delete;
 
     [[nodiscard]] auto GetDatabaseConnection() noexcept -> duckdb::Connection&;
     [[nodiscard]] auto GetTransactionRunner() noexcept -> TransactionRunner&;

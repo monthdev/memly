@@ -5,9 +5,11 @@
 #include <string>
 #include <utility>
 
+#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+
 namespace Infrastructure::Store::Deck {
 
-struct DeckSnapshotRecord final {
+struct DeckSnapshotRecord final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
     std::string m_DeckId;
     std::optional<std::string> m_ParentDeckIdOptional;
     std::string m_DeckName;
@@ -27,7 +29,8 @@ struct DeckSnapshotRecord final {
                                 const std::uint32_t SelfByTodayCount,
                                 const std::uint32_t SelfTotalCount,
                                 const std::uint8_t TargetLanguageCode)
-        : m_DeckId{ std::move(DeckId) }
+        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+        , m_DeckId{ std::move(DeckId) }
         , m_ParentDeckIdOptional{ std::move(ParentDeckIdOptional) }
         , m_DeckName{ std::move(DeckName) }
         , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
@@ -37,11 +40,6 @@ struct DeckSnapshotRecord final {
         , m_SelfTotalCount{ SelfTotalCount }
         , m_TargetLanguageCode{ TargetLanguageCode } {
     }
-
-    explicit DeckSnapshotRecord(const DeckSnapshotRecord&) = delete;
-    explicit DeckSnapshotRecord(DeckSnapshotRecord&&) noexcept = default;
-    auto operator=(const DeckSnapshotRecord&) -> DeckSnapshotRecord& = delete;
-    auto operator=(DeckSnapshotRecord&&) -> DeckSnapshotRecord& = delete;
 };
 
 }

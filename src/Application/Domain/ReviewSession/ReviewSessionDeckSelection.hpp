@@ -4,9 +4,11 @@
 #include <string>
 #include <utility>
 
+#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+
 namespace Application::Domain::ReviewSession {
 
-struct ReviewSessionDeckSelection {
+struct ReviewSessionDeckSelection : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
     enum class [[nodiscard]] DeckSelectionTypeEnum : std::uint8_t {
         Self,
         Subtree,
@@ -18,14 +20,10 @@ struct ReviewSessionDeckSelection {
     DeckSelectionTypeEnum m_DeckSelectionType;
 
     explicit ReviewSessionDeckSelection(std::string&& DeckId, const DeckSelectionTypeEnum DeckSelectionType)
-        : m_DeckId{ std::move(DeckId) }
+        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+        , m_DeckId{ std::move(DeckId) }
         , m_DeckSelectionType{ DeckSelectionType } {
     }
-
-    explicit ReviewSessionDeckSelection(const ReviewSessionDeckSelection&) = delete;
-    explicit ReviewSessionDeckSelection(ReviewSessionDeckSelection&&) noexcept = default;
-    auto operator=(const ReviewSessionDeckSelection&) -> ReviewSessionDeckSelection& = delete;
-    auto operator=(ReviewSessionDeckSelection&&) -> ReviewSessionDeckSelection& = delete;
 };
 
 }

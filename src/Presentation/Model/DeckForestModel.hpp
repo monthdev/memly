@@ -13,14 +13,16 @@
 #include <vector>
 
 #include "Application/Domain/Deck/Index/DeckForestSnapshotNode.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Presentation::Model {
 
-class DeckForestModel final : public QAbstractItemModel {
+class DeckForestModel final : public QAbstractItemModel, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
     Q_OBJECT
 
 private:
-    struct DeckNode {
+    struct DeckNode : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
         Application::Domain::Deck::Index::DeckForestSnapshotNode m_DeckForestSnapshotNode;
         std::optional<std::size_t> m_ParentDeckNodeIndex;
         std::size_t m_RowInParentIndex;
@@ -30,16 +32,12 @@ private:
                  std::optional<std::size_t>&& ParentDeckNodeIndex,
                  const std::size_t RowInParentIndex,
                  std::vector<std::size_t>&& ChildDeckNodeIndexesVector) noexcept
-            : m_DeckForestSnapshotNode{ std::move(DeckForestSnapshotNode) }
+            : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+            , m_DeckForestSnapshotNode{ std::move(DeckForestSnapshotNode) }
             , m_ParentDeckNodeIndex{ std::move(ParentDeckNodeIndex) }
             , m_RowInParentIndex{ RowInParentIndex }
             , m_ChildDeckNodeIndexesVector{ std::move(ChildDeckNodeIndexesVector) } {
         }
-
-        explicit DeckNode(const DeckNode&) = delete;
-        explicit DeckNode(DeckNode&&) noexcept = default;
-        auto operator=(const DeckNode&) -> DeckNode& = delete;
-        auto operator=(DeckNode&&) -> DeckNode& = delete;
     };
 
     std::vector<DeckNode> m_DeckNodesVector;
@@ -50,16 +48,12 @@ private:
 public:
     explicit DeckForestModel(QObject* Parent = nullptr) noexcept
         : QAbstractItemModel{ Parent }
+        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DeckNodesVector{}
         , m_RootDeckNodeIndexesVector{}
         , m_SortColumn{ -1 }
         , m_SortOrder{ Qt::AscendingOrder } {
     }
-    explicit DeckForestModel(const DeckForestModel&) = delete;
-    explicit DeckForestModel(DeckForestModel&&) = delete;
-    DeckForestModel& operator=(const DeckForestModel&) = delete;
-    DeckForestModel& operator=(DeckForestModel&&) = delete;
-
     enum class RoleEnum : int {
         DeckIdRole = Qt::UserRole + 1,
         ParentDeckIdRole,

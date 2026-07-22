@@ -10,11 +10,6 @@ public:
     explicit DeckForestSnapshotIndexCache() noexcept
         : Application::IndexCache::IndexCacheBase<DeckForestSnapshotIndexCacheDefinition>{} {
     }
-
-    explicit DeckForestSnapshotIndexCache(const DeckForestSnapshotIndexCache&) = delete;
-    explicit DeckForestSnapshotIndexCache(DeckForestSnapshotIndexCache&&) = delete;
-    auto operator=(const DeckForestSnapshotIndexCache&) -> DeckForestSnapshotIndexCache& = delete;
-    auto operator=(DeckForestSnapshotIndexCache&&) -> DeckForestSnapshotIndexCache& = delete;
 };
 
 }

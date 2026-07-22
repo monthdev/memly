@@ -11,12 +11,13 @@
 #include <utility>
 
 #include "Application/Invalidation/LibraryInvalidationTarget.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Application::Invalidation {
 
 class LibraryInvalidationCoordinator;
 
-class LibraryInvalidationChannel final : public QObject {
+class LibraryInvalidationChannel final : public QObject, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
     Q_OBJECT
     friend class LibraryInvalidationCoordinator;
 
@@ -26,13 +27,9 @@ private:
 public:
     explicit LibraryInvalidationChannel(QObject* Parent = nullptr)
         : QObject{ Parent }
+        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch()) } {
     }
-
-    explicit LibraryInvalidationChannel(const LibraryInvalidationChannel&) = delete;
-    explicit LibraryInvalidationChannel(LibraryInvalidationChannel&&) = delete;
-    auto operator=(const LibraryInvalidationChannel&) -> LibraryInvalidationChannel& = delete;
-    auto operator=(LibraryInvalidationChannel&&) -> LibraryInvalidationChannel& = delete;
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*>
@@ -59,6 +56,7 @@ public:
 private:
     Q_SIGNAL void InvalidationSignal(const LibraryInvalidationTargetBitset&);
 
+    // NOLINTBEGIN(cppcoreguidelines-missing-std-forward)
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_nothrow_invocable_v<ControllerRefreshMethodType&>
     void ConnectInvalidationSignal(ControllerType* ControllerPointer,
@@ -77,6 +75,8 @@ private:
             },
             Qt::DirectConnection);
     }
+
+    // NOLINTEND(cppcoreguidelines-missing-std-forward)
 };
 
 }

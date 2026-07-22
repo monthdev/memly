@@ -41,7 +41,13 @@ Lambda init-captures must use brace initialization.
 ## Header Declaration Surface
 
 Constructors must always be declared and implemented in the header even when the
-implementation is `= default`.
+implementation is `= default` or `= delete`.
+
+Types that inherit `NonInstantiableMixin` must explicitly reiterate their
+ordinary default constructor `= delete`, even though the inherited policy
+already makes it implicitly deleted. This declaration is the visual marker that
+the type cannot be instantiated. Other types must not declare a deleted ordinary
+default constructor solely because they expose different ordinary constructors.
 
 Function bodies must only appear in headers for constructors and templates.
 Every non-templated non-constructor method and free function must be declared in
@@ -51,12 +57,9 @@ one-line accessors.
 Explicitly defaulted and deleted special-member declarations remain in headers
 because they do not contain function bodies.
 
-Default constructors must not be declared `= delete` outside
-`Support::SpecialMemberPolicy::NonInstantiableMixin`. Non-instantiable types
-must rely on the inherited policy instead of redeclaring the deleted default
-constructor.
-
-Destructors must not be declared.
+Destructors must not be declared by policy consumers. The special-member policy
+mixins must explicitly default their protected destructors so the mixins
+themselves satisfy the Rule of Five.
 
 Destructors are expected to be default behavior because ownership must be
 managed by RAII containers and member objects.
@@ -252,6 +255,12 @@ Use `.at()` instead of `operator[]` for non-mutating element access.
 
 Use `operator[]` only for intentional mutation.
 
+Use `operator[]` for needed non-throwing bounded access when a preceding
+assertion enforces the internal index invariant. Narrowly suppress
+`cppcoreguidelines-pro-bounds-constant-array-index` and
+`cppcoreguidelines-pro-bounds-avoid-unchecked-container-access` on the exact
+access expression.
+
 ## String Types
 
 Read-only string parameters must use `const std::string&` when their inputs are
@@ -280,8 +289,23 @@ Use forward declarations where the header only needs an incomplete type.
 
 ## Copy And Move Surface
 
-Copy and move constructor and assignment operator must explicitly be addressed
-for all declared classes and for all declared data-time object structs.
+Every Memly class and data-time object struct must obtain one effective special
+member policy from `Support::SpecialMemberPolicy`:
+
+- `NoCopyNoMoveMixin` for runtime objects with stable identity or state.
+- `NoCopyMoveConstructOnlyMixin` for transferable values that may be move
+  constructed but must not be copied or assigned.
+- `NonInstantiableMixin` for static-only types.
+
+Types without a Memly base that already supplies the required policy must
+privately inherit the policy mixin directly. Derived Memly types must inherit
+the policy transitively from an existing policy-bearing Memly base rather than
+introducing a duplicate policy-base subobject.
+
+Consumer types must not redeclare the copy constructor, move constructor, copy
+assignment operator, or move assignment operator already determined by their
+inherited policy. Only `NonInstantiableMixin` consumers reiterate their ordinary
+default constructor `= delete` according to the header-declaration rule.
 
 ## Auto
 

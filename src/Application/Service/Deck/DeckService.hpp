@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Application/IndexCache/Deck/DeckForestSnapshotIndexCache.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Application::Domain::Deck::Index {
 class DeckForestSnapshotIndex;
@@ -17,7 +18,7 @@ class DeckSnapshotStore;
 
 namespace Application::Service::Deck {
 
-class DeckService final {
+class DeckService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     Infrastructure::Store::Deck::DeckStore& m_DeckStore;
     Infrastructure::Store::Deck::DeckSnapshotStore& m_DeckSnapshotStore;
@@ -25,15 +26,11 @@ private:
 
 public:
     explicit DeckService(Infrastructure::Store::Deck::DeckStore& DeckStore, Infrastructure::Store::Deck::DeckSnapshotStore& DeckSnapshotStore) noexcept
-        : m_DeckStore{ DeckStore }
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_DeckStore{ DeckStore }
         , m_DeckSnapshotStore{ DeckSnapshotStore }
         , m_DeckForestSnapshotIndexCache{} {
     }
-
-    explicit DeckService(const DeckService&) = delete;
-    explicit DeckService(DeckService&&) = delete;
-    auto operator=(const DeckService&) -> DeckService& = delete;
-    auto operator=(DeckService&&) -> DeckService& = delete;
 
     [[nodiscard]] auto AcquireDeckForestSnapshotIndexCacheLease() -> Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease;
 

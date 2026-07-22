@@ -8,6 +8,8 @@
 #include <memory>
 #include <string>
 
+#include "Support/SpecialMemberPolicy/NonInstantiableMixin.hpp"
+
 namespace Application::Invalidation {
 class LibraryInvalidationChannel;
 class LibraryInvalidationCoordinator;
@@ -42,7 +44,7 @@ class ReviewSessionStore;
 
 namespace Bootstrap {
 
-class RuntimeContext final {
+class RuntimeContext final : private Support::SpecialMemberPolicy::NonInstantiableMixin {
 private:
     static std::unique_ptr<Infrastructure::Database::DatabaseRuntime> s_DatabaseRuntime;
     static std::unique_ptr<Application::Invalidation::LibraryInvalidationChannel> s_LibraryInvalidationChannel;
@@ -58,10 +60,6 @@ private:
 
 public:
     explicit RuntimeContext() = delete;
-    explicit RuntimeContext(const RuntimeContext&) = delete;
-    explicit RuntimeContext(RuntimeContext&&) = delete;
-    auto operator=(const RuntimeContext&) -> RuntimeContext& = delete;
-    auto operator=(RuntimeContext&&) -> RuntimeContext& = delete;
 
     static void Initialize(const std::string&);
 

@@ -13,10 +13,11 @@
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/ReviewSession/Mutation/ReviewSessionMutationSql.hpp"
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 
-class ReviewSessionStore final {
+class ReviewSessionStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_CreateCustomReviewSessionPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_CreateDefaultReviewSessionPreparedStatement;
@@ -32,7 +33,8 @@ private:
 
 public:
     explicit ReviewSessionStore(duckdb::Connection& DatabaseConnection)
-        : m_CreateCustomReviewSessionPreparedStatement{ DatabaseConnection.Prepare(
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_CreateCustomReviewSessionPreparedStatement{ DatabaseConnection.Prepare(
               Infrastructure::Sql::ReviewSession::Mutation::CreateCustomReviewSessionSql()) }
         , m_CreateDefaultReviewSessionPreparedStatement{ DatabaseConnection.Prepare(
               Infrastructure::Sql::ReviewSession::Mutation::CreateDefaultReviewSessionSql()) }
@@ -64,11 +66,6 @@ public:
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement);
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
     }
-
-    explicit ReviewSessionStore(const ReviewSessionStore&) = delete;
-    explicit ReviewSessionStore(ReviewSessionStore&&) = delete;
-    auto operator=(const ReviewSessionStore&) -> ReviewSessionStore& = delete;
-    auto operator=(ReviewSessionStore&&) -> ReviewSessionStore& = delete;
 
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
         -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;

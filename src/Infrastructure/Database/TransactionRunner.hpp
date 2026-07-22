@@ -8,57 +8,43 @@
 #include <type_traits>
 #include <utility>
 
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
+
 namespace Infrastructure::Database {
 
-class TransactionRunner final {
+class TransactionRunner final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     template <typename>
-    struct IsStdExpectedType : std::false_type {
+    struct IsStdExpectedType : std::false_type, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
         explicit constexpr IsStdExpectedType() noexcept
-            : std::false_type{} {
+            : std::false_type{}
+            , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
         }
-
-        explicit IsStdExpectedType(const IsStdExpectedType&) = delete;
-        explicit IsStdExpectedType(IsStdExpectedType&&) = delete;
-        auto operator=(const IsStdExpectedType&) -> IsStdExpectedType& = delete;
-        auto operator=(IsStdExpectedType&&) -> IsStdExpectedType& = delete;
     };
 
     template <typename SuccessType, typename ErrorType>
-    struct IsStdExpectedType<std::expected<SuccessType, ErrorType>> : std::true_type {
+    struct IsStdExpectedType<std::expected<SuccessType, ErrorType>> : std::true_type, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
         explicit constexpr IsStdExpectedType() noexcept
-            : std::true_type{} {
+            : std::true_type{}
+            , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
         }
-
-        explicit IsStdExpectedType(const IsStdExpectedType&) = delete;
-        explicit IsStdExpectedType(IsStdExpectedType&&) = delete;
-        auto operator=(const IsStdExpectedType&) -> IsStdExpectedType& = delete;
-        auto operator=(IsStdExpectedType&&) -> IsStdExpectedType& = delete;
     };
 
     template <typename>
-    struct AlwaysFalseType : std::false_type {
+    struct AlwaysFalseType : std::false_type, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
         explicit constexpr AlwaysFalseType() noexcept
-            : std::false_type{} {
+            : std::false_type{}
+            , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
         }
-
-        explicit AlwaysFalseType(const AlwaysFalseType&) = delete;
-        explicit AlwaysFalseType(AlwaysFalseType&&) = delete;
-        auto operator=(const AlwaysFalseType&) -> AlwaysFalseType& = delete;
-        auto operator=(AlwaysFalseType&&) -> AlwaysFalseType& = delete;
     };
 
     duckdb::Connection& m_DatabaseConnection;
 
 public:
     explicit TransactionRunner(duckdb::Connection& DatabaseConnection) noexcept
-        : m_DatabaseConnection{ DatabaseConnection } {
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_DatabaseConnection{ DatabaseConnection } {
     }
-
-    explicit TransactionRunner(const TransactionRunner&) = delete;
-    explicit TransactionRunner(TransactionRunner&&) = delete;
-    auto operator=(const TransactionRunner&) -> TransactionRunner& = delete;
-    auto operator=(TransactionRunner&&) -> TransactionRunner& = delete;
 
     template <typename ServiceMethodType>
         requires std::invocable<ServiceMethodType&&>

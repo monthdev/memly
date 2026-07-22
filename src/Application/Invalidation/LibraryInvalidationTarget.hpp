@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <utility>
 
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
+
 namespace Application::Invalidation {
 
 enum class [[nodiscard]] LibraryInvalidationTargetEnum : std::uint8_t {
@@ -12,7 +14,7 @@ enum class [[nodiscard]] LibraryInvalidationTargetEnum : std::uint8_t {
     TargetCount
 };
 
-class LibraryInvalidationTargetBitset final {
+class LibraryInvalidationTargetBitset final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     std::array<bool, std::to_underlying(LibraryInvalidationTargetEnum::TargetCount)> m_TargetArray;
 
@@ -20,14 +22,10 @@ public:
     template <typename... LibraryInvalidationTargetType>
         requires(sizeof...(LibraryInvalidationTargetType) > 0 and (std::same_as<LibraryInvalidationTargetType, LibraryInvalidationTargetEnum> and ...))
     explicit LibraryInvalidationTargetBitset(const LibraryInvalidationTargetType... LibraryInvalidationTargets) noexcept
-        : m_TargetArray{} {
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_TargetArray{} {
         (Set(LibraryInvalidationTargets), ...);
     }
-
-    explicit LibraryInvalidationTargetBitset(const LibraryInvalidationTargetBitset&) = delete;
-    explicit LibraryInvalidationTargetBitset(LibraryInvalidationTargetBitset&&) noexcept = delete;
-    auto operator=(const LibraryInvalidationTargetBitset&) -> LibraryInvalidationTargetBitset& = delete;
-    auto operator=(LibraryInvalidationTargetBitset&&) -> LibraryInvalidationTargetBitset& = delete;
 
     [[nodiscard]] auto Contains(LibraryInvalidationTargetEnum) const noexcept -> bool;
 

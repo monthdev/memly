@@ -5,9 +5,11 @@
 #include <string>
 #include <utility>
 
+#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+
 namespace Application::Domain::ReviewSession {
 
-struct ReviewSessionListRow {
+struct ReviewSessionListRow : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
     std::string m_ReviewSessionId;
     std::string m_ReviewSessionName;
     std::int64_t m_CreatedAtMillisecondsSinceEpoch;
@@ -19,17 +21,13 @@ struct ReviewSessionListRow {
                                   const std::int64_t CreatedAtMillisecondsSinceEpoch,
                                   const std::optional<std::int64_t>& LastUpdatedAtMillisecondsSinceEpoch,
                                   const std::optional<std::int64_t>& LastCardReviewAtMillisecondsSinceEpoch)
-        : m_ReviewSessionId{ std::move(ReviewSessionId) }
+        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+        , m_ReviewSessionId{ std::move(ReviewSessionId) }
         , m_ReviewSessionName{ std::move(ReviewSessionName) }
         , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
         , m_LastUpdatedAtMillisecondsSinceEpoch{ LastUpdatedAtMillisecondsSinceEpoch }
         , m_LastCardReviewAtMillisecondsSinceEpoch{ LastCardReviewAtMillisecondsSinceEpoch } {
     }
-
-    explicit ReviewSessionListRow(const ReviewSessionListRow&) = delete;
-    explicit ReviewSessionListRow(ReviewSessionListRow&&) noexcept = default;
-    auto operator=(const ReviewSessionListRow&) -> ReviewSessionListRow& = delete;
-    auto operator=(ReviewSessionListRow&&) -> ReviewSessionListRow& = delete;
 };
 
 }

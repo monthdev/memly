@@ -3,40 +3,33 @@
 #include <memory>
 #include <utility>
 
+#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
+
 namespace Application::IndexCache {
 
 template <typename IndexCacheDefinitionType>
-class IndexCacheBase {
+class IndexCacheBase : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     std::weak_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexWeakPointer;
 
 protected:
     explicit IndexCacheBase() noexcept
-        : m_IndexWeakPointer{} {
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_IndexWeakPointer{} {
     }
 
 public:
-    explicit IndexCacheBase(const IndexCacheBase&) = delete;
-    explicit IndexCacheBase(IndexCacheBase&&) = delete;
-    auto operator=(const IndexCacheBase&) -> IndexCacheBase& = delete;
-    auto operator=(IndexCacheBase&&) -> IndexCacheBase& = delete;
-
-    class [[nodiscard]] IndexCacheLease final {
+    class [[nodiscard]] IndexCacheLease final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
         friend class IndexCacheBase;
 
     private:
         std::shared_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexSharedPointer;
 
         explicit IndexCacheLease(std::shared_ptr<typename IndexCacheDefinitionType::IndexType>&& IndexSharedPointer) noexcept
-            : m_IndexSharedPointer{ std::move(IndexSharedPointer) } {
+            : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+            , m_IndexSharedPointer{ std::move(IndexSharedPointer) } {
         }
-
-    public:
-        explicit IndexCacheLease() = delete;
-        explicit IndexCacheLease(const IndexCacheLease&) = delete;
-        explicit IndexCacheLease(IndexCacheLease&&) noexcept = default;
-        auto operator=(const IndexCacheLease&) -> IndexCacheLease& = delete;
-        auto operator=(IndexCacheLease&&) -> IndexCacheLease& = delete;
     };
 
     [[nodiscard]] auto AcquireLease() -> IndexCacheLease {

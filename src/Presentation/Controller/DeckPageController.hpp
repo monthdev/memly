@@ -12,6 +12,7 @@
 
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Presentation/Model/DeckForestModel.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Application::Service::Deck {
 class DeckService;
@@ -19,7 +20,7 @@ class DeckService;
 
 namespace Presentation::Controller {
 
-class DeckPageController final : public QObject {
+class DeckPageController final : public QObject, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
     Q_OBJECT
 
 private:
@@ -31,16 +32,12 @@ public:
                                 Application::Service::Deck::DeckService& DeckService,
                                 QObject* Parent = nullptr)
         : QObject{ Parent }
+        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DeckService{ DeckService }
         , m_DeckForestModel{ this } {
         LibraryInvalidationChannel.ConnectSnapshot(
             this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckForestSnapshot, &DeckPageController::RefreshDeckForestModel);
     }
-    explicit DeckPageController(const DeckPageController&) = delete;
-    explicit DeckPageController(DeckPageController&&) = delete;
-    DeckPageController& operator=(const DeckPageController&) = delete;
-    DeckPageController& operator=(DeckPageController&&) = delete;
-
     [[nodiscard]] auto GetDeckForestModel() noexcept -> Presentation::Model::DeckForestModel*;
 
     [[nodiscard]] std::expected<void, const char*> CreateRootDeck(const std::string&, std::uint8_t) noexcept;

@@ -9,10 +9,11 @@
 
 #include "Infrastructure/Database/SqlExecutionGuard.hpp"
 #include "Infrastructure/Sql/Deck/Mutation/DeckMutationSql.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Infrastructure::Store::Deck {
 
-class DeckStore final {
+class DeckStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_CreateRootDeckPreparedStatement;
     std::unique_ptr<duckdb::PreparedStatement> m_CreateChildDeckPreparedStatement;
@@ -24,7 +25,8 @@ private:
 
 public:
     explicit DeckStore(duckdb::Connection& DatabaseConnection)
-        : m_CreateRootDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::CreateRootDeckSql()) }
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_CreateRootDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::CreateRootDeckSql()) }
         , m_CreateChildDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::CreateChildDeckSql()) }
         , m_MoveDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::MoveDeckSql()) }
         , m_RenameDeckPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::Deck::Mutation::RenameDeckSql()) }
@@ -39,11 +41,6 @@ public:
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteDeckCardsPreparedStatement);
         Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteDeckPreparedStatement);
     }
-
-    explicit DeckStore(const DeckStore&) = delete;
-    explicit DeckStore(DeckStore&&) = delete;
-    auto operator=(const DeckStore&) -> DeckStore& = delete;
-    auto operator=(DeckStore&&) -> DeckStore& = delete;
 
     void CreateRootDeck(const std::string&, std::uint8_t);
     void CreateChildDeck(const std::string&, const std::string&);

@@ -4,6 +4,7 @@ namespace Support::SpecialMemberPolicy {
 class NoCopyNoMoveMixin {
 protected:
     explicit NoCopyNoMoveMixin() noexcept = default;
+    ~NoCopyNoMoveMixin() noexcept = default;
 
 public:
     explicit NoCopyNoMoveMixin(const NoCopyNoMoveMixin&) = delete;

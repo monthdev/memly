@@ -3,16 +3,14 @@
 #include <functional>
 #include <utility>
 
+#include "Support/SpecialMemberPolicy/NonInstantiableMixin.hpp"
+
 namespace Application::IndexCache {
 
 template <typename IndexObjectType, typename IndexRefreshDataObjectType, void (IndexObjectType::*RefreshIndexMethod)(IndexRefreshDataObjectType&&)>
-class IndexCacheDefinition {
+class IndexCacheDefinition : private Support::SpecialMemberPolicy::NonInstantiableMixin {
 public:
     explicit IndexCacheDefinition() = delete;
-    explicit IndexCacheDefinition(const IndexCacheDefinition&) = delete;
-    explicit IndexCacheDefinition(IndexCacheDefinition&&) = delete;
-    auto operator=(const IndexCacheDefinition&) -> IndexCacheDefinition& = delete;
-    auto operator=(IndexCacheDefinition&&) -> IndexCacheDefinition& = delete;
 
     using IndexType = IndexObjectType;
     using IndexRefreshDataType = IndexRefreshDataObjectType;

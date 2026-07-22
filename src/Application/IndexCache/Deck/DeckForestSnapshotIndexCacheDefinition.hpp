@@ -14,10 +14,6 @@ class DeckForestSnapshotIndexCacheDefinition final
                                                            &Application::Domain::Deck::Index::DeckForestSnapshotIndex::RefreshFromDeckForestSnapshotNodes> {
 public:
     explicit DeckForestSnapshotIndexCacheDefinition() = delete;
-    explicit DeckForestSnapshotIndexCacheDefinition(const DeckForestSnapshotIndexCacheDefinition&) = delete;
-    explicit DeckForestSnapshotIndexCacheDefinition(DeckForestSnapshotIndexCacheDefinition&&) = delete;
-    auto operator=(const DeckForestSnapshotIndexCacheDefinition&) -> DeckForestSnapshotIndexCacheDefinition& = delete;
-    auto operator=(DeckForestSnapshotIndexCacheDefinition&&) -> DeckForestSnapshotIndexCacheDefinition& = delete;
 };
 
 }

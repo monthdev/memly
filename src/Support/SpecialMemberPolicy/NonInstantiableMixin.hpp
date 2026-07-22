@@ -8,5 +8,8 @@ public:
     explicit NonInstantiableMixin(NonInstantiableMixin&&) = delete;
     auto operator=(const NonInstantiableMixin&) -> NonInstantiableMixin& = delete;
     auto operator=(NonInstantiableMixin&&) -> NonInstantiableMixin& = delete;
+
+protected:
+    ~NonInstantiableMixin() noexcept = default;
 };
 }

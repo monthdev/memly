@@ -5,6 +5,8 @@ Checks: >
   cert-*,
   clang-analyzer-*,
   concurrency-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-use-default-member-init,
   misc-*,
   modernize-*,
   -modernize-use-default-member-init,
@@ -20,6 +22,8 @@ Checks: >
   custom-memly-braced-constructor-initializer,
   custom-memly-braced-variable-initialization,
   custom-memly-complete-constructor-initializer-list,
+  custom-memly-deleted-default-constructor-only-for-non-instantiable,
+  custom-memly-explicit-non-instantiable-default-constructor,
   custom-memly-no-default-member-initializer,
   custom-memly-no-delegating-constructor,
   custom-memly-no-named-lambda,
@@ -33,6 +37,10 @@ CheckOptions:
   - {
       key: bugprone-unused-local-non-trivial-variable.IncludeTypes,
       value: ".*",
+    }
+  - {
+      key: cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues,
+      value: "1",
     }
   - {
       key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic,
@@ -135,6 +143,55 @@ CustomChecks:
     Diagnostic:
       - BindName: constructor
         Message: constructor must explicitly initialize every direct base and non-static data member
+        Level: Warning
+  - Name: memly-deleted-default-constructor-only-for-non-instantiable
+    Query: |
+      match cxxConstructorDecl(
+        unless(isImplicit()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        isDefaultConstructor(),
+        isDeleted(),
+        ofClass(
+          cxxRecordDecl(
+            matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+            unless(hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")),
+            unless(
+              isDerivedFrom(
+                hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
+              )
+            )
+          )
+        )
+      ).bind("constructor")
+    Diagnostic:
+      - BindName: constructor
+        Message: only non-instantiable types may explicitly delete their ordinary default constructor
+        Level: Warning
+  - Name: memly-explicit-non-instantiable-default-constructor
+    Query: |
+      match cxxRecordDecl(
+        isDefinition(),
+        unless(isImplicit()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+        isDerivedFrom(
+          hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
+        ),
+        unless(
+          has(
+            cxxConstructorDecl(
+              unless(isImplicit()),
+              isDefaultConstructor(),
+              isDeleted()
+            )
+          )
+        )
+      ).bind("record")
+    Diagnostic:
+      - BindName: record
+        Message: non-instantiable types must explicitly reiterate their ordinary default constructor = delete
         Level: Warning
   - Name: memly-no-default-member-initializer
     Query: |

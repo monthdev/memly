@@ -6,6 +6,7 @@
 
 #include "Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Infrastructure::Database {
 class TransactionRunner;
@@ -17,7 +18,7 @@ class ReviewSessionStore;
 
 namespace Application::Service::ReviewSession {
 
-class ReviewSessionService final {
+class ReviewSessionService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     Infrastructure::Database::TransactionRunner& m_TransactionRunner;
     Infrastructure::Store::ReviewSession::ReviewSessionStore& m_ReviewSessionStore;
@@ -25,14 +26,10 @@ private:
 public:
     explicit ReviewSessionService(Infrastructure::Database::TransactionRunner& TransactionRunner,
                                   Infrastructure::Store::ReviewSession::ReviewSessionStore& ReviewSessionStore) noexcept
-        : m_TransactionRunner{ TransactionRunner }
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_TransactionRunner{ TransactionRunner }
         , m_ReviewSessionStore{ ReviewSessionStore } {
     }
-
-    explicit ReviewSessionService(const ReviewSessionService&) = delete;
-    explicit ReviewSessionService(ReviewSessionService&&) = delete;
-    auto operator=(const ReviewSessionService&) -> ReviewSessionService& = delete;
-    auto operator=(ReviewSessionService&&) -> ReviewSessionService& = delete;
 
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
         -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;

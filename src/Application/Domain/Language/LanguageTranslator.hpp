@@ -5,6 +5,8 @@
 #include <string_view>
 #include <utility>
 
+#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+
 namespace Application::Domain::Language {
 enum class [[nodiscard]] TargetLanguage : std::uint8_t {
     NoLanguage,
@@ -77,7 +79,7 @@ enum class [[nodiscard]] TargetLanguage : std::uint8_t {
     Count
 };
 
-struct TargetLanguageInfo {
+struct TargetLanguageInfo : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
     TargetLanguage m_Language;
     std::string_view m_GoogleTranslateCode;
     std::string_view m_GoogleTextToSpeechLanguageCode;
@@ -89,17 +91,13 @@ struct TargetLanguageInfo {
                                           const std::string_view GoogleTextToSpeechLanguageCode,
                                           const std::string_view GoogleTextToSpeechTopLevelDomain,
                                           const std::string_view DisplayName) noexcept
-        : m_Language{ Language }
+        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+        , m_Language{ Language }
         , m_GoogleTranslateCode{ GoogleTranslateCode }
         , m_GoogleTextToSpeechLanguageCode{ GoogleTextToSpeechLanguageCode }
         , m_GoogleTextToSpeechTopLevelDomain{ GoogleTextToSpeechTopLevelDomain }
         , m_DisplayName{ DisplayName } {
     }
-
-    explicit TargetLanguageInfo(const TargetLanguageInfo&) = delete;
-    explicit TargetLanguageInfo(TargetLanguageInfo&&) noexcept = default;
-    auto operator=(const TargetLanguageInfo&) -> TargetLanguageInfo& = delete;
-    auto operator=(TargetLanguageInfo&&) -> TargetLanguageInfo& = delete;
 };
 
 [[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguage::Count)>&;

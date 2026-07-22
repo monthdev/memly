@@ -8,10 +8,11 @@
 #include <vector>
 
 #include "Application/Domain/Deck/Index/DeckForestSnapshotNode.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Application::Domain::Deck::Index {
 
-class DeckForestSnapshotIndex final {
+class DeckForestSnapshotIndex final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     std::vector<DeckForestSnapshotNode> m_DeckForestSnapshotNodeVector;
     std::vector<std::size_t> m_RootDeckNodePositionVector;
@@ -20,16 +21,12 @@ private:
 
 public:
     explicit DeckForestSnapshotIndex() noexcept
-        : m_DeckForestSnapshotNodeVector{}
+        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_DeckForestSnapshotNodeVector{}
         , m_RootDeckNodePositionVector{}
         , m_ChildDeckNodePositionVectorByDeckNodePositionVector{}
         , m_DeckNodePositionByDeckIdUnorderedMap{} {
     }
-
-    explicit DeckForestSnapshotIndex(const DeckForestSnapshotIndex&) = delete;
-    explicit DeckForestSnapshotIndex(DeckForestSnapshotIndex&&) = delete;
-    auto operator=(const DeckForestSnapshotIndex&) -> DeckForestSnapshotIndex& = delete;
-    auto operator=(DeckForestSnapshotIndex&&) -> DeckForestSnapshotIndex& = delete;
 
     [[nodiscard]] auto GetSubtreeDeckIds(const std::string&) const -> std::vector<std::string_view>;
 

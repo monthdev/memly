@@ -6,8 +6,10 @@
 #include <source_location>
 #include <string_view>
 
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
+
 namespace Support::Runtime {
-class [[nodiscard]] MemlyException final : public std::exception {
+class [[nodiscard]] MemlyException final : public std::exception, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     static constexpr std::size_t s_ErrorMessageCapacity{ 1024 };
 
@@ -17,15 +19,11 @@ private:
 public:
     explicit MemlyException(const std::string_view ErrorMessage, const std::source_location& SourceLocation) noexcept
         : std::exception{}
+        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_ErrorMessageArray{}
         , m_ErrorMessageSize{} {
         ConstructErrorMessage(ErrorMessage, SourceLocation);
     }
-
-    explicit MemlyException(const MemlyException&) = delete;
-    explicit MemlyException(MemlyException&&) = delete;
-    auto operator=(const MemlyException&) -> MemlyException& = delete;
-    auto operator=(MemlyException&&) -> MemlyException& = delete;
 
     [[nodiscard]] auto what() const noexcept -> const char* override;
 
