@@ -34,7 +34,9 @@ Checks: >
   custom-memly-nodiscard-callable,
   custom-memly-nodiscard-enum,
   custom-memly-nodiscard-returned-record,
-  custom-memly-no-stateful-defaulted-default-constructor
+  custom-memly-no-stateful-defaulted-default-constructor,
+  custom-memly-required-special-member-policy,
+  custom-memly-single-special-member-policy
 WarningsAsErrors: "*"
 CheckOptions:
   - {
@@ -348,4 +350,127 @@ CustomChecks:
     Diagnostic:
       - BindName: constructor
         Message: a default constructor with direct bases or non-static data members must use an explicit initializer list instead of = default
+        Level: Warning
+  - Name: memly-required-special-member-policy
+    Query: |
+      match cxxRecordDecl(
+        isDefinition(),
+        unless(isImplicit()),
+        unless(isLambda()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+        unless(matchesName("^::Support::SpecialMemberPolicy::")),
+        unless(
+          anyOf(
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
+            ),
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
+            ),
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
+            )
+          )
+        )
+      ).bind("record")
+    Diagnostic:
+      - BindName: record
+        Message: Memly classes and data-time object structs must inherit a special-member policy directly or transitively
+        Level: Warning
+  - Name: memly-single-special-member-policy
+    Query: |
+      match cxxRecordDecl(
+        isDefinition(),
+        unless(isImplicit()),
+        unless(isLambda()),
+        unless(isTemplateInstantiation()),
+        unless(isExpansionInSystemHeader()),
+        matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+        unless(matchesName("^::Support::SpecialMemberPolicy::")),
+        anyOf(
+          allOf(
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
+            ),
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
+            )
+          ),
+          allOf(
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
+            ),
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
+            )
+          ),
+          allOf(
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
+            ),
+            isDerivedFrom(
+              hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
+            )
+          ),
+          allOf(
+            hasDirectBase(
+              hasType(
+                cxxRecordDecl(
+                  hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
+                )
+              )
+            ),
+            hasDirectBase(
+              hasType(
+                cxxRecordDecl(
+                  isDerivedFrom(
+                    hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
+                  )
+                )
+              )
+            )
+          ),
+          allOf(
+            hasDirectBase(
+              hasType(
+                cxxRecordDecl(
+                  hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
+                )
+              )
+            ),
+            hasDirectBase(
+              hasType(
+                cxxRecordDecl(
+                  isDerivedFrom(
+                    hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
+                  )
+                )
+              )
+            )
+          ),
+          allOf(
+            hasDirectBase(
+              hasType(
+                cxxRecordDecl(
+                  hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
+                )
+              )
+            ),
+            hasDirectBase(
+              hasType(
+                cxxRecordDecl(
+                  isDerivedFrom(
+                    hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
+                  )
+                )
+              )
+            )
+          )
+        )
+      ).bind("record")
+    Diagnostic:
+      - BindName: record
+        Message: Memly classes and data-time object structs must have exactly one special-member policy without duplicate policy-base subobjects
         Level: Warning
