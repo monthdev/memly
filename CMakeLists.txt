@@ -17,7 +17,8 @@ foreach(MEMLY_COMPILER_LANGUAGE IN ITEMS C CXX)
   if(NOT "${${MEMLY_COMPILER_ID_VARIABLE}}" STREQUAL "Clang")
     message(
       FATAL_ERROR
-        "Memly desktop builds require upstream LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x for ${MEMLY_COMPILER_LANGUAGE}; "
+        "Memly desktop builds require upstream LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x "
+        "for ${MEMLY_COMPILER_LANGUAGE}; "
         "configured compiler is ${${MEMLY_COMPILER_ID_VARIABLE}} ${${MEMLY_COMPILER_VERSION_VARIABLE}}"
     )
   endif()
@@ -75,6 +76,7 @@ if(NOT MEMLY_LLVM_C_BINARY_DIRECTORY STREQUAL MEMLY_LLVM_BINARY_DIRECTORY)
   message(FATAL_ERROR "Memly requires clang and clang++ from the same LLVM installation")
 endif()
 
+# Finds a tool in the configured LLVM installation and verifies its major version.
 function(memly_require_llvm_tool MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE MEMLY_LLVM_TOOL_NAME)
   find_program(
     "${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE}"
@@ -104,7 +106,7 @@ function(memly_require_llvm_tool MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE MEMLY_LLVM_
         "found ${MEMLY_LLVM_TOOL_VERSION_OUTPUT}"
     )
   endif()
-  set("${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE}" "${${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE}}" PARENT_SCOPE)
+  set(${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE} "${${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE}}" PARENT_SCOPE)
 endfunction()
 
 memly_require_llvm_tool(MEMLY_LLVM_CLANG_TIDY_EXECUTABLE clang-tidy "clang-tidy-${MEMLY_LLVM_MAJOR_VERSION}" clang-tidy)
@@ -579,7 +581,7 @@ set_target_properties(
 qt_finalize_executable(memly)
 
 if(BUILD_TESTING)
-  add_custom_target(memly-test)
+  add_custom_target(memly-test COMMENT "Memly tests are not currently implemented")
 endif()
 
 set(MEMLY_CXX_SOURCE_FILES ${MEMLY_CORE_SOURCE_FILES} ${MEMLY_QML_SOURCE_FILES} ${MEMLY_EXECUTABLE_SOURCE_FILES})
