@@ -13,6 +13,4 @@ void ThrowOnQueryResultError(duckdb::QueryResult&, const std::source_location& =
 
 void ThrowOnPreparedStatementError(duckdb::PreparedStatement&, const std::source_location& = std::source_location::current());
 
-void ThrowOnMutationNoOp(duckdb::QueryResult&, const char*, const std::source_location& = std::source_location::current());
-
 }

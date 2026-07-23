@@ -20,11 +20,4 @@ void ThrowOnPreparedStatementError(duckdb::PreparedStatement& PreparedStatement,
     }
 }
 
-void ThrowOnMutationNoOp(duckdb::QueryResult& QueryResult, const char* const ErrorMessage, const std::source_location& SourceLocation) {
-    if (QueryResult.begin() not_eq QueryResult.end()) {
-        return;
-    }
-    Support::Runtime::ThrowMemlyException(ErrorMessage, SourceLocation);
-}
-
 }
