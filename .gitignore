@@ -38,6 +38,7 @@ compile_commands.json
 *.stackdump
 
 # IDE and editor specific files
+.codex/
 .vscode
 .idea
 *.code-workspace
