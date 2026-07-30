@@ -1,3 +1,6 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "Infrastructure/Store/ReviewSession/ReviewSessionListStore.hpp"
 
 #include <duckdb.hpp>
@@ -9,27 +12,34 @@
 #include <vector>
 
 #include "Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
-#include "Infrastructure/Database/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/DatabaseRuntime.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 
 [[nodiscard]] auto ReviewSessionListStore::ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_ReadReviewSessionListRowsPreparedStatement->Execute() };
-    Infrastructure::Database::ThrowOnQueryResultError(*QueryResult);
+    std::unique_ptr<duckdb::QueryResult> QueryResult{
+        m_DatabaseRuntime.ExecutePreparedStatement(m_ReadReviewSessionListRowsPreparedStatement).WithoutParameters()
+    };
     std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListRowVector{};
-    // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
-    for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
-        // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
-        const auto& QueryResultRow{ *QueryResultIterator };
-        // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-        ReviewSessionListRowVector.emplace_back(QueryResultRow.GetValue<std::string>(0),
-                                                QueryResultRow.GetValue<std::string>(1),
-                                                QueryResultRow.GetValue<std::int64_t>(2),
-                                                QueryResultRow.IsNull(3) ? std::nullopt : std::make_optional(QueryResultRow.GetValue<std::int64_t>(3)),
-                                                QueryResultRow.IsNull(4) ? std::nullopt : std::make_optional(QueryResultRow.GetValue<std::int64_t>(4)));
-        // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ m_DatabaseRuntime.FetchNextDataChunk(*QueryResult) }) {
+        for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
+            const duckdb::Value LastUpdatedAtMillisecondsSinceEpochValue{ DataChunk->GetValue(3, RowIndex) };
+            const duckdb::Value LastCardReviewAtMillisecondsSinceEpochValue{ DataChunk->GetValue(4, RowIndex) };
+            ReviewSessionListRowVector.emplace_back(
+                DataChunk->GetValue(0, RowIndex).GetValue<std::string>(),
+                DataChunk->GetValue(1, RowIndex).GetValue<std::string>(),
+                DataChunk->GetValue(2, RowIndex).GetValue<std::int64_t>(),
+                LastUpdatedAtMillisecondsSinceEpochValue.IsNull() ? std::nullopt :
+                                                                    std::make_optional(LastUpdatedAtMillisecondsSinceEpochValue.GetValue<std::int64_t>()),
+                LastCardReviewAtMillisecondsSinceEpochValue.IsNull() ?
+                    std::nullopt :
+                    std::make_optional(LastCardReviewAtMillisecondsSinceEpochValue.GetValue<std::int64_t>()));
+        }
     }
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     return ReviewSessionListRowVector;
 }
 
 }
+#endif

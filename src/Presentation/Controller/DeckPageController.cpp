@@ -32,14 +32,14 @@ void DeckPageController::RefreshDeckForestModel(const std::int64_t AsOfMilliseco
                                                                                   const std::uint8_t TargetLanguageCode) noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.CreateRootDeck(DeckName, TargetLanguageCode);
-        return {};
+        return std::expected<void, const char*>{};
     });
 }
 
 [[nodiscard]] std::expected<void, const char*> DeckPageController::CreateChildDeck(const std::string& DeckName, const std::string& ParentDeckId) noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.CreateChildDeck(DeckName, ParentDeckId);
-        return {};
+        return std::expected<void, const char*>{};
     });
 }
 
@@ -47,21 +47,21 @@ void DeckPageController::RefreshDeckForestModel(const std::int64_t AsOfMilliseco
                                                                             const std::optional<std::string>& NewParentDeckIdOptional) noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.MoveDeck(DeckId, NewParentDeckIdOptional);
-        return {};
+        return std::expected<void, const char*>{};
     });
 }
 
 [[nodiscard]] std::expected<void, const char*> DeckPageController::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.RenameDeck(DeckId, NewDeckName);
-        return {};
+        return std::expected<void, const char*>{};
     });
 }
 
 [[nodiscard]] std::expected<void, const char*> DeckPageController::DeleteDeck(const std::string& DeckId) noexcept {
     return Support::Runtime::TryCatchWrapper([&]() -> std::expected<void, const char*> {
         m_DeckService.DeleteDeck(DeckId);
-        return {};
+        return std::expected<void, const char*>{};
     });
 }
 

@@ -1,12 +1,13 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #pragma once
 
-#include <duckdb.hpp>
-
-#include <memory>
 #include <vector>
 
 #include "Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
-#include "Infrastructure/Database/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/DatabaseRuntime.hpp"
+#include "Infrastructure/Database/PreparedStatement.hpp"
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
@@ -14,17 +15,20 @@ namespace Infrastructure::Store::ReviewSession {
 
 class ReviewSessionListStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionListRowsPreparedStatement;
+    Infrastructure::Database::DatabaseRuntime& m_DatabaseRuntime;
+    Infrastructure::Database::PreparedStatement m_ReadReviewSessionListRowsPreparedStatement;
 
 public:
-    explicit ReviewSessionListStore(duckdb::Connection& DatabaseConnection)
+    explicit ReviewSessionListStore(Infrastructure::Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_ReadReviewSessionListRowsPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionListRowsSql()) } {
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionListRowsPreparedStatement);
+        , m_DatabaseRuntime{ DatabaseRuntime }
+        , m_ReadReviewSessionListRowsPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionListRowsSql())
+        } {
     }
 
     [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSession::ReviewSessionListRow>;
 };
 
 }
+#endif

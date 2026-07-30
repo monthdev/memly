@@ -8,7 +8,9 @@ namespace Infrastructure::Sql::Deck::Mutation {
 
 [[nodiscard]] auto CreateChildDeckSql() -> std::string;
 
-[[nodiscard]] auto MoveDeckSql() -> std::string;
+[[nodiscard]] auto MoveDeckToRootSql() -> std::string;
+
+[[nodiscard]] auto MoveDeckUnderParentSql() -> std::string;
 
 [[nodiscard]] auto RenameDeckSql() -> std::string;
 

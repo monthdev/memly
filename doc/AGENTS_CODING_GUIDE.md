@@ -34,6 +34,13 @@ Named variable definitions and lambda init-captures must use brace
 initialization (`custom-memly-braced-variable-initialization`) and direct-list
 spelling wherever the language permits it.
 
+Contextually typed braced initializer lists are disallowed. Function arguments,
+return expressions, assignments, and default arguments must explicitly spell the
+constructed type (`custom-memly-explicit-contextual-braced-expression`,
+`custom-memly-explicit-contextual-braced-default-argument`). Named declarations
+and constructor initializer lists remain direct-list initialized because their
+target type is already stated.
+
 Every constructor, including copy and move constructors, must be `explicit`
 (`custom-memly-always-explicit-constructor`). Conversion operators are
 disallowed (`custom-memly-conversion-operator`).
@@ -43,10 +50,17 @@ disallowed (`custom-memly-conversion-operator`).
 Every Memly class and data-carrying struct must obtain a policy from
 `Support::SpecialMemberPolicy` (`custom-memly-required-special-member-policy`):
 
-- `NoCopyNoMoveMixin` for runtime objects with stable identity or state.
-- `NoCopyMoveConstructOnlyMixin` for transferable values that may be move
-  constructed but cannot be copied or assigned.
+- `NoCopyNoMoveMixin` when current control paths require neither copying nor
+  moving, including runtime objects with stable identity or state.
+- `NoCopyMoveConstructOnlyMixin` only when a current control path requires move
+  construction but does not require copying or assignment.
 - `NonInstantiableMixin` for static-only types.
+
+Always select the most restrictive policy that supports the type's actual
+current use. Do not grant copy or move capability for hypothetical future uses;
+loosen the policy only when introducing a control path that requires that
+operation. Returning a direct prvalue through guaranteed copy elision does not
+require move construction.
 
 A type without a policy-bearing Memly base must inherit its policy directly. Any
 directly inherited policy mixin must be private
@@ -78,7 +92,8 @@ friend declarations.
 When a type has private nested types or data members, its first access block
 must be `private:`. Nested types needed by data-member declarations come first,
 then data members in construction order. This data-member-first rule applies to
-structs as well as classes.
+structs as well as classes. Other nested types appear immediately before the
+first declaration that requires them.
 
 Constructors immediately follow the data-member block under their intended
 access. All remaining declarations follow the constructors.
@@ -98,7 +113,8 @@ definition.
 
 Pass scalars and small non-owning value types by value. Pass non-trivial owning
 values by reference, and use an rvalue reference when the callee consumes
-ownership. Do not copy non-trivial owning values into parameters by value.
+ownership. Do not copy non-trivial owning values into parameters by value. Pass
+`std::source_location` by constant reference.
 
 Use `const std::string&` when a read-only input is already an owning string. Use
 `std::string_view` by value when an API intentionally accepts either strings or
@@ -153,6 +169,19 @@ assumed to satisfy schema and application invariants established by Memly write
 paths. Violations of those invariants are programming errors; database-engine
 failures remain runtime errors at the database boundary.
 
+Prepared-statement execution and result-chunk fetching remain `DatabaseRuntime`
+instance operations because their opaque DuckDB handles belong to the runtime's
+live database connection even when that ownership is not mechanically visible
+from the method body.
+
+`PreparedStatementExecution` is an ephemeral chained-call proxy. Invoke it
+directly from `ExecutePreparedStatement()`; never store or name it
+(`custom-memly-no-prepared-statement-execution-variable` and
+`custom-memly-no-prepared-statement-execution-field`). Invoke `WithParameters()`
+for one or more parameters and `WithoutParameters()` for a parameterless
+statement. Both methods are rvalue-only, and the proxy's source-location
+reference remains valid through the chained full expression.
+
 Positional DuckDB result decoding may narrowly suppress both
 `cppcoreguidelines-avoid-magic-numbers` and `readability-magic-numbers` with a
 paired `NOLINTBEGIN` and `NOLINTEND` around the decoding expression.
@@ -199,7 +228,7 @@ expression.
 Global and namespace-scope variables are disallowed
 (`custom-memly-no-namespace-variable`).
 
-Use container or user-defined type suffixes for non-public-API names when the
+Use container or user-defined type suffixes for non-layer-API names when the
 suffix materially clarifies representation. Relevant standard-container suffixes
 include `Vector`, `Array`, `Map`, `UnorderedMap`, `Set`, and `UnorderedSet`.
 `std::string` and `std::string_view` do not add type suffixes except when a
@@ -218,6 +247,12 @@ suffix, such as `DeckNodeIndexByDeckIdUnorderedMap`.
 Type template parameters are named for the role they represent. Their names end
 in `Type` (`custom-memly-type-template-parameter-name`).
 
+Getters on wrapper and representation-bearing Memly types normally name the
+concrete returned type instead of a generic concept such as `GetValue` or
+`GetText`; for example, an accessor exposing an underlying `std::string` is
+named `GetStdString()`. Use a semantic getter name when the returned value is a
+domain property rather than a wrapper's underlying representation.
+
 ## Namespaces and File-Private Code
 
 Namespaces for code under `src/` mirror its folder nesting. An unnamed helper
@@ -225,6 +260,15 @@ namespace is nested inside that matching namespace. The custom matcher enforces
 the minimum structural requirement that it have a Memly namespace ancestor
 (`custom-memly-unnamed-namespace-nesting`). Namespace-scope helper functions use
 an `a_` prefix (`custom-memly-unnamed-namespace-helper-prefix`).
+
+Qualify names with the shortest namespace prefix that resolves unambiguously
+from the current scope. Omit current and enclosing namespace components, and
+begin sibling-namespace references at their nearest common enclosing namespace.
+Do not introduce using-declarations, using-directives, or aliases solely to
+shorten qualification. The remaining prefix length intentionally signals how far
+the referenced declaration is from the current namespace a.k.a. the dependency
+distance; unnecessary full qualification adds visual clutter and obscures that
+dependency-distance signal.
 
 ## Lambdas, Callables, and Type Spelling
 
@@ -236,6 +280,13 @@ or private types.
 
 Invoke stored callables, callable template parameters, function pointers, and
 member-function pointers with `std::invoke`.
+
+Prefer concept-constrained type template parameters over unconstrained
+`typename` or `class` parameters whenever the accepted operations or type shape
+can be stated at the template boundary. Keep a constraint inline when it has one
+consumer; introduce a named namespace-scope concept when the same semantic
+contract is reused. Leave a type template parameter unconstrained only when the
+template intentionally accepts any substitutable type.
 
 Deduced variable types through `auto` are disallowed unless the type is
 unnameable or the language or API requires deduction. Keep each exception narrow

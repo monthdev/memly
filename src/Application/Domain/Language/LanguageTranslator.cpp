@@ -5,9 +5,9 @@
 #include <utility>
 
 namespace Application::Domain::Language {
-[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Count)>& {
+[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)>& {
     // TODO: Move array to unnamed namespace?
-    static constexpr std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Count)> s_TargetLanguages{
+    static constexpr std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)> s_TargetLanguages{
         {
          TargetLanguageInfo{ TargetLanguageEnum::NoLanguage, "", "", "", "(No Language)" },
          TargetLanguageInfo{ TargetLanguageEnum::Afrikaans, "af", "af", "", "Afrikaans" },

@@ -14,8 +14,12 @@ namespace Infrastructure::Sql::Deck::Mutation {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/CreateChildDeck.sql");
 }
 
-[[nodiscard]] auto MoveDeckSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeck.sql");
+[[nodiscard]] auto MoveDeckToRootSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeckToRoot.sql");
+}
+
+[[nodiscard]] auto MoveDeckUnderParentSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeckUnderParent.sql");
 }
 
 [[nodiscard]] auto RenameDeckSql() -> std::string {

@@ -8,12 +8,17 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <initializer_list>
 #include <memory>
 #include <ranges>
+#include <source_location>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
-#include "Infrastructure/Database/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/PreparedStatement.hpp"
+#include "Infrastructure/Database/PreparedStatementExecution.hpp"
 #include "Infrastructure/Database/TransactionRunner.hpp"
 #include "Infrastructure/Sql/Migration/MigrationSql.hpp"
 #include "Infrastructure/Sql/Seed/SeedSql.hpp"
@@ -21,8 +26,37 @@
 
 namespace Infrastructure::Database {
 
-[[nodiscard]] auto DatabaseRuntime::GetDatabaseConnection() noexcept -> duckdb::Connection& {
-    return m_DatabaseConnection;
+[[nodiscard]] auto DatabaseRuntime::PrepareStatement(const std::string& Sql, const std::source_location& SourceLocation) -> PreparedStatement {
+    std::unique_ptr<duckdb::PreparedStatement> DuckDbPreparedStatement{ m_DatabaseConnection.Prepare(Sql) };
+    if (DuckDbPreparedStatement->HasError()) {
+        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ DuckDbPreparedStatement->GetError() }, SourceLocation);
+    }
+    return PreparedStatement{ std::move(DuckDbPreparedStatement) };
+}
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+[[nodiscard]] auto DatabaseRuntime::ExecutePreparedStatement(PreparedStatement& PreparedStatement, const std::source_location& SourceLocation) noexcept
+    -> PreparedStatementExecution {
+    return PreparedStatementExecution{ *PreparedStatement.m_DuckDbPreparedStatement, SourceLocation };
+}
+
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+[[nodiscard]] auto DatabaseRuntime::FetchNextDataChunk(duckdb::QueryResult& QueryResult, const std::source_location& SourceLocation)
+    -> duckdb::unique_ptr<duckdb::DataChunk> {
+    duckdb::unique_ptr<duckdb::DataChunk> DataChunk{};
+    duckdb::ErrorData FetchError{};
+    if (not QueryResult.TryFetch(DataChunk, FetchError)) {
+        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ FetchError.Message() }, SourceLocation);
+    }
+    return DataChunk;
+}
+
+[[nodiscard]] auto DatabaseRuntime::ExecuteSql(const std::string& Sql, const std::source_location& SourceLocation) -> std::unique_ptr<duckdb::QueryResult> {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.SendQuery(Sql) };
+    if (QueryResult->HasError()) {
+        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, SourceLocation);
+    }
+    return QueryResult;
 }
 
 [[nodiscard]] auto DatabaseRuntime::GetTransactionRunner() noexcept -> TransactionRunner& {
@@ -37,43 +71,35 @@ void DatabaseRuntime::BootstrapDatabase() {
 }
 
 void DatabaseRuntime::ApplySchemaMigrations() {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(Infrastructure::Sql::Migration::M00_SchemaMigrationsLogSql()) };
-    ThrowOnQueryResultError(*QueryResult);
-    QueryResult = m_DatabaseConnection.Query(Infrastructure::Sql::Migration::ReadSchemaMigrationsLogSql());
-    ThrowOnQueryResultError(*QueryResult);
+    static_cast<void>(ExecuteSql(Sql::Migration::M00_SchemaMigrationsLogSql()));
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ ExecuteSql(Sql::Migration::ReadSchemaMigrationsLogSql()) };
     std::vector<std::size_t> AppliedMigrationVersionSequenceVector{};
-    // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
-    for (auto QueryResultIterator{ QueryResult->begin() }; QueryResultIterator not_eq QueryResult->end(); ++QueryResultIterator) {
-        // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
-        const auto& QueryResultRow{ *QueryResultIterator };
-        AppliedMigrationVersionSequenceVector.push_back(QueryResultRow.GetValue<std::uint32_t>(0));
+    while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ FetchNextDataChunk(*QueryResult) }) {
+        for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
+            AppliedMigrationVersionSequenceVector.push_back(DataChunk->GetValue(0, RowIndex).GetValue<std::uint32_t>());
+        }
     }
     assert(std::ranges::equal(AppliedMigrationVersionSequenceVector,
                               std::views::iota(std::size_t{ 1 }, AppliedMigrationVersionSequenceVector.size() + std::size_t{ 1 })));
-    const std::array<std::reference_wrapper<std::string()>, 1> MigrationSqlFunctionArray{ Infrastructure::Sql::Migration::M01_InitialSchemaSql };
-    if (AppliedMigrationVersionSequenceVector.size() > MigrationSqlFunctionArray.size()) {
-        Support::Runtime::ThrowMemlyException("Unexpected number of applied migrations");
+    const std::array<std::string (*)(), 1> SchemaMigrationSqlFunctionArray{ &Sql::Migration::M01_InitialSchemaSql };
+    if (AppliedMigrationVersionSequenceVector.size() > SchemaMigrationSqlFunctionArray.size()) {
+        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ "Unexpected number of applied migrations" });
     }
-    for (std::size_t UnappliedMigrationVersionIndex{ AppliedMigrationVersionSequenceVector.size() };
-         UnappliedMigrationVersionIndex not_eq MigrationSqlFunctionArray.size();
-         ++UnappliedMigrationVersionIndex) {
-        const std::string& MigrationSql{ std::invoke(MigrationSqlFunctionArray.at(UnappliedMigrationVersionIndex)) };
-        QueryResult = m_DatabaseConnection.Query(MigrationSql);
-        ThrowOnQueryResultError(*QueryResult);
-        QueryResult = m_DatabaseConnection.Query(Infrastructure::Sql::Migration::CreateSchemaMigrationsLogEntrySql(),
-                                                 static_cast<std::uint32_t>(UnappliedMigrationVersionIndex + 1));
-        ThrowOnQueryResultError(*QueryResult);
+    if (AppliedMigrationVersionSequenceVector.size() < SchemaMigrationSqlFunctionArray.size()) {
+        PreparedStatement CreateSchemaMigrationsLogEntryPreparedStatement{ PrepareStatement(Sql::Migration::CreateSchemaMigrationsLogEntrySql()) };
+        for (std::size_t MigrationIndex{ AppliedMigrationVersionSequenceVector.size() }; MigrationIndex < SchemaMigrationSqlFunctionArray.size();
+             ++MigrationIndex) {
+            static_cast<void>(ExecuteSql(std::invoke(SchemaMigrationSqlFunctionArray.at(MigrationIndex))));
+            static_cast<void>(
+                ExecutePreparedStatement(CreateSchemaMigrationsLogEntryPreparedStatement).WithParameters(static_cast<std::uint32_t>(MigrationIndex + 1)));
+        }
     }
 }
 
 void DatabaseRuntime::SeedTableDefaults() {
-    const std::array<std::reference_wrapper<std::string()>, 3> SeedSqlFunctionArray{ Infrastructure::Sql::Seed::CreateDefaultFsrs7SchedulerSql,
-                                                                                     Infrastructure::Sql::Seed::CreateDefaultFsrs7SettingsSql,
-                                                                                     Infrastructure::Sql::Seed::CreateDefaultDeckSettingsSql };
-    for (const std::reference_wrapper<std::string()>& SeedSqlFunction : SeedSqlFunctionArray) {
-        std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.Query(std::invoke(SeedSqlFunction)) };
-        ThrowOnQueryResultError(*QueryResult);
-    }
+    static_cast<void>(ExecuteSql(Sql::Seed::CreateDefaultFsrs7SchedulerSql()));
+    static_cast<void>(ExecuteSql(Sql::Seed::CreateDefaultFsrs7SettingsSql()));
+    static_cast<void>(ExecuteSql(Sql::Seed::CreateDefaultDeckSettingsSql()));
 }
 
 }

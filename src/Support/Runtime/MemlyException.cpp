@@ -5,6 +5,7 @@
 #include <cassert>
 #include <charconv>
 #include <cstddef>
+#include <initializer_list>
 #include <limits>
 #include <source_location>
 #include <span>
@@ -17,7 +18,8 @@ namespace Support::Runtime {
     return m_ErrorMessageArray.data();
 }
 
-void MemlyException::ConstructErrorMessage(const std::string_view ErrorMessage, const std::source_location& SourceLocation) noexcept {
+void MemlyException::ConstructErrorMessage(const std::initializer_list<std::string_view> ErrorMessageInitializerList,
+                                           const std::source_location& SourceLocation) noexcept {
     AppendErrorMessage("Exception thrown in ");
     AppendErrorMessage(SourceLocation.file_name());
     AppendErrorMessage(", ");
@@ -30,7 +32,7 @@ void MemlyException::ConstructErrorMessage(const std::string_view ErrorMessage, 
     AppendErrorMessage(
         std::string_view{ SourceLocationLineArray.data(), static_cast<std::size_t>(SourceLocationLineToCharsResult.ptr - SourceLocationLineArray.data()) });
     AppendErrorMessage(":\n\t");
-    AppendErrorMessage(ErrorMessage);
+    for (const std::string_view ErrorMessage : ErrorMessageInitializerList) { AppendErrorMessage(ErrorMessage); }
 }
 
 void MemlyException::AppendErrorMessage(const std::string_view CharsToAppend) noexcept {

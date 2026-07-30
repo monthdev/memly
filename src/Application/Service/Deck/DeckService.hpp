@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <optional>
 #include <string>
 
 #include "Application/IndexCache/Deck/DeckForestSnapshotIndexCache.hpp"
@@ -38,7 +37,8 @@ public:
 
     void CreateRootDeck(const std::string&, std::uint8_t);
     void CreateChildDeck(const std::string&, const std::string&);
-    void MoveDeck(const std::string&, const std::optional<std::string>&);
+    void MoveDeckToRoot(const std::string&);
+    void MoveDeckUnderParent(const std::string&, const std::string&);
     void RenameDeck(const std::string&, const std::string&);
     void DeleteDeck(const std::string&);
     void RefreshDeckForestSnapshotIndexCache(const Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease&, std::int64_t);

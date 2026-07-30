@@ -7,8 +7,10 @@
 #include <unicode/utypes.h>
 
 #include <cstddef>
+#include <initializer_list>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include "Support/Runtime/ThrowMemlyException.hpp"
 
@@ -17,7 +19,7 @@ namespace {
 
 void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
     if (U_FAILURE(ErrorCode) not_eq 0) {
-        Support::Runtime::ThrowMemlyException(u_errorName(ErrorCode));
+        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ u_errorName(ErrorCode) });
     }
 }
 

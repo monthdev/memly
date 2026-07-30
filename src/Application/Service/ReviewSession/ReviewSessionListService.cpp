@@ -1,3 +1,6 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "Application/Service/ReviewSession/ReviewSessionListService.hpp"
 
 #include <vector>
@@ -12,3 +15,4 @@ namespace Application::Service::ReviewSession {
 }
 
 }
+#endif

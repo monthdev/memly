@@ -1,3 +1,6 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #pragma once
 
 #include <string>
@@ -10,3 +13,4 @@ namespace Infrastructure::Sql::ReviewSession::Query {
 
 [[nodiscard]] auto ReadReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string;
 }
+#endif

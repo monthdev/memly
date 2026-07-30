@@ -1,3 +1,6 @@
+// Temporarily disabled during library invalidation control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "LibraryQuerySql.hpp"
 
 #include <string>
@@ -10,3 +13,4 @@ namespace Infrastructure::Sql::Library::Query {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Library/Query/Statement/ReadNextLibraryInvalidationAtMillisecondsSinceEpoch.sql");
 }
 }
+#endif

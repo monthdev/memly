@@ -1,16 +1,17 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #pragma once
 
-#include <duckdb.hpp>
-
 #include <expected>
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include "Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
-#include "Infrastructure/Database/SqlExecutionGuard.hpp"
+#include "Infrastructure/Database/DatabaseRuntime.hpp"
+#include "Infrastructure/Database/PreparedStatement.hpp"
 #include "Infrastructure/Sql/ReviewSession/Mutation/ReviewSessionMutationSql.hpp"
 #include "Infrastructure/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
@@ -19,52 +20,51 @@ namespace Infrastructure::Store::ReviewSession {
 
 class ReviewSessionStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    std::unique_ptr<duckdb::PreparedStatement> m_CreateCustomReviewSessionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_CreateDefaultReviewSessionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_CreateCustomReviewSessionDeckSelectionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_RenameReviewSessionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionToDefaultPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionToCustomPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_DeleteReviewSessionPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement;
-    std::unique_ptr<duckdb::PreparedStatement> m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
+    Infrastructure::Database::DatabaseRuntime& m_DatabaseRuntime;
+    Infrastructure::Database::PreparedStatement m_CreateCustomReviewSessionPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_CreateDefaultReviewSessionPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_CreateCustomReviewSessionDeckSelectionPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_RenameReviewSessionPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_UpdateReviewSessionToDefaultPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_UpdateReviewSessionToCustomPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_DeleteReviewSessionPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement;
+    Infrastructure::Database::PreparedStatement m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
 
 public:
-    explicit ReviewSessionStore(duckdb::Connection& DatabaseConnection)
+    explicit ReviewSessionStore(Infrastructure::Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_CreateCustomReviewSessionPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Mutation::CreateCustomReviewSessionSql()) }
-        , m_CreateDefaultReviewSessionPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Mutation::CreateDefaultReviewSessionSql()) }
-        , m_CreateCustomReviewSessionDeckSelectionPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Mutation::CreateCustomReviewSessionDeckSelectionSql()) }
-        , m_RenameReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReviewSession::Mutation::RenameReviewSessionSql()) }
-        , m_UpdateReviewSessionToDefaultPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Mutation::UpdateReviewSessionToDefaultSql()) }
-        , m_UpdateReviewSessionToCustomPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Mutation::UpdateReviewSessionToCustomSql()) }
-        , m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement{ DatabaseConnection.Prepare(
+        , m_DatabaseRuntime{ DatabaseRuntime }
+        , m_CreateCustomReviewSessionPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Mutation::CreateCustomReviewSessionSql())
+        }
+        , m_CreateDefaultReviewSessionPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Mutation::CreateDefaultReviewSessionSql())
+        }
+        , m_CreateCustomReviewSessionDeckSelectionPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Mutation::CreateCustomReviewSessionDeckSelectionSql())
+        }
+        , m_RenameReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Mutation::RenameReviewSessionSql()) }
+        , m_UpdateReviewSessionToDefaultPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Mutation::UpdateReviewSessionToDefaultSql())
+        }
+        , m_UpdateReviewSessionToCustomPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Mutation::UpdateReviewSessionToCustomSql())
+        }
+        , m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement{ DatabaseRuntime.PrepareStatement(
               Infrastructure::Sql::ReviewSession::Mutation::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql()) }
-        , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Mutation::DeleteCustomReviewSessionDeckSelectionsSql()) }
-        , m_DeleteReviewSessionPreparedStatement{ DatabaseConnection.Prepare(Infrastructure::Sql::ReviewSession::Mutation::DeleteReviewSessionSql()) }
-        , m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Query::ReadDefaultReviewSessionIdByRootDeckIdSql()) }
-        , m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{ DatabaseConnection.Prepare(
-              Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionIdByReviewSessionDefinitionKeySql()) } {
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CreateCustomReviewSessionPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CreateDefaultReviewSessionPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_CreateCustomReviewSessionDeckSelectionPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_RenameReviewSessionPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_UpdateReviewSessionToDefaultPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_UpdateReviewSessionToCustomPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_DeleteReviewSessionPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement);
-        Infrastructure::Database::ThrowOnPreparedStatementError(*m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement);
+        , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Mutation::DeleteCustomReviewSessionDeckSelectionsSql())
+        }
+        , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Mutation::DeleteReviewSessionSql()) }
+        , m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Query::ReadDefaultReviewSessionIdByRootDeckIdSql())
+        }
+        , m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::ReviewSession::Query::ReadReviewSessionIdByReviewSessionDefinitionKeySql())
+        } {
     }
 
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
@@ -86,11 +86,11 @@ public:
 private:
     [[nodiscard]] auto TryReadDefaultReviewSessionIdByRootDeckId(const std::string&) -> std::optional<std::string>;
     [[nodiscard]] auto TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string&) -> std::optional<std::string>;
-    [[nodiscard]] auto CreateCustomReviewSessionDeckSelection(const std::string&,
-                                                              const std::string&,
-                                                              Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum)
-        -> std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+    void CreateCustomReviewSessionDeckSelection(const std::string&,
+                                                const std::string&,
+                                                Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum);
     void DeleteCustomReviewSessionDeckSelections(const std::string&);
 };
 
 }
+#endif

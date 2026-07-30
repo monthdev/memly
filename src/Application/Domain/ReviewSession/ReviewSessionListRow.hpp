@@ -1,3 +1,6 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #pragma once
 
 #include <cstdint>
@@ -9,7 +12,7 @@
 
 namespace Application::Domain::ReviewSession {
 
-struct ReviewSessionListRow : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
+struct [[nodiscard]] ReviewSessionListRow final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
     std::string m_ReviewSessionId;
     std::string m_ReviewSessionName;
     std::int64_t m_CreatedAtMillisecondsSinceEpoch;
@@ -31,3 +34,4 @@ struct ReviewSessionListRow : private Support::SpecialMemberPolicy::NoCopyMoveCo
 };
 
 }
+#endif

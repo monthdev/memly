@@ -40,6 +40,8 @@ Checks: >
   custom-memly-declared-ordinary-constructor,
   custom-memly-deleted-default-constructor-only-for-non-instantiable,
   custom-memly-expected-value-suffix,
+  custom-memly-explicit-contextual-braced-default-argument,
+  custom-memly-explicit-contextual-braced-expression,
   custom-memly-explicit-non-instantiable-default-constructor,
   custom-memly-no-consumer-destructor,
   custom-memly-no-consumer-special-member,
@@ -50,6 +52,8 @@ Checks: >
   custom-memly-no-named-lambda,
   custom-memly-no-named-declaration-parameter,
   custom-memly-no-namespace-variable,
+  custom-memly-no-prepared-statement-execution-field,
+  custom-memly-no-prepared-statement-execution-variable,
   custom-memly-no-using-declaration,
   custom-memly-nodiscard-callable,
   custom-memly-nodiscard-enum,
@@ -283,13 +287,14 @@ CustomChecks:
       match declaratorDecl(
         anyOf(
           varDecl(
-            unless(
-              parmVarDecl(
-                hasAncestor(
-                  functionDecl(
-                    unless(hasBody(stmt()))
-                  )
-                )
+            unless(parmVarDecl())
+          ),
+          parmVarDecl(
+            matchesName("^::.+$"),
+            unless(matchesName("anonymous")),
+            hasAncestor(
+              functionDecl(
+                hasBody(stmt())
               )
             )
           ),
@@ -335,6 +340,109 @@ CustomChecks:
     Diagnostic:
       - BindName: value
         Message: named std::expected values must use the Expected suffix
+        Level: Warning
+  - Name: memly-explicit-contextual-braced-default-argument
+    Query: |
+      match parmVarDecl(
+        hasDefaultArgument(),
+        unless(isExpansionInSystemHeader()),
+        hasInitializer(
+          ignoringImplicit(
+            expr(
+              anyOf(
+                cxxConstructExpr(
+                  isListInitialization(),
+                  unless(cxxTemporaryObjectExpr())
+                ),
+                initListExpr(
+                  unless(hasAncestor(cxxFunctionalCastExpr()))
+                ),
+                cxxStdInitializerListExpr(
+                  unless(hasAncestor(cxxFunctionalCastExpr()))
+                )
+              )
+            ).bind("initializer")
+          )
+        )
+      )
+    Diagnostic:
+      - BindName: initializer
+        Message: a braced default argument must explicitly spell its constructed type
+        Level: Warning
+  - Name: memly-explicit-contextual-braced-expression
+    Query: |
+      match stmt(
+        anyOf(
+          callExpr(
+            unless(isExpansionInSystemHeader()),
+            forEachArgumentWithParam(
+              ignoringImplicit(
+                expr(
+                  anyOf(
+                    cxxConstructExpr(
+                      isListInitialization(),
+                      unless(cxxTemporaryObjectExpr())
+                    ),
+                    initListExpr(
+                      unless(hasAncestor(cxxFunctionalCastExpr()))
+                    ),
+                    cxxStdInitializerListExpr(
+                      unless(hasAncestor(cxxFunctionalCastExpr()))
+                    )
+                  )
+                ).bind("initializer")
+              ),
+              parmVarDecl()
+            )
+          ),
+          returnStmt(
+            unless(isExpansionInSystemHeader()),
+            hasReturnValue(
+              ignoringImplicit(
+                expr(
+                  anyOf(
+                    cxxConstructExpr(
+                      isListInitialization(),
+                      unless(cxxTemporaryObjectExpr())
+                    ),
+                    initListExpr(
+                      unless(hasAncestor(cxxFunctionalCastExpr()))
+                    ),
+                    cxxStdInitializerListExpr(
+                      unless(hasAncestor(cxxFunctionalCastExpr()))
+                    )
+                  )
+                ).bind("initializer")
+              )
+            )
+          ),
+          binaryOperator(
+            isAssignmentOperator(),
+            unless(isExpansionInSystemHeader()),
+            hasRHS(
+              ignoringImplicit(
+                expr(
+                  anyOf(
+                    cxxConstructExpr(
+                      isListInitialization(),
+                      unless(cxxTemporaryObjectExpr())
+                    ),
+                    initListExpr(
+                      unless(hasAncestor(cxxFunctionalCastExpr()))
+                    ),
+                    cxxStdInitializerListExpr(
+                      unless(hasAncestor(cxxFunctionalCastExpr()))
+                    )
+                  )
+                ).bind("initializer")
+              )
+            )
+          )
+        )
+      )
+    Diagnostic:
+      - BindName: initializer
+        Message: a contextual braced expression must explicitly spell its constructed type
         Level: Warning
   - Name: memly-explicit-non-instantiable-default-constructor
     Query: |
@@ -473,6 +581,7 @@ CustomChecks:
         ),
         unless(hasAncestor(functionTemplateDecl())),
         unless(hasAncestor(classTemplateDecl())),
+        unless(hasAncestor(classTemplatePartialSpecializationDecl())),
         isExpansionInFileMatching("[/\\\\]src[/\\\\].*[.](h|hh|hpp|hxx)$")
       ).bind("function")
     Diagnostic:
@@ -536,6 +645,93 @@ CustomChecks:
     Diagnostic:
       - BindName: variable
         Message: global and namespace-scope variables are disallowed
+        Level: Warning
+  - Name: memly-no-prepared-statement-execution-field
+    Query: |
+      match fieldDecl(
+        unless(isImplicit()),
+        unless(isExpansionInSystemHeader()),
+        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
+        anyOf(
+          hasType(
+            qualType(
+              hasUnqualifiedDesugaredType(
+                recordType(
+                  hasDeclaration(
+                    cxxRecordDecl(
+                      hasName("::Infrastructure::Database::PreparedStatementExecution")
+                    )
+                  )
+                )
+              )
+            )
+          ),
+          hasType(
+            referenceType(
+              pointee(
+                qualType(
+                  hasUnqualifiedDesugaredType(
+                    recordType(
+                      hasDeclaration(
+                        cxxRecordDecl(
+                          hasName("::Infrastructure::Database::PreparedStatementExecution")
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      ).bind("field")
+    Diagnostic:
+      - BindName: field
+        Message: PreparedStatementExecution must be invoked directly as a chained temporary and must not be stored or named
+        Level: Warning
+  - Name: memly-no-prepared-statement-execution-variable
+    Query: |
+      match varDecl(
+        unless(isImplicit()),
+        unless(hasAncestor(functionDecl(isImplicit()))),
+        unless(isExpansionInSystemHeader()),
+        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
+        anyOf(
+          hasType(
+            qualType(
+              hasUnqualifiedDesugaredType(
+                recordType(
+                  hasDeclaration(
+                    cxxRecordDecl(
+                      hasName("::Infrastructure::Database::PreparedStatementExecution")
+                    )
+                  )
+                )
+              )
+            )
+          ),
+          hasType(
+            referenceType(
+              pointee(
+                qualType(
+                  hasUnqualifiedDesugaredType(
+                    recordType(
+                      hasDeclaration(
+                        cxxRecordDecl(
+                          hasName("::Infrastructure::Database::PreparedStatementExecution")
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      ).bind("variable")
+    Diagnostic:
+      - BindName: variable
+        Message: PreparedStatementExecution must be invoked directly as a chained temporary and must not be stored or named
         Level: Warning
   - Name: memly-no-using-declaration
     Query: |
@@ -647,13 +843,14 @@ CustomChecks:
       match declaratorDecl(
         anyOf(
           varDecl(
-            unless(
-              parmVarDecl(
-                hasAncestor(
-                  functionDecl(
-                    unless(hasBody(stmt()))
-                  )
-                )
+            unless(parmVarDecl())
+          ),
+          parmVarDecl(
+            matchesName("^::.+$"),
+            unless(matchesName("anonymous")),
+            hasAncestor(
+              functionDecl(
+                hasBody(stmt())
               )
             )
           ),
@@ -992,13 +1189,14 @@ CustomChecks:
       match declaratorDecl(
         anyOf(
           varDecl(
-            unless(
-              parmVarDecl(
-                hasAncestor(
-                  functionDecl(
-                    unless(hasBody(stmt()))
-                  )
-                )
+            unless(parmVarDecl())
+          ),
+          parmVarDecl(
+            matchesName("^::.+$"),
+            unless(matchesName("anonymous")),
+            hasAncestor(
+              functionDecl(
+                hasBody(stmt())
               )
             )
           ),

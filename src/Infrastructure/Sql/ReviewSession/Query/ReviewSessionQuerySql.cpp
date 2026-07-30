@@ -1,3 +1,6 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "ReviewSessionQuerySql.hpp"
 
 #include <string>
@@ -18,3 +21,4 @@ namespace Infrastructure::Sql::ReviewSession::Query {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Query/Statement/ReadReviewSessionIdByReviewSessionDefinitionKey.sql");
 }
 }
+#endif

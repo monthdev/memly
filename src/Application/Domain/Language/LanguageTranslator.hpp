@@ -76,7 +76,7 @@ enum class [[nodiscard]] TargetLanguageEnum : std::uint8_t {
     Cantonese,
     ChineseSimplified,
     ChineseTraditional,
-    Count
+    Size
 };
 
 struct TargetLanguageInfo : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
@@ -100,6 +100,6 @@ struct TargetLanguageInfo : private Support::SpecialMemberPolicy::NoCopyMoveCons
     }
 };
 
-[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Count)>&;
+[[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)>&;
 [[nodiscard]] auto GetTargetLanguageInfo(TargetLanguageEnum) -> const TargetLanguageInfo&;
 }

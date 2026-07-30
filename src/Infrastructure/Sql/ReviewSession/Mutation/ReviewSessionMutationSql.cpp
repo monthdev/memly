@@ -1,3 +1,6 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "ReviewSessionMutationSql.hpp"
 
 #include <string>
@@ -43,3 +46,4 @@ namespace Infrastructure::Sql::ReviewSession::Mutation {
     return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Mutation/Statement/DeleteReviewSession.sql");
 }
 }
+#endif

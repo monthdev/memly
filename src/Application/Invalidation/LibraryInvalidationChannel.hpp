@@ -1,3 +1,6 @@
+// Temporarily disabled during library invalidation control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #pragma once
 
 #include <qdatetime.h>
@@ -80,3 +83,4 @@ private:
 };
 
 }
+#endif

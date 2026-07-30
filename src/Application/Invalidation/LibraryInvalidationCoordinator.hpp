@@ -1,3 +1,6 @@
+// Temporarily disabled during library invalidation control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #pragma once
 
 #include <qobject.h>
@@ -38,7 +41,7 @@ public:
 
     void Invalidate(const LibraryInvalidationTargetBitset&) noexcept;
     void InvalidateWithReschedule(const LibraryInvalidationTargetBitset&) noexcept;
-    void InvalidateWithRescheduleAndCurrentSnapshotEpoch(const LibraryInvalidationTargetBitset&) noexcept;
+    void InvalidateWithRescheduleAndNewSnapshotEpoch(const LibraryInvalidationTargetBitset&) noexcept;
 
 private:
     void HandleScheduledInvalidation() noexcept;
@@ -46,3 +49,4 @@ private:
 };
 
 }
+#endif

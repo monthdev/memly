@@ -9,7 +9,7 @@
 
 namespace Infrastructure::Store::Deck {
 
-struct DeckSnapshotRecord final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
+struct [[nodiscard]] DeckSnapshotRecord final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
     std::string m_DeckId;
     std::optional<std::string> m_ParentDeckIdOptional;
     std::string m_DeckName;

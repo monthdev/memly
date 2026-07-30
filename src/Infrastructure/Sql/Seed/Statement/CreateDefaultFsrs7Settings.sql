@@ -28,6 +28,4 @@ WHERE
       fsrs_settings
     WHERE
       is_default = TRUE
-  )
-LIMIT
-  1;
+  );

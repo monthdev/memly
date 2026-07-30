@@ -1,3 +1,6 @@
+// Temporarily disabled during library invalidation control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
 #include "Application/Invalidation/LibraryInvalidationCoordinator.hpp"
 
 #include <qdatetime.h>
@@ -23,7 +26,7 @@ void LibraryInvalidationCoordinator::InvalidateWithReschedule(const LibraryInval
     ScheduleNextLibraryInvalidation();
 }
 
-void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndCurrentSnapshotEpoch(
+void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndNewSnapshotEpoch(
     const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
     m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch = static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch());
     emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
@@ -31,7 +34,7 @@ void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndCurrentSnapshotE
 }
 
 void LibraryInvalidationCoordinator::HandleScheduledInvalidation() noexcept {
-    InvalidateWithRescheduleAndCurrentSnapshotEpoch(LibraryInvalidationTargetBitset{ LibraryInvalidationTargetEnum::DeckForestSnapshot });
+    InvalidateWithRescheduleAndNewSnapshotEpoch(LibraryInvalidationTargetBitset{ LibraryInvalidationTargetEnum::DeckForestSnapshot });
 }
 
 void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept {
@@ -50,3 +53,4 @@ void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept 
 }
 
 }
+#endif

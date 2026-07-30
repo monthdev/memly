@@ -3,41 +3,21 @@
 #include <duckdb.hpp>
 
 #include <concepts>
-#include <expected>
+#include <exception>
 #include <functional>
+#include <initializer_list>
+#include <source_location>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
+#include "Support/Runtime/ThrowMemlyException.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Infrastructure::Database {
 
 class TransactionRunner final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    template <typename CandidateType>
-    struct IsStdExpectedType : std::false_type, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
-        explicit constexpr IsStdExpectedType() noexcept
-            : std::false_type{}
-            , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
-        }
-    };
-
-    template <typename SuccessType, typename ErrorType>
-    struct IsStdExpectedType<std::expected<SuccessType, ErrorType>> : std::true_type, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
-        explicit constexpr IsStdExpectedType() noexcept
-            : std::true_type{}
-            , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
-        }
-    };
-
-    template <typename DependentType>
-    struct AlwaysFalseType : std::false_type, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
-        explicit constexpr AlwaysFalseType() noexcept
-            : std::false_type{}
-            , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
-        }
-    };
-
     duckdb::Connection& m_DatabaseConnection;
 
 public:
@@ -46,28 +26,39 @@ public:
         , m_DatabaseConnection{ DatabaseConnection } {
     }
 
-    template <typename ServiceMethodType>
-        requires std::invocable<ServiceMethodType&&>
-    [[nodiscard]] auto TransactionWrapper(ServiceMethodType&& ServiceMethod) -> std::invoke_result_t<ServiceMethodType&&> {
+    template <typename LambdaType>
+        requires std::invocable<LambdaType&&>
+    [[nodiscard]] auto TransactionWrapper(LambdaType&& Lambda, const std::source_location& SourceLocation = std::source_location::current())
+        -> std::invoke_result_t<LambdaType&&> {
         m_DatabaseConnection.BeginTransaction();
         try {
-            if constexpr (std::is_void_v<std::invoke_result_t<ServiceMethodType&&>>) {
-                std::invoke(std::forward<ServiceMethodType>(ServiceMethod));
+            if constexpr (std::same_as<std::invoke_result_t<LambdaType&&>, void>) {
+                std::invoke(std::forward<LambdaType>(Lambda));
                 m_DatabaseConnection.Commit();
-            } else if constexpr (IsStdExpectedType<std::remove_cvref_t<std::invoke_result_t<ServiceMethodType&&>>>::value) {
-                std::invoke_result_t<ServiceMethodType&&> ResultExpected{ std::invoke(std::forward<ServiceMethodType>(ServiceMethod)) };
-                if (ResultExpected.has_value()) {
-                    m_DatabaseConnection.Commit();
-                } else {
-                    m_DatabaseConnection.Rollback();
-                }
-                return ResultExpected;
             } else {
-                static_assert(AlwaysFalseType<std::invoke_result_t<ServiceMethodType&&>>::value,
-                              "TransactionWrapper only supports void or std::expected return types");
+                std::invoke_result_t<LambdaType&&> Result{ std::invoke(std::forward<LambdaType>(Lambda)) };
+                m_DatabaseConnection.Commit();
+                return std::invoke_result_t<LambdaType&&>{ std::move(Result) };
             }
+        } catch (const std::exception& TransactionException) {
+            try {
+                m_DatabaseConnection.Rollback();
+            } catch (const std::exception& RollbackException) {
+                Support::Runtime::ThrowMemlyException(
+                    std::initializer_list<std::string_view>{
+                        "Transaction failed:\n\t", TransactionException.what(), "\nRollback also failed:\n\t", RollbackException.what() },
+                    SourceLocation);
+            }
+            throw;
         } catch (...) {
-            m_DatabaseConnection.Rollback();
+            try {
+                m_DatabaseConnection.Rollback();
+            } catch (const std::exception& RollbackException) {
+                Support::Runtime::ThrowMemlyException(
+                    std::initializer_list<std::string_view>{ "Transaction failed with a non-standard exception\nRollback also failed:\n\t",
+                                                             RollbackException.what() },
+                    SourceLocation);
+            }
             throw;
         }
     }

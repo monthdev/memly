@@ -1,7 +1,6 @@
 #include "Application/Service/Deck/DeckService.hpp"
 
 #include <cstdint>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -31,8 +30,12 @@ void DeckService::CreateChildDeck(const std::string& DeckName, const std::string
     m_DeckStore.CreateChildDeck(DeckName, ParentDeckId);
 }
 
-void DeckService::MoveDeck(const std::string& DeckId, const std::optional<std::string>& NewParentDeckIdOptional) {
-    m_DeckStore.MoveDeck(DeckId, NewParentDeckIdOptional);
+void DeckService::MoveDeckToRoot(const std::string& DeckId) {
+    m_DeckStore.MoveDeckToRoot(DeckId);
+}
+
+void DeckService::MoveDeckUnderParent(const std::string& DeckId, const std::string& ParentDeckId) {
+    m_DeckStore.MoveDeckUnderParent(DeckId, ParentDeckId);
 }
 
 void DeckService::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) {

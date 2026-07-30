@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <exception>
+#include <initializer_list>
 #include <source_location>
 #include <string_view>
 
@@ -17,18 +18,18 @@ private:
     std::size_t m_ErrorMessageSize;
 
 public:
-    explicit MemlyException(const std::string_view ErrorMessage, const std::source_location& SourceLocation) noexcept
+    explicit MemlyException(const std::initializer_list<std::string_view> ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
         : std::exception{}
         , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_ErrorMessageArray{}
         , m_ErrorMessageSize{} {
-        ConstructErrorMessage(ErrorMessage, SourceLocation);
+        ConstructErrorMessage(ErrorMessageInitializerList, SourceLocation);
     }
 
     [[nodiscard]] auto what() const noexcept -> const char* override;
 
 private:
-    void ConstructErrorMessage(std::string_view, const std::source_location&) noexcept;
+    void ConstructErrorMessage(std::initializer_list<std::string_view>, const std::source_location&) noexcept;
     void AppendErrorMessage(std::string_view) noexcept;
 };
 }

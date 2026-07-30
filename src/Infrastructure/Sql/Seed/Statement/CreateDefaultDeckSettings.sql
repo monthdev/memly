@@ -27,6 +27,4 @@ WHERE
       deck_settings
     WHERE
       is_default = TRUE
-  )
-LIMIT
-  1;
+  );

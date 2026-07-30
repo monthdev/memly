@@ -1,5 +1,5 @@
 DELETE FROM review_sessions
 WHERE
-  id = ?
+  id = CAST(CAST(? AS VARCHAR) AS UUID)
 RETURNING
-  id;
+  id::VARCHAR AS review_session_id;

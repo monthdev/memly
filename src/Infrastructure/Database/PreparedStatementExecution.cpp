@@ -1,0 +1,26 @@
+#include "Infrastructure/Database/PreparedStatementExecution.hpp"
+
+#include <duckdb.hpp>
+
+#include <initializer_list>
+#include <memory>
+#include <string_view>
+
+#include "Support/Runtime/ThrowMemlyException.hpp"
+
+namespace Infrastructure::Database {
+
+[[nodiscard]] auto PreparedStatementExecution::WithoutParameters() && -> std::unique_ptr<duckdb::QueryResult> {
+    duckdb::vector<duckdb::Value> DuckDbValueVector{};
+    return Execute(DuckDbValueVector);
+}
+
+[[nodiscard]] auto PreparedStatementExecution::Execute(duckdb::vector<duckdb::Value>& DuckDbValueVector) -> std::unique_ptr<duckdb::QueryResult> {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DuckDbPreparedStatement.Execute(DuckDbValueVector, true) };
+    if (QueryResult->HasError()) {
+        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, m_SourceLocation);
+    }
+    return QueryResult;
+}
+
+}

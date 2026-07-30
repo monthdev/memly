@@ -15,7 +15,7 @@ void DeckForestProxyModel::sort(const int Column, const Qt::SortOrder SortOrder)
 
 [[nodiscard]] QVariant DeckForestProxyModel::headerData(const int Section, const Qt::Orientation Orientation, const int Role) const noexcept {
     if (Orientation not_eq Qt::Horizontal or Role not_eq Qt::DisplayRole) {
-        return {};
+        return QVariant{};
     }
     switch (Section) {
     case static_cast<int>(Presentation::Model::DeckForestModel::ColumnEnum::DeckNameColumn):
@@ -27,7 +27,7 @@ void DeckForestProxyModel::sort(const int Column, const Qt::SortOrder SortOrder)
     case static_cast<int>(Presentation::Model::DeckForestModel::ColumnEnum::SubtreeTotalCountColumn):
         return QStringLiteral("Total");
     default:
-        return {};
+        return QVariant{};
     }
 }
 
