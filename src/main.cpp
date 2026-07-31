@@ -5,7 +5,7 @@
 #include <qqmlapplicationengine.h>
 #include <qtresource.h>
 
-#include "Bootstrap/RuntimeContext.hpp"
+#include "CompositionRoot/RuntimeContext.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 #include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
 
@@ -19,7 +19,7 @@ auto main(int argc, char** argv) noexcept -> int {
         QGuiApplication::setApplicationDisplayName(AppName);
         QCoreApplication::setOrganizationDomain(OrgName);
         QCoreApplication::setOrganizationName(OrgName);
-        Bootstrap::RuntimeContext::Initialize(Support::Runtime::QtApp::DatabaseFilePath());
+        CompositionRoot::RuntimeContext::Initialize(Support::Runtime::QtApp::DatabaseFilePath());
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

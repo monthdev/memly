@@ -215,7 +215,7 @@ CustomChecks:
         unless(isExpansionInSystemHeader()),
         ofClass(
           cxxRecordDecl(
-            matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::")
+            matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::")
           )
         )
       ).bind("conversion")
@@ -231,7 +231,7 @@ CustomChecks:
         unless(isLambda()),
         unless(isTemplateInstantiation()),
         unless(isExpansionInSystemHeader()),
-        matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
         unless(
           anyOf(
             has(
@@ -269,7 +269,7 @@ CustomChecks:
         isDeleted(),
         ofClass(
           cxxRecordDecl(
-            matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+            matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
             unless(hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")),
             unless(
               isDerivedFrom(
@@ -452,7 +452,7 @@ CustomChecks:
         unless(isImplicit()),
         unless(isTemplateInstantiation()),
         unless(isExpansionInSystemHeader()),
-        matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
         isDerivedFrom(
           hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
         ),
@@ -478,7 +478,7 @@ CustomChecks:
         unless(isExpansionInSystemHeader()),
         ofClass(
           cxxRecordDecl(
-            matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+            matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
             unless(matchesName("^::Support::SpecialMemberPolicy::"))
           )
         )
@@ -505,7 +505,7 @@ CustomChecks:
         ),
         ofClass(
           cxxRecordDecl(
-            matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+            matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
             unless(matchesName("^::Support::SpecialMemberPolicy::"))
           )
         )
@@ -660,7 +660,7 @@ CustomChecks:
                 recordType(
                   hasDeclaration(
                     cxxRecordDecl(
-                      hasName("::Infrastructure::Database::PreparedStatementExecution")
+                      hasName("::Layer::Infrastructure::Database::PreparedStatementExecution")
                     )
                   )
                 )
@@ -675,7 +675,7 @@ CustomChecks:
                     recordType(
                       hasDeclaration(
                         cxxRecordDecl(
-                          hasName("::Infrastructure::Database::PreparedStatementExecution")
+                          hasName("::Layer::Infrastructure::Database::PreparedStatementExecution")
                         )
                       )
                     )
@@ -704,7 +704,7 @@ CustomChecks:
                 recordType(
                   hasDeclaration(
                     cxxRecordDecl(
-                      hasName("::Infrastructure::Database::PreparedStatementExecution")
+                      hasName("::Layer::Infrastructure::Database::PreparedStatementExecution")
                     )
                   )
                 )
@@ -719,7 +719,7 @@ CustomChecks:
                     recordType(
                       hasDeclaration(
                         cxxRecordDecl(
-                          hasName("::Infrastructure::Database::PreparedStatementExecution")
+                          hasName("::Layer::Infrastructure::Database::PreparedStatementExecution")
                         )
                       )
                     )
@@ -974,7 +974,7 @@ CustomChecks:
         unless(isImplicit()),
         unless(isTemplateInstantiation()),
         unless(isExpansionInSystemHeader()),
-        matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
         unless(matchesName("^::Support::SpecialMemberPolicy::")),
         hasDirectBase(
           cxxBaseSpecifier(
@@ -999,7 +999,7 @@ CustomChecks:
         unless(isLambda()),
         unless(isTemplateInstantiation()),
         unless(isExpansionInSystemHeader()),
-        matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
         unless(matchesName("^::Support::SpecialMemberPolicy::")),
         unless(
           anyOf(
@@ -1027,7 +1027,7 @@ CustomChecks:
         unless(isLambda()),
         unless(isTemplateInstantiation()),
         unless(isExpansionInSystemHeader()),
-        matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)::"),
+        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
         unless(matchesName("^::Support::SpecialMemberPolicy::")),
         anyOf(
           allOf(
@@ -1223,7 +1223,7 @@ CustomChecks:
         unless(
           hasAncestor(
             namespaceDecl(
-              matchesName("^::(Application|Bootstrap|Infrastructure|Presentation|Support|View)(::|$)")
+              matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)(::|$)")
             )
           )
         )

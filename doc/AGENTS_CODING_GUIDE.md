@@ -2,9 +2,9 @@
 
 ## Runtime Composition and Services
 
-Constructor parameters and data members of `RuntimeContext`-owned objects must
-follow their order in `RuntimeContext`. See \ref RuntimeContext.hpp
-"RuntimeContext.hpp" and \ref RuntimeContext.cpp "RuntimeContext.cpp".
+Constructor parameters and data members of objects owned by
+`CompositionRoot::RuntimeContext` must follow their order in
+`RuntimeContext.hpp/cpp`.
 
 Services form the domain capability surface used by application commands; they
 do not model stateful domain entities. A state-free operation remains on its
@@ -193,12 +193,13 @@ paired `NOLINTBEGIN` and `NOLINTEND` around the decoding expression.
 
 ## Qt and QML Boundaries
 
-Presentation and View own UI-facing Qt and QML integration. Focused Application
-runtime-coordination modules may use Qt when their behavior depends on the Qt
-event loop, signals, or timers; keep those dependencies contained and out of
-domain, service, store, and database contracts. `main.cpp` owns process startup
-and QML engine bootstrap. `Support/Runtime/QtApp` contains Qt adapters for
-application runtime support such as standard paths and embedded resources.
+`Layer/Presentation` and `Layer/View` own UI-facing Qt and QML integration.
+Focused `Layer/Application` runtime-coordination modules may use Qt when their
+behavior depends on the Qt event loop, signals, or timers; keep those
+dependencies contained and out of domain, service, store, and database
+contracts. `main.cpp` owns process startup and QML engine bootstrap.
+`Support/Runtime/QtApp` contains Qt adapters for application runtime support
+such as standard paths and embedded resources.
 
 Use standard-library types and containers at non-Qt-facing boundaries. Qt types
 and containers appear only in explicitly Qt-bound modules or where Qt framework,
@@ -260,7 +261,8 @@ domain property rather than a wrapper's underlying representation.
 
 ## Namespaces and File-Private Code
 
-Namespaces for code under `src/` mirror its folder nesting. An unnamed helper
+Namespaces for code under `src/` mirror its folder nesting; namespaces for the
+four architectural layers therefore begin with `Layer::`. An unnamed helper
 namespace is nested inside that matching namespace. The custom matcher enforces
 the minimum structural requirement that it have a Memly namespace ancestor
 (`custom-memly-unnamed-namespace-nesting`). Namespace-scope helper functions use
