@@ -41,7 +41,7 @@ private:
     [[nodiscard]] auto ExecuteSql(const std::string&, const std::source_location& = std::source_location::current()) -> std::unique_ptr<duckdb::QueryResult>;
 
     void BootstrapDatabase();
-    void ApplySchemaMigrations();
+    void ApplyMigrations();
     void SeedTableDefaults();
 };
 

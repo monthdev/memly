@@ -65,14 +65,14 @@ namespace Layer::Infrastructure::Database {
 
 void DatabaseRuntime::BootstrapDatabase() {
     m_TransactionRunner.TransactionWrapper([this]() -> void {
-        ApplySchemaMigrations();
+        ApplyMigrations();
         SeedTableDefaults();
     });
 }
 
-void DatabaseRuntime::ApplySchemaMigrations() {
-    static_cast<void>(ExecuteSql(Sql::Migration::M00_SchemaMigrationsLogSql()));
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ ExecuteSql(Sql::Migration::ReadSchemaMigrationsLogSql()) };
+void DatabaseRuntime::ApplyMigrations() {
+    static_cast<void>(ExecuteSql(Sql::Migration::M00_MigrationsLogSql()));
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ ExecuteSql(Sql::Migration::ReadMigrationsLogSql()) };
     std::vector<std::size_t> AppliedMigrationVersionSequenceVector{};
     while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ FetchNextDataChunk(*QueryResult) }) {
         for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
@@ -81,18 +81,17 @@ void DatabaseRuntime::ApplySchemaMigrations() {
     }
     assert(std::ranges::equal(AppliedMigrationVersionSequenceVector,
                               std::views::iota(std::size_t{ 1 }, AppliedMigrationVersionSequenceVector.size() + std::size_t{ 1 })));
-    const std::array<std::string (*)(), 1> SchemaMigrationSqlFunctionArray{ &Sql::Migration::M01_InitialSchemaSql };
-    if (AppliedMigrationVersionSequenceVector.size() > SchemaMigrationSqlFunctionArray.size()) {
+    const std::array<std::string (*)(), 1> MigrationSqlFunctionArray{ &Sql::Migration::M01_InitialSchemaSql };
+    if (AppliedMigrationVersionSequenceVector.size() > MigrationSqlFunctionArray.size()) {
         Support::Runtime::Exception::ThrowMemlyException(
             std::initializer_list<std::string_view>{ "Applied migration count exceeds available migration count" });
     }
-    if (AppliedMigrationVersionSequenceVector.size() < SchemaMigrationSqlFunctionArray.size()) {
-        PreparedStatement CreateSchemaMigrationsLogEntryPreparedStatement{ PrepareStatement(Sql::Migration::CreateSchemaMigrationsLogEntrySql()) };
-        for (std::size_t MigrationIndex{ AppliedMigrationVersionSequenceVector.size() }; MigrationIndex < SchemaMigrationSqlFunctionArray.size();
-             ++MigrationIndex) {
-            static_cast<void>(ExecuteSql(std::invoke(SchemaMigrationSqlFunctionArray.at(MigrationIndex))));
+    if (AppliedMigrationVersionSequenceVector.size() < MigrationSqlFunctionArray.size()) {
+        PreparedStatement CreateMigrationsLogEntryPreparedStatement{ PrepareStatement(Sql::Migration::CreateMigrationsLogEntrySql()) };
+        for (std::size_t MigrationIndex{ AppliedMigrationVersionSequenceVector.size() }; MigrationIndex < MigrationSqlFunctionArray.size(); ++MigrationIndex) {
+            static_cast<void>(ExecuteSql(std::invoke(MigrationSqlFunctionArray.at(MigrationIndex))));
             static_cast<void>(
-                ExecutePreparedStatement(CreateSchemaMigrationsLogEntryPreparedStatement).WithParameters(static_cast<std::uint32_t>(MigrationIndex + 1)));
+                ExecutePreparedStatement(CreateMigrationsLogEntryPreparedStatement).WithParameters(static_cast<std::uint32_t>(MigrationIndex + 1)));
         }
     }
 }

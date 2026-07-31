@@ -1,6 +1,6 @@
 SELECT
   version
 FROM
-  schema_migrations_log
+  migrations_log
 ORDER BY
   version;

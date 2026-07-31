@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS schema_migrations_log (
+CREATE TABLE IF NOT EXISTS migrations_log (
   version UINTEGER PRIMARY KEY,
   applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
