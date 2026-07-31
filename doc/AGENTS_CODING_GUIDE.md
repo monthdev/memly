@@ -162,6 +162,10 @@ Do not assert conditions that can fail during correct execution because of
 external or runtime state. Throw when such a failure cannot be recovered at the
 current boundary and is not represented by a typed recoverable result.
 
+Write exception-message prose as a noun phrase followed by a verb phrase, such
+as `Database query failed`. Do not use verb-first wording such as
+`Failed to execute database query`.
+
 Validate user input and other untrusted values at their input boundary before
 converting them into internal state. Downstream code may assert the established
 invariant instead of repeating runtime validation. Do not add both an assertion

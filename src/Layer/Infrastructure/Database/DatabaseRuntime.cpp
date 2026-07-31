@@ -83,7 +83,8 @@ void DatabaseRuntime::ApplySchemaMigrations() {
                               std::views::iota(std::size_t{ 1 }, AppliedMigrationVersionSequenceVector.size() + std::size_t{ 1 })));
     const std::array<std::string (*)(), 1> SchemaMigrationSqlFunctionArray{ &Sql::Migration::M01_InitialSchemaSql };
     if (AppliedMigrationVersionSequenceVector.size() > SchemaMigrationSqlFunctionArray.size()) {
-        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ "Unexpected number of applied migrations" });
+        Support::Runtime::Exception::ThrowMemlyException(
+            std::initializer_list<std::string_view>{ "Applied migration count exceeds available migration count" });
     }
     if (AppliedMigrationVersionSequenceVector.size() < SchemaMigrationSqlFunctionArray.size()) {
         PreparedStatement CreateSchemaMigrationsLogEntryPreparedStatement{ PrepareStatement(Sql::Migration::CreateSchemaMigrationsLogEntrySql()) };
