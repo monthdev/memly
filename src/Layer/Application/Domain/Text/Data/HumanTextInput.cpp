@@ -7,6 +7,7 @@
 #include <unicode/utypes.h>
 
 #include <cstddef>
+#include <functional>
 #include <initializer_list>
 #include <memory>
 #include <string>
@@ -38,12 +39,12 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
 #endif
-    thread_local std::unique_ptr<icu::BreakIterator> s_IcuBreakIteratorUniquePointer{ []() -> std::unique_ptr<icu::BreakIterator> {
+    thread_local std::unique_ptr<icu::BreakIterator> s_IcuBreakIteratorUniquePointer{ std::invoke([]() -> std::unique_ptr<icu::BreakIterator> {
         UErrorCode ErrorCode{ U_ZERO_ERROR };
         std::unique_ptr<icu::BreakIterator> IcuBreakIteratorUniquePointer{ icu::BreakIterator::createCharacterInstance(icu::Locale::getRoot(), ErrorCode) };
         a_ThrowOnIcuError(ErrorCode);
         return IcuBreakIteratorUniquePointer;
-    }() };
+    }) };
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif

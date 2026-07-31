@@ -70,6 +70,7 @@ Checks: >
   custom-memly-type-template-parameter-name,
   custom-memly-unnamed-namespace-helper-prefix,
   custom-memly-unnamed-namespace-nesting,
+  custom-memly-use-std-invoke,
   custom-memly-variant-value-suffix
 WarningsAsErrors: "*"
 CheckOptions:
@@ -1231,6 +1232,90 @@ CustomChecks:
     Diagnostic:
       - BindName: namespace
         Message: unnamed helper namespaces must be nested inside the matching Memly namespace
+        Level: Warning
+  - Name: memly-use-std-invoke
+    Query: |
+      match callExpr(
+        unless(isExpansionInSystemHeader()),
+        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
+        anyOf(
+          allOf(
+            unless(cxxOperatorCallExpr()),
+            unless(callee(functionDecl())),
+            callee(
+              expr(
+                hasType(pointerType())
+              )
+            )
+          ),
+          allOf(
+            unless(cxxOperatorCallExpr()),
+            callee(
+              expr(
+                allOf(
+                  isInstantiationDependent(),
+                  ignoringParenImpCasts(
+                    anyOf(
+                      declRefExpr(
+                        to(varDecl())
+                      ),
+                      declRefExpr(
+                        to(nonTypeTemplateParmDecl())
+                      ),
+                      memberExpr(
+                        member(fieldDecl())
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          ),
+          cxxMemberCallExpr(
+            callee(
+              expr(
+                ignoringParenImpCasts(
+                  binaryOperator(
+                    hasAnyOperatorName(".*", "->*")
+                  )
+                )
+              )
+            )
+          ),
+          cxxMemberCallExpr(
+            callee(
+              cxxMethodDecl(
+                hasOverloadedOperatorName("()")
+              )
+            )
+          ),
+          cxxOperatorCallExpr(
+            hasOverloadedOperatorName("()"),
+            unless(
+              hasArgument(
+                0,
+                ignoringParenImpCasts(
+                  declRefExpr(
+                    to(
+                      varDecl(
+                        hasDeclContext(
+                          anyOf(
+                            namespaceDecl(),
+                            translationUnitDecl()
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      ).bind("call")
+    Diagnostic:
+      - BindName: call
+        Message: indirect callable expressions must be invoked with std::invoke
         Level: Warning
   - Name: memly-variant-value-suffix
     Query: |

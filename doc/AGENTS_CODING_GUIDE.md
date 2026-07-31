@@ -285,12 +285,25 @@ dependency-distance signal.
 
 Lambdas always declare their return type. Named lambda closure variables are
 disallowed (`custom-memly-no-named-lambda`); pass a lambda directly to its
-consumer or invoke it immediately. Reusable callable logic belongs in an
-unnamed-namespace `a_` helper, or in a private method when it needs class state
-or private types.
+consumer or invoke it immediately with `std::invoke`. Reusable callable logic
+belongs in an unnamed-namespace `a_` helper or in a private method when it needs
+object state or private types.
 
-Invoke stored callables, callable template parameters, function pointers, and
-member-function pointers with `std::invoke`.
+Invoke every indirect callable expression with `std::invoke`, including an
+immediately invoked lambda, a temporary or returned function object, a stored
+callable, a callable template parameter, a function pointer, and a
+member-function pointer (`custom-memly-use-std-invoke`). This is to improve
+readability over easily missed operator() invocations. Calls outside this
+requirement are limited to:
+
+- ordinary direct free or static functions, such as
+  `a_ThrowOnIcuError(ErrorCode)`;
+- ordinary direct member functions, such as `IcuBreakIterator.next()`; and
+- namespace-level library callable APIs designed for direct function syntax,
+  such as `std::ranges::copy(...)` and `std::ranges::equal(...)`.
+
+Passing a callable to another function is not an invocation at that call site;
+the receiving implementation invokes it with `std::invoke`.
 
 Prefer concept-constrained type template parameters over unconstrained
 `typename` or `class` parameters whenever the accepted operations or type shape
