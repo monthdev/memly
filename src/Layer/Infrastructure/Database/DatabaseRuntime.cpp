@@ -71,7 +71,7 @@ void DatabaseRuntime::BootstrapDatabase() {
 }
 
 void DatabaseRuntime::ApplyMigrations() {
-    static_cast<void>(ExecuteSql(Sql::Migration::M00_MigrationsLogSql()));
+    static_cast<void>(ExecuteSql(Sql::Migration::M00_CreateMigrationsLogSql()));
     std::unique_ptr<duckdb::QueryResult> QueryResult{ ExecuteSql(Sql::Migration::ReadMigrationsLogSql()) };
     std::vector<std::size_t> AppliedMigrationVersionSequenceVector{};
     while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ FetchNextDataChunk(*QueryResult) }) {
@@ -81,7 +81,7 @@ void DatabaseRuntime::ApplyMigrations() {
     }
     assert(std::ranges::equal(AppliedMigrationVersionSequenceVector,
                               std::views::iota(std::size_t{ 1 }, AppliedMigrationVersionSequenceVector.size() + std::size_t{ 1 })));
-    const std::array<std::string (*)(), 1> MigrationSqlFunctionArray{ &Sql::Migration::M01_InitialSchemaSql };
+    const std::array<std::string (*)(), 1> MigrationSqlFunctionArray{ &Sql::Migration::M01_CreateSchemaSql };
     if (AppliedMigrationVersionSequenceVector.size() > MigrationSqlFunctionArray.size()) {
         Support::Runtime::Exception::ThrowMemlyException(
             std::initializer_list<std::string_view>{ "Applied migration count exceeds available migration count" });
