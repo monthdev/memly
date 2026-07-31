@@ -9,9 +9,9 @@
 namespace Application::IndexCache::Deck {
 
 class DeckForestSnapshotIndexCacheDefinition final
-    : public Application::IndexCache::IndexCacheDefinition<Application::Domain::Deck::Index::DeckForestSnapshotIndex,
-                                                           std::vector<Application::Domain::Deck::Index::DeckForestSnapshotNode>,
-                                                           &Application::Domain::Deck::Index::DeckForestSnapshotIndex::RefreshFromDeckForestSnapshotNodes> {
+    : public IndexCacheDefinition<Domain::Deck::Index::DeckForestSnapshotIndex,
+                                  std::vector<Domain::Deck::Index::DeckForestSnapshotNode>,
+                                  &Domain::Deck::Index::DeckForestSnapshotIndex::RefreshFromDeckForestSnapshotNodes> {
 public:
     explicit DeckForestSnapshotIndexCacheDefinition() = delete;
 };

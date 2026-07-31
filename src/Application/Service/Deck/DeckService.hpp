@@ -21,7 +21,7 @@ class DeckService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixi
 private:
     Infrastructure::Store::Deck::DeckStore& m_DeckStore;
     Infrastructure::Store::Deck::DeckSnapshotStore& m_DeckSnapshotStore;
-    Application::IndexCache::Deck::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
+    IndexCache::Deck::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
 
 public:
     explicit DeckService(Infrastructure::Store::Deck::DeckStore& DeckStore, Infrastructure::Store::Deck::DeckSnapshotStore& DeckSnapshotStore) noexcept
@@ -31,7 +31,7 @@ public:
         , m_DeckForestSnapshotIndexCache{} {
     }
 
-    [[nodiscard]] auto AcquireDeckForestSnapshotIndexCacheLease() -> Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease;
+    [[nodiscard]] auto AcquireDeckForestSnapshotIndexCacheLease() -> IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease;
 
     [[nodiscard]] static auto IsDeckNameLengthValid(const std::string&) noexcept -> bool;
 
@@ -41,7 +41,7 @@ public:
     void MoveDeckUnderParent(const std::string&, const std::string&);
     void RenameDeck(const std::string&, const std::string&);
     void DeleteDeck(const std::string&);
-    void RefreshDeckForestSnapshotIndexCache(const Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease&, std::int64_t);
+    void RefreshDeckForestSnapshotIndexCache(const IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease&, std::int64_t);
 };
 
 }

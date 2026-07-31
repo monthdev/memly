@@ -13,14 +13,14 @@ namespace Infrastructure::Store::Deck {
 
 class DeckSnapshotStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Database::DatabaseRuntime& m_DatabaseRuntime;
-    Infrastructure::Database::PreparedStatement m_ReadDeckSnapshotRecordsPreparedStatement;
+    Database::DatabaseRuntime& m_DatabaseRuntime;
+    Database::PreparedStatement m_ReadDeckSnapshotRecordsPreparedStatement;
 
 public:
-    explicit DeckSnapshotStore(Infrastructure::Database::DatabaseRuntime& DatabaseRuntime)
+    explicit DeckSnapshotStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
-        , m_ReadDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Query::ReadDeckSnapshotRecordsSql()) } {
+        , m_ReadDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Query::ReadDeckSnapshotRecordsSql()) } {
     }
 
     [[nodiscard]] auto ReadDeckSnapshotRecords(std::int64_t) -> std::vector<DeckSnapshotRecord>;

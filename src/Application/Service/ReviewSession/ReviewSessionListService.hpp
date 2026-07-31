@@ -24,7 +24,7 @@ public:
         , m_ReviewSessionListStore{ ReviewSessionListStore } {
     }
 
-    [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSession::ReviewSessionListRow>;
+    [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Domain::ReviewSession::ReviewSessionListRow>;
 };
 
 }

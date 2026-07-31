@@ -12,28 +12,28 @@ namespace Infrastructure::Store::Deck {
 
 class DeckStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Database::DatabaseRuntime& m_DatabaseRuntime;
-    Infrastructure::Database::PreparedStatement m_CreateRootDeckPreparedStatement;
-    Infrastructure::Database::PreparedStatement m_CreateChildDeckPreparedStatement;
-    Infrastructure::Database::PreparedStatement m_MoveDeckToRootPreparedStatement;
-    Infrastructure::Database::PreparedStatement m_MoveDeckUnderParentPreparedStatement;
-    Infrastructure::Database::PreparedStatement m_RenameDeckPreparedStatement;
-    Infrastructure::Database::PreparedStatement m_DeleteDeckCardReviewsPreparedStatement;
-    Infrastructure::Database::PreparedStatement m_DeleteDeckCardsPreparedStatement;
-    Infrastructure::Database::PreparedStatement m_DeleteDeckPreparedStatement;
+    Database::DatabaseRuntime& m_DatabaseRuntime;
+    Database::PreparedStatement m_CreateRootDeckPreparedStatement;
+    Database::PreparedStatement m_CreateChildDeckPreparedStatement;
+    Database::PreparedStatement m_MoveDeckToRootPreparedStatement;
+    Database::PreparedStatement m_MoveDeckUnderParentPreparedStatement;
+    Database::PreparedStatement m_RenameDeckPreparedStatement;
+    Database::PreparedStatement m_DeleteDeckCardReviewsPreparedStatement;
+    Database::PreparedStatement m_DeleteDeckCardsPreparedStatement;
+    Database::PreparedStatement m_DeleteDeckPreparedStatement;
 
 public:
-    explicit DeckStore(Infrastructure::Database::DatabaseRuntime& DatabaseRuntime)
+    explicit DeckStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
-        , m_CreateRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Mutation::CreateRootDeckSql()) }
-        , m_CreateChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Mutation::CreateChildDeckSql()) }
-        , m_MoveDeckToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Mutation::MoveDeckToRootSql()) }
-        , m_MoveDeckUnderParentPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Mutation::MoveDeckUnderParentSql()) }
-        , m_RenameDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Mutation::RenameDeckSql()) }
-        , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Mutation::DeleteDeckCardReviewsSql()) }
-        , m_DeleteDeckCardsPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Mutation::DeleteDeckCardsSql()) }
-        , m_DeleteDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Deck::Mutation::DeleteDeckSql()) } {
+        , m_CreateRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::CreateRootDeckSql()) }
+        , m_CreateChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::CreateChildDeckSql()) }
+        , m_MoveDeckToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::MoveDeckToRootSql()) }
+        , m_MoveDeckUnderParentPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::MoveDeckUnderParentSql()) }
+        , m_RenameDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::RenameDeckSql()) }
+        , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::DeleteDeckCardReviewsSql()) }
+        , m_DeleteDeckCardsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::DeleteDeckCardsSql()) }
+        , m_DeleteDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::DeleteDeckSql()) } {
     }
 
     void CreateRootDeck(const std::string&, std::uint8_t);

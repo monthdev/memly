@@ -44,7 +44,7 @@ a_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
     }
 }
 
-[[nodiscard]] auto a_CountResultRows(Infrastructure::Database::DatabaseRuntime& DatabaseRuntime,
+[[nodiscard]] auto a_CountResultRows(Database::DatabaseRuntime& DatabaseRuntime,
                                      duckdb::QueryResult& QueryResult,
                                      const std::source_location& SourceLocation = std::source_location::current()) -> std::size_t {
     std::size_t ResultRowCount{ 0 };
@@ -54,7 +54,7 @@ a_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
     return ResultRowCount;
 }
 
-[[nodiscard]] auto a_TryReadSingleStringResult(Infrastructure::Database::DatabaseRuntime& DatabaseRuntime,
+[[nodiscard]] auto a_TryReadSingleStringResult(Database::DatabaseRuntime& DatabaseRuntime,
                                                duckdb::QueryResult& QueryResult,
                                                const std::source_location& SourceLocation = std::source_location::current()) -> std::optional<std::string> {
     std::optional<std::string> ResultOptional{};

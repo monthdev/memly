@@ -25,7 +25,7 @@ class DeckPageController final : public QObject, private Support::SpecialMemberP
 
 private:
     Application::Service::Deck::DeckService& m_DeckService;
-    Presentation::Model::DeckForestModel m_DeckForestModel;
+    Model::DeckForestModel m_DeckForestModel;
 
 public:
     explicit DeckPageController(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
@@ -38,7 +38,7 @@ public:
         LibraryInvalidationChannel.ConnectSnapshot(
             this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckForestSnapshot, &DeckPageController::RefreshDeckForestModel);
     }
-    [[nodiscard]] auto GetDeckForestModel() noexcept -> Presentation::Model::DeckForestModel*;
+    [[nodiscard]] auto GetDeckForestModel() noexcept -> Model::DeckForestModel*;
 
     [[nodiscard]] std::expected<void, const char*> CreateRootDeck(const std::string&, std::uint8_t) noexcept;
     [[nodiscard]] std::expected<void, const char*> CreateChildDeck(const std::string&, const std::string&) noexcept;

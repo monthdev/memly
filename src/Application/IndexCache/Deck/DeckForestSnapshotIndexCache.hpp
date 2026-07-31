@@ -5,10 +5,10 @@
 
 namespace Application::IndexCache::Deck {
 
-class DeckForestSnapshotIndexCache final : public Application::IndexCache::IndexCacheBase<DeckForestSnapshotIndexCacheDefinition> {
+class DeckForestSnapshotIndexCache final : public IndexCacheBase<DeckForestSnapshotIndexCacheDefinition> {
 public:
     explicit DeckForestSnapshotIndexCache() noexcept
-        : Application::IndexCache::IndexCacheBase<DeckForestSnapshotIndexCacheDefinition>{} {
+        : IndexCacheBase<DeckForestSnapshotIndexCacheDefinition>{} {
     }
 };
 

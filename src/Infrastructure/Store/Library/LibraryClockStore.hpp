@@ -15,15 +15,15 @@ namespace Infrastructure::Store::Library {
 
 class LibraryClockStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Database::DatabaseRuntime& m_DatabaseRuntime;
-    Infrastructure::Database::PreparedStatement m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
+    Database::DatabaseRuntime& m_DatabaseRuntime;
+    Database::PreparedStatement m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
 
 public:
-    explicit LibraryClockStore(Infrastructure::Database::DatabaseRuntime& DatabaseRuntime)
+    explicit LibraryClockStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
         , m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Infrastructure::Sql::Library::Query::ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql())
+            DatabaseRuntime.PrepareStatement(Sql::Library::Query::ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql())
         } {
     }
 

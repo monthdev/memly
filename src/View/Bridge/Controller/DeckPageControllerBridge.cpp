@@ -19,7 +19,7 @@ namespace {
 
 }
 
-[[nodiscard]] View::Bridge::ProxyModel::DeckForestProxyModel* DeckPageControllerBridge::GetDeckForestProxyModel() noexcept {
+[[nodiscard]] ProxyModel::DeckForestProxyModel* DeckPageControllerBridge::GetDeckForestProxyModel() noexcept {
     return &m_DeckForestProxyModel;
 }
 

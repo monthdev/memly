@@ -17,12 +17,12 @@ namespace View::Bridge::Controller {
 
 class DeckPageControllerBridge : public QObject, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
     Q_OBJECT
-    Q_PROPERTY(View::Bridge::ProxyModel::DeckForestProxyModel* deckForestModel READ GetDeckForestProxyModel CONSTANT)
+    Q_PROPERTY(ProxyModel::DeckForestProxyModel* deckForestModel READ GetDeckForestProxyModel CONSTANT)
     QML_NAMED_ELEMENT(DeckPageController)
 
 private:
     Presentation::Controller::DeckPageController m_DeckPageController;
-    View::Bridge::ProxyModel::DeckForestProxyModel m_DeckForestProxyModel;
+    ProxyModel::DeckForestProxyModel m_DeckForestProxyModel;
 
 public:
     explicit DeckPageControllerBridge(QObject* Parent = nullptr)
@@ -31,7 +31,7 @@ public:
         , m_DeckPageController{ Bootstrap::RuntimeContext::GetRequiredLibraryInvalidationChannel(), Bootstrap::RuntimeContext::GetRequiredDeckService() }
         , m_DeckForestProxyModel{ *m_DeckPageController.GetDeckForestModel(), this } {
     }
-    [[nodiscard]] View::Bridge::ProxyModel::DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
+    [[nodiscard]] ProxyModel::DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
 
     [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString&, quint8) noexcept;
     [[nodiscard]] Q_INVOKABLE QString CreateChildDeck(const QString&, const QString&) noexcept;

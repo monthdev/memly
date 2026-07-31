@@ -35,22 +35,22 @@ public:
     }
 
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
-        -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+        -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto CreateOrReadExistingCustomReviewSession(const std::string&,
                                                                const std::string&,
-                                                               const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>&)
-        -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+                                                               const std::vector<Domain::ReviewSession::ReviewSessionDeckSelection>&)
+        -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto RenameReviewSession(const std::string&, const std::string&)
-        -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+        -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto EditReviewSessionToDefault(const std::string&, const std::string&, const std::string&)
-        -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+        -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto
-    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>&)
-        -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<Domain::ReviewSession::ReviewSessionDeckSelection>&)
+        -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string&)
-        -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+        -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto DeleteReviewSession(const std::string&)
-        -> std::expected<void, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
+        -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
 };
 
 }

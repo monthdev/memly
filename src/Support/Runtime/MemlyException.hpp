@@ -10,7 +10,7 @@
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Support::Runtime {
-class [[nodiscard]] MemlyException final : public std::exception, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class [[nodiscard]] MemlyException final : public std::exception, private SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     static constexpr std::size_t s_ErrorMessageCapacity{ 1024 };
 
@@ -20,7 +20,7 @@ private:
 public:
     explicit MemlyException(const std::initializer_list<std::string_view> ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
         : std::exception{}
-        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_ErrorMessageArray{}
         , m_ErrorMessageSize{} {
         ConstructErrorMessage(ErrorMessageInitializerList, SourceLocation);

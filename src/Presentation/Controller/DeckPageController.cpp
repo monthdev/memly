@@ -15,7 +15,7 @@
 
 namespace Presentation::Controller {
 
-[[nodiscard]] auto DeckPageController::GetDeckForestModel() noexcept -> Presentation::Model::DeckForestModel* {
+[[nodiscard]] auto DeckPageController::GetDeckForestModel() noexcept -> Model::DeckForestModel* {
     return &m_DeckForestModel;
 }
 

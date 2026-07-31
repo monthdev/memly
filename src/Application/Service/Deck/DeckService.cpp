@@ -14,12 +14,12 @@
 
 namespace Application::Service::Deck {
 
-[[nodiscard]] auto DeckService::AcquireDeckForestSnapshotIndexCacheLease() -> Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease {
+[[nodiscard]] auto DeckService::AcquireDeckForestSnapshotIndexCacheLease() -> IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease {
     return m_DeckForestSnapshotIndexCache.AcquireLease();
 }
 
 [[nodiscard]] auto DeckService::IsDeckNameLengthValid(const std::string& DeckName) noexcept -> bool {
-    return Application::Domain::Deck::Constraint::IsDeckNameLengthValid(DeckName);
+    return Domain::Deck::Constraint::IsDeckNameLengthValid(DeckName);
 }
 
 void DeckService::CreateRootDeck(const std::string& DeckName, const std::uint8_t TargetLanguageCode) {
@@ -46,12 +46,11 @@ void DeckService::DeleteDeck(const std::string& DeckId) {
     m_DeckStore.DeleteDeck(DeckId);
 }
 
-void DeckService::RefreshDeckForestSnapshotIndexCache(
-    const Application::IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease& DeckForestSnapshotIndexCacheLease,
-    const std::int64_t AsOfMillisecondsSinceEpoch) {
+void DeckService::RefreshDeckForestSnapshotIndexCache(const IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease& DeckForestSnapshotIndexCacheLease,
+                                                      const std::int64_t AsOfMillisecondsSinceEpoch) {
     std::vector<Infrastructure::Store::Deck::DeckSnapshotRecord> DeckSnapshotRecordVector{ m_DeckSnapshotStore.ReadDeckSnapshotRecords(
         AsOfMillisecondsSinceEpoch) };
-    std::vector<Application::Domain::Deck::Index::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
+    std::vector<Domain::Deck::Index::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
     DeckForestSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
     for (Infrastructure::Store::Deck::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
         DeckForestSnapshotNodeVector.emplace_back(std::move(DeckSnapshotRecord.m_DeckId),
