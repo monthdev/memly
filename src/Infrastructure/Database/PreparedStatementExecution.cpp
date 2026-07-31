@@ -11,11 +11,11 @@
 namespace Infrastructure::Database {
 
 [[nodiscard]] auto PreparedStatementExecution::WithoutParameters() && -> std::unique_ptr<duckdb::QueryResult> {
-    duckdb::vector<duckdb::Value> DuckDbValueVector{};
-    return Execute(DuckDbValueVector);
+    return Execute(duckdb::vector<duckdb::Value>{});
 }
 
-[[nodiscard]] auto PreparedStatementExecution::Execute(duckdb::vector<duckdb::Value>& DuckDbValueVector) -> std::unique_ptr<duckdb::QueryResult> {
+// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
+[[nodiscard]] auto PreparedStatementExecution::Execute(duckdb::vector<duckdb::Value>&& DuckDbValueVector) -> std::unique_ptr<duckdb::QueryResult> {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DuckDbPreparedStatement.Execute(DuckDbValueVector, true) };
     if (QueryResult->HasError()) {
         Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, m_SourceLocation);

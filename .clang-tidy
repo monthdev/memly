@@ -59,6 +59,7 @@ Checks: >
   custom-memly-nodiscard-enum,
   custom-memly-nodiscard-returned-record,
   custom-memly-no-stateful-defaulted-default-constructor,
+  custom-memly-no-two-statement-pass-through-variable,
   custom-memly-optional-value-suffix,
   custom-memly-policy-mixin-destructor,
   custom-memly-private-direct-special-member-policy,
@@ -837,6 +838,53 @@ CustomChecks:
     Diagnostic:
       - BindName: constructor
         Message: a default constructor with direct bases or non-static data members must use an explicit initializer list instead of = default
+        Level: Warning
+  - Name: memly-no-two-statement-pass-through-variable
+    Query: |
+      match compoundStmt(
+        statementCountIs(2),
+        hasAnySubstatement(
+          declStmt(
+            hasSingleDecl(
+              varDecl(
+                isDefinition(),
+                unless(isImplicit()),
+                hasAutomaticStorageDuration(),
+                unless(isExpansionInSystemHeader()),
+                isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
+                hasInitializer(expr())
+              ).bind("variable")
+            )
+          )
+        ),
+        hasAnySubstatement(
+          returnStmt(
+            hasReturnValue(
+              ignoringParenImpCasts(
+                callExpr(
+                  unless(cxxOperatorCallExpr()),
+                  argumentCountIs(1),
+                  hasArgument(
+                    0,
+                    ignoringParenImpCasts(
+                      declRefExpr(
+                        to(
+                          varDecl(
+                            equalsBoundNode("variable")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    Diagnostic:
+      - BindName: variable
+        Message: construct this single-use argument directly in the returned call
         Level: Warning
   - Name: memly-optional-value-suffix
     Query: |

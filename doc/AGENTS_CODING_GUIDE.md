@@ -34,6 +34,11 @@ Named variable definitions and lambda init-captures must use brace
 initialization (`custom-memly-braced-variable-initialization`) and direct-list
 spelling wherever the language permits it.
 
+Do not introduce a named local solely to pass it once. In particular, a
+two-statement block consisting of a local declaration followed by a returned
+one-argument call that passes the local must construct the argument directly in
+the call (`custom-memly-no-two-statement-pass-through-variable`).
+
 Contextually typed braced initializer lists are disallowed. Function arguments,
 return expressions, assignments, and default arguments must explicitly spell the
 constructed type (`custom-memly-explicit-contextual-braced-expression`,

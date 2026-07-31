@@ -32,13 +32,13 @@ public:
         duckdb::vector<duckdb::Value> DuckDbValueVector{};
         DuckDbValueVector.reserve(sizeof...(SqlParameterType));
         (DuckDbValueVector.emplace_back(duckdb::Value::CreateValue(std::forward<SqlParameterType>(SqlParameters))), ...);
-        return Execute(DuckDbValueVector);
+        return Execute(std::move(DuckDbValueVector));
     }
 
     [[nodiscard]] auto WithoutParameters() && -> std::unique_ptr<duckdb::QueryResult>;
 
 private:
-    [[nodiscard]] auto Execute(duckdb::vector<duckdb::Value>&) -> std::unique_ptr<duckdb::QueryResult>;
+    [[nodiscard]] auto Execute(duckdb::vector<duckdb::Value>&&) -> std::unique_ptr<duckdb::QueryResult>;
 };
 
 }

@@ -5,14 +5,18 @@ Diagnostics:
 
 ---
 If:
-  PathMatch: ^build/_deps/.*
+  PathExclude: (src|test)/.*
 
 CompileFlags:
-  Remove: [-Wall, -Wextra, -Wunused, -Werror, -pedantic]
+  Remove: [-W*, -pedantic, /W*, /clang:-W*, /clang:-pedantic]
+
+Diagnostics:
+  ClangTidy:
+    Remove: ['*']
+
+---
+If:
+  PathExclude: (src|test)/.*
 
 Diagnostics:
   Suppress: ['*']
-  ClangTidy:
-    Remove: ['*']
-  UnusedIncludes: None
-  MissingIncludes: None
