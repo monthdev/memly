@@ -12,14 +12,14 @@
 #include <string>
 #include <string_view>
 
-#include "Support/Runtime/ThrowMemlyException.hpp"
+#include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 
 namespace Application::Domain::Text::Data {
 namespace {
 
 void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
     if (U_FAILURE(ErrorCode) not_eq 0) {
-        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ u_errorName(ErrorCode) });
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ u_errorName(ErrorCode) });
     }
 }
 

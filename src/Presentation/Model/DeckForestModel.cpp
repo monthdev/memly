@@ -13,12 +13,12 @@
 #include <unordered_map>
 #include <utility>
 
-#include "Support/Runtime/ExceptionBoundary.hpp"
+#include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 
 namespace Presentation::Model {
 
 [[nodiscard]] QModelIndex DeckForestModel::index(const int Row, const int Column, const QModelIndex& Parent) const noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> QModelIndex {
+    return Support::Runtime::Exception::TryCatchWrapper([&]() -> QModelIndex {
         if (not hasIndex(Row, Column, Parent)) {
             return QModelIndex{};
         }
@@ -29,7 +29,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] QModelIndex DeckForestModel::parent(const QModelIndex& Index) const noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> QModelIndex {
+    return Support::Runtime::Exception::TryCatchWrapper([&]() -> QModelIndex {
         const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
             return QModelIndex{};
@@ -45,7 +45,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] int DeckForestModel::rowCount(const QModelIndex& Parent) const noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> int {
+    return Support::Runtime::Exception::TryCatchWrapper([&]() -> int {
         if (Parent.column() > 0) {
             return 0;
         }
@@ -54,7 +54,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] int DeckForestModel::columnCount(const QModelIndex& Parent) const noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> int {
+    return Support::Runtime::Exception::TryCatchWrapper([&]() -> int {
         if (Parent.isValid() and Parent.column() > 0) {
             return 0;
         }
@@ -63,7 +63,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] QVariant DeckForestModel::data(const QModelIndex& Index, const int Role) const noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> QVariant {
+    return Support::Runtime::Exception::TryCatchWrapper([&]() -> QVariant {
         const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
             return QVariant{};
@@ -120,7 +120,7 @@ namespace Presentation::Model {
 }
 
 [[nodiscard]] bool DeckForestModel::hasChildren(const QModelIndex& Parent) const noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> bool {
+    return Support::Runtime::Exception::TryCatchWrapper([&]() -> bool {
         if (Parent.column() > 0) {
             return false;
         }
@@ -129,7 +129,7 @@ namespace Presentation::Model {
 }
 
 void DeckForestModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
-    Support::Runtime::TryCatchWrapper([&]() -> void {
+    Support::Runtime::Exception::TryCatchWrapper([&]() -> void {
         if (Column < static_cast<int>(ColumnEnum::DeckNameColumn) or Column > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
             return;
         }
@@ -213,7 +213,7 @@ void DeckForestModel::ApplyCurrentSort() {
 }
 
 void DeckForestModel::ReplaceAll(std::vector<Application::Domain::Deck::Index::DeckForestSnapshotNode>&& DeckForestSnapshotNodeVector) noexcept {
-    Support::Runtime::TryCatchWrapper([&]() -> void {
+    Support::Runtime::Exception::TryCatchWrapper([&]() -> void {
         std::vector<DeckNode> DeckNodesVector;
         std::vector<std::size_t> RootDeckNodeIndexesVector;
         std::unordered_map<std::string, std::size_t> DeckNodeIndexByIdHash;

@@ -1,4 +1,4 @@
-#include "Support/Runtime/MemlyException.hpp"
+#include "Support/Runtime/Exception/MemlyException.hpp"
 
 #include <algorithm>
 #include <array>
@@ -12,7 +12,7 @@
 #include <string_view>
 #include <system_error>
 
-namespace Support::Runtime {
+namespace Support::Runtime::Exception {
 
 [[nodiscard]] auto MemlyException::what() const noexcept -> const char* {
     return m_ErrorMessageArray.data();

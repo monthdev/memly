@@ -21,7 +21,7 @@
 #include "Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Infrastructure/Database/DatabaseRuntime.hpp"
 #include "Infrastructure/Database/PreparedStatement.hpp"
-#include "Support/Runtime/ThrowMemlyException.hpp"
+#include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 
 namespace Infrastructure::Store::ReviewSession {
 namespace {
@@ -90,7 +90,7 @@ a_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
     if (ErrorMessage.contains("exclude_selection_conflict")) {
         return Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckExcludeSelectionError;
     }
-    Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult.GetError() });
+    Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult.GetError() });
 }
 
 }

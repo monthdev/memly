@@ -22,14 +22,14 @@
 #include "Infrastructure/Database/TransactionRunner.hpp"
 #include "Infrastructure/Sql/Migration/MigrationSql.hpp"
 #include "Infrastructure/Sql/Seed/SeedSql.hpp"
-#include "Support/Runtime/ThrowMemlyException.hpp"
+#include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 
 namespace Infrastructure::Database {
 
 [[nodiscard]] auto DatabaseRuntime::PrepareStatement(const std::string& Sql, const std::source_location& SourceLocation) -> PreparedStatement {
     std::unique_ptr<duckdb::PreparedStatement> DuckDbPreparedStatement{ m_DatabaseConnection.Prepare(Sql) };
     if (DuckDbPreparedStatement->HasError()) {
-        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ DuckDbPreparedStatement->GetError() }, SourceLocation);
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ DuckDbPreparedStatement->GetError() }, SourceLocation);
     }
     return PreparedStatement{ std::move(DuckDbPreparedStatement) };
 }
@@ -46,7 +46,7 @@ namespace Infrastructure::Database {
     duckdb::unique_ptr<duckdb::DataChunk> DataChunk{};
     duckdb::ErrorData FetchError{};
     if (not QueryResult.TryFetch(DataChunk, FetchError)) {
-        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ FetchError.Message() }, SourceLocation);
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ FetchError.Message() }, SourceLocation);
     }
     return DataChunk;
 }
@@ -54,7 +54,7 @@ namespace Infrastructure::Database {
 [[nodiscard]] auto DatabaseRuntime::ExecuteSql(const std::string& Sql, const std::source_location& SourceLocation) -> std::unique_ptr<duckdb::QueryResult> {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.SendQuery(Sql) };
     if (QueryResult->HasError()) {
-        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, SourceLocation);
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, SourceLocation);
     }
     return QueryResult;
 }
@@ -83,7 +83,7 @@ void DatabaseRuntime::ApplySchemaMigrations() {
                               std::views::iota(std::size_t{ 1 }, AppliedMigrationVersionSequenceVector.size() + std::size_t{ 1 })));
     const std::array<std::string (*)(), 1> SchemaMigrationSqlFunctionArray{ &Sql::Migration::M01_InitialSchemaSql };
     if (AppliedMigrationVersionSequenceVector.size() > SchemaMigrationSqlFunctionArray.size()) {
-        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ "Unexpected number of applied migrations" });
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ "Unexpected number of applied migrations" });
     }
     if (AppliedMigrationVersionSequenceVector.size() < SchemaMigrationSqlFunctionArray.size()) {
         PreparedStatement CreateSchemaMigrationsLogEntryPreparedStatement{ PrepareStatement(Sql::Migration::CreateSchemaMigrationsLogEntrySql()) };

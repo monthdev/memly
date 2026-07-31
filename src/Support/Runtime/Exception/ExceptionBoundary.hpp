@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace Support::Runtime {
+namespace Support::Runtime::Exception {
 void LogException(std::string_view) noexcept;
 
 template <typename LambdaType>
@@ -16,8 +16,8 @@ template <typename LambdaType>
 [[nodiscard]] auto TryCatchWrapper(LambdaType&& Lambda) noexcept -> std::invoke_result_t<LambdaType&&> {
     try {
         return std::invoke(std::forward<LambdaType>(Lambda));
-    } catch (const std::exception& Exception) {
-        LogException(Exception.what());
+    } catch (const std::exception& CaughtException) {
+        LogException(CaughtException.what());
         std::abort();
     } catch (...) {
         LogException("Non-standard exception caught");

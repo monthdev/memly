@@ -1,4 +1,4 @@
-#include "Support/Runtime/ExceptionBoundary.hpp"
+#include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 
 #include <cstddef>
 #include <exception>
@@ -19,7 +19,7 @@
 
 #include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
 
-namespace Support::Runtime {
+namespace Support::Runtime::Exception {
 namespace {
 [[nodiscard]] auto a_WriteStdErrBytes(const char* const Bytes, const std::size_t ByteCount) noexcept -> std::ptrdiff_t {
 #if defined(_WIN32)
@@ -51,7 +51,7 @@ void LogException(const std::string_view ExceptionMessage) noexcept {
         ExceptionLogFile.exceptions(std::ios::failbit bitor std::ios::badbit);
         ExceptionLogFile.open(QtApp::ExceptionLogFilePath());
         ExceptionLogFile.write(ExceptionMessage.data(), static_cast<std::streamsize>(ExceptionMessage.size()));
-    } catch (const std::exception& Exception) { a_WriteToStdErr(Exception.what()); } catch (...) {
+    } catch (const std::exception& CaughtException) { a_WriteToStdErr(CaughtException.what()); } catch (...) {
         a_WriteToStdErr("Failed to write exception log file");
     }
 }

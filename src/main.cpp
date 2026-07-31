@@ -6,11 +6,11 @@
 #include <qtresource.h>
 
 #include "Bootstrap/RuntimeContext.hpp"
-#include "Support/Runtime/ExceptionBoundary.hpp"
+#include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 #include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
 
 auto main(int argc, char** argv) noexcept -> int {
-    return Support::Runtime::TryCatchWrapper([&]() -> int {
+    return Support::Runtime::Exception::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(Sql);
         [[maybe_unused]] const QGuiApplication QtApplicationLifetime{ argc, argv };
         constexpr const char* AppName{ "Memly" };

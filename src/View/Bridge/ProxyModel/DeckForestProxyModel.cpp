@@ -5,7 +5,7 @@
 
 #include <qstring.h>
 
-#include "Support/Runtime/ExceptionBoundary.hpp"
+#include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 
 namespace View::Bridge::ProxyModel {
 
@@ -32,7 +32,7 @@ void DeckForestProxyModel::sort(const int Column, const Qt::SortOrder SortOrder)
 }
 
 [[nodiscard]] QHash<int, QByteArray> DeckForestProxyModel::roleNames() const noexcept {
-    return Support::Runtime::TryCatchWrapper([&]() -> QHash<int, QByteArray> {
+    return Support::Runtime::Exception::TryCatchWrapper([&]() -> QHash<int, QByteArray> {
         static const QHash<int, QByteArray> s_DeckForestRoleNameByRoleQHash{
             {                                                                                         Qt::DisplayRole,QByteArrayLiteral("display")                                                                                                                      },
             {                              static_cast<int>(Presentation::Model::DeckForestModel::RoleEnum::DeckIdRole),              QByteArrayLiteral("deckId") },

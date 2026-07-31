@@ -13,7 +13,7 @@
 #include "Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Application/Invalidation/LibraryInvalidationTarget.hpp"
 #include "Infrastructure/Store/Library/LibraryClockStore.hpp"
-#include "Support/Runtime/ExceptionBoundary.hpp"
+#include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 
 namespace Application::Invalidation {
 
@@ -38,7 +38,7 @@ void LibraryInvalidationCoordinator::HandleScheduledInvalidation() noexcept {
 }
 
 void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept {
-    Support::Runtime::TryCatchWrapper([&]() -> void {
+    Support::Runtime::Exception::TryCatchWrapper([&]() -> void {
         m_LibraryInvalidationQTimer.stop();
         const std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpochOptional{
             m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch)

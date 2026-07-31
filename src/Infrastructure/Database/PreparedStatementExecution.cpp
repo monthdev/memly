@@ -6,7 +6,7 @@
 #include <memory>
 #include <string_view>
 
-#include "Support/Runtime/ThrowMemlyException.hpp"
+#include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 
 namespace Infrastructure::Database {
 
@@ -18,7 +18,7 @@ namespace Infrastructure::Database {
 [[nodiscard]] auto PreparedStatementExecution::Execute(duckdb::vector<duckdb::Value>& DuckDbValueVector) -> std::unique_ptr<duckdb::QueryResult> {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DuckDbPreparedStatement.Execute(DuckDbValueVector, true) };
     if (QueryResult->HasError()) {
-        Support::Runtime::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, m_SourceLocation);
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, m_SourceLocation);
     }
     return QueryResult;
 }

@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "Support/Runtime/ThrowMemlyException.hpp"
+#include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Infrastructure::Database {
@@ -44,7 +44,7 @@ public:
             try {
                 m_DatabaseConnection.Rollback();
             } catch (const std::exception& RollbackException) {
-                Support::Runtime::ThrowMemlyException(
+                Support::Runtime::Exception::ThrowMemlyException(
                     std::initializer_list<std::string_view>{
                         "Transaction failed:\n\t", TransactionException.what(), "\nRollback also failed:\n\t", RollbackException.what() },
                     SourceLocation);
@@ -54,7 +54,7 @@ public:
             try {
                 m_DatabaseConnection.Rollback();
             } catch (const std::exception& RollbackException) {
-                Support::Runtime::ThrowMemlyException(
+                Support::Runtime::Exception::ThrowMemlyException(
                     std::initializer_list<std::string_view>{ "Transaction failed with a non-standard exception\nRollback also failed:\n\t",
                                                              RollbackException.what() },
                     SourceLocation);

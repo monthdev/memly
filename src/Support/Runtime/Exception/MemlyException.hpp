@@ -9,7 +9,7 @@
 
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Support::Runtime {
+namespace Support::Runtime::Exception {
 class [[nodiscard]] MemlyException final : public std::exception, private SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     static constexpr std::size_t s_ErrorMessageCapacity{ 1024 };
