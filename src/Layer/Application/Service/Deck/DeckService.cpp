@@ -15,11 +15,11 @@
 namespace Layer::Application::Service::Deck {
 
 [[nodiscard]] auto DeckService::AcquireDeckForestSnapshotIndexCacheLease() -> IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease {
-    return m_DeckForestSnapshotIndexCache.AcquireLease();
+    return IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease{ m_DeckForestSnapshotIndexCache.AcquireLease() };
 }
 
 [[nodiscard]] auto DeckService::IsDeckNameLengthValid(const std::string& DeckName) noexcept -> bool {
-    return Domain::Deck::Constraint::IsDeckNameLengthValid(DeckName);
+    return bool{ Domain::Deck::Constraint::IsDeckNameLengthValid(DeckName) };
 }
 
 void DeckService::CreateRootDeck(const std::string& DeckName, const std::uint8_t TargetLanguageCode) {

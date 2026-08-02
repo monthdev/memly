@@ -1,4 +1,4 @@
-Checks: >
+Checks: |
   -*,
   abseil-*,
   android-*,
@@ -28,6 +28,7 @@ Checks: >
   -portability-avoid-pragma-once,
   readability-*,
   -readability-named-parameter,
+  -readability-redundant-casting,
   -readability-redundant-member-init,
   -readability-redundant-typename,
   -readability-use-concise-preprocessor-directives,
@@ -35,7 +36,7 @@ Checks: >
   custom-memly-braced-constructor-initializer,
   custom-memly-braced-variable-initialization,
   custom-memly-complete-constructor-initializer-list,
-  custom-memly-constructor-definition-in-header,
+  custom-memly-constructor-definition-in-class,
   custom-memly-conversion-operator,
   custom-memly-declared-ordinary-constructor,
   custom-memly-deleted-default-constructor-only-for-non-instantiable,
@@ -43,17 +44,21 @@ Checks: >
   custom-memly-explicit-contextual-braced-default-argument,
   custom-memly-explicit-contextual-braced-expression,
   custom-memly-explicit-non-instantiable-default-constructor,
+  custom-memly-explicit-return-type-construction,
   custom-memly-no-consumer-destructor,
   custom-memly-no-consumer-special-member,
+  custom-memly-no-database-chain-proxy-field,
+  custom-memly-no-database-chain-proxy-variable,
   custom-memly-no-default-member-initializer,
   custom-memly-no-delegating-constructor,
   custom-memly-no-deduced-variable-type,
   custom-memly-no-header-function-definition,
+  custom-memly-no-magic-integer-in-assertion,
+  custom-memly-no-negative-magic-integer,
+  custom-memly-no-zero-floating-point-magic-number,
   custom-memly-no-named-lambda,
   custom-memly-no-named-declaration-parameter,
   custom-memly-no-namespace-variable,
-  custom-memly-no-prepared-statement-execution-field,
-  custom-memly-no-prepared-statement-execution-variable,
   custom-memly-no-using-declaration,
   custom-memly-nodiscard-callable,
   custom-memly-nodiscard-enum,
@@ -65,1313 +70,494 @@ Checks: >
   custom-memly-private-direct-special-member-policy,
   custom-memly-required-special-member-policy,
   custom-memly-nonconflicting-special-member-policy,
+  custom-memly-standard-container-value-suffix,
   custom-memly-string-view-definition-parameter-const,
   custom-memly-string-view-parameter-by-value,
   custom-memly-type-template-parameter-name,
-  custom-memly-unnamed-namespace-helper-prefix,
+  custom-memly-unnamed-namespace-declaration-prefix,
   custom-memly-unnamed-namespace-nesting,
   custom-memly-use-std-invoke,
   custom-memly-variant-value-suffix
 WarningsAsErrors: "*"
 CheckOptions:
-  - {
-      key: bugprone-unused-local-non-trivial-variable.IncludeTypes,
-      value: ".*",
-    }
-  - {
-      key: cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues,
-      value: "1",
-    }
-  - {
-      key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic,
-      value: "true",
-    }
+  - { key: bugprone-unused-local-non-trivial-variable.IncludeTypes, value: ".*" }
+  - { key: cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues, value: "1" }
+  - { key: cppcoreguidelines-avoid-magic-numbers.IgnoredFloatingPointValues, value: "" }
+  - { key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic, value: "true" }
   - { key: readability-identifier-naming.ClassConstantPrefix, value: "s_" }
   - { key: readability-identifier-naming.ClassConstexprPrefix, value: "s_" }
   - { key: readability-identifier-naming.ClassMemberPrefix, value: "s_" }
   - { key: readability-identifier-naming.EnumSuffix, value: "Enum" }
   - { key: readability-identifier-naming.MemberPrefix, value: "m_" }
   - { key: readability-identifier-naming.StaticConstantPrefix, value: "s_" }
-  - {
-      key: readability-identifier-naming.StaticConstexprVariablePrefix,
-      value: "s_",
-    }
+  - { key: readability-identifier-naming.StaticConstexprVariablePrefix, value: "s_" }
   - { key: readability-identifier-naming.StaticVariablePrefix, value: "s_" }
   - { key: readability-magic-numbers.IgnoredIntegerValues, value: "1" }
-  - {
-      key: readability-operators-representation.BinaryOperators,
-      value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
-    }
-  - {
-      key: readability-operators-representation.OverloadedOperators,
-      value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq",
-    }
+  - { key: readability-magic-numbers.IgnoredFloatingPointValues, value: "" }
+  - { key: readability-operators-representation.BinaryOperators, value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq" }
+  - { key: readability-operators-representation.OverloadedOperators, value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq" }
 CustomChecks:
   - Name: memly-always-explicit-constructor
-    Query: |
-      match cxxConstructorDecl(
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExplicit()),
-        unless(isExpansionInSystemHeader())
+    Query: >-
+      match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExplicit()), unless(isExpansionInSystemHeader())
       ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: constructor must be declared explicit
         Level: Warning
   - Name: memly-braced-constructor-initializer
-    Query: |
-      match cxxConstructorDecl(
-        unless(isImplicit()),
-        unless(isDeleted()),
-        unless(isDefaulted()),
-        unless(isDelegatingConstructor()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        forEachConstructorInitializer(
-          cxxCtorInitializer(
-            isWritten(),
-            unless(
-              withInitializer(
-                ignoringImplicit(
-                  anyOf(
-                    initListExpr(),
-                    cxxConstructExpr(isListInitialization())
-                  )
-                )
-              )
-            )
-          ).bind("initializer")
-        )
-      )
+    Query: >-
+      match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isDelegatingConstructor()),
+      unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), forEachConstructorInitializer( cxxCtorInitializer( isWritten(), unless(
+      withInitializer( ignoringImplicit( anyOf( initListExpr(), cxxConstructExpr(isListInitialization()) ) ) ) ) ).bind("initializer") ) )
     Diagnostic:
       - BindName: initializer
         Message: constructor initializers must use brace initialization
         Level: Warning
   - Name: memly-braced-variable-initialization
-    Query: |
-      match varDecl(
-        isDefinition(),
-        unless(parmVarDecl()),
-        unless(isImplicit()),
-        unless(isExceptionVariable()),
-        unless(isExpansionInSystemHeader()),
-        unless(
-          hasParent(
-            declStmt(
-              hasParent(cxxForRangeStmt())
-            )
-          )
-        ),
-        unless(
-          hasInitializer(
-            ignoringImplicit(
-              anyOf(
-                initListExpr(),
-                cxxConstructExpr(isListInitialization())
-              )
-            )
-          )
-        )
-      ).bind("variable")
+    Query: >-
+      match varDecl( isDefinition(), unless(parmVarDecl()), unless(isImplicit()), unless(isExceptionVariable()), unless(isExpansionInSystemHeader()), unless(
+      hasParent( declStmt( hasParent(cxxForRangeStmt()) ) ) ), unless( hasInitializer( ignoringImplicit( anyOf( initListExpr(),
+      cxxConstructExpr(isListInitialization()) ) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: named variable definitions must use brace initialization
         Level: Warning
   - Name: memly-complete-constructor-initializer-list
-    Query: |
-      match cxxConstructorDecl(
-        unless(isImplicit()),
-        unless(isDeleted()),
-        unless(isDefaulted()),
-        unless(isDelegatingConstructor()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        hasAnyConstructorInitializer(
-          unless(isWritten())
-        )
-      ).bind("constructor")
+    Query: >-
+      match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isDelegatingConstructor()),
+      unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), hasAnyConstructorInitializer( unless(isWritten()) ) ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: constructor must explicitly initialize every direct base and non-static data member
         Level: Warning
-  - Name: memly-constructor-definition-in-header
-    Query: |
-      match cxxConstructorDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\].*[.](cc|cpp|cxx)$")
+  - Name: memly-constructor-definition-in-class
+    Query: >-
+      match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), unless( anyOf(
+      hasParent(cxxRecordDecl()), hasParent( functionTemplateDecl( hasParent(cxxRecordDecl()) ) ) ) ), isExpansionInFileMatching("[/\\\\]src[/\\\\]")
       ).bind("constructor")
     Diagnostic:
       - BindName: constructor
-        Message: constructor definitions must remain in headers
+        Message: constructor definitions must appear inside their class or struct declaration
         Level: Warning
   - Name: memly-conversion-operator
-    Query: |
-      match cxxConversionDecl(
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        ofClass(
-          cxxRecordDecl(
-            matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::")
-          )
-        )
-      ).bind("conversion")
+    Query: >-
+      match cxxConversionDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl(
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::") ) ) ).bind("conversion")
     Diagnostic:
       - BindName: conversion
         Message: conversion operators are disallowed
         Level: Warning
   - Name: memly-declared-ordinary-constructor
-    Query: |
-      match cxxRecordDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isLambda()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-        unless(
-          anyOf(
-            has(
-              cxxConstructorDecl(
-                unless(isImplicit()),
-                unless(isCopyConstructor()),
-                unless(isMoveConstructor())
-              )
-            ),
-            has(
-              functionTemplateDecl(
-                has(
-                  cxxConstructorDecl(
-                    unless(isImplicit()),
-                    unless(isCopyConstructor()),
-                    unless(isMoveConstructor())
-                  )
-                )
-              )
-            )
-          )
-        )
-      ).bind("record")
+    Query: >-
+      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"), unless( anyOf( has(
+      cxxConstructorDecl( unless(isImplicit()), unless(isCopyConstructor()), unless(isMoveConstructor()) ) ), has( functionTemplateDecl( has(
+      cxxConstructorDecl( unless(isImplicit()), unless(isCopyConstructor()), unless(isMoveConstructor()) ) ) ) ) ) ) ).bind("record")
     Diagnostic:
       - BindName: record
         Message: Memly types must explicitly declare an ordinary constructor
         Level: Warning
   - Name: memly-deleted-default-constructor-only-for-non-instantiable
-    Query: |
-      match cxxConstructorDecl(
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        isDefaultConstructor(),
-        isDeleted(),
-        ofClass(
-          cxxRecordDecl(
-            matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-            unless(hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")),
-            unless(
-              isDerivedFrom(
-                hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
-              )
-            )
-          )
-        )
-      ).bind("constructor")
+    Query: >-
+      match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isDefaultConstructor(),
+      isDeleted(), ofClass( cxxRecordDecl(
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
+      unless(hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")), unless( isDerivedFrom(
+      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ) ) ) ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: only non-instantiable types may explicitly delete their ordinary default constructor
         Level: Warning
   - Name: memly-expected-value-suffix
-    Query: |
-      match declaratorDecl(
-        anyOf(
-          varDecl(
-            unless(parmVarDecl())
-          ),
-          parmVarDecl(
-            matchesName("^::.+$"),
-            unless(matchesName("anonymous")),
-            hasAncestor(
-              functionDecl(
-                hasBody(stmt())
-              )
-            )
-          ),
-          fieldDecl()
-        ),
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        anyOf(
-          hasType(
-            qualType(
-              hasUnqualifiedDesugaredType(
-                recordType(
-                  hasDeclaration(
-                    classTemplateSpecializationDecl(
-                      hasName("::std::expected")
-                    )
-                  )
-                )
-              )
-            )
-          ),
-          hasType(
-            referenceType(
-              pointee(
-                qualType(
-                  hasUnqualifiedDesugaredType(
-                    recordType(
-                      hasDeclaration(
-                        classTemplateSpecializationDecl(
-                          hasName("::std::expected")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        ),
-        unless(matchesName("Expected$"))
+    Query: >-
+      match declaratorDecl( anyOf( varDecl( unless(parmVarDecl()) ), parmVarDecl( matchesName("^::.+$"), unless(matchesName("anonymous")), hasAncestor(
+      functionDecl( hasBody(stmt()) ) ) ), fieldDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      classTemplateSpecializationDecl( hasName("::std::expected") ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType(
+      recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::expected") ) ) ) ) ) ) ) ) ), unless(matchesName("Expected$"))
       ).bind("value")
     Diagnostic:
       - BindName: value
         Message: named std::expected values must use the Expected suffix
         Level: Warning
   - Name: memly-explicit-contextual-braced-default-argument
-    Query: |
-      match parmVarDecl(
-        hasDefaultArgument(),
-        unless(isExpansionInSystemHeader()),
-        hasInitializer(
-          ignoringImplicit(
-            expr(
-              anyOf(
-                cxxConstructExpr(
-                  isListInitialization(),
-                  unless(cxxTemporaryObjectExpr())
-                ),
-                initListExpr(
-                  unless(hasAncestor(cxxFunctionalCastExpr()))
-                ),
-                cxxStdInitializerListExpr(
-                  unless(hasAncestor(cxxFunctionalCastExpr()))
-                )
-              )
-            ).bind("initializer")
-          )
-        )
-      )
+    Query: >-
+      match parmVarDecl( hasDefaultArgument(), unless(isExpansionInSystemHeader()), hasInitializer( ignoringImplicit( expr( anyOf( cxxConstructExpr(
+      isListInitialization(), unless(cxxTemporaryObjectExpr()) ), initListExpr( unless(hasAncestor(cxxFunctionalCastExpr())) ), cxxStdInitializerListExpr(
+      unless(hasAncestor(cxxFunctionalCastExpr())) ) ) ).bind("initializer") ) ) )
     Diagnostic:
       - BindName: initializer
         Message: a braced default argument must explicitly spell its constructed type
         Level: Warning
   - Name: memly-explicit-contextual-braced-expression
-    Query: |
-      match stmt(
-        anyOf(
-          callExpr(
-            unless(isExpansionInSystemHeader()),
-            forEachArgumentWithParam(
-              ignoringImplicit(
-                expr(
-                  anyOf(
-                    cxxConstructExpr(
-                      isListInitialization(),
-                      unless(cxxTemporaryObjectExpr())
-                    ),
-                    initListExpr(
-                      unless(hasAncestor(cxxFunctionalCastExpr()))
-                    ),
-                    cxxStdInitializerListExpr(
-                      unless(hasAncestor(cxxFunctionalCastExpr()))
-                    )
-                  )
-                ).bind("initializer")
-              ),
-              parmVarDecl()
-            )
-          ),
-          returnStmt(
-            unless(isExpansionInSystemHeader()),
-            hasReturnValue(
-              ignoringImplicit(
-                expr(
-                  anyOf(
-                    cxxConstructExpr(
-                      isListInitialization(),
-                      unless(cxxTemporaryObjectExpr())
-                    ),
-                    initListExpr(
-                      unless(hasAncestor(cxxFunctionalCastExpr()))
-                    ),
-                    cxxStdInitializerListExpr(
-                      unless(hasAncestor(cxxFunctionalCastExpr()))
-                    )
-                  )
-                ).bind("initializer")
-              )
-            )
-          ),
-          binaryOperator(
-            isAssignmentOperator(),
-            unless(isExpansionInSystemHeader()),
-            hasRHS(
-              ignoringImplicit(
-                expr(
-                  anyOf(
-                    cxxConstructExpr(
-                      isListInitialization(),
-                      unless(cxxTemporaryObjectExpr())
-                    ),
-                    initListExpr(
-                      unless(hasAncestor(cxxFunctionalCastExpr()))
-                    ),
-                    cxxStdInitializerListExpr(
-                      unless(hasAncestor(cxxFunctionalCastExpr()))
-                    )
-                  )
-                ).bind("initializer")
-              )
-            )
-          )
-        )
-      )
+    Query: >-
+      match stmt( anyOf( callExpr( unless(isExpansionInSystemHeader()), forEachArgumentWithParam( ignoringImplicit( expr( anyOf( cxxConstructExpr(
+      isListInitialization(), unless(cxxTemporaryObjectExpr()) ), initListExpr( unless(hasAncestor(cxxFunctionalCastExpr())) ), cxxStdInitializerListExpr(
+      unless(hasAncestor(cxxFunctionalCastExpr())) ) ) ).bind("initializer") ), parmVarDecl() ) ), returnStmt( unless(isExpansionInSystemHeader()),
+      hasReturnValue( ignoringImplicit( expr( anyOf( cxxConstructExpr( isListInitialization(), unless(cxxTemporaryObjectExpr()) ), initListExpr(
+      unless(hasAncestor(cxxFunctionalCastExpr())) ), cxxStdInitializerListExpr( unless(hasAncestor(cxxFunctionalCastExpr())) ) ) ).bind("initializer") ) ) ),
+      binaryOperator( isAssignmentOperator(), unless(isExpansionInSystemHeader()), hasRHS( ignoringImplicit( expr( anyOf( cxxConstructExpr(
+      isListInitialization(), unless(cxxTemporaryObjectExpr()) ), initListExpr( unless(hasAncestor(cxxFunctionalCastExpr())) ), cxxStdInitializerListExpr(
+      unless(hasAncestor(cxxFunctionalCastExpr())) ) ) ).bind("initializer") ) ) ) ) )
     Diagnostic:
       - BindName: initializer
         Message: a contextual braced expression must explicitly spell its constructed type
         Level: Warning
   - Name: memly-explicit-non-instantiable-default-constructor
-    Query: |
-      match cxxRecordDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-        isDerivedFrom(
-          hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
-        ),
-        unless(
-          has(
-            cxxConstructorDecl(
-              unless(isImplicit()),
-              isDefaultConstructor(),
-              isDeleted()
-            )
-          )
-        )
-      ).bind("record")
+    Query: >-
+      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"), isDerivedFrom(
+      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ), unless( has( cxxConstructorDecl( unless(isImplicit()), isDefaultConstructor(),
+      isDeleted() ) ) ) ).bind("record")
     Diagnostic:
       - BindName: record
         Message: non-instantiable types must explicitly reiterate their ordinary default constructor = delete
         Level: Warning
+  - Name: memly-explicit-return-type-construction
+    Query: >-
+      match returnStmt( hasReturnValue(expr()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), hasAncestor( functionDecl(
+      unless(isTemplateInstantiation()), unless(returns(voidType())), unless(returns(referenceType())), unless(returns(pointerType())), returns( qualType(
+      hasCanonicalType( qualType().bind("return_type") ) ) ) ) ), unless( allOf( hasAncestor( functionDecl( hasAncestor(functionTemplateDecl()) ) ),
+      hasReturnValue( ignoringImplicit( callExpr( callee( unresolvedLookupExpr( hasAnyDeclaration( namedDecl(hasName("::std::invoke")) ) ) ), hasArgument( 0,
+      ignoringImplicit( callExpr( callee( unresolvedLookupExpr( hasAnyDeclaration( namedDecl(hasName("::std::forward")) ) ) ), hasArgument( 0,
+      ignoringParenImpCasts( declRefExpr( to( parmVarDecl( hasType(rValueReferenceType()) ) ) ) ) ) ) ) ) ) ) ) ) ), unless( hasReturnValue( ignoringImplicit(
+      anyOf( expr( hasType( qualType( hasCanonicalType( qualType( equalsBoundNode("return_type") ) ) ) ), anyOf( cxxTemporaryObjectExpr(isListInitialization()),
+      cxxFunctionalCastExpr( hasSourceExpression(initListExpr()) ) ) ), cxxUnresolvedConstructExpr( has(initListExpr()) ) ) ) ) ) ).bind("return")
+    Diagnostic:
+      - BindName: return
+        Message: value returns must explicitly brace-construct their declared return type
+        Level: Warning
   - Name: memly-no-consumer-destructor
-    Query: |
-      match cxxDestructorDecl(
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        ofClass(
-          cxxRecordDecl(
-            matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-            unless(matchesName("^::Support::SpecialMemberPolicy::"))
-          )
-        )
-      ).bind("destructor")
+    Query: >-
+      match cxxDestructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl(
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
+      unless(matchesName("^::Support::SpecialMemberPolicy::")) ) ) ).bind("destructor")
     Diagnostic:
       - BindName: destructor
         Message: special-member policy consumers must not declare destructors
         Level: Warning
   - Name: memly-no-consumer-special-member
-    Query: |
-      match cxxMethodDecl(
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        anyOf(
-          cxxConstructorDecl(
-            anyOf(
-              isCopyConstructor(),
-              isMoveConstructor()
-            )
-          ),
-          isCopyAssignmentOperator(),
-          isMoveAssignmentOperator()
-        ),
-        ofClass(
-          cxxRecordDecl(
-            matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-            unless(matchesName("^::Support::SpecialMemberPolicy::"))
-          )
-        )
-      ).bind("special_member")
+    Query: >-
+      match cxxMethodDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), anyOf( cxxConstructorDecl( anyOf(
+      isCopyConstructor(), isMoveConstructor() ) ), isCopyAssignmentOperator(), isMoveAssignmentOperator() ), ofClass( cxxRecordDecl(
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
+      unless(matchesName("^::Support::SpecialMemberPolicy::")) ) ) ).bind("special_member")
     Diagnostic:
       - BindName: special_member
         Message: special-member policy consumers must not redeclare copy or move operations
         Level: Warning
   - Name: memly-no-default-member-initializer
-    Query: |
-      match fieldDecl(
-        hasInClassInitializer(anything()),
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader())
-      ).bind("field")
+    Query: >-
+      match fieldDecl( hasInClassInitializer(anything()), unless(isImplicit()), unless(isExpansionInSystemHeader()) ).bind("field")
     Diagnostic:
       - BindName: field
         Message: default member initializers are disallowed; initialize this member in each constructor initializer list
         Level: Warning
   - Name: memly-no-delegating-constructor
-    Query: |
-      match cxxConstructorDecl(
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        isDelegatingConstructor()
+    Query: >-
+      match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isDelegatingConstructor()
       ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: delegating constructors are disallowed
         Level: Warning
   - Name: memly-no-deduced-variable-type
-    Query: |
-      match varDecl(
-        unless(parmVarDecl()),
-        unless(isImplicit()),
-        unless(isInitCapture()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        anyOf(
-          hasType(autoType()),
-          hasType(
-            referenceType(
-              pointee(autoType())
-            )
-          ),
-          hasType(
-            pointerType(
-              pointee(autoType())
-            )
-          )
-        )
-      ).bind("variable")
+    Query: >-
+      match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isInitCapture()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]"), anyOf( hasType(autoType()), hasType( referenceType( pointee(autoType()) ) ), hasType( pointerType(
+      pointee(autoType()) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: deduced variable types require a narrow documented exception
         Level: Warning
   - Name: memly-no-header-function-definition
-    Query: |
-      match functionDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isDeleted()),
-        unless(isDefaulted()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        unless(cxxConstructorDecl()),
-        unless(
-          cxxMethodDecl(
-            ofClass(
-              cxxRecordDecl(isLambda())
-            )
-          )
-        ),
-        unless(hasAncestor(functionTemplateDecl())),
-        unless(hasAncestor(classTemplateDecl())),
-        unless(hasAncestor(classTemplatePartialSpecializationDecl())),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\].*[.](h|hh|hpp|hxx)$")
-      ).bind("function")
+    Query: >-
+      match functionDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isTemplateInstantiation()),
+      unless(isExpansionInSystemHeader()), unless(cxxConstructorDecl()), unless( cxxMethodDecl( ofClass( cxxRecordDecl(isLambda()) ) ) ),
+      unless(hasAncestor(functionTemplateDecl())), unless(hasAncestor(classTemplateDecl())), unless(hasAncestor(classTemplatePartialSpecializationDecl())),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\].*[.](h|hh|hpp|hxx)$") ).bind("function")
     Diagnostic:
       - BindName: function
         Message: ordinary non-template function definitions must remain in source files
         Level: Warning
+  - Name: memly-no-magic-integer-in-assertion
+    Query: >-
+      match integerLiteral( isExpandedFromMacro("assert"), unless(equals(0)), unless(equals(1)), unless(isExpandedFromMacro("__LINE__")),
+      unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]") ).bind("integer_literal")
+    Diagnostic:
+      - BindName: integer_literal
+        Message: integer literals in assertions must be zero, positive one, or a named constant
+        Level: Warning
+  - Name: memly-no-negative-magic-integer
+    Query: >-
+      match unaryOperator( hasOperatorName("-"), hasUnaryOperand( ignoringParenImpCasts( integerLiteral( anyOf( equals(0), equals(1) ) ) ) ), unless(
+      hasAncestor( varDecl( hasType(isConstQualified()) ) ) ), unless(hasAncestor(enumConstantDecl())), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]") ).bind("negative_integer_literal")
+    Diagnostic:
+      - BindName: negative_integer_literal
+        Message: negative integer literals must be introduced through a named constant
+        Level: Warning
+  - Name: memly-no-zero-floating-point-magic-number
+    Query: >-
+      match floatLiteral( equals(0.0), unless( hasAncestor( varDecl( hasType(isConstQualified()) ) ) ), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]") ).bind("zero_floating_point_literal")
+    Diagnostic:
+      - BindName: zero_floating_point_literal
+        Message: floating-point literals must be introduced through a named constant
+        Level: Warning
   - Name: memly-no-named-lambda
-    Query: |
-      match varDecl(
-        unless(parmVarDecl()),
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        hasType(
-          qualType(
-            hasUnqualifiedDesugaredType(
-              recordType(
-                hasDeclaration(
-                  cxxRecordDecl(isLambda())
-                )
-              )
-            )
-          )
-        )
-      ).bind("variable")
+    Query: >-
+      match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), hasType(
+      qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(isLambda()) ) ) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: named lambda closure variables are disallowed; pass the lambda directly or use a reusable helper
         Level: Warning
   - Name: memly-no-named-declaration-parameter
-    Query: |
-      match functionDecl(
-        unless(hasBody(stmt())),
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        forEach(
-          parmVarDecl(
-            matchesName("^::.+$")
-          ).bind("parameter")
-        )
-      )
+    Query: >-
+      match functionDecl( unless(hasBody(stmt())), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), forEach(
+      parmVarDecl( matchesName("^::.+$") ).bind("parameter") ) )
     Diagnostic:
       - BindName: parameter
         Message: parameters must be unnamed in function declarations
         Level: Warning
   - Name: memly-no-namespace-variable
-    Query: |
-      match varDecl(
-        unless(isImplicit()),
-        unless(parmVarDecl()),
-        unless(isExpansionInSystemHeader()),
-        hasDeclContext(
-          anyOf(
-            namespaceDecl(),
-            translationUnitDecl()
-          )
-        ),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]")
-      ).bind("variable")
+    Query: >-
+      match varDecl( unless(isImplicit()), unless(parmVarDecl()), unless(isExpansionInSystemHeader()), hasDeclContext( anyOf( namespaceDecl(),
+      translationUnitDecl() ) ), isExpansionInFileMatching("[/\\\\]src[/\\\\]") ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: global and namespace-scope variables are disallowed
         Level: Warning
-  - Name: memly-no-prepared-statement-execution-field
-    Query: |
-      match fieldDecl(
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        anyOf(
-          hasType(
-            qualType(
-              hasUnqualifiedDesugaredType(
-                recordType(
-                  hasDeclaration(
-                    cxxRecordDecl(
-                      hasName("::Layer::Infrastructure::Database::PreparedStatementExecution")
-                    )
-                  )
-                )
-              )
-            )
-          ),
-          hasType(
-            referenceType(
-              pointee(
-                qualType(
-                  hasUnqualifiedDesugaredType(
-                    recordType(
-                      hasDeclaration(
-                        cxxRecordDecl(
-                          hasName("::Layer::Infrastructure::Database::PreparedStatementExecution")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-      ).bind("field")
+  - Name: memly-no-database-chain-proxy-field
+    Query: >-
+      match fieldDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), anyOf( hasType( qualType(
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::Database::PreparedStatementExecution",
+      "::Layer::Infrastructure::Database::QueryResultDecoder", "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType(
+      pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName(
+      "::Layer::Infrastructure::Database::PreparedStatementExecution", "::Layer::Infrastructure::Database::QueryResultDecoder",
+      "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("field")
     Diagnostic:
       - BindName: field
-        Message: PreparedStatementExecution must be invoked directly as a chained temporary and must not be stored or named
+        Message: database chain proxies must remain within one chained full expression and must not be stored or named
         Level: Warning
-  - Name: memly-no-prepared-statement-execution-variable
-    Query: |
-      match varDecl(
-        unless(isImplicit()),
-        unless(hasAncestor(functionDecl(isImplicit()))),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        anyOf(
-          hasType(
-            qualType(
-              hasUnqualifiedDesugaredType(
-                recordType(
-                  hasDeclaration(
-                    cxxRecordDecl(
-                      hasName("::Layer::Infrastructure::Database::PreparedStatementExecution")
-                    )
-                  )
-                )
-              )
-            )
-          ),
-          hasType(
-            referenceType(
-              pointee(
-                qualType(
-                  hasUnqualifiedDesugaredType(
-                    recordType(
-                      hasDeclaration(
-                        cxxRecordDecl(
-                          hasName("::Layer::Infrastructure::Database::PreparedStatementExecution")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-      ).bind("variable")
+  - Name: memly-no-database-chain-proxy-variable
+    Query: >-
+      match varDecl( unless(isImplicit()), unless(hasAncestor(functionDecl(isImplicit()))), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(
+      hasAnyName( "::Layer::Infrastructure::Database::PreparedStatementExecution", "::Layer::Infrastructure::Database::QueryResultDecoder",
+      "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType(
+      hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::Database::PreparedStatementExecution",
+      "::Layer::Infrastructure::Database::QueryResultDecoder", "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
-        Message: PreparedStatementExecution must be invoked directly as a chained temporary and must not be stored or named
+        Message: database chain proxies must remain within one chained full expression and must not be stored or named
         Level: Warning
   - Name: memly-no-using-declaration
-    Query: |
-      match decl(
-        anyOf(
-          usingDecl(),
-          usingDirectiveDecl()
-        ),
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]")
-      ).bind("using")
+    Query: >-
+      match decl( anyOf( usingDecl(), usingDirectiveDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]") ).bind("using")
     Diagnostic:
       - BindName: using
         Message: using-declarations and using-directives are disallowed
         Level: Warning
   - Name: memly-nodiscard-callable
-    Query: |
-      match functionDecl(
-        unless(isImplicit()),
-        unless(isDeleted()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        unless(isExpandedFromMacro("Q_OBJECT")),
-        unless(isMain()),
-        unless(cxxConstructorDecl()),
-        unless(cxxDestructorDecl()),
-        unless(
-          cxxMethodDecl(
-            ofClass(
-              cxxRecordDecl(isLambda())
-            )
-          )
-        ),
-        unless(returns(voidType())),
-        unless(hasAttr("attr::NoReturn")),
-        unless(hasAttr("attr::WarnUnusedResult"))
+    Query: >-
+      match functionDecl( unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      unless(isExpandedFromMacro("Q_OBJECT")), unless(isMain()), unless(cxxConstructorDecl()), unless(cxxDestructorDecl()), unless( cxxMethodDecl( ofClass(
+      cxxRecordDecl(isLambda()) ) ) ), unless(returns(voidType())), unless(hasAttr("attr::NoReturn")), unless(hasAttr("attr::WarnUnusedResult"))
       ).bind("callable")
     Diagnostic:
       - BindName: callable
         Message: non-void callables must be declared [[nodiscard]]
         Level: Warning
   - Name: memly-nodiscard-enum
-    Query: |
-      match enumDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader()),
-        matchesName("^::.+$"),
-        unless(hasAttr("attr::WarnUnusedResult"))
-      ).bind("enum")
+    Query: >-
+      match enumDecl( isDefinition(), unless(isImplicit()), unless(isExpansionInSystemHeader()), matchesName("^::.+$"),
+      unless(hasAttr("attr::WarnUnusedResult")) ).bind("enum")
     Diagnostic:
       - BindName: enum
         Message: enum types must be declared [[nodiscard]]
         Level: Warning
   - Name: memly-nodiscard-returned-record
-    Query: |
-      match functionDecl(
-        unless(isImplicit()),
-        unless(isDeleted()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        returns(
-          qualType(
-            hasUnqualifiedDesugaredType(
-              recordType(
-                hasDeclaration(
-                  cxxRecordDecl(
-                    isDefinition(),
-                    unless(isImplicit()),
-                    unless(isLambda()),
-                    unless(isTemplateInstantiation()),
-                    unless(isExpansionInSystemHeader()),
-                    unless(hasAttr("attr::WarnUnusedResult"))
-                  ).bind("result_type")
-                )
-              )
-            )
-          )
-        )
-      )
+    Query: >-
+      match functionDecl( unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), returns( qualType(
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()),
+      unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), unless(hasAttr("attr::WarnUnusedResult")) ).bind("result_type") ) ) ) ) ) )
     Diagnostic:
       - BindName: result_type
         Message: record types returned by value must be declared [[nodiscard]]
         Level: Warning
   - Name: memly-no-stateful-defaulted-default-constructor
-    Query: |
-      match cxxConstructorDecl(
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        isDefaulted(),
-        isDefaultConstructor(),
-        ofClass(
-          cxxRecordDecl(
-            anyOf(
-              has(fieldDecl()),
-              hasDirectBase(cxxBaseSpecifier())
-            )
-          )
-        )
-      ).bind("constructor")
+    Query: >-
+      match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isDefaulted(),
+      isDefaultConstructor(), ofClass( cxxRecordDecl( anyOf( has(fieldDecl()), hasDirectBase(cxxBaseSpecifier()) ) ) ) ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: a default constructor with direct bases or non-static data members must use an explicit initializer list instead of = default
         Level: Warning
   - Name: memly-no-two-statement-pass-through-variable
-    Query: |
-      match compoundStmt(
-        statementCountIs(2),
-        hasAnySubstatement(
-          declStmt(
-            hasSingleDecl(
-              varDecl(
-                isDefinition(),
-                unless(isImplicit()),
-                hasAutomaticStorageDuration(),
-                unless(isExpansionInSystemHeader()),
-                isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-                hasInitializer(expr())
-              ).bind("variable")
-            )
-          )
-        ),
-        hasAnySubstatement(
-          returnStmt(
-            hasReturnValue(
-              ignoringParenImpCasts(
-                callExpr(
-                  unless(cxxOperatorCallExpr()),
-                  argumentCountIs(1),
-                  hasArgument(
-                    0,
-                    ignoringParenImpCasts(
-                      declRefExpr(
-                        to(
-                          varDecl(
-                            equalsBoundNode("variable")
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
+    Query: >-
+      match compoundStmt( statementCountIs(2), hasAnySubstatement( declStmt( hasSingleDecl( varDecl( isDefinition(), unless(isImplicit()),
+      hasAutomaticStorageDuration(), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), hasInitializer(expr())
+      ).bind("variable") ) ) ), hasAnySubstatement( returnStmt( hasReturnValue( ignoringParenImpCasts( callExpr( unless(cxxOperatorCallExpr()),
+      argumentCountIs(1), hasArgument( 0, ignoringParenImpCasts( declRefExpr( to( varDecl( equalsBoundNode("variable") ) ) ) ) ) ) ) ) ) ) )
     Diagnostic:
       - BindName: variable
         Message: construct this single-use argument directly in the returned call
         Level: Warning
   - Name: memly-optional-value-suffix
-    Query: |
-      match declaratorDecl(
-        anyOf(
-          varDecl(
-            unless(parmVarDecl())
-          ),
-          parmVarDecl(
-            matchesName("^::.+$"),
-            unless(matchesName("anonymous")),
-            hasAncestor(
-              functionDecl(
-                hasBody(stmt())
-              )
-            )
-          ),
-          fieldDecl()
-        ),
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        anyOf(
-          hasType(
-            qualType(
-              hasUnqualifiedDesugaredType(
-                recordType(
-                  hasDeclaration(
-                    classTemplateSpecializationDecl(
-                      hasName("::std::optional")
-                    )
-                  )
-                )
-              )
-            )
-          ),
-          hasType(
-            referenceType(
-              pointee(
-                qualType(
-                  hasUnqualifiedDesugaredType(
-                    recordType(
-                      hasDeclaration(
-                        classTemplateSpecializationDecl(
-                          hasName("::std::optional")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        ),
-        unless(matchesName("Optional$"))
+    Query: >-
+      match declaratorDecl( anyOf( varDecl( unless(parmVarDecl()) ), parmVarDecl( matchesName("^::.+$"), unless(matchesName("anonymous")), hasAncestor(
+      functionDecl( hasBody(stmt()) ) ) ), fieldDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      classTemplateSpecializationDecl( hasName("::std::optional") ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType(
+      recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::optional") ) ) ) ) ) ) ) ) ), unless(matchesName("Optional$"))
       ).bind("value")
     Diagnostic:
       - BindName: value
         Message: named std::optional values must use the Optional suffix
         Level: Warning
   - Name: memly-policy-mixin-destructor
-    Query: |
-      match cxxRecordDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        matchesName("^::Support::SpecialMemberPolicy::(NoCopyNoMoveMixin|NoCopyMoveConstructOnlyMixin|NonInstantiableMixin)$"),
-        unless(
-          has(
-            cxxDestructorDecl(
-              unless(isImplicit()),
-              isProtected(),
-              isDefaulted()
-            )
-          )
-        )
-      ).bind("policy")
+    Query: >-
+      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      matchesName("^::Support::SpecialMemberPolicy::(NoCopyNoMoveMixin|NoCopyMoveConstructOnlyMixin|NonInstantiableMixin)$"), unless( has( cxxDestructorDecl(
+      unless(isImplicit()), isProtected(), isDefaulted() ) ) ) ).bind("policy")
     Diagnostic:
       - BindName: policy
         Message: special-member policy mixins must explicitly default a protected destructor
         Level: Warning
   - Name: memly-private-direct-special-member-policy
-    Query: |
-      match cxxRecordDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-        unless(matchesName("^::Support::SpecialMemberPolicy::")),
-        hasDirectBase(
-          cxxBaseSpecifier(
-            hasType(
-              cxxRecordDecl(
-                matchesName("^::Support::SpecialMemberPolicy::(NoCopyNoMoveMixin|NoCopyMoveConstructOnlyMixin|NonInstantiableMixin)$")
-              )
-            ),
-            unless(isPrivate())
-          )
-        )
+    Query: >-
+      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
+      unless(matchesName("^::Support::SpecialMemberPolicy::")), hasDirectBase( cxxBaseSpecifier( hasType( cxxRecordDecl(
+      matchesName("^::Support::SpecialMemberPolicy::(NoCopyNoMoveMixin|NoCopyMoveConstructOnlyMixin|NonInstantiableMixin)$") ) ), unless(isPrivate()) ) )
       ).bind("record")
     Diagnostic:
       - BindName: record
         Message: directly inherited special-member policy mixins must be private bases
         Level: Warning
   - Name: memly-required-special-member-policy
-    Query: |
-      match cxxRecordDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isLambda()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-        unless(matchesName("^::Support::SpecialMemberPolicy::")),
-        unless(
-          anyOf(
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
-            ),
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
-            ),
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
-            )
-          )
-        )
-      ).bind("record")
+    Query: >-
+      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
+      unless(matchesName("^::Support::SpecialMemberPolicy::")), unless( anyOf( isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ),
+      isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ), isDerivedFrom(
+      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ) ) ).bind("record")
     Diagnostic:
       - BindName: record
         Message: Memly classes and data-carrying structs must inherit a special-member policy directly or transitively
         Level: Warning
   - Name: memly-nonconflicting-special-member-policy
-    Query: |
-      match cxxRecordDecl(
-        isDefinition(),
-        unless(isImplicit()),
-        unless(isLambda()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-        unless(matchesName("^::Support::SpecialMemberPolicy::")),
-        anyOf(
-          allOf(
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
-            ),
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
-            )
-          ),
-          allOf(
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
-            ),
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
-            )
-          ),
-          allOf(
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
-            ),
-            isDerivedFrom(
-              hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
-            )
-          ),
-          allOf(
-            hasDirectBase(
-              hasType(
-                cxxRecordDecl(
-                  hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
-                )
-              )
-            ),
-            hasDirectBase(
-              hasType(
-                cxxRecordDecl(
-                  isDerivedFrom(
-                    hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin")
-                  )
-                )
-              )
-            )
-          ),
-          allOf(
-            hasDirectBase(
-              hasType(
-                cxxRecordDecl(
-                  hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
-                )
-              )
-            ),
-            hasDirectBase(
-              hasType(
-                cxxRecordDecl(
-                  isDerivedFrom(
-                    hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin")
-                  )
-                )
-              )
-            )
-          ),
-          allOf(
-            hasDirectBase(
-              hasType(
-                cxxRecordDecl(
-                  hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
-                )
-              )
-            ),
-            hasDirectBase(
-              hasType(
-                cxxRecordDecl(
-                  isDerivedFrom(
-                    hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")
-                  )
-                )
-              )
-            )
-          )
-        )
-      ).bind("record")
+    Query: >-
+      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
+      unless(matchesName("^::Support::SpecialMemberPolicy::")), anyOf( allOf( isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ),
+      isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ) ), allOf( isDerivedFrom(
+      hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ), isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ), allOf(
+      isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ), isDerivedFrom(
+      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ), allOf( hasDirectBase( hasType( cxxRecordDecl(
+      hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ) ) ), hasDirectBase( hasType( cxxRecordDecl( isDerivedFrom(
+      hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ) ) ) ) ), allOf( hasDirectBase( hasType( cxxRecordDecl(
+      hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ) ) ), hasDirectBase( hasType( cxxRecordDecl( isDerivedFrom(
+      hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ) ) ) ) ), allOf( hasDirectBase( hasType( cxxRecordDecl(
+      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ) ), hasDirectBase( hasType( cxxRecordDecl( isDerivedFrom(
+      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ) ) ) ) ) ).bind("record")
     Diagnostic:
       - BindName: record
         Message: Memly types must not combine different policies or directly repeat a policy already inherited through another base
         Level: Warning
+  - Name: memly-standard-container-value-suffix
+    Query: >-
+      match declaratorDecl( anyOf( varDecl( unless(parmVarDecl()) ), parmVarDecl( matchesName("^::.+$"), unless(matchesName("anonymous")), hasAncestor(
+      functionDecl( hasBody(stmt()) ) ) ), fieldDecl() ), unless(isImplicit()), unless( hasAncestor( functionDecl(isTemplateInstantiation()) ) ), unless(
+      hasAncestor( cxxRecordDecl(isTemplateInstantiation()) ) ), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), anyOf(
+      allOf( anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::vector") ) ) )
+      ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl(
+      hasName("::std::vector") ) ) ) ) ) ) ) ) ), unless(matchesName("Vector$")) ), allOf( anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType(
+      hasDeclaration( classTemplateSpecializationDecl( hasName("::std::array") ) ) ) ) ) ), hasType( referenceType( pointee( qualType(
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::array") ) ) ) ) ) ) ) ) ),
+      unless(matchesName("Array$")) ), allOf( anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      classTemplateSpecializationDecl( hasName("::std::map") ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType(
+      hasDeclaration( classTemplateSpecializationDecl( hasName("::std::map") ) ) ) ) ) ) ) ) ), unless(matchesName("Map$")) ), allOf( anyOf( hasType( qualType(
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::unordered_map") ) ) ) ) ) ), hasType(
+      referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl(
+      hasName("::std::unordered_map") ) ) ) ) ) ) ) ) ), unless(matchesName("UnorderedMap$")) ), allOf( anyOf( hasType( qualType( hasUnqualifiedDesugaredType(
+      recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::set") ) ) ) ) ) ), hasType( referenceType( pointee( qualType(
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::set") ) ) ) ) ) ) ) ) ),
+      unless(matchesName("Set$")) ), allOf( anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl(
+      hasName("::std::unordered_set") ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      classTemplateSpecializationDecl( hasName("::std::unordered_set") ) ) ) ) ) ) ) ) ), unless(matchesName("UnorderedSet$")) ) ) ).bind("value")
+    Diagnostic:
+      - BindName: value
+        Message: named standard-container values must end in their complete unqualified container type name
+        Level: Warning
   - Name: memly-string-view-definition-parameter-const
-    Query: |
-      match parmVarDecl(
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        hasAncestor(
-          functionDecl(isDefinition())
-        ),
-        hasType(
-          qualType(
-            hasUnqualifiedDesugaredType(
-              recordType(
-                hasDeclaration(
-                  classTemplateSpecializationDecl(
-                    hasName("::std::basic_string_view")
-                  )
-                )
-              )
-            ),
-            unless(isConstQualified())
-          )
-        )
-      ).bind("parameter")
+    Query: >-
+      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), hasAncestor( functionDecl(isDefinition()) ),
+      hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::basic_string_view") ) ) ) ),
+      unless(isConstQualified()) ) ) ).bind("parameter")
     Diagnostic:
       - BindName: parameter
         Message: by-value std::string_view parameters must be top-level const at their definitions
         Level: Warning
   - Name: memly-string-view-parameter-by-value
-    Query: |
-      match parmVarDecl(
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        hasType(
-          qualType(
-            anyOf(
-              referenceType(
-                pointee(
-                  qualType(
-                    hasUnqualifiedDesugaredType(
-                      recordType(
-                        hasDeclaration(
-                          classTemplateSpecializationDecl(
-                            hasName("::std::basic_string_view")
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              ),
-              pointerType(
-                pointee(
-                  qualType(
-                    hasUnqualifiedDesugaredType(
-                      recordType(
-                        hasDeclaration(
-                          classTemplateSpecializationDecl(
-                            hasName("::std::basic_string_view")
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-      ).bind("parameter")
+    Query: >-
+      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), hasType( qualType( anyOf( referenceType( pointee(
+      qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::basic_string_view") ) ) ) ) ) ) ),
+      pointerType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl(
+      hasName("::std::basic_string_view") ) ) ) ) ) ) ) ) ) ) ).bind("parameter")
     Diagnostic:
       - BindName: parameter
         Message: std::string_view parameters must be passed by value
         Level: Warning
   - Name: memly-type-template-parameter-name
-    Query: |
-      match templateTypeParmDecl(
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        unless(matchesName("Type$"))
-      ).bind("parameter")
+    Query: >-
+      match templateTypeParmDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
+      unless(matchesName("Type$")) ).bind("parameter")
     Diagnostic:
       - BindName: parameter
         Message: type template parameters must be named and end in Type
         Level: Warning
-  - Name: memly-unnamed-namespace-helper-prefix
-    Query: |
-      match functionDecl(
-        unless(cxxMethodDecl()),
-        unless(isImplicit()),
-        unless(isTemplateInstantiation()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        hasAncestor(namespaceDecl(isAnonymous())),
-        unless(matchesName("::a_[^:]*$"))
-      ).bind("helper")
+  - Name: memly-unnamed-namespace-declaration-prefix
+    Query: >-
+      match namedDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
+      hasParent(namespaceDecl(isAnonymous())), unless(matchesName("::a_[^:]*$")) ).bind("declaration")
     Diagnostic:
-      - BindName: helper
-        Message: unnamed-namespace helper functions must use the a_ prefix
+      - BindName: declaration
+        Message: declarations made directly in an unnamed namespace must use the a_ prefix
         Level: Warning
   - Name: memly-unnamed-namespace-nesting
-    Query: |
-      match namespaceDecl(
-        isAnonymous(),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        unless(
-          hasAncestor(
-            namespaceDecl(
-              matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)(::|$)")
-            )
-          )
-        )
+    Query: >-
+      match namespaceDecl( isAnonymous(), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), unless( hasAncestor(
+      namespaceDecl( matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)(::|$)") ) ) )
       ).bind("namespace")
     Diagnostic:
       - BindName: namespace
         Message: unnamed helper namespaces must be nested inside the matching Memly namespace
         Level: Warning
   - Name: memly-use-std-invoke
-    Query: |
-      match callExpr(
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        anyOf(
-          allOf(
-            unless(cxxOperatorCallExpr()),
-            unless(callee(functionDecl())),
-            callee(
-              expr(
-                hasType(pointerType())
-              )
-            )
-          ),
-          allOf(
-            unless(cxxOperatorCallExpr()),
-            callee(
-              expr(
-                allOf(
-                  isInstantiationDependent(),
-                  ignoringParenImpCasts(
-                    anyOf(
-                      declRefExpr(
-                        to(varDecl())
-                      ),
-                      declRefExpr(
-                        to(nonTypeTemplateParmDecl())
-                      ),
-                      memberExpr(
-                        member(fieldDecl())
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          ),
-          cxxMemberCallExpr(
-            callee(
-              expr(
-                ignoringParenImpCasts(
-                  binaryOperator(
-                    hasAnyOperatorName(".*", "->*")
-                  )
-                )
-              )
-            )
-          ),
-          cxxMemberCallExpr(
-            callee(
-              cxxMethodDecl(
-                hasOverloadedOperatorName("()")
-              )
-            )
-          ),
-          cxxOperatorCallExpr(
-            hasOverloadedOperatorName("()"),
-            unless(
-              hasArgument(
-                0,
-                ignoringParenImpCasts(
-                  declRefExpr(
-                    to(
-                      varDecl(
-                        hasDeclContext(
-                          anyOf(
-                            namespaceDecl(),
-                            translationUnitDecl()
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
+    Query: >-
+      match callExpr( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]src[/\\\\]"), anyOf( allOf( unless(cxxOperatorCallExpr()),
+      unless(callee(functionDecl())), callee( expr( hasType(pointerType()) ) ) ), allOf( unless(cxxOperatorCallExpr()), callee( expr( allOf(
+      isInstantiationDependent(), ignoringParenImpCasts( anyOf( declRefExpr( to(varDecl()) ), declRefExpr( to(nonTypeTemplateParmDecl()) ), memberExpr(
+      member(fieldDecl()) ) ) ) ) ) ) ), cxxMemberCallExpr( callee( expr( ignoringParenImpCasts( binaryOperator( hasAnyOperatorName(".*", "->*") ) ) ) ) ),
+      cxxMemberCallExpr( callee( cxxMethodDecl( hasOverloadedOperatorName("()") ) ) ), cxxOperatorCallExpr( hasOverloadedOperatorName("()"), unless(
+      hasArgument( 0, ignoringParenImpCasts( declRefExpr( to( varDecl( hasDeclContext( anyOf( namespaceDecl(), translationUnitDecl() ) ) ) ) ) ) ) ) ) )
       ).bind("call")
     Diagnostic:
       - BindName: call
         Message: indirect callable expressions must be invoked with std::invoke
         Level: Warning
   - Name: memly-variant-value-suffix
-    Query: |
-      match declaratorDecl(
-        anyOf(
-          varDecl(
-            unless(parmVarDecl())
-          ),
-          parmVarDecl(
-            matchesName("^::.+$"),
-            unless(matchesName("anonymous")),
-            hasAncestor(
-              functionDecl(
-                hasBody(stmt())
-              )
-            )
-          ),
-          fieldDecl()
-        ),
-        unless(isImplicit()),
-        unless(isExpansionInSystemHeader()),
-        isExpansionInFileMatching("[/\\\\]src[/\\\\]"),
-        anyOf(
-          hasType(
-            qualType(
-              hasUnqualifiedDesugaredType(
-                recordType(
-                  hasDeclaration(
-                    classTemplateSpecializationDecl(
-                      hasName("::std::variant")
-                    )
-                  )
-                )
-              )
-            )
-          ),
-          hasType(
-            referenceType(
-              pointee(
-                qualType(
-                  hasUnqualifiedDesugaredType(
-                    recordType(
-                      hasDeclaration(
-                        classTemplateSpecializationDecl(
-                          hasName("::std::variant")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        ),
-        unless(matchesName("Variant$"))
-      ).bind("value")
+    Query: >-
+      match declaratorDecl( anyOf( varDecl( unless(parmVarDecl()) ), parmVarDecl( matchesName("^::.+$"), unless(matchesName("anonymous")), hasAncestor(
+      functionDecl( hasBody(stmt()) ) ) ), fieldDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      classTemplateSpecializationDecl( hasName("::std::variant") ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType(
+      recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::variant") ) ) ) ) ) ) ) ) ), unless(matchesName("Variant$")) ).bind("value")
     Diagnostic:
       - BindName: value
         Message: named std::variant values must use the Variant suffix

@@ -14,9 +14,10 @@ file-private helper merely because it does not use instance state.
 ## Initialization and Construction
 
 Every Memly type must explicitly declare an ordinary constructor
-(`custom-memly-declared-ordinary-constructor`). Constructor definitions must
-remain in headers, including `= default` and `= delete` definitions
-(`custom-memly-constructor-definition-in-header`).
+(`custom-memly-declared-ordinary-constructor`). Define every constructor inside
+its class or struct declaration wherever that declaration resides, including
+`= default` and `= delete` definitions
+(`custom-memly-constructor-definition-in-class`).
 
 Every non-deleted, non-defaulted constructor must explicitly initialize every
 direct base, every non-static data member, and every virtual base for which it
@@ -39,12 +40,20 @@ two-statement block consisting of a local declaration followed by a returned
 one-argument call that passes the local must construct the argument directly in
 the call (`custom-memly-no-two-statement-pass-through-variable`).
 
-Contextually typed braced initializer lists are disallowed. Function arguments,
-return expressions, assignments, and default arguments must explicitly spell the
-constructed type (`custom-memly-explicit-contextual-braced-expression`,
-`custom-memly-explicit-contextual-braced-default-argument`). Named declarations
-and constructor initializer lists remain direct-list initialized because their
-target type is already stated.
+Contextually typed braced initializer lists are disallowed. When a function
+argument, return expression, assignment, or default argument uses braced
+construction, explicitly spell the constructed type
+(`custom-memly-explicit-contextual-braced-expression`,
+`custom-memly-explicit-contextual-braced-default-argument`). Every non-void
+value return whose declared return type is neither a reference nor a pointer
+must explicitly brace-construct that declared type, including when returning an
+existing expression such as `std::move(Value)`
+(`custom-memly-explicit-return-type-construction`). Named declarations and
+constructor initializer lists remain direct-list initialized because their
+target type is already stated. A function-template forwarding adapter may
+directly return a `std::invoke` expression so one expression preserves `void`,
+reference, and value result categories without compile-time branching; the
+explicit-return check recognizes this exception.
 
 Every constructor, including copy and move constructors, must be `explicit`
 (`custom-memly-always-explicit-constructor`). Conversion operators are
@@ -94,25 +103,30 @@ must not delete an ordinary default constructor
 Class-level Qt metadata macros come first inside a class or struct, followed by
 friend declarations.
 
+Every base specifier explicitly states `public`, `protected`, or `private`.
+Never rely on the different default inheritance access of `class` and `struct`.
+
 When a type has private nested types or data members, its first access block
 must be `private:`. Nested types needed by data-member declarations come first,
 then data members in construction order. This data-member-first rule applies to
 structs as well as classes. Other nested types appear immediately before the
-first declaration that requires them.
+first declaration that requires them. A nested type used exclusively by
+out-of-class implementation bodies appears at the end of the class declaration.
 
 Constructors immediately follow the data-member block under their intended
 access. All remaining declarations follow the constructors.
 
-Headers may contain bodies only for constructors and templates. Every ordinary
-non-template method and free function, including a one-line accessor, is
-declared in its header and defined in the corresponding source file
-(`custom-memly-no-header-function-definition`). Defaulted and deleted
-special-member declarations remain in headers because they have no function
-body.
+Headers may contain bodies only for in-class constructor definitions and
+templates. Every ordinary non-template method and free function, including a
+one-line accessor, is declared in its header and defined in the corresponding
+source file (`custom-memly-no-header-function-definition`). Defaulted and
+deleted special-member definitions remain inside their class declarations
+because they have no function body.
 
 Function declaration parameters are unnamed
-(`custom-memly-no-named-declaration-parameter`); parameters are named at the
-definition.
+(`custom-memly-no-named-declaration-parameter`). A definition parameter is named
+only when its body references it. An intentionally unreferenced parameter
+remains unnamed instead of receiving a name and `[[maybe_unused]]`.
 
 ## Parameters, Ownership, and Strings
 
@@ -158,6 +172,14 @@ incorrect: violated internal preconditions, postconditions, invariants, invalid
 internal enum values, and impossible control states. Do not throw for a
 programming error.
 
+Only zero and positive one may remain as unnamed integer literals. Negative
+integer literals must be introduced through a named constant
+(`custom-memly-no-negative-magic-integer`). Every floating-point literal must be
+introduced through a named constant; zero-valued floating-point literals are
+covered by `custom-memly-no-zero-floating-point-magic-number` because the
+built-in magic-number check always exempts them. Integer literals in assertions
+obey the same policy (`custom-memly-no-magic-integer-in-assertion`).
+
 Do not assert conditions that can fail during correct execution because of
 external or runtime state. Throw when such a failure cannot be recovered at the
 current boundary and is not represented by a typed recoverable result.
@@ -178,18 +200,44 @@ assumed to satisfy schema and application invariants established by Memly write
 paths. Violations of those invariants are programming errors; database-engine
 failures remain runtime errors at the database boundary.
 
-Prepared-statement execution and result-chunk fetching remain `DatabaseRuntime`
-instance operations because their opaque DuckDB handles belong to the runtime's
-live database connection even when that ownership is not mechanically visible
-from the method body.
+`DatabaseRuntime` owns operations that actually require its live DuckDB
+connection, including preparing statements and executing direct SQL. A
+`PreparedStatement` is self-contained after preparation and begins execution
+through its own `Execute()` method. `QueryResultDecoder` owns the result from
+either execution path and fetches its chunks directly. Do not route an operation
+back through `DatabaseRuntime` when the corresponding DuckDB handle already owns
+that operation.
 
-`PreparedStatementExecution` is an ephemeral chained-call proxy. Invoke it
-directly from `ExecutePreparedStatement()`; never store or name it
-(`custom-memly-no-prepared-statement-execution-variable` and
-`custom-memly-no-prepared-statement-execution-field`). Invoke `WithParameters()`
-for one or more parameters and `WithoutParameters()` for a parameterless
-statement. Both methods are rvalue-only, and the proxy's source-location
-reference remains valid through the chained full expression.
+Prepared-statement execution and result decoding form one ephemeral, rvalue-only
+chain beginning at `PreparedStatement::Execute()`. Invoke `WithParameters()` for
+one or more parameters and `WithoutParameters()` for a parameterless statement.
+Decode consumed rows with `DecodedTo<QueryResultRowType>()`. Terminate the chain
+with `AssertRowCount(QueryResultRowCountRange)`. Use `ZeroOrMore()` when any
+result count, including zero, is valid; otherwise supply the bounded range
+required by the store contract. This terminal call is the only operation that
+releases decoded records to the store. Never name or store any intermediate
+execution, decoder, or decoded-result proxy
+(`custom-memly-no-database-chain-proxy-variable` and
+`custom-memly-no-database-chain-proxy-field`). The source-location reference
+captured by `PreparedStatement::Execute()` remains valid through that chained
+full expression. A statement intentionally returning no consumed rows may
+explicitly discard the decoder produced by `WithParameters()` or
+`WithoutParameters()`.
+
+A database-decoded row publicly inherits
+`Database::DecodableQueryResultRowMixin<ColumnType...>`. The ordered column-type
+pack generates compile-time positional decoding and constructs the concrete row
+without a store-owned DuckDB decoder. Use `std::optional<ColumnType>` in that
+pack for a nullable result column; SQL `NULL` in a non-optional column violates
+a programming invariant. Keep the SQL projection, column-type pack, and
+row-constructor parameter order aligned. The mixin supplies the row's
+special-member policy, so the row does not inherit a second policy mixin
+directly.
+
+Decoding and row-count validation are separate stages. Express every store
+contract with `QueryResultRowCountRange::ZeroOrMore()`, `Exactly()`,
+`AtLeast()`, `AtMost()`, or `Between()`. Bounded row-count mismatches are
+programming errors and remain debug assertions.
 
 Positional DuckDB result decoding may narrowly suppress both
 `cppcoreguidelines-avoid-magic-numbers` and `readability-magic-numbers` with a
@@ -238,11 +286,20 @@ expression.
 Global and namespace-scope variables are disallowed
 (`custom-memly-no-namespace-variable`).
 
-Use container or user-defined type suffixes for non-layer-API names when the
-suffix materially clarifies representation. Relevant standard-container suffixes
-include `Vector`, `Array`, `Map`, `UnorderedMap`, `Set`, and `UnorderedSet`.
-`std::string` and `std::string_view` do not add type suffixes except when a
-callable name emphasizes conversion to that representation.
+Use representation suffixes for non-layer-API names when the concrete
+representation matters. For every type governed by this rule, regardless of
+whether it is defined by Memly, the standard library, or a third-party library,
+use its complete unqualified type name as the suffix. Add a semantic prefix only
+when it states a narrower role or distinguishes multiple values of that type.
+When the type itself fully describes the value, use the type name as the entire
+name; for example, `duckdb::ErrorData ErrorData{}`, not `FetchError` or
+`FetchErrorData`.
+
+Relevant standard-container suffixes include `Vector`, `Array`, `Map`,
+`UnorderedMap`, `Set`, and `UnorderedSet`
+(`custom-memly-standard-container-value-suffix`). `std::string` and
+`std::string_view` do not add type suffixes except when a callable name
+emphasizes conversion to that representation.
 
 Named `std::expected`, `std::variant`, and `std::optional` values end in
 `Expected`, `Variant`, and `Optional`, respectively
@@ -257,6 +314,12 @@ suffix, such as `DeckNodeIndexByDeckIdUnorderedMap`.
 Type template parameters are named for the role they represent. Their names end
 in `Type` (`custom-memly-type-template-parameter-name`).
 
+A wrapper type's wrapped-value constructor parameter repeats the complete
+wrapper type name, and its wrapped-value member repeats that name after the `m_`
+prefix. For example, `MutatedId(std::string&& MutatedId)` stores `m_MutatedId`.
+Never shorten either name to a generic representation such as `Identifier` or
+`m_Id`.
+
 Getters on wrapper and representation-bearing Memly types normally name the
 concrete returned type instead of a generic concept such as `GetValue` or
 `GetText`; for example, an accessor exposing an underlying `std::string` is
@@ -269,8 +332,23 @@ Namespaces for code under `src/` mirror its folder nesting; namespaces for the
 four architectural layers therefore begin with `Layer::`. An unnamed helper
 namespace is nested inside that matching namespace. The custom matcher enforces
 the minimum structural requirement that it have a Memly namespace ancestor
-(`custom-memly-unnamed-namespace-nesting`). Namespace-scope helper functions use
-an `a_` prefix (`custom-memly-unnamed-namespace-helper-prefix`).
+(`custom-memly-unnamed-namespace-nesting`). Every declaration made directly at
+unnamed-namespace scope uses an `a_` prefix, including functions, types, enums,
+concepts, and aliases; members of an unnamed-namespace type retain their normal
+member naming (`custom-memly-unnamed-namespace-declaration-prefix`).
+
+A custom type whose required visibility is confined to one translation unit is
+declared in that translation unit's unnamed namespace. Do not place it in a
+header, define it inside a function, or add an incomplete nested declaration
+solely to scope the type under a class. Move it into a header or class
+declaration only when another translation unit or the enclosing type's
+declaration must name it.
+
+Place each unnamed namespace block immediately above the first function or
+method definition that uses a declaration introduced by that block. Split
+declarations among multiple unnamed namespace blocks when their first consumers
+differ; do not collect file-private declarations at the top of a translation
+unit merely because all reopened blocks denote the same unnamed namespace.
 
 Qualify names with the shortest namespace prefix that resolves unambiguously
 from the current scope. Omit current and enclosing namespace components, and

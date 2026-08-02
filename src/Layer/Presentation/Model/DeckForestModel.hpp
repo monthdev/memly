@@ -40,6 +40,7 @@ private:
         }
     };
 
+    static constexpr int s_UnsortedColumn{ -1 };
     std::vector<DeckNode> m_DeckNodesVector;
     std::vector<std::size_t> m_RootDeckNodeIndexesVector;
     int m_SortColumn;
@@ -51,7 +52,7 @@ public:
         , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DeckNodesVector{}
         , m_RootDeckNodeIndexesVector{}
-        , m_SortColumn{ -1 }
+        , m_SortColumn{ s_UnsortedColumn }
         , m_SortOrder{ Qt::AscendingOrder } {
     }
     enum class RoleEnum : int {

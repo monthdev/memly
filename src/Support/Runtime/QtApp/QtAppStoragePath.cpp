@@ -9,23 +9,23 @@ namespace Support::Runtime::QtApp {
 namespace {
 [[nodiscard]] auto a_EnsureDirectory(const QString& Directory) -> std::string {
     QDir().mkpath(Directory);
-    return Directory.toStdString();
+    return std::string{ Directory.toStdString() };
 }
 
 [[nodiscard]] auto a_BaseDirectoryPath() -> std::string {
-    return a_EnsureDirectory(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+    return std::string{ a_EnsureDirectory(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)) };
 }
 }
 
 [[nodiscard]] auto AudioDirectoryPath() -> std::string {
-    return a_EnsureDirectory(QString::fromStdString(a_BaseDirectoryPath() + "/Audio"));
+    return std::string{ a_EnsureDirectory(QString::fromStdString(a_BaseDirectoryPath() + "/Audio")) };
 }
 
 [[nodiscard]] auto ExceptionLogFilePath() -> std::string {
-    return a_BaseDirectoryPath() + "/exception.log";
+    return std::string{ a_BaseDirectoryPath() + "/exception.log" };
 }
 
 [[nodiscard]] auto DatabaseFilePath() -> std::string {
-    return a_BaseDirectoryPath() + "/memly.duckdb";
+    return std::string{ a_BaseDirectoryPath() + "/memly.duckdb" };
 }
 }

@@ -2,18 +2,18 @@
 
 #include <duckdb.hpp>
 
-#include <memory>
 #include <source_location>
 #include <utility>
 
+#include "Layer/Infrastructure/Database/QueryResultDecoder.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 
-class DatabaseRuntime;
+class PreparedStatement;
 
 class [[nodiscard]] PreparedStatementExecution final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
-    friend class DatabaseRuntime;
+    friend class PreparedStatement;
 
 private:
     duckdb::PreparedStatement& m_DuckDbPreparedStatement;
@@ -28,17 +28,17 @@ private:
 public:
     template <typename... SqlParameterType>
         requires(sizeof...(SqlParameterType) > 0)
-    [[nodiscard]] auto WithParameters(SqlParameterType&&... SqlParameters) && -> std::unique_ptr<duckdb::QueryResult> {
+    [[nodiscard]] auto WithParameters(SqlParameterType&&... SqlParameters) && -> QueryResultDecoder {
         duckdb::vector<duckdb::Value> DuckDbValueVector{};
         DuckDbValueVector.reserve(sizeof...(SqlParameterType));
         (DuckDbValueVector.emplace_back(duckdb::Value::CreateValue(std::forward<SqlParameterType>(SqlParameters))), ...);
-        return Execute(std::move(DuckDbValueVector));
+        return QueryResultDecoder{ Execute(std::move(DuckDbValueVector)) };
     }
 
-    [[nodiscard]] auto WithoutParameters() && -> std::unique_ptr<duckdb::QueryResult>;
+    [[nodiscard]] auto WithoutParameters() && -> QueryResultDecoder;
 
 private:
-    [[nodiscard]] auto Execute(duckdb::vector<duckdb::Value>&&) -> std::unique_ptr<duckdb::QueryResult>;
+    [[nodiscard]] auto Execute(duckdb::vector<duckdb::Value>&&) -> QueryResultDecoder;
 };
 
 }

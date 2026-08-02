@@ -12,6 +12,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 
@@ -31,8 +32,16 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
     icu::UnicodeString NormalizedUnicodeString{};
     NormalizerPointer->normalize(UnicodeString, NormalizedUnicodeString, ErrorCode);
     a_ThrowOnIcuError(ErrorCode);
-    return NormalizedUnicodeString;
+    return icu::UnicodeString{ std::move(NormalizedUnicodeString) };
 }
+
+}
+
+[[nodiscard]] auto HumanTextInput::FromInput(const std::string& Text) -> HumanTextInput {
+    return HumanTextInput{ a_NormalizeText(icu::UnicodeString::fromUTF8(Text)) };
+}
+
+namespace {
 
 [[nodiscard]] auto a_GetThreadLocalIcuBreakIterator() -> icu::BreakIterator& {
 #if defined(__clang__)
@@ -43,7 +52,7 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
         UErrorCode ErrorCode{ U_ZERO_ERROR };
         std::unique_ptr<icu::BreakIterator> IcuBreakIteratorUniquePointer{ icu::BreakIterator::createCharacterInstance(icu::Locale::getRoot(), ErrorCode) };
         a_ThrowOnIcuError(ErrorCode);
-        return IcuBreakIteratorUniquePointer;
+        return std::unique_ptr<icu::BreakIterator>{ std::move(IcuBreakIteratorUniquePointer) };
     }) };
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -53,29 +62,25 @@ void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
 
 }
 
-[[nodiscard]] auto HumanTextInput::FromInput(const std::string& Text) -> HumanTextInput {
-    return HumanTextInput{ a_NormalizeText(icu::UnicodeString::fromUTF8(Text)) };
-}
-
 [[nodiscard]] auto HumanTextInput::ComputeGraphemeClusterLength() const -> std::size_t {
     icu::BreakIterator& IcuBreakIterator{ a_GetThreadLocalIcuBreakIterator() };
     IcuBreakIterator.setText(m_NormalizedUnicodeString);
     std::size_t GraphemeClusterLength{ 0 };
     IcuBreakIterator.first();
     while (IcuBreakIterator.next() not_eq icu::BreakIterator::DONE) { ++GraphemeClusterLength; }
-    return GraphemeClusterLength;
+    return std::size_t{ GraphemeClusterLength };
 }
 
 [[nodiscard]] auto HumanTextInput::ToNormalizedStdString() const -> std::string {
     std::string Text{};
     m_NormalizedUnicodeString.toUTF8String(Text);
-    return Text;
+    return std::string{ std::move(Text) };
 }
 
 [[nodiscard]] auto HumanTextInput::ToNormalizedCaseFoldedStdString() && -> std::string {
     std::string Text{};
     m_NormalizedUnicodeString.foldCase().toUTF8String(Text);
-    return Text;
+    return std::string{ std::move(Text) };
 }
 
 }

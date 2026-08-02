@@ -7,6 +7,6 @@
 namespace Layer::Infrastructure::Sql::Deck::Query {
 
 [[nodiscard]] auto ReadDeckSnapshotRecordsSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Query/Statement/ReadDeckSnapshotRecords.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Query/Statement/ReadDeckSnapshotRecords.sql") };
 }
 }

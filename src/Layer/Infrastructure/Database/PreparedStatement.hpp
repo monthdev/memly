@@ -3,8 +3,10 @@
 #include <duckdb.hpp>
 
 #include <memory>
+#include <source_location>
 #include <utility>
 
+#include "Layer/Infrastructure/Database/PreparedStatementExecution.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
@@ -21,6 +23,9 @@ private:
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DuckDbPreparedStatement{ std::move(DuckDbPreparedStatement) } {
     }
+
+public:
+    [[nodiscard]] auto Execute(const std::source_location& = std::source_location::current()) noexcept -> PreparedStatementExecution;
 };
 
 }

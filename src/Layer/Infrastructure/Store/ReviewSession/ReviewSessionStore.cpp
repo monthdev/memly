@@ -24,25 +24,8 @@
 #include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 
 namespace Layer::Infrastructure::Store::ReviewSession {
-namespace {
 
-[[nodiscard]] constexpr auto
-a_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) noexcept
-    -> const char* {
-    switch (DeckSelectionType) {
-    case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Self:
-        return "self";
-    case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Subtree:
-        return "subtree";
-    case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSelf:
-        return "exclude_self";
-    case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSubtree:
-        return "exclude_subtree";
-    default:
-        assert(false);
-        std::unreachable();
-    }
-}
+namespace {
 
 [[nodiscard]] auto a_CountResultRows(Database::DatabaseRuntime& DatabaseRuntime,
                                      duckdb::QueryResult& QueryResult,
@@ -52,21 +35,6 @@ a_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
         ResultRowCount += DataChunk->size();
     }
     return ResultRowCount;
-}
-
-[[nodiscard]] auto a_TryReadSingleStringResult(Database::DatabaseRuntime& DatabaseRuntime,
-                                               duckdb::QueryResult& QueryResult,
-                                               const std::source_location& SourceLocation = std::source_location::current()) -> std::optional<std::string> {
-    std::optional<std::string> ResultOptional{};
-    std::size_t ResultRowCount{ 0 };
-    while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ DatabaseRuntime.FetchNextDataChunk(QueryResult, SourceLocation) }) {
-        for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
-            ++ResultRowCount;
-            ResultOptional = DataChunk->GetValue(0, RowIndex).GetValue<std::string>();
-        }
-    }
-    assert(ResultRowCount <= 1);
-    return ResultOptional;
 }
 
 [[maybe_unused, nodiscard]] auto a_TryGetRecoverableReviewSessionMutationError(duckdb::QueryResult& QueryResult)
@@ -237,6 +205,25 @@ void ReviewSessionStore::DeleteReviewSession(const std::string& ReviewSessionId)
     assert(ResultRowCount == 1);
 }
 
+namespace {
+
+[[nodiscard]] auto a_TryReadSingleStringResult(Database::DatabaseRuntime& DatabaseRuntime,
+                                               duckdb::QueryResult& QueryResult,
+                                               const std::source_location& SourceLocation = std::source_location::current()) -> std::optional<std::string> {
+    std::optional<std::string> ResultOptional{};
+    std::size_t ResultRowCount{ 0 };
+    while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ DatabaseRuntime.FetchNextDataChunk(QueryResult, SourceLocation) }) {
+        for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
+            ++ResultRowCount;
+            ResultOptional = DataChunk->GetValue(0, RowIndex).GetValue<std::string>();
+        }
+    }
+    assert(ResultRowCount <= 1);
+    return ResultOptional;
+}
+
+}
+
 [[nodiscard]] auto ReviewSessionStore::TryReadDefaultReviewSessionIdByRootDeckId(const std::string& RootDeckId) -> std::optional<std::string> {
     return a_TryReadSingleStringResult(
         m_DatabaseRuntime,
@@ -249,6 +236,28 @@ void ReviewSessionStore::DeleteReviewSession(const std::string& ReviewSessionId)
         m_DatabaseRuntime,
         *m_DatabaseRuntime.ExecutePreparedStatement(m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey));
+}
+
+namespace {
+
+[[nodiscard]] constexpr auto
+a_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) noexcept
+    -> const char* {
+    switch (DeckSelectionType) {
+    case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Self:
+        return "self";
+    case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Subtree:
+        return "subtree";
+    case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSelf:
+        return "exclude_self";
+    case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSubtree:
+        return "exclude_subtree";
+    default:
+        assert(false);
+        std::unreachable();
+    }
+}
+
 }
 
 void ReviewSessionStore::CreateCustomReviewSessionDeckSelection(

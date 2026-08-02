@@ -23,9 +23,10 @@ namespace Support::Runtime::Exception {
 namespace {
 [[nodiscard]] auto a_WriteStdErrBytes(const char* const Bytes, const std::size_t ByteCount) noexcept -> std::ptrdiff_t {
 #if defined(_WIN32)
-    return ::_write(::_fileno(stderr), Bytes, static_cast<unsigned int>(std::min(ByteCount, static_cast<std::size_t>(std::numeric_limits<int>::max()))));
+    return std::ptrdiff_t{ ::_write(
+        ::_fileno(stderr), Bytes, static_cast<unsigned int>(std::min(ByteCount, static_cast<std::size_t>(std::numeric_limits<int>::max())))) };
 #else
-    return ::write(STDERR_FILENO, Bytes, ByteCount);
+    return std::ptrdiff_t{ ::write(STDERR_FILENO, Bytes, ByteCount) };
 #endif
 }
 

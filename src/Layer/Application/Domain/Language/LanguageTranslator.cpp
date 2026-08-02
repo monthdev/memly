@@ -7,7 +7,7 @@
 namespace Layer::Application::Domain::Language {
 [[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)>& {
     // TODO: Move array to unnamed namespace?
-    static constexpr std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)> s_TargetLanguages{
+    static constexpr std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)> s_TargetLanguageInfoArray{
         {
          TargetLanguageInfo{ TargetLanguageEnum::NoLanguage, "", "", "", "(No Language)" },
          TargetLanguageInfo{ TargetLanguageEnum::Afrikaans, "af", "af", "", "Afrikaans" },
@@ -78,7 +78,7 @@ namespace Layer::Application::Domain::Language {
          TargetLanguageInfo{ TargetLanguageEnum::ChineseTraditional, "zh-tw", "zh-TW", "", "Chinese (Traditional)" },
          }
     };
-    return s_TargetLanguages;
+    return s_TargetLanguageInfoArray;
 }
 
 [[nodiscard]] auto GetTargetLanguageInfo(const TargetLanguageEnum Language) -> const TargetLanguageInfo& {

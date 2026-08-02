@@ -5,12 +5,14 @@
 #include <qqmlapplicationengine.h>
 #include <qtresource.h>
 
+#include <cstdlib>
+
 #include "CompositionRoot/RuntimeContext.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 #include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
 
 auto main(int argc, char** argv) noexcept -> int {
-    return Support::Runtime::Exception::TryCatchWrapper([&]() -> int {
+    return int{ Support::Runtime::Exception::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(Sql);
         [[maybe_unused]] const QGuiApplication QtApplicationLifetime{ argc, argv };
         constexpr const char* AppName{ "Memly" };
@@ -25,9 +27,9 @@ auto main(int argc, char** argv) noexcept -> int {
             &AppEngine,
             &QQmlApplicationEngine::objectCreationFailed,
             QCoreApplication::instance(),
-            []() -> void { QCoreApplication::exit(-1); },
+            []() -> void { QCoreApplication::exit(EXIT_FAILURE); },
             Qt::QueuedConnection);
         AppEngine.loadFromModule(AppName, "MainWindow");
-        return QGuiApplication::exec();
-    });
+        return int{ QGuiApplication::exec() };
+    }) };
 }

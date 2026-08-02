@@ -13,13 +13,11 @@ namespace Layer::Infrastructure::Store::Deck {
 
 class DeckSnapshotStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Database::DatabaseRuntime& m_DatabaseRuntime;
     Database::PreparedStatement m_ReadDeckSnapshotRecordsPreparedStatement;
 
 public:
     explicit DeckSnapshotStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DatabaseRuntime{ DatabaseRuntime }
         , m_ReadDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Query::ReadDeckSnapshotRecordsSql()) } {
     }
 

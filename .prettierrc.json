@@ -2,6 +2,16 @@
   "overrides": [
     {
       "files": [
+        ".clang-tidy"
+      ],
+      "options": {
+        "parser": "yaml",
+        "printWidth": 160,
+        "proseWrap": "always"
+      }
+    },
+    {
+      "files": [
         "*.md",
         "**/*.md",
         "*.markdown",

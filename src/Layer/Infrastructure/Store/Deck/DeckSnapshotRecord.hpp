@@ -5,11 +5,19 @@
 #include <string>
 #include <utility>
 
-#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+#include "Layer/Infrastructure/Database/DecodableQueryResultRowMixin.hpp"
 
 namespace Layer::Infrastructure::Store::Deck {
 
-struct [[nodiscard]] DeckSnapshotRecord final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
+struct [[nodiscard]] DeckSnapshotRecord final : public Database::DecodableQueryResultRowMixin<std::string,
+                                                                                              std::optional<std::string>,
+                                                                                              std::string,
+                                                                                              std::int64_t,
+                                                                                              std::optional<std::int64_t>,
+                                                                                              std::uint32_t,
+                                                                                              std::uint32_t,
+                                                                                              std::uint32_t,
+                                                                                              std::uint8_t> {
     std::string m_DeckId;
     std::optional<std::string> m_ParentDeckIdOptional;
     std::string m_DeckName;
@@ -29,7 +37,7 @@ struct [[nodiscard]] DeckSnapshotRecord final : private Support::SpecialMemberPo
                                 const std::uint32_t SelfByTodayCount,
                                 const std::uint32_t SelfTotalCount,
                                 const std::uint8_t TargetLanguageCode)
-        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+        : DecodableQueryResultRowMixin{}
         , m_DeckId{ std::move(DeckId) }
         , m_ParentDeckIdOptional{ std::move(ParentDeckIdOptional) }
         , m_DeckName{ std::move(DeckName) }

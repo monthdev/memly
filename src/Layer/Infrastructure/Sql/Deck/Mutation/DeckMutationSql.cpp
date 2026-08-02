@@ -7,34 +7,34 @@
 namespace Layer::Infrastructure::Sql::Deck::Mutation {
 
 [[nodiscard]] auto CreateRootDeckSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/CreateRootDeck.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/CreateRootDeck.sql") };
 }
 
 [[nodiscard]] auto CreateChildDeckSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/CreateChildDeck.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/CreateChildDeck.sql") };
 }
 
 [[nodiscard]] auto MoveDeckToRootSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeckToRoot.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeckToRoot.sql") };
 }
 
 [[nodiscard]] auto MoveDeckUnderParentSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeckUnderParent.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/MoveDeckUnderParent.sql") };
 }
 
 [[nodiscard]] auto RenameDeckSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/RenameDeck.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/RenameDeck.sql") };
 }
 
 [[nodiscard]] auto DeleteDeckCardReviewsSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeckCardReviews.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeckCardReviews.sql") };
 }
 
 [[nodiscard]] auto DeleteDeckCardsSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeckCards.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeckCards.sql") };
 }
 
 [[nodiscard]] auto DeleteDeckSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeck.sql");
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Mutation/Statement/DeleteDeck.sql") };
 }
 }

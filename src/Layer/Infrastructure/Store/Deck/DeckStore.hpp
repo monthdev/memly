@@ -12,7 +12,6 @@ namespace Layer::Infrastructure::Store::Deck {
 
 class DeckStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Database::DatabaseRuntime& m_DatabaseRuntime;
     Database::PreparedStatement m_CreateRootDeckPreparedStatement;
     Database::PreparedStatement m_CreateChildDeckPreparedStatement;
     Database::PreparedStatement m_MoveDeckToRootPreparedStatement;
@@ -25,7 +24,6 @@ private:
 public:
     explicit DeckStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DatabaseRuntime{ DatabaseRuntime }
         , m_CreateRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::CreateRootDeckSql()) }
         , m_CreateChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::CreateChildDeckSql()) }
         , m_MoveDeckToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Mutation::MoveDeckToRootSql()) }
