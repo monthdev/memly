@@ -10,7 +10,7 @@
 namespace Layer::View::Bridge::ProxyModel {
 
 void DeckForestProxyModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
-    sourceModel()->sort(Column, SortOrder);
+    this->sourceModel()->sort(Column, SortOrder);
 }
 
 [[nodiscard]] QVariant DeckForestProxyModel::headerData(const int Section, const Qt::Orientation Orientation, const int Role) const noexcept {

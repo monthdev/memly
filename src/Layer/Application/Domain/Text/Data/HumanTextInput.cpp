@@ -64,7 +64,7 @@ namespace {
 
 [[nodiscard]] auto HumanTextInput::ComputeGraphemeClusterLength() const -> std::size_t {
     icu::BreakIterator& IcuBreakIterator{ a_GetThreadLocalIcuBreakIterator() };
-    IcuBreakIterator.setText(m_NormalizedUnicodeString);
+    IcuBreakIterator.setText(this->m_NormalizedUnicodeString);
     std::size_t GraphemeClusterLength{ 0 };
     IcuBreakIterator.first();
     while (IcuBreakIterator.next() not_eq icu::BreakIterator::DONE) { ++GraphemeClusterLength; }
@@ -73,13 +73,13 @@ namespace {
 
 [[nodiscard]] auto HumanTextInput::ToNormalizedStdString() const -> std::string {
     std::string Text{};
-    m_NormalizedUnicodeString.toUTF8String(Text);
+    this->m_NormalizedUnicodeString.toUTF8String(Text);
     return std::string{ std::move(Text) };
 }
 
 [[nodiscard]] auto HumanTextInput::ToNormalizedCaseFoldedStdString() && -> std::string {
     std::string Text{};
-    m_NormalizedUnicodeString.foldCase().toUTF8String(Text);
+    this->m_NormalizedUnicodeString.foldCase().toUTF8String(Text);
     return std::string{ std::move(Text) };
 }
 

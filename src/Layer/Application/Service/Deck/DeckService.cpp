@@ -15,7 +15,7 @@
 namespace Layer::Application::Service::Deck {
 
 [[nodiscard]] auto DeckService::AcquireDeckForestSnapshotIndexCacheLease() -> IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease {
-    return IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease{ m_DeckForestSnapshotIndexCache.AcquireLease() };
+    return IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease{ this->m_DeckForestSnapshotIndexCache.AcquireLease() };
 }
 
 [[nodiscard]] auto DeckService::IsDeckNameLengthValid(const std::string& DeckName) noexcept -> bool {
@@ -23,32 +23,32 @@ namespace Layer::Application::Service::Deck {
 }
 
 void DeckService::CreateRootDeck(const std::string& DeckName, const std::uint8_t TargetLanguageCode) {
-    m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode);
+    this->m_DeckStore.CreateRootDeck(DeckName, TargetLanguageCode);
 }
 
 void DeckService::CreateChildDeck(const std::string& DeckName, const std::string& ParentDeckId) {
-    m_DeckStore.CreateChildDeck(DeckName, ParentDeckId);
+    this->m_DeckStore.CreateChildDeck(DeckName, ParentDeckId);
 }
 
 void DeckService::MoveDeckToRoot(const std::string& DeckId) {
-    m_DeckStore.MoveDeckToRoot(DeckId);
+    this->m_DeckStore.MoveDeckToRoot(DeckId);
 }
 
 void DeckService::MoveDeckUnderParent(const std::string& DeckId, const std::string& ParentDeckId) {
-    m_DeckStore.MoveDeckUnderParent(DeckId, ParentDeckId);
+    this->m_DeckStore.MoveDeckUnderParent(DeckId, ParentDeckId);
 }
 
 void DeckService::RenameDeck(const std::string& DeckId, const std::string& NewDeckName) {
-    m_DeckStore.RenameDeck(DeckId, NewDeckName);
+    this->m_DeckStore.RenameDeck(DeckId, NewDeckName);
 }
 
 void DeckService::DeleteDeck(const std::string& DeckId) {
-    m_DeckStore.DeleteDeck(DeckId);
+    this->m_DeckStore.DeleteDeck(DeckId);
 }
 
 void DeckService::RefreshDeckForestSnapshotIndexCache(const IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease& DeckForestSnapshotIndexCacheLease,
                                                       const std::int64_t AsOfMillisecondsSinceEpoch) {
-    std::vector<Infrastructure::Store::Deck::DeckSnapshotRecord> DeckSnapshotRecordVector{ m_DeckSnapshotStore.ReadDeckSnapshotRecords(
+    std::vector<Infrastructure::Store::Deck::DeckSnapshotRecord> DeckSnapshotRecordVector{ this->m_DeckSnapshotStore.ReadDeckSnapshotRecords(
         AsOfMillisecondsSinceEpoch) };
     std::vector<Domain::Deck::Index::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
     DeckForestSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
@@ -63,7 +63,7 @@ void DeckService::RefreshDeckForestSnapshotIndexCache(const IndexCache::Deck::De
                                                   DeckSnapshotRecord.m_SelfTotalCount,
                                                   DeckSnapshotRecord.m_TargetLanguageCode);
     }
-    m_DeckForestSnapshotIndexCache.Refresh(DeckForestSnapshotIndexCacheLease, std::move(DeckForestSnapshotNodeVector));
+    this->m_DeckForestSnapshotIndexCache.Refresh(DeckForestSnapshotIndexCacheLease, std::move(DeckForestSnapshotNodeVector));
 }
 
 }

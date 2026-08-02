@@ -17,9 +17,9 @@ namespace Layer::Application::Service::ReviewSession {
 
 [[nodiscard]] auto ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey)
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    return m_TransactionRunner.TransactionWrapper(
+    return this->m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-            return m_ReviewSessionStore.CreateOrReadExistingDefaultReviewSession(RootDeckId, ReviewSessionDefinitionKey);
+            return this->m_ReviewSessionStore.CreateOrReadExistingDefaultReviewSession(RootDeckId, ReviewSessionDefinitionKey);
         });
 }
 
@@ -28,18 +28,18 @@ namespace Layer::Application::Service::ReviewSession {
     const std::string& ReviewSessionDefinitionKey,
     const std::vector<Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    return m_TransactionRunner.TransactionWrapper(
+    return this->m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-            return m_ReviewSessionStore.CreateOrReadExistingCustomReviewSession(
+            return this->m_ReviewSessionStore.CreateOrReadExistingCustomReviewSession(
                 ReviewSessionName, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
         });
 }
 
 [[nodiscard]] auto ReviewSessionService::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName)
     -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
+    return this->m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
         const std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
-            m_ReviewSessionStore.RenameReviewSession(ReviewSessionId, ReviewSessionName)
+            this->m_ReviewSessionStore.RenameReviewSession(ReviewSessionId, ReviewSessionName)
         };
         if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
             return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
@@ -52,9 +52,9 @@ namespace Layer::Application::Service::ReviewSession {
                                                                     const std::string& RootDeckId,
                                                                     const std::string& ReviewSessionDefinitionKey)
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    return m_TransactionRunner.TransactionWrapper(
+    return this->m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-            return m_ReviewSessionStore.EditReviewSessionToDefault(CurrentReviewSessionId, RootDeckId, ReviewSessionDefinitionKey);
+            return this->m_ReviewSessionStore.EditReviewSessionToDefault(CurrentReviewSessionId, RootDeckId, ReviewSessionDefinitionKey);
         });
 }
 
@@ -63,24 +63,24 @@ namespace Layer::Application::Service::ReviewSession {
     const std::string& ReviewSessionDefinitionKey,
     const std::vector<Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    return m_TransactionRunner.TransactionWrapper(
+    return this->m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-            return m_ReviewSessionStore.EditReviewSessionToCustom(CurrentReviewSessionId, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
+            return this->m_ReviewSessionStore.EditReviewSessionToCustom(CurrentReviewSessionId, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
         });
 }
 
 [[nodiscard]] auto ReviewSessionService::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId)
     -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-        m_ReviewSessionStore.UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(ReviewSessionId);
+    return this->m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
+        this->m_ReviewSessionStore.UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(ReviewSessionId);
         return std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>{};
     });
 }
 
 [[nodiscard]] auto ReviewSessionService::DeleteReviewSession(const std::string& ReviewSessionId)
     -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    return m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-        m_ReviewSessionStore.DeleteReviewSession(ReviewSessionId);
+    return this->m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
+        this->m_ReviewSessionStore.DeleteReviewSession(ReviewSessionId);
         return std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>{};
     });
 }

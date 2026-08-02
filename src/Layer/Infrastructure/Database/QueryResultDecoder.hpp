@@ -38,9 +38,9 @@ private:
 public:
     template <DecodableQueryResultRow QueryResultRowType>
     [[nodiscard]] auto DecodedTo() && -> DecodedQueryResult<QueryResultRowType> {
-        assert(m_QueryResult->ColumnCount() == std::tuple_size_v<typename QueryResultRowType::QueryResultColumnTypeTuple>);
+        assert(this->m_QueryResult->ColumnCount() == std::tuple_size_v<typename QueryResultRowType::QueryResultColumnTypeTuple>);
         std::vector<QueryResultRowType> QueryResultRowVector{};
-        while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ FetchNextDataChunk() }) {
+        while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ this->FetchNextDataChunk() }) {
             for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
                 QueryResultRowVector.emplace_back(DecodeQueryResultRow<QueryResultRowType>(
                     *DataChunk, RowIndex, std::make_index_sequence<std::tuple_size_v<typename QueryResultRowType::QueryResultColumnTypeTuple>>{}));

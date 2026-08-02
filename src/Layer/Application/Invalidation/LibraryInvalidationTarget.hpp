@@ -22,7 +22,7 @@ public:
     explicit LibraryInvalidationTargetBitset(const LibraryInvalidationTargetType... LibraryInvalidationTargets) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_TargetBitMask{} {
-        (Set(LibraryInvalidationTargets), ...);
+        (this->Set(LibraryInvalidationTargets), ...);
     }
 
     [[nodiscard]] auto Contains(LibraryInvalidationTargetEnum) const noexcept -> bool;

@@ -23,7 +23,7 @@ public:
         , SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_ErrorMessageArray{}
         , m_ErrorMessageSize{} {
-        ConstructErrorMessage(ErrorMessageInitializerList, SourceLocation);
+        this->ConstructErrorMessage(ErrorMessageInitializerList, SourceLocation);
     }
 
     [[nodiscard]] auto what() const noexcept -> const char* override;

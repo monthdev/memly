@@ -30,19 +30,19 @@ public:
         requires std::invocable<LambdaType&&>
     [[nodiscard]] auto TransactionWrapper(LambdaType&& Lambda, const std::source_location& SourceLocation = std::source_location::current())
         -> std::invoke_result_t<LambdaType&&> {
-        m_DatabaseConnection.BeginTransaction();
+        this->m_DatabaseConnection.BeginTransaction();
         try {
             if constexpr (std::same_as<std::invoke_result_t<LambdaType&&>, void>) {
                 std::invoke(std::forward<LambdaType>(Lambda));
-                m_DatabaseConnection.Commit();
+                this->m_DatabaseConnection.Commit();
             } else {
                 std::invoke_result_t<LambdaType&&> Result{ std::invoke(std::forward<LambdaType>(Lambda)) };
-                m_DatabaseConnection.Commit();
+                this->m_DatabaseConnection.Commit();
                 return std::invoke_result_t<LambdaType&&>{ std::move(Result) };
             }
         } catch (const std::exception& TransactionException) {
             try {
-                m_DatabaseConnection.Rollback();
+                this->m_DatabaseConnection.Rollback();
             } catch (const std::exception& RollbackException) {
                 Support::Runtime::Exception::ThrowMemlyException(
                     std::initializer_list<std::string_view>{
@@ -52,7 +52,7 @@ public:
             throw;
         } catch (...) {
             try {
-                m_DatabaseConnection.Rollback();
+                this->m_DatabaseConnection.Rollback();
             } catch (const std::exception& RollbackException) {
                 Support::Runtime::Exception::ThrowMemlyException(
                     std::initializer_list<std::string_view>{ "Transaction failed with a non-standard exception\nRollback also failed:\n\t",

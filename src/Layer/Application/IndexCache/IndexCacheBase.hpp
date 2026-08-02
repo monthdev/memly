@@ -33,10 +33,10 @@ public:
     };
 
     [[nodiscard]] auto AcquireLease() -> IndexCacheLease {
-        std::shared_ptr<typename IndexCacheDefinitionType::IndexType> IndexSharedPointer{ m_IndexWeakPointer.lock() };
+        std::shared_ptr<typename IndexCacheDefinitionType::IndexType> IndexSharedPointer{ this->m_IndexWeakPointer.lock() };
         if (IndexSharedPointer == nullptr) {
             IndexSharedPointer = std::make_shared<typename IndexCacheDefinitionType::IndexType>();
-            m_IndexWeakPointer = IndexSharedPointer;
+            this->m_IndexWeakPointer = IndexSharedPointer;
         }
         return IndexCacheLease{ std::move(IndexSharedPointer) };
     }

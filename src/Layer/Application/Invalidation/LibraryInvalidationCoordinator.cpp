@@ -18,37 +18,38 @@
 namespace Layer::Application::Invalidation {
 
 void LibraryInvalidationCoordinator::Invalidate(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
-    emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
+    emit this->m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
 }
 
 void LibraryInvalidationCoordinator::InvalidateWithReschedule(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
-    emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
-    ScheduleNextLibraryInvalidation();
+    emit this->m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
+    this->ScheduleNextLibraryInvalidation();
 }
 
 void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndNewSnapshotEpoch(
     const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
-    m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch = static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch());
-    emit m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
-    ScheduleNextLibraryInvalidation();
+    this->m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch = static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch());
+    emit this->m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
+    this->ScheduleNextLibraryInvalidation();
 }
 
 void LibraryInvalidationCoordinator::HandleScheduledInvalidation() noexcept {
-    InvalidateWithRescheduleAndNewSnapshotEpoch(LibraryInvalidationTargetBitset{ LibraryInvalidationTargetEnum::DeckForestSnapshot });
+    this->InvalidateWithRescheduleAndNewSnapshotEpoch(LibraryInvalidationTargetBitset{ LibraryInvalidationTargetEnum::DeckForestSnapshot });
 }
 
 void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept {
     Support::Runtime::Exception::TryCatchWrapper([&]() -> void {
-        m_LibraryInvalidationQTimer.stop();
+        this->m_LibraryInvalidationQTimer.stop();
         const std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpochOptional{
-            m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch)
+            this->m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(
+                this->m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch)
         };
         if (not NextLibraryInvalidationAtMillisecondsSinceEpochOptional.has_value()) {
             return;
         }
         const std::int64_t LibraryInvalidationDelayMilliseconds{ std::max<std::int64_t>(
             0, NextLibraryInvalidationAtMillisecondsSinceEpochOptional.value() - static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch())) };
-        m_LibraryInvalidationQTimer.start(static_cast<int>(LibraryInvalidationDelayMilliseconds));
+        this->m_LibraryInvalidationQTimer.start(static_cast<int>(LibraryInvalidationDelayMilliseconds));
     });
 }
 

@@ -34,9 +34,9 @@ public:
         , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
         , m_LibraryClockStore{ LibraryClockStore }
         , m_LibraryInvalidationQTimer{} {
-        m_LibraryInvalidationQTimer.setSingleShot(true);
-        connect(&m_LibraryInvalidationQTimer, &QTimer::timeout, this, &LibraryInvalidationCoordinator::HandleScheduledInvalidation);
-        ScheduleNextLibraryInvalidation();
+        this->m_LibraryInvalidationQTimer.setSingleShot(true);
+        QObject::connect(&this->m_LibraryInvalidationQTimer, &QTimer::timeout, this, &LibraryInvalidationCoordinator::HandleScheduledInvalidation);
+        this->ScheduleNextLibraryInvalidation();
     }
 
     void Invalidate(const LibraryInvalidationTargetBitset&) noexcept;

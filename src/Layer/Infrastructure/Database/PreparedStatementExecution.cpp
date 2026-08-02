@@ -13,16 +13,16 @@
 namespace Layer::Infrastructure::Database {
 
 [[nodiscard]] auto PreparedStatementExecution::WithoutParameters() && -> QueryResultDecoder {
-    return QueryResultDecoder{ Execute(duckdb::vector<duckdb::Value>{}) };
+    return QueryResultDecoder{ this->Execute(duckdb::vector<duckdb::Value>{}) };
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 [[nodiscard]] auto PreparedStatementExecution::Execute(duckdb::vector<duckdb::Value>&& DuckDbValueVector) -> QueryResultDecoder {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DuckDbPreparedStatement.Execute(DuckDbValueVector, true) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ this->m_DuckDbPreparedStatement.Execute(DuckDbValueVector, true) };
     if (QueryResult->HasError()) {
-        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, m_SourceLocation);
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, this->m_SourceLocation);
     }
-    return QueryResultDecoder{ std::move(QueryResult), m_SourceLocation };
+    return QueryResultDecoder{ std::move(QueryResult), this->m_SourceLocation };
 }
 
 }

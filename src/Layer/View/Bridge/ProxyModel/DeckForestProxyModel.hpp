@@ -23,7 +23,7 @@ public:
     explicit DeckForestProxyModel(Presentation::Model::DeckForestModel& DeckForestModel, QObject* Parent = nullptr)
         : QIdentityProxyModel{ Parent }
         , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
-        setSourceModel(&DeckForestModel);
+        this->setSourceModel(&DeckForestModel);
     }
 
     void sort(int, Qt::SortOrder = Qt::AscendingOrder) noexcept override;

@@ -7,7 +7,7 @@
 namespace Layer::Infrastructure::Database {
 
 [[nodiscard]] auto PreparedStatement::Execute(const std::source_location& SourceLocation) noexcept -> PreparedStatementExecution {
-    return PreparedStatementExecution{ *m_DuckDbPreparedStatement, SourceLocation };
+    return PreparedStatementExecution{ *this->m_DuckDbPreparedStatement, SourceLocation };
 }
 
 }

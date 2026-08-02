@@ -39,7 +39,7 @@ public:
     void Connect(ControllerType* ControllerPointer,
                  const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                  const ControllerRefreshMethodType ControllerRefreshMethod) {
-        ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshMethod]() noexcept -> void {
+        this->ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshMethod]() noexcept -> void {
             std::invoke(ControllerRefreshMethod, ControllerPointer);
         });
     }
@@ -50,9 +50,9 @@ public:
     void ConnectSnapshot(ControllerType* ControllerPointer,
                          const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
                          const ControllerRefreshMethodType ControllerRefreshMethod) {
-        ConnectInvalidationSignal(
+        this->ConnectInvalidationSignal(
             ControllerPointer, ControllerLibraryInvalidationTarget, [this, ControllerPointer, ControllerRefreshMethod]() noexcept -> void {
-                std::invoke(ControllerRefreshMethod, ControllerPointer, m_CurrentSnapshotAsOfMillisecondsSinceEpoch);
+                std::invoke(ControllerRefreshMethod, ControllerPointer, this->m_CurrentSnapshotAsOfMillisecondsSinceEpoch);
             });
     }
 

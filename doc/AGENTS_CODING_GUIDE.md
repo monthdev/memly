@@ -123,6 +123,13 @@ source file (`custom-memly-no-header-function-definition`). Defaulted and
 deleted special-member definitions remain inside their class declarations
 because they have no function body.
 
+Inside a non-static member function, explicitly qualify every access to the
+current object's data members and methods with `this->`. This includes member
+accesses in constructor-initializer expressions and lambdas that capture `this`;
+a constructor's member-initializer identifiers are not access expressions and
+remain unqualified. Qualify static members with their declaring type because
+they do not belong to an object instance.
+
 Function declaration parameters are unnamed
 (`custom-memly-no-named-declaration-parameter`). A definition parameter is named
 only when its body references it. An intentionally unreferenced parameter

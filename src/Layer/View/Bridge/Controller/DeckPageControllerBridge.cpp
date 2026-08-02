@@ -10,7 +10,7 @@
 namespace Layer::View::Bridge::Controller {
 
 [[nodiscard]] ProxyModel::DeckForestProxyModel* DeckPageControllerBridge::GetDeckForestProxyModel() noexcept {
-    return &m_DeckForestProxyModel;
+    return &this->m_DeckForestProxyModel;
 }
 
 namespace {
@@ -25,24 +25,25 @@ namespace {
 }
 
 [[nodiscard]] QString DeckPageControllerBridge::CreateRootDeck(const QString& DeckName, const quint8 TargetLanguageCode) noexcept {
-    return a_DeckPageControllerExpectedToQString(m_DeckPageController.CreateRootDeck(DeckName.toStdString(), static_cast<std::uint8_t>(TargetLanguageCode)));
+    return a_DeckPageControllerExpectedToQString(
+        this->m_DeckPageController.CreateRootDeck(DeckName.toStdString(), static_cast<std::uint8_t>(TargetLanguageCode)));
 }
 
 [[nodiscard]] QString DeckPageControllerBridge::CreateChildDeck(const QString& DeckName, const QString& ParentDeckId) noexcept {
-    return a_DeckPageControllerExpectedToQString(m_DeckPageController.CreateChildDeck(DeckName.toStdString(), ParentDeckId.toStdString()));
+    return a_DeckPageControllerExpectedToQString(this->m_DeckPageController.CreateChildDeck(DeckName.toStdString(), ParentDeckId.toStdString()));
 }
 
 [[nodiscard]] QString DeckPageControllerBridge::MoveDeck(const QString& DeckId, const QString& NewParentDeckId) noexcept {
     return a_DeckPageControllerExpectedToQString(
-        m_DeckPageController.MoveDeck(DeckId.toStdString(), NewParentDeckId.isEmpty() ? std::nullopt : std::make_optional(NewParentDeckId.toStdString())));
+        this->m_DeckPageController.MoveDeck(DeckId.toStdString(), NewParentDeckId.isEmpty() ? std::nullopt : std::make_optional(NewParentDeckId.toStdString())));
 }
 
 [[nodiscard]] QString DeckPageControllerBridge::RenameDeck(const QString& DeckId, const QString& NewDeckName) noexcept {
-    return a_DeckPageControllerExpectedToQString(m_DeckPageController.RenameDeck(DeckId.toStdString(), NewDeckName.toStdString()));
+    return a_DeckPageControllerExpectedToQString(this->m_DeckPageController.RenameDeck(DeckId.toStdString(), NewDeckName.toStdString()));
 }
 
 [[nodiscard]] QString DeckPageControllerBridge::DeleteDeck(const QString& DeckId) noexcept {
-    return a_DeckPageControllerExpectedToQString(m_DeckPageController.DeleteDeck(DeckId.toStdString()));
+    return a_DeckPageControllerExpectedToQString(this->m_DeckPageController.DeleteDeck(DeckId.toStdString()));
 }
 
 }

@@ -30,7 +30,7 @@ namespace Layer::Infrastructure::Database {
 }
 
 [[nodiscard]] auto QueryResultRowCountRange::Contains(const std::size_t RowCount) const noexcept -> bool {
-    return bool{ RowCount >= m_MinimumRowCount and RowCount <= m_MaximumRowCount };
+    return bool{ RowCount >= this->m_MinimumRowCount and RowCount <= this->m_MaximumRowCount };
 }
 
 }

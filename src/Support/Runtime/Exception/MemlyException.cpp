@@ -15,30 +15,30 @@
 namespace Support::Runtime::Exception {
 
 [[nodiscard]] auto MemlyException::what() const noexcept -> const char* {
-    return m_ErrorMessageArray.data();
+    return this->m_ErrorMessageArray.data();
 }
 
 void MemlyException::ConstructErrorMessage(const std::initializer_list<std::string_view> ErrorMessageInitializerList,
                                            const std::source_location& SourceLocation) noexcept {
-    AppendErrorMessage("Exception thrown in ");
-    AppendErrorMessage(SourceLocation.file_name());
-    AppendErrorMessage(", ");
-    AppendErrorMessage(SourceLocation.function_name());
-    AppendErrorMessage(", line ");
+    this->AppendErrorMessage("Exception thrown in ");
+    this->AppendErrorMessage(SourceLocation.file_name());
+    this->AppendErrorMessage(", ");
+    this->AppendErrorMessage(SourceLocation.function_name());
+    this->AppendErrorMessage(", line ");
     std::array<char, std::numeric_limits<decltype(SourceLocation.line())>::digits10 + 1> SourceLocationLineArray{};
     const std::to_chars_result SourceLocationLineToCharsResult{ std::to_chars(
         SourceLocationLineArray.begin(), SourceLocationLineArray.end(), SourceLocation.line()) };
     assert(SourceLocationLineToCharsResult.ec == std::errc{});
-    AppendErrorMessage(
+    this->AppendErrorMessage(
         std::string_view{ SourceLocationLineArray.data(), static_cast<std::size_t>(SourceLocationLineToCharsResult.ptr - SourceLocationLineArray.data()) });
-    AppendErrorMessage(":\n\t");
-    for (const std::string_view ErrorMessage : ErrorMessageInitializerList) { AppendErrorMessage(ErrorMessage); }
+    this->AppendErrorMessage(":\n\t");
+    for (const std::string_view ErrorMessage : ErrorMessageInitializerList) { this->AppendErrorMessage(ErrorMessage); }
 }
 
 void MemlyException::AppendErrorMessage(const std::string_view CharsToAppend) noexcept {
-    const std::size_t AvailableCopySize{ std::min(CharsToAppend.size(), m_ErrorMessageArray.size() - 1 - m_ErrorMessageSize) };
+    const std::size_t AvailableCopySize{ std::min(CharsToAppend.size(), this->m_ErrorMessageArray.size() - 1 - this->m_ErrorMessageSize) };
     std::ranges::copy(std::span{ CharsToAppend }.first(AvailableCopySize),
-                      std::span{ m_ErrorMessageArray }.subspan(m_ErrorMessageSize, AvailableCopySize).begin());
-    m_ErrorMessageSize += AvailableCopySize;
+                      std::span{ this->m_ErrorMessageArray }.subspan(this->m_ErrorMessageSize, AvailableCopySize).begin());
+    this->m_ErrorMessageSize += AvailableCopySize;
 }
 }

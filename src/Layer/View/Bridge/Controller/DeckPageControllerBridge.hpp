@@ -29,7 +29,7 @@ public:
         : QObject{ Parent }
         , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DeckPageController{ CompositionRoot::RuntimeContext::GetRequiredLibraryInvalidationChannel(), CompositionRoot::RuntimeContext::GetRequiredDeckService() }
-        , m_DeckForestProxyModel{ *m_DeckPageController.GetDeckForestModel(), this } {
+        , m_DeckForestProxyModel{ *this->m_DeckPageController.GetDeckForestModel(), this } {
     }
     [[nodiscard]] ProxyModel::DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
 

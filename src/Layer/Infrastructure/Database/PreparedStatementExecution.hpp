@@ -32,7 +32,7 @@ public:
         duckdb::vector<duckdb::Value> DuckDbValueVector{};
         DuckDbValueVector.reserve(sizeof...(SqlParameterType));
         (DuckDbValueVector.emplace_back(duckdb::Value::CreateValue(std::forward<SqlParameterType>(SqlParameters))), ...);
-        return QueryResultDecoder{ Execute(std::move(DuckDbValueVector)) };
+        return QueryResultDecoder{ this->Execute(std::move(DuckDbValueVector)) };
     }
 
     [[nodiscard]] auto WithoutParameters() && -> QueryResultDecoder;

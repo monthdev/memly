@@ -30,7 +30,7 @@
 namespace Layer::Infrastructure::Database {
 
 [[nodiscard]] auto DatabaseRuntime::PrepareStatement(const std::string& Sql, const std::source_location& SourceLocation) -> PreparedStatement {
-    std::unique_ptr<duckdb::PreparedStatement> DuckDbPreparedStatement{ m_DatabaseConnection.Prepare(Sql) };
+    std::unique_ptr<duckdb::PreparedStatement> DuckDbPreparedStatement{ this->m_DatabaseConnection.Prepare(Sql) };
     if (DuckDbPreparedStatement->HasError()) {
         Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ DuckDbPreparedStatement->GetError() }, SourceLocation);
     }
@@ -38,7 +38,7 @@ namespace Layer::Infrastructure::Database {
 }
 
 [[nodiscard]] auto DatabaseRuntime::ExecuteSql(const std::string& Sql, const std::source_location& SourceLocation) -> QueryResultDecoder {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{ m_DatabaseConnection.SendQuery(Sql) };
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ this->m_DatabaseConnection.SendQuery(Sql) };
     if (QueryResult->HasError()) {
         Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, SourceLocation);
     }
@@ -46,13 +46,13 @@ namespace Layer::Infrastructure::Database {
 }
 
 [[nodiscard]] auto DatabaseRuntime::GetTransactionRunner() noexcept -> TransactionRunner& {
-    return m_TransactionRunner;
+    return this->m_TransactionRunner;
 }
 
 void DatabaseRuntime::BootstrapDatabase() {
-    m_TransactionRunner.TransactionWrapper([this]() -> void {
-        ApplyMigrations();
-        SeedTableDefaults();
+    this->m_TransactionRunner.TransactionWrapper([this]() -> void {
+        this->ApplyMigrations();
+        this->SeedTableDefaults();
     });
 }
 
@@ -86,16 +86,16 @@ void DatabaseRuntime::ApplyMigrations() {
     if (AppliedMigrationLogEntryRecordVector.size() < MigrationSqlFunctionArray.size()) {
         PreparedStatement CreateMigrationsLogEntryPreparedStatement{ this->PrepareStatement(Sql::Migration::CreateMigrationsLogEntrySql()) };
         for (std::size_t MigrationIndex{ AppliedMigrationLogEntryRecordVector.size() }; MigrationIndex < MigrationSqlFunctionArray.size(); ++MigrationIndex) {
-            static_cast<void>(ExecuteSql(std::invoke(MigrationSqlFunctionArray.at(MigrationIndex))));
+            static_cast<void>(this->ExecuteSql(std::invoke(MigrationSqlFunctionArray.at(MigrationIndex))));
             static_cast<void>(CreateMigrationsLogEntryPreparedStatement.Execute().WithParameters(static_cast<std::uint32_t>(MigrationIndex + 1)));
         }
     }
 }
 
 void DatabaseRuntime::SeedTableDefaults() {
-    static_cast<void>(ExecuteSql(Sql::Seed::CreateDefaultFsrs7SchedulerSql()));
-    static_cast<void>(ExecuteSql(Sql::Seed::CreateDefaultFsrs7SettingsSql()));
-    static_cast<void>(ExecuteSql(Sql::Seed::CreateDefaultDeckSettingsSql()));
+    static_cast<void>(this->ExecuteSql(Sql::Seed::CreateDefaultFsrs7SchedulerSql()));
+    static_cast<void>(this->ExecuteSql(Sql::Seed::CreateDefaultFsrs7SettingsSql()));
+    static_cast<void>(this->ExecuteSql(Sql::Seed::CreateDefaultDeckSettingsSql()));
 }
 
 }

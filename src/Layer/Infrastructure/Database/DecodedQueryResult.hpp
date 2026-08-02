@@ -26,8 +26,8 @@ private:
 
 public:
     [[nodiscard]] auto AssertRowCount([[maybe_unused]] const QueryResultRowCountRange& ExpectedQueryResultRowCountRange) && -> std::vector<QueryResultRowType> {
-        assert(ExpectedQueryResultRowCountRange.Contains(m_QueryResultRowVector.size()));
-        return std::vector<QueryResultRowType>{ std::move(m_QueryResultRowVector) };
+        assert(ExpectedQueryResultRowCountRange.Contains(this->m_QueryResultRowVector.size()));
+        return std::vector<QueryResultRowType>{ std::move(this->m_QueryResultRowVector) };
     }
 };
 

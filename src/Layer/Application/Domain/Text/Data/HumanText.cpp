@@ -10,11 +10,11 @@ namespace Layer::Application::Domain::Text::Data {
 }
 
 [[nodiscard]] auto HumanText::GetNormalizedStdString() const noexcept -> const std::string& {
-    return m_NormalizedText;
+    return this->m_NormalizedText;
 }
 
 [[nodiscard]] auto HumanText::GetNormalizedCaseFoldedStdString() const noexcept -> const std::string& {
-    return m_NormalizedCaseFoldedText;
+    return this->m_NormalizedCaseFoldedText;
 }
 
 }

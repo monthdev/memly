@@ -23,9 +23,9 @@ public:
     explicit DatabaseRuntime(const std::string& DatabaseFilePath)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_Database{ DatabaseFilePath }
-        , m_DatabaseConnection{ m_Database }
-        , m_TransactionRunner{ m_DatabaseConnection } {
-        BootstrapDatabase();
+        , m_DatabaseConnection{ this->m_Database }
+        , m_TransactionRunner{ this->m_DatabaseConnection } {
+        this->BootstrapDatabase();
     }
 
     [[nodiscard]] auto PrepareStatement(const std::string&, const std::source_location& = std::source_location::current()) -> PreparedStatement;

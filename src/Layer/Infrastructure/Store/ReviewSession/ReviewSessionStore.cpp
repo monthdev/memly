@@ -65,13 +65,13 @@ namespace {
 
 [[nodiscard]] auto ReviewSessionStore::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey)
     -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    if (const std::optional<std::string> ExistingReviewSessionIdOptional{ TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
+    if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
         ExistingReviewSessionIdOptional.has_value()) {
         return ExistingReviewSessionIdOptional.value();
     }
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_CreateDefaultReviewSessionPreparedStatement)
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_CreateDefaultReviewSessionPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey, RootDeckId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
@@ -80,7 +80,7 @@ namespace {
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
     // }
-    std::optional<std::string> NewDefaultReviewSessionIdOptional{ TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
+    std::optional<std::string> NewDefaultReviewSessionIdOptional{ this->TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
     assert(NewDefaultReviewSessionIdOptional.has_value());
     return std::move(NewDefaultReviewSessionIdOptional).value();
 }
@@ -90,13 +90,14 @@ namespace {
     const std::string& ReviewSessionDefinitionKey,
     const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
     -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    if (const std::optional<std::string> ExistingReviewSessionIdOptional{ TryReadReviewSessionIdByReviewSessionDefinitionKey(ReviewSessionDefinitionKey) };
+    if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadReviewSessionIdByReviewSessionDefinitionKey(
+            ReviewSessionDefinitionKey) };
         ExistingReviewSessionIdOptional.has_value()) {
         return ExistingReviewSessionIdOptional.value();
     }
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_CreateCustomReviewSessionPreparedStatement)
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_CreateCustomReviewSessionPreparedStatement)
              .WithParameters(ReviewSessionName, ReviewSessionDefinitionKey)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
@@ -105,13 +106,14 @@ namespace {
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
     // }
-    std::optional<std::string> NewCustomReviewSessionIdOptional{ TryReadReviewSessionIdByReviewSessionDefinitionKey(ReviewSessionDefinitionKey) };
+    std::optional<std::string> NewCustomReviewSessionIdOptional{ this->TryReadReviewSessionIdByReviewSessionDefinitionKey(ReviewSessionDefinitionKey) };
     assert(NewCustomReviewSessionIdOptional.has_value());
     // TODO: The fact that this can't be marked const to allow automatic move at the end suggests separate helper method
     std::string NewCustomReviewSessionId{ std::move(NewCustomReviewSessionIdOptional).value() };
     for (const Application::Domain::ReviewSession::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
         // RecoverableReviewSessionMutationErrorOptional =
-        CreateCustomReviewSessionDeckSelection(NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
+        this->CreateCustomReviewSessionDeckSelection(
+            NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
         // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
         //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
         // }
@@ -122,8 +124,8 @@ namespace {
 [[nodiscard]] auto ReviewSessionStore::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName)
     -> std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_RenameReviewSessionPreparedStatement).WithParameters(ReviewSessionName, ReviewSessionId)) };
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_RenameReviewSessionPreparedStatement).WithParameters(ReviewSessionName, ReviewSessionId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
     //     a_TryGetRecoverableReviewSessionMutationError(*QueryResult)
@@ -136,15 +138,15 @@ namespace {
                                                                   const std::string& RootDeckId,
                                                                   const std::string& ReviewSessionDefinitionKey)
     -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    if (const std::optional<std::string> ExistingReviewSessionIdOptional{ TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
+    if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
         ExistingReviewSessionIdOptional.has_value()) {
         if (ExistingReviewSessionIdOptional.value() not_eq CurrentReviewSessionId) {
             return std::unexpected{ Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_UpdateReviewSessionToDefaultPreparedStatement).WithParameters(
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionToDefaultPreparedStatement).WithParameters(
             RootDeckId, ReviewSessionDefinitionKey, CurrentReviewSessionId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
@@ -153,7 +155,7 @@ namespace {
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
     // }
-    DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
+    this->DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     return CurrentReviewSessionId;
 }
 
@@ -162,15 +164,16 @@ namespace {
     const std::string& ReviewSessionDefinitionKey,
     const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
     -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    if (const std::optional<std::string> ExistingReviewSessionIdOptional{ TryReadReviewSessionIdByReviewSessionDefinitionKey(ReviewSessionDefinitionKey) };
+    if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadReviewSessionIdByReviewSessionDefinitionKey(
+            ReviewSessionDefinitionKey) };
         ExistingReviewSessionIdOptional.has_value()) {
         if (ExistingReviewSessionIdOptional.value() not_eq CurrentReviewSessionId) {
             return std::unexpected{ Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_UpdateReviewSessionToCustomPreparedStatement)
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionToCustomPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey, CurrentReviewSessionId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
@@ -179,10 +182,11 @@ namespace {
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
     // }
-    DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
+    this->DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
     for (const Application::Domain::ReviewSession::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
         // RecoverableReviewSessionMutationErrorOptional =
-        CreateCustomReviewSessionDeckSelection(CurrentReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
+        this->CreateCustomReviewSessionDeckSelection(
+            CurrentReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
         // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
         //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
         // }
@@ -192,16 +196,16 @@ namespace {
 
 void ReviewSessionStore::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId) {
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement)
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement)
              .WithParameters(ReviewSessionId)) };
     assert(ResultRowCount == 1);
 }
 
 void ReviewSessionStore::DeleteReviewSession(const std::string& ReviewSessionId) {
-    DeleteCustomReviewSessionDeckSelections(ReviewSessionId);
+    this->DeleteCustomReviewSessionDeckSelections(ReviewSessionId);
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
-        m_DatabaseRuntime, *m_DatabaseRuntime.ExecutePreparedStatement(m_DeleteReviewSessionPreparedStatement).WithParameters(ReviewSessionId)) };
+        this->m_DatabaseRuntime, *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_DeleteReviewSessionPreparedStatement).WithParameters(ReviewSessionId)) };
     assert(ResultRowCount == 1);
 }
 
@@ -226,15 +230,15 @@ namespace {
 
 [[nodiscard]] auto ReviewSessionStore::TryReadDefaultReviewSessionIdByRootDeckId(const std::string& RootDeckId) -> std::optional<std::string> {
     return a_TryReadSingleStringResult(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement).WithParameters(RootDeckId));
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement).WithParameters(RootDeckId));
 }
 
 [[nodiscard]] auto ReviewSessionStore::TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string& ReviewSessionDefinitionKey)
     -> std::optional<std::string> {
     return a_TryReadSingleStringResult(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement)
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey));
 }
 
@@ -266,8 +270,8 @@ void ReviewSessionStore::CreateCustomReviewSessionDeckSelection(
     const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) {
     const char* const DeckSelectionTypeString{ a_ReviewSessionDeckSelectionTypeToString(DeckSelectionType) };
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_CreateCustomReviewSessionDeckSelectionPreparedStatement).WithParameters(
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_CreateCustomReviewSessionDeckSelectionPreparedStatement).WithParameters(
             ReviewSessionId, DeckId, DeckSelectionTypeString)) };
     assert(ResultRowCount == 1);
     // return a_TryGetRecoverableReviewSessionMutationError(*QueryResult);
@@ -275,8 +279,8 @@ void ReviewSessionStore::CreateCustomReviewSessionDeckSelection(
 
 void ReviewSessionStore::DeleteCustomReviewSessionDeckSelections(const std::string& ReviewSessionId) {
     static_cast<void>(a_CountResultRows(
-        m_DatabaseRuntime,
-        *m_DatabaseRuntime.ExecutePreparedStatement(m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement).WithParameters(ReviewSessionId)));
+        this->m_DatabaseRuntime,
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement).WithParameters(ReviewSessionId)));
 }
 
 }

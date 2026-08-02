@@ -19,18 +19,18 @@ namespace Layer::Presentation::Model {
 
 [[nodiscard]] QModelIndex DeckForestModel::index(const int Row, const int Column, const QModelIndex& Parent) const noexcept {
     return Support::Runtime::Exception::TryCatchWrapper([&]() -> QModelIndex {
-        if (not hasIndex(Row, Column, Parent)) {
+        if (not this->hasIndex(Row, Column, Parent)) {
             return QModelIndex{};
         }
-        const std::vector<std::size_t>& ChildDeckNodeIndexesVector{ GetChildDeckNodeIndexes(Parent) };
+        const std::vector<std::size_t>& ChildDeckNodeIndexesVector{ this->GetChildDeckNodeIndexes(Parent) };
         const std::size_t ChildDeckNodeIndex{ ChildDeckNodeIndexesVector.at(static_cast<std::size_t>(Row)) };
-        return createIndex(Row, Column, static_cast<quintptr>(ChildDeckNodeIndex));
+        return this->createIndex(Row, Column, static_cast<quintptr>(ChildDeckNodeIndex));
     });
 }
 
 [[nodiscard]] QModelIndex DeckForestModel::parent(const QModelIndex& Index) const noexcept {
     return Support::Runtime::Exception::TryCatchWrapper([&]() -> QModelIndex {
-        const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
+        const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ this->TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
             return QModelIndex{};
         }
@@ -39,8 +39,8 @@ namespace Layer::Presentation::Model {
             return QModelIndex{};
         }
         const std::size_t ParentDeckNodeIndex{ CurrentDeckNode.m_ParentDeckNodeIndexOptional.value() };
-        const DeckNode& ParentDeckNode{ m_DeckNodesVector.at(ParentDeckNodeIndex) };
-        return createIndex(static_cast<int>(ParentDeckNode.m_RowInParentIndex), 0, static_cast<quintptr>(ParentDeckNodeIndex));
+        const DeckNode& ParentDeckNode{ this->m_DeckNodesVector.at(ParentDeckNodeIndex) };
+        return this->createIndex(static_cast<int>(ParentDeckNode.m_RowInParentIndex), 0, static_cast<quintptr>(ParentDeckNodeIndex));
     });
 }
 
@@ -49,7 +49,7 @@ namespace Layer::Presentation::Model {
         if (Parent.column() > 0) {
             return 0;
         }
-        return static_cast<int>(GetChildDeckNodeIndexes(Parent).size());
+        return static_cast<int>(this->GetChildDeckNodeIndexes(Parent).size());
     });
 }
 
@@ -64,7 +64,7 @@ namespace Layer::Presentation::Model {
 
 [[nodiscard]] QVariant DeckForestModel::data(const QModelIndex& Index, const int Role) const noexcept {
     return Support::Runtime::Exception::TryCatchWrapper([&]() -> QVariant {
-        const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ TryGetDeckNode(Index) };
+        const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ this->TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
             return QVariant{};
         }
@@ -124,7 +124,7 @@ namespace Layer::Presentation::Model {
         if (Parent.column() > 0) {
             return false;
         }
-        return rowCount(Parent) > 0;
+        return this->rowCount(Parent) > 0;
     });
 }
 
@@ -133,11 +133,11 @@ void DeckForestModel::sort(const int Column, const Qt::SortOrder SortOrder) noex
         if (Column < static_cast<int>(ColumnEnum::DeckNameColumn) or Column > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
             return;
         }
-        m_SortColumn = Column;
-        m_SortOrder = SortOrder;
-        beginResetModel();
-        ApplyCurrentSort();
-        endResetModel();
+        this->m_SortColumn = Column;
+        this->m_SortOrder = SortOrder;
+        this->beginResetModel();
+        this->ApplyCurrentSort();
+        this->endResetModel();
     });
 }
 
@@ -146,25 +146,25 @@ void DeckForestModel::sort(const int Column, const Qt::SortOrder SortOrder) noex
         return std::nullopt;
     }
     const std::size_t DeckNodeIndex{ static_cast<std::size_t>(Index.internalId()) };
-    assert(DeckNodeIndex < m_DeckNodesVector.size());
-    return m_DeckNodesVector.at(DeckNodeIndex);
+    assert(DeckNodeIndex < this->m_DeckNodesVector.size());
+    return this->m_DeckNodesVector.at(DeckNodeIndex);
 }
 
 [[nodiscard]] const std::vector<std::size_t>& DeckForestModel::GetChildDeckNodeIndexes(const QModelIndex& Parent) const {
     if (not Parent.isValid()) {
-        return m_RootDeckNodeIndexesVector;
+        return this->m_RootDeckNodeIndexesVector;
     }
-    const DeckNode& ParentDeckNode{ TryGetDeckNode(Parent).value().get() };
+    const DeckNode& ParentDeckNode{ this->TryGetDeckNode(Parent).value().get() };
     return ParentDeckNode.m_ChildDeckNodeIndexesVector;
 }
 
 [[nodiscard]] int DeckForestModel::CompareDeckNodes(const std::size_t LeftDeckNodeIndex, const std::size_t RightDeckNodeIndex) const noexcept {
-    const DeckNode& LeftDeckNode{ m_DeckNodesVector.at(LeftDeckNodeIndex) };
-    const DeckNode& RightDeckNode{ m_DeckNodesVector.at(RightDeckNodeIndex) };
+    const DeckNode& LeftDeckNode{ this->m_DeckNodesVector.at(LeftDeckNodeIndex) };
+    const DeckNode& RightDeckNode{ this->m_DeckNodesVector.at(RightDeckNodeIndex) };
     const auto CompareDeckNodeCounts{ [](const std::uint32_t LeftDeckNodeCount, const std::uint32_t RightDeckNodeCount) static noexcept -> int {
         return static_cast<int>(LeftDeckNodeCount > RightDeckNodeCount) - static_cast<int>(LeftDeckNodeCount < RightDeckNodeCount);
     } };
-    switch (m_SortColumn) {
+    switch (this->m_SortColumn) {
     case static_cast<int>(ColumnEnum::DeckNameColumn):
         return LeftDeckNode.m_DeckForestSnapshotNode.m_DeckName.compare(RightDeckNode.m_DeckForestSnapshotNode.m_DeckName);
     case static_cast<int>(ColumnEnum::SubtreeDueNowCountColumn):
@@ -182,8 +182,8 @@ void DeckForestModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>& Sibli
     std::stable_sort(SiblingDeckNodeIndexes.begin(),
                      SiblingDeckNodeIndexes.end(),
                      [this](const std::size_t LeftDeckNodeIndex, const std::size_t RightDeckNodeIndex) noexcept -> bool {
-                         const int DeckNodeComparison{ CompareDeckNodes(LeftDeckNodeIndex, RightDeckNodeIndex) };
-                         if (m_SortOrder == Qt::AscendingOrder) {
+                         const int DeckNodeComparison{ this->CompareDeckNodes(LeftDeckNodeIndex, RightDeckNodeIndex) };
+                         if (this->m_SortOrder == Qt::AscendingOrder) {
                              return DeckNodeComparison < 0;
                          }
                          return DeckNodeComparison > 0;
@@ -192,24 +192,24 @@ void DeckForestModel::SortSiblingDeckNodeIndexes(std::vector<std::size_t>& Sibli
 
 void DeckForestModel::UpdateSiblingRowIndexes(const std::optional<std::size_t>& ParentDeckNodeIndexOptional) noexcept {
     std::vector<std::size_t>& SiblingDeckNodeIndexes{ ParentDeckNodeIndexOptional.has_value() ?
-                                                          m_DeckNodesVector.at(ParentDeckNodeIndexOptional.value()).m_ChildDeckNodeIndexesVector :
-                                                          m_RootDeckNodeIndexesVector };
+                                                          this->m_DeckNodesVector.at(ParentDeckNodeIndexOptional.value()).m_ChildDeckNodeIndexesVector :
+                                                          this->m_RootDeckNodeIndexesVector };
     for (std::size_t SiblingDeckRow{ 0 }; SiblingDeckRow < SiblingDeckNodeIndexes.size(); ++SiblingDeckRow) {
-        DeckNode& ChildDeckNode{ m_DeckNodesVector.at(SiblingDeckNodeIndexes.at(SiblingDeckRow)) };
+        DeckNode& ChildDeckNode{ this->m_DeckNodesVector.at(SiblingDeckNodeIndexes.at(SiblingDeckRow)) };
         ChildDeckNode.m_RowInParentIndex = SiblingDeckRow;
-        UpdateSiblingRowIndexes(SiblingDeckNodeIndexes.at(SiblingDeckRow));
+        this->UpdateSiblingRowIndexes(SiblingDeckNodeIndexes.at(SiblingDeckRow));
     }
 }
 
 void DeckForestModel::ApplyCurrentSort() {
-    if (m_SortColumn < static_cast<int>(ColumnEnum::DeckNameColumn) or m_SortColumn > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
+    if (this->m_SortColumn < static_cast<int>(ColumnEnum::DeckNameColumn) or this->m_SortColumn > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
         return;
     }
-    SortSiblingDeckNodeIndexes(m_RootDeckNodeIndexesVector);
-    for (std::size_t DeckNodeIndex{ 0 }; DeckNodeIndex < m_DeckNodesVector.size(); ++DeckNodeIndex) {
-        SortSiblingDeckNodeIndexes(m_DeckNodesVector.at(DeckNodeIndex).m_ChildDeckNodeIndexesVector);
+    this->SortSiblingDeckNodeIndexes(this->m_RootDeckNodeIndexesVector);
+    for (std::size_t DeckNodeIndex{ 0 }; DeckNodeIndex < this->m_DeckNodesVector.size(); ++DeckNodeIndex) {
+        this->SortSiblingDeckNodeIndexes(this->m_DeckNodesVector.at(DeckNodeIndex).m_ChildDeckNodeIndexesVector);
     }
-    UpdateSiblingRowIndexes();
+    this->UpdateSiblingRowIndexes();
 }
 
 void DeckForestModel::ReplaceAll(std::vector<Application::Domain::Deck::Index::DeckForestSnapshotNode>&& DeckForestSnapshotNodeVector) noexcept {
@@ -237,11 +237,11 @@ void DeckForestModel::ReplaceAll(std::vector<Application::Domain::Deck::Index::D
             CurrentDeckNode.m_RowInParentIndex = DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndexOptional.value()).m_ChildDeckNodeIndexesVector.size();
             DeckNodesVector.at(CurrentDeckNode.m_ParentDeckNodeIndexOptional.value()).m_ChildDeckNodeIndexesVector.push_back(DeckNodeIndex);
         }
-        beginResetModel();
-        m_DeckNodesVector = std::move(DeckNodesVector);
-        m_RootDeckNodeIndexesVector = std::move(RootDeckNodeIndexesVector);
-        ApplyCurrentSort();
-        endResetModel();
+        this->beginResetModel();
+        this->m_DeckNodesVector = std::move(DeckNodesVector);
+        this->m_RootDeckNodeIndexesVector = std::move(RootDeckNodeIndexesVector);
+        this->ApplyCurrentSort();
+        this->endResetModel();
     });
 }
 
