@@ -13,18 +13,25 @@ jobs:
   doxygen:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      DOXYGEN_VERSION: "1.17.0"
+      DOXYGEN_SHA256: "75419ef4f446fc1c24ef12514b574e66e898ee6f527c6ae2ad84f91a905823c2"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Doxygen
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y doxygen graphviz
-          doxygen --version
-          dot -V
+          DOXYGEN_ARCHIVE="/tmp/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          curl --fail --location --silent --show-error \
+            --output "$DOXYGEN_ARCHIVE" \
+            "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          printf '%s  %s\n' "$DOXYGEN_SHA256" "$DOXYGEN_ARCHIVE" | sha256sum --check
+          tar --extract --gzip --file "$DOXYGEN_ARCHIVE" --directory /tmp
+          echo "/tmp/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
+          "/tmp/doxygen-${DOXYGEN_VERSION}/bin/doxygen" --version
 
       - name: Build Doxygen
         shell: bash

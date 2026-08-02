@@ -14,13 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      PYTHON_VERSION: "3.14.6"
+      AQTINSTALL_VERSION: "3.3.0"
       QT_VERSION: "6.11.1"
       QT_ARCH: "linux_gcc_64"
       QT_DIR: ${{ github.workspace }}/Qt
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -68,13 +70,13 @@ jobs:
 
       - name: Set up Python
         if: steps.files.outputs.has_files == 'true'
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.x"
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Cache Qt
         if: steps.files.outputs.has_files == 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.QT_DIR }}
           key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
@@ -84,8 +86,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install "aqtinstall==3.3.*"
+          python -m pip install --disable-pip-version-check "aqtinstall==${AQTINSTALL_VERSION}"
           python -m aqt version
 
       - name: Install Qt ${{ env.QT_VERSION }}
