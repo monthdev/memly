@@ -5,7 +5,7 @@ Diagnostics:
 
 ---
 If:
-  PathExclude: (src|test)/.*
+  PathExclude: (program|test)/.*
 
 CompileFlags:
   Remove: [-W*, -pedantic, /W*, /clang:-W*, /clang:-pedantic]
@@ -16,7 +16,7 @@ Diagnostics:
 
 ---
 If:
-  PathExclude: (src|test)/.*
+  PathExclude: (program|test)/.*
 
 Diagnostics:
   Suppress: ['*']

@@ -344,7 +344,7 @@ domain property rather than a wrapper's underlying representation.
 
 ## Namespaces and File-Private Code
 
-Namespaces for code under `src/` mirror its folder nesting; namespaces for the
+Namespaces for code under `program/` mirror its folder nesting; namespaces for the
 four architectural layers therefore begin with `Layer::`. An unnamed helper
 namespace is nested inside that matching namespace. The custom matcher enforces
 the minimum structural requirement that it have a Memly namespace ancestor

@@ -154,201 +154,201 @@ qt_standard_project_setup(REQUIRES ${MEMLY_QT_MIN_VERSION})
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
   add_custom_target(
-    memly-docs
+    memly-documentation
     COMMAND "${DOXYGEN_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/Doxyfile"
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     COMMENT "Generate Doxygen documentation"
     VERBATIM
   )
 else()
-  message(STATUS "Doxygen not found; memly-docs target will not be available")
+  message(STATUS "Doxygen not found; memly-documentation target will not be available")
 endif()
 
-set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/src/main.cpp")
+set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/program/main.cpp")
 
-file(GLOB COMPOSITION_ROOT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/CompositionRoot/*.cpp")
-file(GLOB COMPOSITION_ROOT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/CompositionRoot/*.[Hh]*")
+file(GLOB COMPOSITION_ROOT_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/CompositionRoot/*.cpp")
+file(GLOB COMPOSITION_ROOT_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/CompositionRoot/*.[Hh]*")
 
 file(GLOB LAYER_APPLICATION_DOMAIN_DECK_CONSTRAINT_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Deck/Constraint/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Deck/Constraint/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_DECK_CONSTRAINT_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Deck/Constraint/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Deck/Constraint/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_DECK_INDEX_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Deck/Index/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Deck/Index/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_DECK_INDEX_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Deck/Index/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Deck/Index/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_LANGUAGE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Language/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Language/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_LANGUAGE_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Language/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Language/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_REVIEW_SESSION_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/ReviewSession/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/ReviewSession/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_REVIEW_SESSION_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/ReviewSession/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/ReviewSession/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_SCHEDULER_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Scheduler/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Scheduler/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_SCHEDULER_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Scheduler/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Scheduler/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_TEXT_DATA_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Text/Data/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Text/Data/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_DOMAIN_TEXT_DATA_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Domain/Text/Data/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/Text/Data/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_INDEX_CACHE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/IndexCache/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/IndexCache/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_INDEX_CACHE_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/IndexCache/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/IndexCache/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_INDEX_CACHE_DECK_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/IndexCache/Deck/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/IndexCache/Deck/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_INDEX_CACHE_DECK_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/IndexCache/Deck/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/IndexCache/Deck/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_INVALIDATION_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Invalidation/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Invalidation/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_INVALIDATION_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Invalidation/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Invalidation/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_SERVICE_DECK_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Service/Deck/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Service/Deck/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_SERVICE_DECK_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Service/Deck/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Service/Deck/*.[Hh]*"
 )
 file(GLOB LAYER_APPLICATION_SERVICE_REVIEW_SESSION_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Service/ReviewSession/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Service/ReviewSession/*.cpp"
 )
 file(GLOB LAYER_APPLICATION_SERVICE_REVIEW_SESSION_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Application/Service/ReviewSession/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Service/ReviewSession/*.[Hh]*"
 )
 
 file(GLOB LAYER_INFRASTRUCTURE_DATABASE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Database/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_DATABASE_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Database/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/*.[Hh]*"
 )
-file(GLOB LAYER_INFRASTRUCTURE_SQL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/*.[Hh]*")
+file(GLOB LAYER_INFRASTRUCTURE_SQL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/*.[Hh]*")
 file(GLOB LAYER_INFRASTRUCTURE_SQL_DECK_MUTATION_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Deck/Mutation/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Deck/Mutation/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_DECK_MUTATION_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Deck/Mutation/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Deck/Mutation/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_DECK_QUERY_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Deck/Query/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Deck/Query/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_DECK_QUERY_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Deck/Query/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Deck/Query/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_LIBRARY_QUERY_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Library/Query/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Library/Query/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_LIBRARY_QUERY_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Library/Query/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Library/Query/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_MIGRATION_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Migration/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Migration/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_MIGRATION_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Migration/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Migration/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_REVIEW_SESSION_MUTATION_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/ReviewSession/Mutation/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/ReviewSession/Mutation/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_REVIEW_SESSION_MUTATION_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/ReviewSession/Mutation/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/ReviewSession/Mutation/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_REVIEW_SESSION_QUERY_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/ReviewSession/Query/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/ReviewSession/Query/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_REVIEW_SESSION_QUERY_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/ReviewSession/Query/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/ReviewSession/Query/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_SEED_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Seed/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Seed/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_SQL_SEED_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Seed/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Seed/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_STORE_DECK_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Store/Deck/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Store/Deck/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_STORE_DECK_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Store/Deck/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Store/Deck/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_STORE_LIBRARY_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Store/Library/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Store/Library/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_STORE_LIBRARY_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Store/Library/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Store/Library/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_STORE_REVIEW_SESSION_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Store/ReviewSession/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Store/ReviewSession/*.cpp"
 )
 file(GLOB LAYER_INFRASTRUCTURE_STORE_REVIEW_SESSION_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Store/ReviewSession/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Store/ReviewSession/*.[Hh]*"
 )
 
 file(GLOB SQL_DECK_MUTATION_STATEMENT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Deck/Mutation/Statement/*.sql"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Deck/Mutation/Statement/*.sql"
 )
 file(GLOB SQL_DECK_QUERY_STATEMENT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Deck/Query/Statement/*.sql"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Deck/Query/Statement/*.sql"
 )
 file(GLOB SQL_LIBRARY_QUERY_STATEMENT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Library/Query/Statement/*.sql"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Library/Query/Statement/*.sql"
 )
 file(GLOB SQL_MIGRATION_STATEMENT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Migration/Statement/*.sql"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Migration/Statement/*.sql"
 )
 file(GLOB SQL_REVIEW_SESSION_MUTATION_STATEMENT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/ReviewSession/Mutation/Statement/*.sql"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/ReviewSession/Mutation/Statement/*.sql"
 )
 file(GLOB SQL_REVIEW_SESSION_QUERY_STATEMENT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/ReviewSession/Query/Statement/*.sql"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/ReviewSession/Query/Statement/*.sql"
 )
 file(GLOB SQL_SEED_STATEMENT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql/Seed/Statement/*.sql"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql/Seed/Statement/*.sql"
 )
 
 file(GLOB LAYER_PRESENTATION_CONTROLLER_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Presentation/Controller/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Controller/*.cpp"
 )
 file(GLOB LAYER_PRESENTATION_CONTROLLER_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/Presentation/Controller/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Controller/*.[Hh]*"
 )
-file(GLOB LAYER_PRESENTATION_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Layer/Presentation/Model/*.cpp")
-file(GLOB LAYER_PRESENTATION_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Layer/Presentation/Model/*.[Hh]*")
+file(GLOB LAYER_PRESENTATION_MODEL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Model/*.cpp")
+file(GLOB LAYER_PRESENTATION_MODEL_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Model/*.[Hh]*")
 
 file(GLOB LAYER_VIEW_BRIDGE_CONTROLLER_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/View/Bridge/Controller/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/Controller/*.cpp"
 )
 file(GLOB LAYER_VIEW_BRIDGE_CONTROLLER_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/View/Bridge/Controller/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/Controller/*.[Hh]*"
 )
 file(GLOB LAYER_VIEW_BRIDGE_PROXY_MODEL_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/View/Bridge/ProxyModel/*.cpp"
+     "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/ProxyModel/*.cpp"
 )
 file(GLOB LAYER_VIEW_BRIDGE_PROXY_MODEL_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Layer/View/Bridge/ProxyModel/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/ProxyModel/*.[Hh]*"
 )
 
-set(QML_DIR "${CMAKE_SOURCE_DIR}/src/Layer/View/Qml")
+set(QML_DIR "${CMAKE_SOURCE_DIR}/program/Layer/View/Qml")
 file(GLOB QML_ROOT CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
 file(GLOB QML_COMPONENT CONFIGURE_DEPENDS "${QML_DIR}/Component/*.qml")
 file(GLOB QML_SCREEN_CARD CONFIGURE_DEPENDS "${QML_DIR}/Screen/Card/*.qml")
@@ -363,12 +363,14 @@ foreach(qml_file IN LISTS QT_QML)
   set_source_files_properties("${qml_file}" PROPERTIES QT_RESOURCE_ALIAS "${rel_qml}")
 endforeach()
 
-file(GLOB SUPPORT_RUNTIME_EXCEPTION_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/Runtime/Exception/*.cpp")
-file(GLOB SUPPORT_RUNTIME_EXCEPTION_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/Runtime/Exception/*.[Hh]*")
-file(GLOB SUPPORT_RUNTIME_QT_APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/Runtime/QtApp/*.cpp")
-file(GLOB SUPPORT_RUNTIME_QT_APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/Support/Runtime/QtApp/*.[Hh]*")
+file(GLOB SUPPORT_RUNTIME_EXCEPTION_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Support/Runtime/Exception/*.cpp")
+file(GLOB SUPPORT_RUNTIME_EXCEPTION_HDR CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Support/Runtime/Exception/*.[Hh]*"
+)
+file(GLOB SUPPORT_RUNTIME_QT_APP_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Support/Runtime/QtApp/*.cpp")
+file(GLOB SUPPORT_RUNTIME_QT_APP_HDR CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Support/Runtime/QtApp/*.[Hh]*")
 file(GLOB SUPPORT_SPECIAL_MEMBER_POLICY_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/src/Support/SpecialMemberPolicy/*.[Hh]*"
+     "${CMAKE_SOURCE_DIR}/program/Support/SpecialMemberPolicy/*.[Hh]*"
 )
 
 set(DUCKDB_VERSION "1.4.4")
@@ -484,7 +486,7 @@ qt_add_resources(
   PREFIX
   "/Sql"
   BASE
-  "${CMAKE_SOURCE_DIR}/src/Layer/Infrastructure/Sql"
+  "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Sql"
   FILES
   ${SQL_DECK_MUTATION_STATEMENT_SQL}
   ${SQL_DECK_QUERY_STATEMENT_SQL}
@@ -553,7 +555,7 @@ set(MEMLY_CORE_SOURCE_FILES
 
 add_library(memly_core STATIC ${MEMLY_CORE_SOURCE_FILES} $<TARGET_OBJECTS:memly_sql_resources>)
 
-target_include_directories(memly_core BEFORE PUBLIC "${CMAKE_SOURCE_DIR}/src" "${_duckdb_wrapper_dir}")
+target_include_directories(memly_core BEFORE PUBLIC "${CMAKE_SOURCE_DIR}/program" "${_duckdb_wrapper_dir}")
 
 target_include_directories(memly_core SYSTEM PUBLIC "${_duckdb_inc}")
 
@@ -596,8 +598,8 @@ qt_add_qml_module(
 )
 
 target_include_directories(
-  memly_qml BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Layer/View/Bridge/Controller"
-                           "${CMAKE_SOURCE_DIR}/src/Layer/View/Bridge/ProxyModel"
+  memly_qml BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/program" "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/Controller"
+                           "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/ProxyModel"
 )
 
 target_link_libraries(
@@ -677,7 +679,7 @@ add_custom_command(
   COMMAND
     "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -clang-tidy-binary
     "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
-    "^${CMAKE_SOURCE_DIR}/(src|test)/" -quiet "^${CMAKE_SOURCE_DIR}/(src|test)/.*\\.cpp$"
+    "^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet "^${CMAKE_SOURCE_DIR}/(program|test)/.*\\.cpp$"
   COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_CLANG_TIDY_STAMP}"
   DEPENDS "${CMAKE_SOURCE_DIR}/.clang-tidy" "${CMAKE_BINARY_DIR}/compile_commands.json"
           "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
