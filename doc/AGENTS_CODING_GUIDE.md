@@ -185,7 +185,10 @@ integer literals must be introduced through a named constant
 introduced through a named constant; zero-valued floating-point literals are
 covered by `custom-memly-no-zero-floating-point-magic-number` because the
 built-in magic-number check always exempts them. Integer literals in assertions
-obey the same policy (`custom-memly-no-magic-integer-in-assertion`).
+obey the same policy (`custom-memly-no-magic-integer-in-assertion`). Integer
+literals in a const-qualified non-parameter variable or field's type spelling
+obey the same policy; this includes direct and nested class template arguments
+(`custom-memly-no-magic-integer-in-constant-declaration-type`).
 
 Do not assert conditions that can fail during correct execution because of
 external or runtime state. Throw when such a failure cannot be recovered at the
@@ -207,11 +210,17 @@ assumed to satisfy schema and application invariants established by Memly write
 paths. Violations of those invariants are programming errors; database-engine
 failures remain runtime errors at the database boundary.
 
-`DatabaseRuntime` owns operations that actually require its live DuckDB
-connection, including preparing statements and executing direct SQL. A
+`DatabaseRuntime` owns the live DuckDB database and connection and the
+store-facing prepared-statement factory. It retains the single startup
+transaction that orders migration before seeding. The ephemeral
+`DatabaseMigrator` and `DatabaseSeeder` receive the live connection and own
+their respective startup-only direct SQL through raw DuckDB connection,
+prepared-statement, and result APIs. The Memly prepared-statement execution and
+decoding chain is the capability boundary for database consumers outside the
+Database component; internal migration and seeding must not route through it. A
 `PreparedStatement` is self-contained after preparation and begins execution
 through its own `Execute()` method. `QueryResultDecoder` owns the result from
-either execution path and fetches its chunks directly. Do not route an operation
+that execution path and fetches its chunks directly. Do not route an operation
 back through `DatabaseRuntime` when the corresponding DuckDB handle already owns
 that operation.
 
@@ -401,6 +410,10 @@ Deduced variable types through `auto` are disallowed unless the type is
 unnameable or the language or API requires deduction. Keep each exception narrow
 and explicit; DuckDB query-result iterators are the current example
 (`custom-memly-no-deduced-variable-type`).
+
+Class template argument deduction is disallowed for named variable declarations.
+Explicitly spell every class template argument
+(`custom-memly-no-class-template-argument-deduction`).
 
 Using-declarations and using-directives are disallowed
 (`custom-memly-no-using-declaration`). Type aliases are allowed only where

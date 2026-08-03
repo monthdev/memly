@@ -52,12 +52,12 @@ public:
 private:
     [[nodiscard]] auto FetchNextDataChunk() -> duckdb::unique_ptr<duckdb::DataChunk>;
 
-    template <DecodableQueryResultRow QueryResultRowType, std::size_t... ColumnIndex>
+    template <DecodableQueryResultRow DecodableQueryResultRowType, std::size_t... ColumnIndex>
     [[nodiscard]] static auto DecodeQueryResultRow(duckdb::DataChunk& DataChunk, const duckdb::idx_t RowIndex, const std::index_sequence<ColumnIndex...>)
-        -> QueryResultRowType {
-        return QueryResultRowType{ DecodeColumn(
+        -> DecodableQueryResultRowType {
+        return DecodableQueryResultRowType{ DecodeColumn(
             DataChunk.GetValue(ColumnIndex, RowIndex),
-            std::type_identity<std::tuple_element_t<ColumnIndex, typename QueryResultRowType::QueryResultColumnTypeTuple>>{})... };
+            std::type_identity<std::tuple_element_t<ColumnIndex, typename DecodableQueryResultRowType::QueryResultColumnTypeTuple>>{})... };
     }
 
     template <typename ColumnType>

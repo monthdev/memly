@@ -11,8 +11,6 @@
 
 namespace Layer::Infrastructure::Database {
 
-class QueryResultDecoder;
-
 class DatabaseRuntime final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     duckdb::DuckDB m_Database;
@@ -33,11 +31,7 @@ public:
     [[nodiscard]] auto GetTransactionRunner() noexcept -> TransactionRunner&;
 
 private:
-    [[nodiscard]] auto ExecuteSql(const std::string&, const std::source_location& = std::source_location::current()) -> QueryResultDecoder;
-
     void BootstrapDatabase();
-    void ApplyMigrations();
-    void SeedTableDefaults();
 };
 
 }

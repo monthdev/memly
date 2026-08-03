@@ -45,6 +45,7 @@ Checks: |
   custom-memly-explicit-contextual-braced-expression,
   custom-memly-explicit-non-instantiable-default-constructor,
   custom-memly-explicit-return-type-construction,
+  custom-memly-no-class-template-argument-deduction,
   custom-memly-no-consumer-destructor,
   custom-memly-no-consumer-special-member,
   custom-memly-no-database-chain-proxy-field,
@@ -54,6 +55,7 @@ Checks: |
   custom-memly-no-deduced-variable-type,
   custom-memly-no-header-function-definition,
   custom-memly-no-magic-integer-in-assertion,
+  custom-memly-no-magic-integer-in-constant-declaration-type,
   custom-memly-no-negative-magic-integer,
   custom-memly-no-zero-floating-point-magic-number,
   custom-memly-no-named-lambda,
@@ -228,6 +230,14 @@ CustomChecks:
       - BindName: return
         Message: value returns must explicitly brace-construct their declared return type
         Level: Warning
+  - Name: memly-no-class-template-argument-deduction
+    Query: >-
+      match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isInitCapture()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]"), hasType(deducedTemplateSpecializationType()) ).bind("variable")
+    Diagnostic:
+      - BindName: variable
+        Message: named variable declarations must explicitly specify every class template argument
+        Level: Warning
   - Name: memly-no-consumer-destructor
     Query: >-
       match cxxDestructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl(
@@ -288,6 +298,16 @@ CustomChecks:
     Diagnostic:
       - BindName: integer_literal
         Message: integer literals in assertions must be zero, positive one, or a named constant
+        Level: Warning
+  - Name: memly-no-magic-integer-in-constant-declaration-type
+    Query: >-
+      match integerLiteral( allOf( integerLiteral( unless(anyOf(equals(0), equals(1))), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]src[/\\\\]") ).bind("integer_literal"), hasAncestor( anyOf( varDecl( unless(parmVarDecl()), unless(isImplicit()),
+      hasType(isConstQualified()), unless( hasInitializer( hasDescendant( expr(equalsBoundNode("integer_literal")) ) ) ) ), fieldDecl( unless(isImplicit()),
+      hasType(isConstQualified()), unless( hasInClassInitializer( hasDescendant( expr(equalsBoundNode("integer_literal")) ) ) ) ) ) ) ) )
+    Diagnostic:
+      - BindName: integer_literal
+        Message: integer literals in const-qualified declaration type spellings must be zero, positive one, or a named constant
         Level: Warning
   - Name: memly-no-negative-magic-integer
     Query: >-

@@ -31,7 +31,7 @@ namespace {
 }
 
 void a_WriteToStdErr(const std::string_view ErrorMessage) noexcept {
-    const std::span ErrorMessageSpan{ ErrorMessage };
+    const std::span<const char> ErrorMessageSpan{ ErrorMessage };
     std::size_t TotalWrittenSize{ 0 };
     std::ptrdiff_t WrittenSize{ 0 };
     while (TotalWrittenSize < ErrorMessageSpan.size() and
