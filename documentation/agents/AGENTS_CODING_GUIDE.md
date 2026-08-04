@@ -210,19 +210,26 @@ assumed to satisfy schema and application invariants established by Memly write
 paths. Violations of those invariants are programming errors; database-engine
 failures remain runtime errors at the database boundary.
 
-`Layer/Infrastructure/Persistence` groups the database engine boundary, SQL
-resources, and concrete repositories. A repository is the domain-shaped
-persistence boundary for one domain and groups that domain's reads and
-mutations. Do not split read and mutation operations into separate repository
-types merely because their result shapes differ. If persistence dependency
-inversion is introduced, preserve this domain grouping in the Application-owned
-port and make the Infrastructure repository its implementation.
+`Layer/Infrastructure/DuckDb` contains the concrete DuckDB database boundary and
+repositories. A repository is the domain-shaped persistence boundary for one
+domain and groups that domain's reads and mutations. Do not split read and
+mutation operations into separate repository types merely because their result
+shapes differ. If persistence dependency inversion is introduced, preserve this
+domain grouping in the Application-owned port and make the Infrastructure
+repository its implementation.
+
+DuckDB SQL resources are implementation details of their direct consumer.
+Repository SQL lives under the corresponding `DuckDb/Repository/<Domain>/Sql`
+folder. Migration and seed SQL live under `DuckDb/Database/Sql/Migration` and
+`DuckDb/Database/Sql/Seed`, respectively. The migrator and seeder themselves
+remain direct members of the Database component. Do not collect SQL from
+independent consumers into a shared horizontal folder.
 
 Single-operation SQL resources are classified by their primary SQL statement
 under `Select/`, `Update/`, `Insert/`, or `Delete/`. Each resource filename and
 accessor begins with that SQL statement name, followed by its domain purpose;
 prepared-statement members repeat the same operation name. Repository methods
-retain domain-operation language. Each SQL domain exposes one root-level
+retain domain-operation language. Each SQL owner exposes one root-level
 `<Domain>Sql.hpp/.cpp` accessor pair, and consumers depend on that accessor
 rather than on operation folders.
 

@@ -10,7 +10,7 @@
 #include "Layer/Application/Invalidation/LibraryInvalidationTarget.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Repository::Library {
+namespace Layer::Infrastructure::DuckDb::Repository::Library {
 class LibraryRepository;
 }
 
@@ -22,12 +22,12 @@ class LibraryInvalidationCoordinator final : public QObject, private Support::Sp
     Q_OBJECT
 private:
     LibraryInvalidationChannel& m_LibraryInvalidationChannel;
-    Infrastructure::Persistence::Repository::Library::LibraryRepository& m_LibraryRepository;
+    Infrastructure::DuckDb::Repository::Library::LibraryRepository& m_LibraryRepository;
     QTimer m_LibraryInvalidationQTimer;
 
 public:
     explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel& LibraryInvalidationChannel,
-                                            Infrastructure::Persistence::Repository::Library::LibraryRepository& LibraryRepository,
+                                            Infrastructure::DuckDb::Repository::Library::LibraryRepository& LibraryRepository,
                                             QObject* Parent = nullptr)
         : QObject{ Parent }
         , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}

@@ -8,8 +8,8 @@
 #include "Layer/Application/Domain/Deck/Constraint/DeckConstraint.hpp"
 #include "Layer/Application/Domain/Deck/Index/DeckForestSnapshotNode.hpp"
 #include "Layer/Application/IndexCache/Deck/DeckForestSnapshotIndexCache.hpp"
-#include "Layer/Infrastructure/Persistence/Repository/Deck/DeckRepository.hpp"
-#include "Layer/Infrastructure/Persistence/Repository/Deck/DeckSnapshotRecord.hpp"
+#include "Layer/Infrastructure/DuckDb/Repository/Deck/DeckRepository.hpp"
+#include "Layer/Infrastructure/DuckDb/Repository/Deck/DeckSnapshotRecord.hpp"
 
 namespace Layer::Application::Service::Deck {
 
@@ -47,11 +47,11 @@ void DeckService::DeleteDeck(const std::string& DeckId) {
 
 void DeckService::RefreshDeckForestSnapshotIndexCache(const IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease& DeckForestSnapshotIndexCacheLease,
                                                       const std::int64_t AsOfMillisecondsSinceEpoch) {
-    std::vector<Infrastructure::Persistence::Repository::Deck::DeckSnapshotRecord> DeckSnapshotRecordVector{ this->m_DeckRepository.ReadDeckSnapshotRecords(
+    std::vector<Infrastructure::DuckDb::Repository::Deck::DeckSnapshotRecord> DeckSnapshotRecordVector{ this->m_DeckRepository.ReadDeckSnapshotRecords(
         AsOfMillisecondsSinceEpoch) };
     std::vector<Domain::Deck::Index::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
     DeckForestSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
-    for (Infrastructure::Persistence::Repository::Deck::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
+    for (Infrastructure::DuckDb::Repository::Deck::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
         DeckForestSnapshotNodeVector.emplace_back(std::move(DeckSnapshotRecord.m_DeckId),
                                                   std::move(DeckSnapshotRecord.m_ParentDeckIdOptional),
                                                   std::move(DeckSnapshotRecord.m_DeckName),

@@ -24,19 +24,19 @@ class DeckService;
 // class ReviewSessionService;
 // }
 
-namespace Layer::Infrastructure::Persistence::Database {
+namespace Layer::Infrastructure::DuckDb::Database {
 class DatabaseRuntime;
 }
 
-namespace Layer::Infrastructure::Persistence::Repository::Deck {
+namespace Layer::Infrastructure::DuckDb::Repository::Deck {
 class DeckRepository;
 }
 
-// namespace Layer::Infrastructure::Persistence::Repository::Library {
+// namespace Layer::Infrastructure::DuckDb::Repository::Library {
 // class LibraryRepository;
 // }
 
-// namespace Layer::Infrastructure::Persistence::Repository::ReviewSession {
+// namespace Layer::Infrastructure::DuckDb::Repository::ReviewSession {
 // class ReviewSessionRepository;
 // }
 
@@ -44,12 +44,12 @@ namespace CompositionRoot {
 
 class RuntimeContext final : private Support::SpecialMemberPolicy::NonInstantiableMixin {
 private:
-    static std::unique_ptr<Layer::Infrastructure::Persistence::Database::DatabaseRuntime> s_DatabaseRuntime;
+    static std::unique_ptr<Layer::Infrastructure::DuckDb::Database::DatabaseRuntime> s_DatabaseRuntime;
     // static std::unique_ptr<Layer::Application::Invalidation::LibraryInvalidationChannel> s_LibraryInvalidationChannel;
-    // static std::unique_ptr<Layer::Infrastructure::Persistence::Repository::Library::LibraryRepository> s_LibraryRepository;
+    // static std::unique_ptr<Layer::Infrastructure::DuckDb::Repository::Library::LibraryRepository> s_LibraryRepository;
     // static std::unique_ptr<Layer::Application::Invalidation::LibraryInvalidationCoordinator> s_LibraryInvalidationCoordinator;
-    static std::unique_ptr<Layer::Infrastructure::Persistence::Repository::Deck::DeckRepository> s_DeckRepository;
-    // static std::unique_ptr<Layer::Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository> s_ReviewSessionRepository;
+    static std::unique_ptr<Layer::Infrastructure::DuckDb::Repository::Deck::DeckRepository> s_DeckRepository;
+    // static std::unique_ptr<Layer::Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository> s_ReviewSessionRepository;
     static std::unique_ptr<Layer::Application::Service::Deck::DeckService> s_DeckService;
     // static std::unique_ptr<Layer::Application::Service::ReviewSession::ReviewSessionListService> s_ReviewSessionListService;
     // static std::unique_ptr<Layer::Application::Service::ReviewSession::ReviewSessionService> s_ReviewSessionService;

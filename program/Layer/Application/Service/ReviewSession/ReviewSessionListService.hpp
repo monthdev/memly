@@ -8,7 +8,7 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Repository::ReviewSession {
+namespace Layer::Infrastructure::DuckDb::Repository::ReviewSession {
 class ReviewSessionRepository;
 }
 
@@ -16,10 +16,10 @@ namespace Layer::Application::Service::ReviewSession {
 
 class ReviewSessionListService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository& m_ReviewSessionRepository;
+    Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
-    explicit ReviewSessionListService(Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
+    explicit ReviewSessionListService(Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_ReviewSessionRepository{ ReviewSessionRepository } {
     }

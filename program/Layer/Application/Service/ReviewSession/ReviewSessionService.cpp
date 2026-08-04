@@ -10,8 +10,8 @@
 
 #include "Layer/Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
-#include "Layer/Infrastructure/Persistence/Database/TransactionRunner.hpp"
-#include "Layer/Infrastructure/Persistence/Repository/ReviewSession/ReviewSessionRepository.hpp"
+#include "Layer/Infrastructure/DuckDb/Database/TransactionRunner.hpp"
+#include "Layer/Infrastructure/DuckDb/Repository/ReviewSession/ReviewSessionRepository.hpp"
 
 namespace Layer::Application::Service::ReviewSession {
 

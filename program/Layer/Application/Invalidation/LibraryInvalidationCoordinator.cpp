@@ -12,7 +12,7 @@
 
 #include "Layer/Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Layer/Application/Invalidation/LibraryInvalidationTarget.hpp"
-#include "Layer/Infrastructure/Persistence/Repository/Library/LibraryRepository.hpp"
+#include "Layer/Infrastructure/DuckDb/Repository/Library/LibraryRepository.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 
 namespace Layer::Application::Invalidation {

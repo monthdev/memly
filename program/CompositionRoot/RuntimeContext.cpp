@@ -14,11 +14,11 @@
 #include "Layer/Application/Service/Deck/DeckService.hpp"
 // #include "Layer/Application/Service/ReviewSession/ReviewSessionListService.hpp"
 // #include "Layer/Application/Service/ReviewSession/ReviewSessionService.hpp"
-#include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
-#include "Layer/Infrastructure/Persistence/Repository/Deck/DeckRepository.hpp"
+#include "Layer/Infrastructure/DuckDb/Database/DatabaseRuntime.hpp"
+#include "Layer/Infrastructure/DuckDb/Repository/Deck/DeckRepository.hpp"
 
-// #include "Layer/Infrastructure/Persistence/Repository/Library/LibraryRepository.hpp"
-// #include "Layer/Infrastructure/Persistence/Repository/ReviewSession/ReviewSessionRepository.hpp"
+// #include "Layer/Infrastructure/DuckDb/Repository/Library/LibraryRepository.hpp"
+// #include "Layer/Infrastructure/DuckDb/Repository/ReviewSession/ReviewSessionRepository.hpp"
 
 namespace CompositionRoot {
 
@@ -27,12 +27,12 @@ namespace CompositionRoot {
 #pragma clang diagnostic ignored "-Wglobal-constructors"
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
 #endif
-std::unique_ptr<Layer::Infrastructure::Persistence::Database::DatabaseRuntime> RuntimeContext::s_DatabaseRuntime{};
+std::unique_ptr<Layer::Infrastructure::DuckDb::Database::DatabaseRuntime> RuntimeContext::s_DatabaseRuntime{};
 // std::unique_ptr<Layer::Application::Invalidation::LibraryInvalidationChannel> RuntimeContext::s_LibraryInvalidationChannel{};
-// std::unique_ptr<Layer::Infrastructure::Persistence::Repository::Library::LibraryRepository> RuntimeContext::s_LibraryRepository{};
+// std::unique_ptr<Layer::Infrastructure::DuckDb::Repository::Library::LibraryRepository> RuntimeContext::s_LibraryRepository{};
 // std::unique_ptr<Layer::Application::Invalidation::LibraryInvalidationCoordinator> RuntimeContext::s_LibraryInvalidationCoordinator{};
-std::unique_ptr<Layer::Infrastructure::Persistence::Repository::Deck::DeckRepository> RuntimeContext::s_DeckRepository{};
-// std::unique_ptr<Layer::Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository> RuntimeContext::s_ReviewSessionRepository{};
+std::unique_ptr<Layer::Infrastructure::DuckDb::Repository::Deck::DeckRepository> RuntimeContext::s_DeckRepository{};
+// std::unique_ptr<Layer::Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository> RuntimeContext::s_ReviewSessionRepository{};
 std::unique_ptr<Layer::Application::Service::Deck::DeckService> RuntimeContext::s_DeckService{};
 // std::unique_ptr<Layer::Application::Service::ReviewSession::ReviewSessionListService> RuntimeContext::s_ReviewSessionListService{};
 // std::unique_ptr<Layer::Application::Service::ReviewSession::ReviewSessionService> RuntimeContext::s_ReviewSessionService{};
@@ -52,13 +52,14 @@ void RuntimeContext::Initialize(const std::string& DatabaseFilePath) {
     // assert(s_ReviewSessionListService == nullptr);
     // assert(s_ReviewSessionService == nullptr);
 
-    s_DatabaseRuntime = std::make_unique<Layer::Infrastructure::Persistence::Database::DatabaseRuntime>(DatabaseFilePath);
+    s_DatabaseRuntime = std::make_unique<Layer::Infrastructure::DuckDb::Database::DatabaseRuntime>(DatabaseFilePath);
     // s_LibraryInvalidationChannel = std::make_unique<Layer::Application::Invalidation::LibraryInvalidationChannel>();
-    // s_LibraryRepository = std::make_unique<Layer::Infrastructure::Persistence::Repository::Library::LibraryRepository>(*s_DatabaseRuntime);
+    // s_LibraryRepository = std::make_unique<Layer::Infrastructure::DuckDb::Repository::Library::LibraryRepository>(*s_DatabaseRuntime);
     // s_LibraryInvalidationCoordinator =
     //     std::make_unique<Layer::Application::Invalidation::LibraryInvalidationCoordinator>(*s_LibraryInvalidationChannel, *s_LibraryRepository);
-    s_DeckRepository = std::make_unique<Layer::Infrastructure::Persistence::Repository::Deck::DeckRepository>(*s_DatabaseRuntime);
-    // s_ReviewSessionRepository = std::make_unique<Layer::Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository>(*s_DatabaseRuntime);
+    s_DeckRepository = std::make_unique<Layer::Infrastructure::DuckDb::Repository::Deck::DeckRepository>(*s_DatabaseRuntime);
+    // s_ReviewSessionRepository =
+    // std::make_unique<Layer::Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository>(*s_DatabaseRuntime);
     s_DeckService = std::make_unique<Layer::Application::Service::Deck::DeckService>(*s_DeckRepository);
     // s_ReviewSessionListService = std::make_unique<Layer::Application::Service::ReviewSession::ReviewSessionListService>(*s_ReviewSessionRepository);
     // s_ReviewSessionService =

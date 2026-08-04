@@ -353,11 +353,11 @@ CustomChecks:
   - Name: memly-no-database-chain-proxy-field
     Query: >-
       match fieldDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType(
-      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::Persistence::Database::PreparedStatementExecution",
-      "::Layer::Infrastructure::Persistence::Database::QueryResultDecoder", "::Layer::Infrastructure::Persistence::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType(
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution",
+      "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder", "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType(
       pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName(
-      "::Layer::Infrastructure::Persistence::Database::PreparedStatementExecution", "::Layer::Infrastructure::Persistence::Database::QueryResultDecoder",
-      "::Layer::Infrastructure::Persistence::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("field")
+      "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution", "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder",
+      "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("field")
     Diagnostic:
       - BindName: field
         Message: database chain proxies must remain within one chained full expression and must not be stored or named
@@ -366,10 +366,10 @@ CustomChecks:
     Query: >-
       match varDecl( unless(isImplicit()), unless(hasAncestor(functionDecl(isImplicit()))), unless(isExpansionInSystemHeader()),
       isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(
-      hasAnyName( "::Layer::Infrastructure::Persistence::Database::PreparedStatementExecution", "::Layer::Infrastructure::Persistence::Database::QueryResultDecoder",
-      "::Layer::Infrastructure::Persistence::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType(
-      hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::Persistence::Database::PreparedStatementExecution",
-      "::Layer::Infrastructure::Persistence::Database::QueryResultDecoder", "::Layer::Infrastructure::Persistence::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("variable")
+      hasAnyName( "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution", "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder",
+      "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType(
+      hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution",
+      "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder", "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: database chain proxies must remain within one chained full expression and must not be stored or named

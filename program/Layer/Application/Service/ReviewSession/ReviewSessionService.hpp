@@ -11,11 +11,11 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Database {
+namespace Layer::Infrastructure::DuckDb::Database {
 class TransactionRunner;
 }
 
-namespace Layer::Infrastructure::Persistence::Repository::ReviewSession {
+namespace Layer::Infrastructure::DuckDb::Repository::ReviewSession {
 class ReviewSessionRepository;
 }
 
@@ -23,12 +23,12 @@ namespace Layer::Application::Service::ReviewSession {
 
 class ReviewSessionService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Persistence::Database::TransactionRunner& m_TransactionRunner;
-    Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository& m_ReviewSessionRepository;
+    Infrastructure::DuckDb::Database::TransactionRunner& m_TransactionRunner;
+    Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
-    explicit ReviewSessionService(Infrastructure::Persistence::Database::TransactionRunner& TransactionRunner,
-                                  Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
+    explicit ReviewSessionService(Infrastructure::DuckDb::Database::TransactionRunner& TransactionRunner,
+                                  Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_TransactionRunner{ TransactionRunner }
         , m_ReviewSessionRepository{ ReviewSessionRepository } {
