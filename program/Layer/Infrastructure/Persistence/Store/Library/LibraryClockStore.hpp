@@ -8,7 +8,7 @@
 
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/Persistence/Database/PreparedStatement.hpp"
-#include "Layer/Infrastructure/Persistence/Sql/Library/Query/LibraryQuerySql.hpp"
+#include "Layer/Infrastructure/Persistence/Sql/Library/LibrarySql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Persistence::Store::Library {
@@ -23,7 +23,7 @@ public:
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
         , m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::Library::Query::ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql())
+            DatabaseRuntime.PrepareStatement(Sql::Library::ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql())
         } {
     }
 

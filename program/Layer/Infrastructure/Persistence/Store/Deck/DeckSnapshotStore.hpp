@@ -5,7 +5,7 @@
 
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/Persistence/Database/PreparedStatement.hpp"
-#include "Layer/Infrastructure/Persistence/Sql/Deck/Query/DeckQuerySql.hpp"
+#include "Layer/Infrastructure/Persistence/Sql/Deck/DeckSql.hpp"
 #include "Layer/Infrastructure/Persistence/Store/Deck/DeckSnapshotRecord.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
@@ -18,7 +18,7 @@ private:
 public:
     explicit DeckSnapshotStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_ReadDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::Query::ReadDeckSnapshotRecordsSql()) } {
+        , m_ReadDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::ReadDeckSnapshotRecordsSql()) } {
     }
 
     [[nodiscard]] auto ReadDeckSnapshotRecords(std::int64_t) -> std::vector<DeckSnapshotRecord>;

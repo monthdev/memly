@@ -12,8 +12,7 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/Persistence/Database/PreparedStatement.hpp"
-#include "Layer/Infrastructure/Persistence/Sql/ReviewSession/Mutation/ReviewSessionMutationSql.hpp"
-#include "Layer/Infrastructure/Persistence/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
+#include "Layer/Infrastructure/Persistence/Sql/ReviewSession/ReviewSessionSql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
@@ -38,32 +37,32 @@ public:
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
         , m_CreateCustomReviewSessionPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Mutation::CreateCustomReviewSessionSql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::CreateCustomReviewSessionSql())
         }
         , m_CreateDefaultReviewSessionPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Mutation::CreateDefaultReviewSessionSql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::CreateDefaultReviewSessionSql())
         }
         , m_CreateCustomReviewSessionDeckSelectionPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Mutation::CreateCustomReviewSessionDeckSelectionSql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::CreateCustomReviewSessionDeckSelectionSql())
         }
-        , m_RenameReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Mutation::RenameReviewSessionSql()) }
+        , m_RenameReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::RenameReviewSessionSql()) }
         , m_UpdateReviewSessionToDefaultPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Mutation::UpdateReviewSessionToDefaultSql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::UpdateReviewSessionToDefaultSql())
         }
         , m_UpdateReviewSessionToCustomPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Mutation::UpdateReviewSessionToCustomSql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::UpdateReviewSessionToCustomSql())
         }
         , m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement{ DatabaseRuntime.PrepareStatement(
-              Sql::ReviewSession::Mutation::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql()) }
+              Sql::ReviewSession::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql()) }
         , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Mutation::DeleteCustomReviewSessionDeckSelectionsSql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::DeleteCustomReviewSessionDeckSelectionsSql())
         }
-        , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Mutation::DeleteReviewSessionSql()) }
+        , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::DeleteReviewSessionSql()) }
         , m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Query::ReadDefaultReviewSessionIdByRootDeckIdSql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::ReadDefaultReviewSessionIdByRootDeckIdSql())
         }
         , m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Query::ReadReviewSessionIdByReviewSessionDefinitionKeySql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::ReadReviewSessionIdByReviewSessionDefinitionKeySql())
         } {
     }
 

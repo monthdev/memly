@@ -8,7 +8,7 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/Persistence/Database/PreparedStatement.hpp"
-#include "Layer/Infrastructure/Persistence/Sql/ReviewSession/Query/ReviewSessionQuerySql.hpp"
+#include "Layer/Infrastructure/Persistence/Sql/ReviewSession/ReviewSessionSql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
@@ -23,7 +23,7 @@ public:
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
         , m_ReadReviewSessionListRowsPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::Query::ReadReviewSessionListRowsSql())
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::ReadReviewSessionListRowsSql())
         } {
     }
 

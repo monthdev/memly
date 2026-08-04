@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace Layer::Infrastructure::Persistence::Sql::Library::Query {
+namespace Layer::Infrastructure::Persistence::Sql::Library {
 
 [[nodiscard]] auto ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string;
 }

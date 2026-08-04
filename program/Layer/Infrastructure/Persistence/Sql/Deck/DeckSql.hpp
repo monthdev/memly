@@ -2,7 +2,9 @@
 
 #include <string>
 
-namespace Layer::Infrastructure::Persistence::Sql::Deck::Mutation {
+namespace Layer::Infrastructure::Persistence::Sql::Deck {
+
+[[nodiscard]] auto ReadDeckSnapshotRecordsSql() -> std::string;
 
 [[nodiscard]] auto CreateRootDeckSql() -> std::string;
 

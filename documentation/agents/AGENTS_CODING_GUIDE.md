@@ -213,6 +213,13 @@ failures remain runtime errors at the database boundary.
 `Layer/Infrastructure/Persistence` groups the database engine boundary, SQL
 resources, and concrete stores.
 
+Domain SQL resources are classified by their primary SQL operation under
+`Select/`, `Update/`, `Insert/`, or `Delete/`. Each SQL domain exposes one
+root-level `<Domain>Sql.hpp/.cpp` accessor pair; consumers depend on that domain
+accessor rather than on operation folders. Migration and seed SQL remain
+lifecycle-specific root groups. Do not add a redundant `Statement/` directory
+around SQL resources.
+
 `DatabaseRuntime` owns the live DuckDB database and connection and the
 store-facing prepared-statement factory. It retains the single startup
 transaction that orders migration before seeding. The ephemeral

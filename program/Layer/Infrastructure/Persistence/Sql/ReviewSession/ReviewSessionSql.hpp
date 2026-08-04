@@ -5,7 +5,13 @@
 
 #include <string>
 
-namespace Layer::Infrastructure::Persistence::Sql::ReviewSession::Mutation {
+namespace Layer::Infrastructure::Persistence::Sql::ReviewSession {
+
+[[nodiscard]] auto ReadReviewSessionListRowsSql() -> std::string;
+
+[[nodiscard]] auto ReadDefaultReviewSessionIdByRootDeckIdSql() -> std::string;
+
+[[nodiscard]] auto ReadReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string;
 
 [[nodiscard]] auto CreateCustomReviewSessionSql() -> std::string;
 
