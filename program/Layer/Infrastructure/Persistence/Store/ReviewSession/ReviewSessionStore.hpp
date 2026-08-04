@@ -20,32 +20,32 @@ namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
 class ReviewSessionStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     Database::DatabaseRuntime& m_DatabaseRuntime;
-    Database::PreparedStatement m_CreateCustomReviewSessionPreparedStatement;
-    Database::PreparedStatement m_CreateDefaultReviewSessionPreparedStatement;
-    Database::PreparedStatement m_CreateCustomReviewSessionDeckSelectionPreparedStatement;
-    Database::PreparedStatement m_RenameReviewSessionPreparedStatement;
+    Database::PreparedStatement m_InsertCustomReviewSessionPreparedStatement;
+    Database::PreparedStatement m_InsertDefaultReviewSessionPreparedStatement;
+    Database::PreparedStatement m_InsertCustomReviewSessionDeckSelectionPreparedStatement;
+    Database::PreparedStatement m_UpdateReviewSessionNamePreparedStatement;
     Database::PreparedStatement m_UpdateReviewSessionToDefaultPreparedStatement;
     Database::PreparedStatement m_UpdateReviewSessionToCustomPreparedStatement;
     Database::PreparedStatement m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement;
     Database::PreparedStatement m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement;
     Database::PreparedStatement m_DeleteReviewSessionPreparedStatement;
-    Database::PreparedStatement m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement;
-    Database::PreparedStatement m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
+    Database::PreparedStatement m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement;
+    Database::PreparedStatement m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
 
 public:
     explicit ReviewSessionStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
-        , m_CreateCustomReviewSessionPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::CreateCustomReviewSessionSql())
+        , m_InsertCustomReviewSessionPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::InsertCustomReviewSessionSql())
         }
-        , m_CreateDefaultReviewSessionPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::CreateDefaultReviewSessionSql())
+        , m_InsertDefaultReviewSessionPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::InsertDefaultReviewSessionSql())
         }
-        , m_CreateCustomReviewSessionDeckSelectionPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::CreateCustomReviewSessionDeckSelectionSql())
+        , m_InsertCustomReviewSessionDeckSelectionPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::InsertCustomReviewSessionDeckSelectionSql())
         }
-        , m_RenameReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::RenameReviewSessionSql()) }
+        , m_UpdateReviewSessionNamePreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::UpdateReviewSessionNameSql()) }
         , m_UpdateReviewSessionToDefaultPreparedStatement{
             DatabaseRuntime.PrepareStatement(Sql::ReviewSession::UpdateReviewSessionToDefaultSql())
         }
@@ -58,11 +58,11 @@ public:
             DatabaseRuntime.PrepareStatement(Sql::ReviewSession::DeleteCustomReviewSessionDeckSelectionsSql())
         }
         , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::DeleteReviewSessionSql()) }
-        , m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::ReadDefaultReviewSessionIdByRootDeckIdSql())
+        , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::SelectDefaultReviewSessionIdByRootDeckIdSql())
         }
-        , m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::ReadReviewSessionIdByReviewSessionDefinitionKeySql())
+        , m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::SelectReviewSessionIdByReviewSessionDefinitionKeySql())
         } {
     }
 

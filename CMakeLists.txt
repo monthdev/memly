@@ -309,8 +309,17 @@ file(GLOB SQL_DECK_DELETE_SQL CONFIGURE_DEPENDS
 file(GLOB SQL_LIBRARY_SELECT_SQL CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/Library/Select/*.sql"
 )
-file(GLOB SQL_MIGRATION_SQL CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/Migration/*.sql"
+file(GLOB SQL_MIGRATION_BOOTSTRAP_SQL CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/Migration/Bootstrap/*.sql"
+)
+file(GLOB SQL_MIGRATION_VERSION_SQL CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/Migration/Version/*.sql"
+)
+file(GLOB SQL_MIGRATION_SELECT_SQL CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/Migration/Select/*.sql"
+)
+file(GLOB SQL_MIGRATION_INSERT_SQL CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/Migration/Insert/*.sql"
 )
 file(GLOB SQL_REVIEW_SESSION_SELECT_SQL CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/ReviewSession/Select/*.sql"
@@ -324,7 +333,9 @@ file(GLOB SQL_REVIEW_SESSION_INSERT_SQL CONFIGURE_DEPENDS
 file(GLOB SQL_REVIEW_SESSION_DELETE_SQL CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/ReviewSession/Delete/*.sql"
 )
-file(GLOB SQL_SEED_SQL CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/Seed/*.sql")
+file(GLOB SQL_SEED_INSERT_SQL CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Persistence/Sql/Seed/Insert/*.sql"
+)
 
 file(GLOB LAYER_PRESENTATION_CONTROLLER_CPP CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Controller/*.cpp"
@@ -493,10 +504,13 @@ qt_add_resources(
   ${SQL_DECK_INSERT_SQL}
   ${SQL_DECK_DELETE_SQL}
   # ${SQL_LIBRARY_SELECT_SQL}
-  ${SQL_MIGRATION_SQL}
+  ${SQL_MIGRATION_BOOTSTRAP_SQL}
+  ${SQL_MIGRATION_VERSION_SQL}
+  ${SQL_MIGRATION_SELECT_SQL}
+  ${SQL_MIGRATION_INSERT_SQL}
   # ${SQL_REVIEW_SESSION_SELECT_SQL} ${SQL_REVIEW_SESSION_UPDATE_SQL} ${SQL_REVIEW_SESSION_INSERT_SQL}
   # ${SQL_REVIEW_SESSION_DELETE_SQL}
-  ${SQL_SEED_SQL}
+  ${SQL_SEED_INSERT_SQL}
 )
 
 set(MEMLY_CORE_SOURCE_FILES

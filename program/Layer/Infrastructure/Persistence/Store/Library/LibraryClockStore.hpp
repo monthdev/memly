@@ -16,14 +16,14 @@ namespace Layer::Infrastructure::Persistence::Store::Library {
 class LibraryClockStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     Database::DatabaseRuntime& m_DatabaseRuntime;
-    Database::PreparedStatement m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
+    Database::PreparedStatement m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
 
 public:
     explicit LibraryClockStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
-        , m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::Library::ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql())
+        , m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::Library::SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
         } {
     }
 

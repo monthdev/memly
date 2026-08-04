@@ -7,6 +7,6 @@
 
 namespace Layer::Infrastructure::Persistence::Sql::Library {
 
-[[nodiscard]] auto ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string;
+[[nodiscard]] auto SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string;
 }
 #endif

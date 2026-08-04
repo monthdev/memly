@@ -12,11 +12,11 @@ namespace Layer::Infrastructure::Persistence::Store::Deck {
 
 class DeckStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Database::PreparedStatement m_CreateRootDeckPreparedStatement;
-    Database::PreparedStatement m_CreateChildDeckPreparedStatement;
-    Database::PreparedStatement m_MoveDeckToRootPreparedStatement;
-    Database::PreparedStatement m_MoveDeckUnderParentPreparedStatement;
-    Database::PreparedStatement m_RenameDeckPreparedStatement;
+    Database::PreparedStatement m_InsertRootDeckPreparedStatement;
+    Database::PreparedStatement m_InsertChildDeckPreparedStatement;
+    Database::PreparedStatement m_UpdateDeckParentToRootPreparedStatement;
+    Database::PreparedStatement m_UpdateDeckParentPreparedStatement;
+    Database::PreparedStatement m_UpdateDeckNamePreparedStatement;
     Database::PreparedStatement m_DeleteDeckCardReviewsPreparedStatement;
     Database::PreparedStatement m_DeleteDeckCardsPreparedStatement;
     Database::PreparedStatement m_DeleteDeckPreparedStatement;
@@ -24,11 +24,11 @@ private:
 public:
     explicit DeckStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_CreateRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::CreateRootDeckSql()) }
-        , m_CreateChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::CreateChildDeckSql()) }
-        , m_MoveDeckToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::MoveDeckToRootSql()) }
-        , m_MoveDeckUnderParentPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::MoveDeckUnderParentSql()) }
-        , m_RenameDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::RenameDeckSql()) }
+        , m_InsertRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::InsertRootDeckSql()) }
+        , m_InsertChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::InsertChildDeckSql()) }
+        , m_UpdateDeckParentToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::UpdateDeckParentToRootSql()) }
+        , m_UpdateDeckParentPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::UpdateDeckParentSql()) }
+        , m_UpdateDeckNamePreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::UpdateDeckNameSql()) }
         , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::DeleteDeckCardReviewsSql()) }
         , m_DeleteDeckCardsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::DeleteDeckCardsSql()) }
         , m_DeleteDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::DeleteDeckSql()) } {

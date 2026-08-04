@@ -16,14 +16,14 @@ namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
 class ReviewSessionListStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     Database::DatabaseRuntime& m_DatabaseRuntime;
-    Database::PreparedStatement m_ReadReviewSessionListRowsPreparedStatement;
+    Database::PreparedStatement m_SelectReviewSessionListRowsPreparedStatement;
 
 public:
     explicit ReviewSessionListStore(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
-        , m_ReadReviewSessionListRowsPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::ReadReviewSessionListRowsSql())
+        , m_SelectReviewSessionListRowsPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::SelectReviewSessionListRowsSql())
         } {
     }
 

@@ -4,9 +4,9 @@
 
 namespace Layer::Infrastructure::Persistence::Sql::Seed {
 
-[[nodiscard]] auto CreateDefaultFsrs7SchedulerSql() -> std::string;
+[[nodiscard]] auto InsertDefaultFsrs7SchedulerSql() -> std::string;
 
-[[nodiscard]] auto CreateDefaultFsrs7SettingsSql() -> std::string;
+[[nodiscard]] auto InsertDefaultFsrs7SettingsSql() -> std::string;
 
-[[nodiscard]] auto CreateDefaultDeckSettingsSql() -> std::string;
+[[nodiscard]] auto InsertDefaultDeckSettingsSql() -> std::string;
 }

@@ -71,7 +71,7 @@ namespace {
     }
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
         this->m_DatabaseRuntime,
-        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_CreateDefaultReviewSessionPreparedStatement)
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_InsertDefaultReviewSessionPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey, RootDeckId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
@@ -97,7 +97,7 @@ namespace {
     }
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
         this->m_DatabaseRuntime,
-        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_CreateCustomReviewSessionPreparedStatement)
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_InsertCustomReviewSessionPreparedStatement)
              .WithParameters(ReviewSessionName, ReviewSessionDefinitionKey)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
@@ -125,7 +125,7 @@ namespace {
     -> std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
         this->m_DatabaseRuntime,
-        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_RenameReviewSessionPreparedStatement).WithParameters(ReviewSessionName, ReviewSessionId)) };
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionNamePreparedStatement).WithParameters(ReviewSessionName, ReviewSessionId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
     //     a_TryGetRecoverableReviewSessionMutationError(*QueryResult)
@@ -231,14 +231,14 @@ namespace {
 [[nodiscard]] auto ReviewSessionStore::TryReadDefaultReviewSessionIdByRootDeckId(const std::string& RootDeckId) -> std::optional<std::string> {
     return a_TryReadSingleStringResult(
         this->m_DatabaseRuntime,
-        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_ReadDefaultReviewSessionIdByRootDeckIdPreparedStatement).WithParameters(RootDeckId));
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement).WithParameters(RootDeckId));
 }
 
 [[nodiscard]] auto ReviewSessionStore::TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string& ReviewSessionDefinitionKey)
     -> std::optional<std::string> {
     return a_TryReadSingleStringResult(
         this->m_DatabaseRuntime,
-        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_ReadReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement)
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey));
 }
 
@@ -271,7 +271,7 @@ void ReviewSessionStore::CreateCustomReviewSessionDeckSelection(
     const char* const DeckSelectionTypeString{ a_ReviewSessionDeckSelectionTypeToString(DeckSelectionType) };
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
         this->m_DatabaseRuntime,
-        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_CreateCustomReviewSessionDeckSelectionPreparedStatement).WithParameters(
+        *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_InsertCustomReviewSessionDeckSelectionPreparedStatement).WithParameters(
             ReviewSessionId, DeckId, DeckSelectionTypeString)) };
     assert(ResultRowCount == 1);
     // return a_TryGetRecoverableReviewSessionMutationError(*QueryResult);

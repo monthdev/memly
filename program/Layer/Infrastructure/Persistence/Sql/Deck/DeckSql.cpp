@@ -6,28 +6,28 @@
 
 namespace Layer::Infrastructure::Persistence::Sql::Deck {
 
-[[nodiscard]] auto ReadDeckSnapshotRecordsSql() -> std::string {
-    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Select/ReadDeckSnapshotRecords.sql") };
+[[nodiscard]] auto SelectDeckSnapshotRecordsSql() -> std::string {
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Select/SelectDeckSnapshotRecords.sql") };
 }
 
-[[nodiscard]] auto CreateRootDeckSql() -> std::string {
-    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Insert/CreateRootDeck.sql") };
+[[nodiscard]] auto InsertRootDeckSql() -> std::string {
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Insert/InsertRootDeck.sql") };
 }
 
-[[nodiscard]] auto CreateChildDeckSql() -> std::string {
-    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Insert/CreateChildDeck.sql") };
+[[nodiscard]] auto InsertChildDeckSql() -> std::string {
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Insert/InsertChildDeck.sql") };
 }
 
-[[nodiscard]] auto MoveDeckToRootSql() -> std::string {
-    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/MoveDeckToRoot.sql") };
+[[nodiscard]] auto UpdateDeckParentToRootSql() -> std::string {
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/UpdateDeckParentToRoot.sql") };
 }
 
-[[nodiscard]] auto MoveDeckUnderParentSql() -> std::string {
-    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/MoveDeckUnderParent.sql") };
+[[nodiscard]] auto UpdateDeckParentSql() -> std::string {
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/UpdateDeckParent.sql") };
 }
 
-[[nodiscard]] auto RenameDeckSql() -> std::string {
-    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/RenameDeck.sql") };
+[[nodiscard]] auto UpdateDeckNameSql() -> std::string {
+    return std::string{ Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/UpdateDeckName.sql") };
 }
 
 [[nodiscard]] auto DeleteDeckCardReviewsSql() -> std::string {

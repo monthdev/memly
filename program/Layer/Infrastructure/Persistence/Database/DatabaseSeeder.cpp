@@ -8,9 +8,9 @@
 namespace Layer::Infrastructure::Persistence::Database {
 
 void DatabaseSeeder::SeedTableDefaults() {
-    ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(Sql::Seed::CreateDefaultFsrs7SchedulerSql()));
-    ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(Sql::Seed::CreateDefaultFsrs7SettingsSql()));
-    ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(Sql::Seed::CreateDefaultDeckSettingsSql()));
+    ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(Sql::Seed::InsertDefaultFsrs7SchedulerSql()));
+    ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(Sql::Seed::InsertDefaultFsrs7SettingsSql()));
+    ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(Sql::Seed::InsertDefaultDeckSettingsSql()));
 }
 
 }

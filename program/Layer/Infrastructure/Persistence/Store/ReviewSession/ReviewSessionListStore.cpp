@@ -18,7 +18,7 @@ namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
 
 [[nodiscard]] auto ReviewSessionListStore::ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> {
     std::unique_ptr<duckdb::QueryResult> QueryResult{
-        this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_ReadReviewSessionListRowsPreparedStatement).WithoutParameters()
+        this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectReviewSessionListRowsPreparedStatement).WithoutParameters()
     };
     std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListRowVector{};
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)

@@ -17,7 +17,7 @@ namespace Layer::Infrastructure::Persistence::Store::Library {
 [[nodiscard]] auto LibraryClockStore::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const std::int64_t AsOfMillisecondsSinceEpoch)
     -> std::optional<std::int64_t> {
     std::unique_ptr<duckdb::QueryResult> QueryResult{
-        this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_ReadNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement)
+        this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement)
             .WithParameters(AsOfMillisecondsSinceEpoch)
     };
     std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpochOptional{};

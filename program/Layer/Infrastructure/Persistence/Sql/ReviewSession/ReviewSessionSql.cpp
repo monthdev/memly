@@ -9,32 +9,32 @@
 
 namespace Layer::Infrastructure::Persistence::Sql::ReviewSession {
 
-[[nodiscard]] auto ReadReviewSessionListRowsSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/ReadReviewSessionListRows.sql");
+[[nodiscard]] auto SelectReviewSessionListRowsSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/SelectReviewSessionListRows.sql");
 }
 
-[[nodiscard]] auto ReadDefaultReviewSessionIdByRootDeckIdSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/ReadDefaultReviewSessionIdByRootDeckId.sql");
+[[nodiscard]] auto SelectDefaultReviewSessionIdByRootDeckIdSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/SelectDefaultReviewSessionIdByRootDeckId.sql");
 }
 
-[[nodiscard]] auto ReadReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/ReadReviewSessionIdByReviewSessionDefinitionKey.sql");
+[[nodiscard]] auto SelectReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/SelectReviewSessionIdByReviewSessionDefinitionKey.sql");
 }
 
-[[nodiscard]] auto CreateCustomReviewSessionSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/CreateCustomReviewSession.sql");
+[[nodiscard]] auto InsertCustomReviewSessionSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/InsertCustomReviewSession.sql");
 }
 
-[[nodiscard]] auto CreateDefaultReviewSessionSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/CreateDefaultReviewSession.sql");
+[[nodiscard]] auto InsertDefaultReviewSessionSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/InsertDefaultReviewSession.sql");
 }
 
-[[nodiscard]] auto CreateCustomReviewSessionDeckSelectionSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/CreateCustomReviewSessionDeckSelection.sql");
+[[nodiscard]] auto InsertCustomReviewSessionDeckSelectionSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/InsertCustomReviewSessionDeckSelection.sql");
 }
 
-[[nodiscard]] auto RenameReviewSessionSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Update/RenameReviewSession.sql");
+[[nodiscard]] auto UpdateReviewSessionNameSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Update/UpdateReviewSessionName.sql");
 }
 
 [[nodiscard]] auto UpdateReviewSessionToDefaultSql() -> std::string {

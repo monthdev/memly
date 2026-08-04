@@ -9,8 +9,8 @@
 
 namespace Layer::Infrastructure::Persistence::Sql::Library {
 
-[[nodiscard]] auto ReadNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string {
-    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Library/Select/ReadNextLibraryInvalidationAtMillisecondsSinceEpoch.sql");
+[[nodiscard]] auto SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string {
+    return Support::Runtime::QtApp::ReadQtAppResourceBytes(":/Sql/Library/Select/SelectNextLibraryInvalidationAtMillisecondsSinceEpoch.sql");
 }
 }
 #endif

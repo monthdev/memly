@@ -7,19 +7,19 @@
 
 namespace Layer::Infrastructure::Persistence::Sql::ReviewSession {
 
-[[nodiscard]] auto ReadReviewSessionListRowsSql() -> std::string;
+[[nodiscard]] auto SelectReviewSessionListRowsSql() -> std::string;
 
-[[nodiscard]] auto ReadDefaultReviewSessionIdByRootDeckIdSql() -> std::string;
+[[nodiscard]] auto SelectDefaultReviewSessionIdByRootDeckIdSql() -> std::string;
 
-[[nodiscard]] auto ReadReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string;
+[[nodiscard]] auto SelectReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string;
 
-[[nodiscard]] auto CreateCustomReviewSessionSql() -> std::string;
+[[nodiscard]] auto InsertCustomReviewSessionSql() -> std::string;
 
-[[nodiscard]] auto CreateDefaultReviewSessionSql() -> std::string;
+[[nodiscard]] auto InsertDefaultReviewSessionSql() -> std::string;
 
-[[nodiscard]] auto CreateCustomReviewSessionDeckSelectionSql() -> std::string;
+[[nodiscard]] auto InsertCustomReviewSessionDeckSelectionSql() -> std::string;
 
-[[nodiscard]] auto RenameReviewSessionSql() -> std::string;
+[[nodiscard]] auto UpdateReviewSessionNameSql() -> std::string;
 
 [[nodiscard]] auto UpdateReviewSessionToDefaultSql() -> std::string;
 
