@@ -1,7 +1,7 @@
 // Temporarily disabled during review session control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
 #if 0
-#include "Layer/Infrastructure/Persistence/Store/ReviewSession/ReviewSessionStore.hpp"
+#include "Layer/Infrastructure/Persistence/Repository/ReviewSession/ReviewSessionRepository.hpp"
 
 #include <duckdb.hpp>
 
@@ -19,11 +19,12 @@
 
 #include "Layer/Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
+#include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/Persistence/Database/PreparedStatement.hpp"
 #include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
+namespace Layer::Infrastructure::Persistence::Repository::ReviewSession {
 
 namespace {
 
@@ -63,7 +64,32 @@ namespace {
 
 }
 
-[[nodiscard]] auto ReviewSessionStore::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey)
+[[nodiscard]] auto ReviewSessionRepository::ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{
+        this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectReviewSessionListRowsPreparedStatement).WithoutParameters()
+    };
+    std::vector<Application::Domain::ReviewSession::ReviewSessionListRow> ReviewSessionListRowVector{};
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ this->m_DatabaseRuntime.FetchNextDataChunk(*QueryResult) }) {
+        for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
+            const duckdb::Value LastUpdatedAtMillisecondsSinceEpochValue{ DataChunk->GetValue(3, RowIndex) };
+            const duckdb::Value LastCardReviewAtMillisecondsSinceEpochValue{ DataChunk->GetValue(4, RowIndex) };
+            ReviewSessionListRowVector.emplace_back(
+                DataChunk->GetValue(0, RowIndex).GetValue<std::string>(),
+                DataChunk->GetValue(1, RowIndex).GetValue<std::string>(),
+                DataChunk->GetValue(2, RowIndex).GetValue<std::int64_t>(),
+                LastUpdatedAtMillisecondsSinceEpochValue.IsNull() ? std::nullopt :
+                                                                    std::make_optional(LastUpdatedAtMillisecondsSinceEpochValue.GetValue<std::int64_t>()),
+                LastCardReviewAtMillisecondsSinceEpochValue.IsNull() ?
+                    std::nullopt :
+                    std::make_optional(LastCardReviewAtMillisecondsSinceEpochValue.GetValue<std::int64_t>()));
+        }
+    }
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    return ReviewSessionListRowVector;
+}
+
+[[nodiscard]] auto ReviewSessionRepository::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey)
     -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
         ExistingReviewSessionIdOptional.has_value()) {
@@ -85,7 +111,7 @@ namespace {
     return std::move(NewDefaultReviewSessionIdOptional).value();
 }
 
-[[nodiscard]] auto ReviewSessionStore::CreateOrReadExistingCustomReviewSession(
+[[nodiscard]] auto ReviewSessionRepository::CreateOrReadExistingCustomReviewSession(
     const std::string& ReviewSessionName,
     const std::string& ReviewSessionDefinitionKey,
     const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
@@ -121,7 +147,7 @@ namespace {
     return NewCustomReviewSessionId;
 }
 
-[[nodiscard]] auto ReviewSessionStore::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName)
+[[nodiscard]] auto ReviewSessionRepository::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName)
     -> std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
         this->m_DatabaseRuntime,
@@ -134,7 +160,7 @@ namespace {
     return std::nullopt;
 }
 
-[[nodiscard]] auto ReviewSessionStore::EditReviewSessionToDefault(const std::string& CurrentReviewSessionId,
+[[nodiscard]] auto ReviewSessionRepository::EditReviewSessionToDefault(const std::string& CurrentReviewSessionId,
                                                                   const std::string& RootDeckId,
                                                                   const std::string& ReviewSessionDefinitionKey)
     -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
@@ -159,7 +185,7 @@ namespace {
     return CurrentReviewSessionId;
 }
 
-[[nodiscard]] auto ReviewSessionStore::EditReviewSessionToCustom(
+[[nodiscard]] auto ReviewSessionRepository::EditReviewSessionToCustom(
     const std::string& CurrentReviewSessionId,
     const std::string& ReviewSessionDefinitionKey,
     const std::vector<Application::Domain::ReviewSession::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
@@ -194,7 +220,7 @@ namespace {
     return CurrentReviewSessionId;
 }
 
-void ReviewSessionStore::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId) {
+void ReviewSessionRepository::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId) {
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement)
@@ -202,7 +228,7 @@ void ReviewSessionStore::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpo
     assert(ResultRowCount == 1);
 }
 
-void ReviewSessionStore::DeleteReviewSession(const std::string& ReviewSessionId) {
+void ReviewSessionRepository::DeleteReviewSession(const std::string& ReviewSessionId) {
     this->DeleteCustomReviewSessionDeckSelections(ReviewSessionId);
     [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
         this->m_DatabaseRuntime, *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_DeleteReviewSessionPreparedStatement).WithParameters(ReviewSessionId)) };
@@ -228,13 +254,13 @@ namespace {
 
 }
 
-[[nodiscard]] auto ReviewSessionStore::TryReadDefaultReviewSessionIdByRootDeckId(const std::string& RootDeckId) -> std::optional<std::string> {
+[[nodiscard]] auto ReviewSessionRepository::TryReadDefaultReviewSessionIdByRootDeckId(const std::string& RootDeckId) -> std::optional<std::string> {
     return a_TryReadSingleStringResult(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement).WithParameters(RootDeckId));
 }
 
-[[nodiscard]] auto ReviewSessionStore::TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string& ReviewSessionDefinitionKey)
+[[nodiscard]] auto ReviewSessionRepository::TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string& ReviewSessionDefinitionKey)
     -> std::optional<std::string> {
     return a_TryReadSingleStringResult(
         this->m_DatabaseRuntime,
@@ -264,7 +290,7 @@ a_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
 
 }
 
-void ReviewSessionStore::CreateCustomReviewSessionDeckSelection(
+void ReviewSessionRepository::CreateCustomReviewSessionDeckSelection(
     const std::string& ReviewSessionId,
     const std::string& DeckId,
     const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) {
@@ -277,7 +303,7 @@ void ReviewSessionStore::CreateCustomReviewSessionDeckSelection(
     // return a_TryGetRecoverableReviewSessionMutationError(*QueryResult);
 }
 
-void ReviewSessionStore::DeleteCustomReviewSessionDeckSelections(const std::string& ReviewSessionId) {
+void ReviewSessionRepository::DeleteCustomReviewSessionDeckSelections(const std::string& ReviewSessionId) {
     static_cast<void>(a_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement).WithParameters(ReviewSessionId)));

@@ -15,12 +15,10 @@
 // #include "Layer/Application/Service/ReviewSession/ReviewSessionListService.hpp"
 // #include "Layer/Application/Service/ReviewSession/ReviewSessionService.hpp"
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
-#include "Layer/Infrastructure/Persistence/Store/Deck/DeckSnapshotStore.hpp"
-#include "Layer/Infrastructure/Persistence/Store/Deck/DeckStore.hpp"
+#include "Layer/Infrastructure/Persistence/Repository/Deck/DeckRepository.hpp"
 
-// #include "Layer/Infrastructure/Persistence/Store/Library/LibraryClockStore.hpp"
-// #include "Layer/Infrastructure/Persistence/Store/ReviewSession/ReviewSessionListStore.hpp"
-// #include "Layer/Infrastructure/Persistence/Store/ReviewSession/ReviewSessionStore.hpp"
+// #include "Layer/Infrastructure/Persistence/Repository/Library/LibraryRepository.hpp"
+// #include "Layer/Infrastructure/Persistence/Repository/ReviewSession/ReviewSessionRepository.hpp"
 
 namespace CompositionRoot {
 
@@ -31,12 +29,10 @@ namespace CompositionRoot {
 #endif
 std::unique_ptr<Layer::Infrastructure::Persistence::Database::DatabaseRuntime> RuntimeContext::s_DatabaseRuntime{};
 // std::unique_ptr<Layer::Application::Invalidation::LibraryInvalidationChannel> RuntimeContext::s_LibraryInvalidationChannel{};
-// std::unique_ptr<Layer::Infrastructure::Persistence::Store::Library::LibraryClockStore> RuntimeContext::s_LibraryClockStore{};
+// std::unique_ptr<Layer::Infrastructure::Persistence::Repository::Library::LibraryRepository> RuntimeContext::s_LibraryRepository{};
 // std::unique_ptr<Layer::Application::Invalidation::LibraryInvalidationCoordinator> RuntimeContext::s_LibraryInvalidationCoordinator{};
-std::unique_ptr<Layer::Infrastructure::Persistence::Store::Deck::DeckStore> RuntimeContext::s_DeckStore{};
-std::unique_ptr<Layer::Infrastructure::Persistence::Store::Deck::DeckSnapshotStore> RuntimeContext::s_DeckSnapshotStore{};
-// std::unique_ptr<Layer::Infrastructure::Persistence::Store::ReviewSession::ReviewSessionListStore> RuntimeContext::s_ReviewSessionListStore{};
-// std::unique_ptr<Layer::Infrastructure::Persistence::Store::ReviewSession::ReviewSessionStore> RuntimeContext::s_ReviewSessionStore{};
+std::unique_ptr<Layer::Infrastructure::Persistence::Repository::Deck::DeckRepository> RuntimeContext::s_DeckRepository{};
+// std::unique_ptr<Layer::Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository> RuntimeContext::s_ReviewSessionRepository{};
 std::unique_ptr<Layer::Application::Service::Deck::DeckService> RuntimeContext::s_DeckService{};
 // std::unique_ptr<Layer::Application::Service::ReviewSession::ReviewSessionListService> RuntimeContext::s_ReviewSessionListService{};
 // std::unique_ptr<Layer::Application::Service::ReviewSession::ReviewSessionService> RuntimeContext::s_ReviewSessionService{};
@@ -48,29 +44,26 @@ void RuntimeContext::Initialize(const std::string& DatabaseFilePath) {
     assert(not DatabaseFilePath.empty());
     assert(s_DatabaseRuntime == nullptr);
     // assert(s_LibraryInvalidationChannel == nullptr);
-    // assert(s_LibraryClockStore == nullptr);
+    // assert(s_LibraryRepository == nullptr);
     // assert(s_LibraryInvalidationCoordinator == nullptr);
-    assert(s_DeckStore == nullptr);
-    assert(s_DeckSnapshotStore == nullptr);
-    // assert(s_ReviewSessionListStore == nullptr);
-    // assert(s_ReviewSessionStore == nullptr);
+    assert(s_DeckRepository == nullptr);
+    // assert(s_ReviewSessionRepository == nullptr);
     assert(s_DeckService == nullptr);
     // assert(s_ReviewSessionListService == nullptr);
     // assert(s_ReviewSessionService == nullptr);
 
     s_DatabaseRuntime = std::make_unique<Layer::Infrastructure::Persistence::Database::DatabaseRuntime>(DatabaseFilePath);
     // s_LibraryInvalidationChannel = std::make_unique<Layer::Application::Invalidation::LibraryInvalidationChannel>();
-    // s_LibraryClockStore = std::make_unique<Layer::Infrastructure::Persistence::Store::Library::LibraryClockStore>(*s_DatabaseRuntime);
+    // s_LibraryRepository = std::make_unique<Layer::Infrastructure::Persistence::Repository::Library::LibraryRepository>(*s_DatabaseRuntime);
     // s_LibraryInvalidationCoordinator =
-    //     std::make_unique<Layer::Application::Invalidation::LibraryInvalidationCoordinator>(*s_LibraryInvalidationChannel, *s_LibraryClockStore);
-    s_DeckStore = std::make_unique<Layer::Infrastructure::Persistence::Store::Deck::DeckStore>(*s_DatabaseRuntime);
-    s_DeckSnapshotStore = std::make_unique<Layer::Infrastructure::Persistence::Store::Deck::DeckSnapshotStore>(*s_DatabaseRuntime);
-    // s_ReviewSessionListStore = std::make_unique<Layer::Infrastructure::Persistence::Store::ReviewSession::ReviewSessionListStore>(*s_DatabaseRuntime);
-    // s_ReviewSessionStore = std::make_unique<Layer::Infrastructure::Persistence::Store::ReviewSession::ReviewSessionStore>(*s_DatabaseRuntime);
-    s_DeckService = std::make_unique<Layer::Application::Service::Deck::DeckService>(*s_DeckStore, *s_DeckSnapshotStore);
-    // s_ReviewSessionListService = std::make_unique<Layer::Application::Service::ReviewSession::ReviewSessionListService>(*s_ReviewSessionListStore);
+    //     std::make_unique<Layer::Application::Invalidation::LibraryInvalidationCoordinator>(*s_LibraryInvalidationChannel, *s_LibraryRepository);
+    s_DeckRepository = std::make_unique<Layer::Infrastructure::Persistence::Repository::Deck::DeckRepository>(*s_DatabaseRuntime);
+    // s_ReviewSessionRepository = std::make_unique<Layer::Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository>(*s_DatabaseRuntime);
+    s_DeckService = std::make_unique<Layer::Application::Service::Deck::DeckService>(*s_DeckRepository);
+    // s_ReviewSessionListService = std::make_unique<Layer::Application::Service::ReviewSession::ReviewSessionListService>(*s_ReviewSessionRepository);
     // s_ReviewSessionService =
-    //     std::make_unique<Layer::Application::Service::ReviewSession::ReviewSessionService>(s_DatabaseRuntime->GetTransactionRunner(), *s_ReviewSessionStore);
+    //     std::make_unique<Layer::Application::Service::ReviewSession::ReviewSessionService>(s_DatabaseRuntime->GetTransactionRunner(),
+    //     *s_ReviewSessionRepository);
 }
 
 // [[nodiscard]] auto RuntimeContext::GetRequiredLibraryInvalidationChannel() noexcept -> Layer::Application::Invalidation::LibraryInvalidationChannel& {

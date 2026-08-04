@@ -11,15 +11,15 @@
 #include "Layer/Infrastructure/Persistence/Sql/Library/LibrarySql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store::Library {
+namespace Layer::Infrastructure::Persistence::Repository::Library {
 
-class LibraryClockStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class LibraryRepository final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     Database::DatabaseRuntime& m_DatabaseRuntime;
     Database::PreparedStatement m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
 
 public:
-    explicit LibraryClockStore(Database::DatabaseRuntime& DatabaseRuntime)
+    explicit LibraryRepository(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
         , m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{

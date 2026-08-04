@@ -12,7 +12,7 @@
 
 #include "Layer/Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Layer/Application/Invalidation/LibraryInvalidationTarget.hpp"
-#include "Layer/Infrastructure/Persistence/Store/Library/LibraryClockStore.hpp"
+#include "Layer/Infrastructure/Persistence/Repository/Library/LibraryRepository.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 
 namespace Layer::Application::Invalidation {
@@ -41,7 +41,7 @@ void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept 
     Support::Runtime::Exception::TryCatchWrapper([&]() -> void {
         this->m_LibraryInvalidationQTimer.stop();
         const std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpochOptional{
-            this->m_LibraryClockStore.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(
+            this->m_LibraryRepository.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(
                 this->m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch)
         };
         if (not NextLibraryInvalidationAtMillisecondsSinceEpochOptional.has_value()) {

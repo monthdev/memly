@@ -10,16 +10,20 @@
 
 #include "Layer/Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
+#include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/Persistence/Database/PreparedStatement.hpp"
 #include "Layer/Infrastructure/Persistence/Sql/ReviewSession/ReviewSessionSql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
+namespace Layer::Infrastructure::Persistence::Repository::ReviewSession {
 
-class ReviewSessionStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class ReviewSessionRepository final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     Database::DatabaseRuntime& m_DatabaseRuntime;
+    Database::PreparedStatement m_SelectReviewSessionListRowsPreparedStatement;
+    Database::PreparedStatement m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement;
+    Database::PreparedStatement m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
     Database::PreparedStatement m_InsertCustomReviewSessionPreparedStatement;
     Database::PreparedStatement m_InsertDefaultReviewSessionPreparedStatement;
     Database::PreparedStatement m_InsertCustomReviewSessionDeckSelectionPreparedStatement;
@@ -29,13 +33,20 @@ private:
     Database::PreparedStatement m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement;
     Database::PreparedStatement m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement;
     Database::PreparedStatement m_DeleteReviewSessionPreparedStatement;
-    Database::PreparedStatement m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement;
-    Database::PreparedStatement m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement;
 
 public:
-    explicit ReviewSessionStore(Database::DatabaseRuntime& DatabaseRuntime)
+    explicit ReviewSessionRepository(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DatabaseRuntime{ DatabaseRuntime }
+        , m_SelectReviewSessionListRowsPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::SelectReviewSessionListRowsSql())
+        }
+        , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::SelectDefaultReviewSessionIdByRootDeckIdSql())
+        }
+        , m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
+            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::SelectReviewSessionIdByReviewSessionDefinitionKeySql())
+        }
         , m_InsertCustomReviewSessionPreparedStatement{
             DatabaseRuntime.PrepareStatement(Sql::ReviewSession::InsertCustomReviewSessionSql())
         }
@@ -57,15 +68,10 @@ public:
         , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{
             DatabaseRuntime.PrepareStatement(Sql::ReviewSession::DeleteCustomReviewSessionDeckSelectionsSql())
         }
-        , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::DeleteReviewSessionSql()) }
-        , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::SelectDefaultReviewSessionIdByRootDeckIdSql())
-        }
-        , m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::ReviewSession::SelectReviewSessionIdByReviewSessionDefinitionKeySql())
-        } {
+        , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::ReviewSession::DeleteReviewSessionSql()) } {
     }
 
+    [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSession::ReviewSessionListRow>;
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
         -> std::expected<std::string, Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto CreateOrReadExistingCustomReviewSession(const std::string&,

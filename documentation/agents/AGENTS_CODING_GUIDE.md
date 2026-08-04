@@ -211,13 +211,18 @@ paths. Violations of those invariants are programming errors; database-engine
 failures remain runtime errors at the database boundary.
 
 `Layer/Infrastructure/Persistence` groups the database engine boundary, SQL
-resources, and concrete stores.
+resources, and concrete repositories. A repository is the domain-shaped
+persistence boundary for one domain and groups that domain's reads and
+mutations. Do not split read and mutation operations into separate repository
+types merely because their result shapes differ. If persistence dependency
+inversion is introduced, preserve this domain grouping in the Application-owned
+port and make the Infrastructure repository its implementation.
 
 Single-operation SQL resources are classified by their primary SQL statement
 under `Select/`, `Update/`, `Insert/`, or `Delete/`. Each resource filename and
 accessor begins with that SQL statement name, followed by its domain purpose;
-prepared-statement members repeat the same operation name. Store methods retain
-domain-operation language. Each SQL domain exposes one root-level
+prepared-statement members repeat the same operation name. Repository methods
+retain domain-operation language. Each SQL domain exposes one root-level
 `<Domain>Sql.hpp/.cpp` accessor pair, and consumers depend on that accessor
 rather than on operation folders.
 
@@ -229,7 +234,7 @@ uses SQL-operation folders, currently `Insert/`. Do not add a redundant
 `Statement/` directory around SQL resources.
 
 `DatabaseRuntime` owns the live DuckDB database and connection and the
-store-facing prepared-statement factory. It retains the single startup
+repository-facing prepared-statement factory. It retains the single startup
 transaction that orders migration before seeding. The ephemeral
 `DatabaseMigrator` and `DatabaseSeeder` receive the live connection and own
 their respective startup-only direct SQL through raw DuckDB connection,
@@ -248,9 +253,9 @@ one or more parameters and `WithoutParameters()` for a parameterless statement.
 Decode consumed rows with `DecodedTo<QueryResultRowType>()`. Terminate the chain
 with `AssertRowCount(QueryResultRowCountRange)`. Use `ZeroOrMore()` when any
 result count, including zero, is valid; otherwise supply the bounded range
-required by the store contract. This terminal call is the only operation that
-releases decoded records to the store. Never name or store any intermediate
-execution, decoder, or decoded-result proxy
+required by the repository contract. This terminal call is the only operation
+that releases decoded records to the repository. Never name or store any
+intermediate execution, decoder, or decoded-result proxy
 (`custom-memly-no-database-chain-proxy-variable` and
 `custom-memly-no-database-chain-proxy-field`). The source-location reference
 captured by `PreparedStatement::Execute()` remains valid through that chained
@@ -261,14 +266,14 @@ explicitly discard the decoder produced by `WithParameters()` or
 A database-decoded row publicly inherits
 `Database::DecodableQueryResultRowMixin<ColumnType...>`. The ordered column-type
 pack generates compile-time positional decoding and constructs the concrete row
-without a store-owned DuckDB decoder. Use `std::optional<ColumnType>` in that
-pack for a nullable result column; SQL `NULL` in a non-optional column violates
-a programming invariant. Keep the SQL projection, column-type pack, and
+without a repository-owned DuckDB decoder. Use `std::optional<ColumnType>` in
+that pack for a nullable result column; SQL `NULL` in a non-optional column
+violates a programming invariant. Keep the SQL projection, column-type pack, and
 row-constructor parameter order aligned. The mixin supplies the row's
 special-member policy, so the row does not inherit a second policy mixin
 directly.
 
-Decoding and row-count validation are separate stages. Express every store
+Decoding and row-count validation are separate stages. Express every repository
 contract with `QueryResultRowCountRange::ZeroOrMore()`, `Exactly()`,
 `AtLeast()`, `AtMost()`, or `Between()`. Bounded row-count mismatches are
 programming errors and remain debug assertions.
@@ -282,7 +287,7 @@ paired `NOLINTBEGIN` and `NOLINTEND` around the decoding expression.
 `Layer/Presentation` and `Layer/View` own UI-facing Qt and QML integration.
 Focused `Layer/Application` runtime-coordination modules may use Qt when their
 behavior depends on the Qt event loop, signals, or timers; keep those
-dependencies contained and out of domain, service, store, and database
+dependencies contained and out of domain, service, repository, and database
 contracts. `main.cpp` owns process startup and QML engine bootstrap.
 `Support/Runtime/QtApp` contains Qt adapters for application runtime support
 such as standard paths and embedded resources.

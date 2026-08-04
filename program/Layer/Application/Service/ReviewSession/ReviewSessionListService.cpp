@@ -6,12 +6,12 @@
 #include <vector>
 
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
-#include "Layer/Infrastructure/Persistence/Store/ReviewSession/ReviewSessionListStore.hpp"
+#include "Layer/Infrastructure/Persistence/Repository/ReviewSession/ReviewSessionRepository.hpp"
 
 namespace Layer::Application::Service::ReviewSession {
 
 [[nodiscard]] auto ReviewSessionListService::ReadReviewSessionListRows() -> std::vector<Domain::ReviewSession::ReviewSessionListRow> {
-    return this->m_ReviewSessionListStore.ReadReviewSessionListRows();
+    return this->m_ReviewSessionRepository.ReadReviewSessionListRows();
 }
 
 }

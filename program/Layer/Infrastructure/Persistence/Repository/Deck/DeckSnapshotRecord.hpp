@@ -7,7 +7,7 @@
 
 #include "Layer/Infrastructure/Persistence/Database/DecodableQueryResultRowMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store::Deck {
+namespace Layer::Infrastructure::Persistence::Repository::Deck {
 
 struct [[nodiscard]] DeckSnapshotRecord final : public Database::DecodableQueryResultRowMixin<std::string,
                                                                                               std::optional<std::string>,

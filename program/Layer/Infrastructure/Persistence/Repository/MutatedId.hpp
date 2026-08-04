@@ -5,7 +5,7 @@
 
 #include "Layer/Infrastructure/Persistence/Database/DecodableQueryResultRowMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store {
+namespace Layer::Infrastructure::Persistence::Repository {
 
 struct [[nodiscard]] MutatedId final : public Database::DecodableQueryResultRowMixin<std::string> {
     std::string m_MutatedId;

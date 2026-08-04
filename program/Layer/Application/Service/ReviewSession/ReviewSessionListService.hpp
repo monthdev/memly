@@ -8,20 +8,20 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
-class ReviewSessionListStore;
+namespace Layer::Infrastructure::Persistence::Repository::ReviewSession {
+class ReviewSessionRepository;
 }
 
 namespace Layer::Application::Service::ReviewSession {
 
 class ReviewSessionListService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Persistence::Store::ReviewSession::ReviewSessionListStore& m_ReviewSessionListStore;
+    Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
-    explicit ReviewSessionListService(Infrastructure::Persistence::Store::ReviewSession::ReviewSessionListStore& ReviewSessionListStore) noexcept
+    explicit ReviewSessionListService(Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_ReviewSessionListStore{ ReviewSessionListStore } {
+        , m_ReviewSessionRepository{ ReviewSessionRepository } {
     }
 
     [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Domain::ReviewSession::ReviewSessionListRow>;

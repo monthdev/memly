@@ -10,8 +10,8 @@
 #include "Layer/Application/Invalidation/LibraryInvalidationTarget.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store::Library {
-class LibraryClockStore;
+namespace Layer::Infrastructure::Persistence::Repository::Library {
+class LibraryRepository;
 }
 
 namespace Layer::Application::Invalidation {
@@ -22,17 +22,17 @@ class LibraryInvalidationCoordinator final : public QObject, private Support::Sp
     Q_OBJECT
 private:
     LibraryInvalidationChannel& m_LibraryInvalidationChannel;
-    Infrastructure::Persistence::Store::Library::LibraryClockStore& m_LibraryClockStore;
+    Infrastructure::Persistence::Repository::Library::LibraryRepository& m_LibraryRepository;
     QTimer m_LibraryInvalidationQTimer;
 
 public:
     explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel& LibraryInvalidationChannel,
-                                            Infrastructure::Persistence::Store::Library::LibraryClockStore& LibraryClockStore,
+                                            Infrastructure::Persistence::Repository::Library::LibraryRepository& LibraryRepository,
                                             QObject* Parent = nullptr)
         : QObject{ Parent }
         , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
-        , m_LibraryClockStore{ LibraryClockStore }
+        , m_LibraryRepository{ LibraryRepository }
         , m_LibraryInvalidationQTimer{} {
         this->m_LibraryInvalidationQTimer.setSingleShot(true);
         QObject::connect(&this->m_LibraryInvalidationQTimer, &QTimer::timeout, this, &LibraryInvalidationCoordinator::HandleScheduledInvalidation);

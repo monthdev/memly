@@ -2,16 +2,19 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/Persistence/Database/PreparedStatement.hpp"
+#include "Layer/Infrastructure/Persistence/Repository/Deck/DeckSnapshotRecord.hpp"
 #include "Layer/Infrastructure/Persistence/Sql/Deck/DeckSql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store::Deck {
+namespace Layer::Infrastructure::Persistence::Repository::Deck {
 
-class DeckStore final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class DeckRepository final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
+    Database::PreparedStatement m_SelectDeckSnapshotRecordsPreparedStatement;
     Database::PreparedStatement m_InsertRootDeckPreparedStatement;
     Database::PreparedStatement m_InsertChildDeckPreparedStatement;
     Database::PreparedStatement m_UpdateDeckParentToRootPreparedStatement;
@@ -22,8 +25,9 @@ private:
     Database::PreparedStatement m_DeleteDeckPreparedStatement;
 
 public:
-    explicit DeckStore(Database::DatabaseRuntime& DatabaseRuntime)
+    explicit DeckRepository(Database::DatabaseRuntime& DatabaseRuntime)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+        , m_SelectDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::SelectDeckSnapshotRecordsSql()) }
         , m_InsertRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::InsertRootDeckSql()) }
         , m_InsertChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::InsertChildDeckSql()) }
         , m_UpdateDeckParentToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::UpdateDeckParentToRootSql()) }
@@ -34,6 +38,7 @@ public:
         , m_DeleteDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::Deck::DeleteDeckSql()) } {
     }
 
+    [[nodiscard]] auto ReadDeckSnapshotRecords(std::int64_t) -> std::vector<DeckSnapshotRecord>;
     void CreateRootDeck(const std::string&, std::uint8_t);
     void CreateChildDeck(const std::string&, const std::string&);
     void MoveDeckToRoot(const std::string&);

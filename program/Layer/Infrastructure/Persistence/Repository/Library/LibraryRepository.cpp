@@ -1,7 +1,7 @@
 // Temporarily disabled during library invalidation control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
 #if 0
-#include "Layer/Infrastructure/Persistence/Store/Library/LibraryClockStore.hpp"
+#include "Layer/Infrastructure/Persistence/Repository/Library/LibraryRepository.hpp"
 
 #include <duckdb.hpp>
 
@@ -12,9 +12,9 @@
 
 #include "Layer/Infrastructure/Persistence/Database/DatabaseRuntime.hpp"
 
-namespace Layer::Infrastructure::Persistence::Store::Library {
+namespace Layer::Infrastructure::Persistence::Repository::Library {
 
-[[nodiscard]] auto LibraryClockStore::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const std::int64_t AsOfMillisecondsSinceEpoch)
+[[nodiscard]] auto LibraryRepository::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const std::int64_t AsOfMillisecondsSinceEpoch)
     -> std::optional<std::int64_t> {
     std::unique_ptr<duckdb::QueryResult> QueryResult{
         this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement)

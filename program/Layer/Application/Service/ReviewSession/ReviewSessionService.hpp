@@ -15,8 +15,8 @@ namespace Layer::Infrastructure::Persistence::Database {
 class TransactionRunner;
 }
 
-namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
-class ReviewSessionStore;
+namespace Layer::Infrastructure::Persistence::Repository::ReviewSession {
+class ReviewSessionRepository;
 }
 
 namespace Layer::Application::Service::ReviewSession {
@@ -24,14 +24,14 @@ namespace Layer::Application::Service::ReviewSession {
 class ReviewSessionService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     Infrastructure::Persistence::Database::TransactionRunner& m_TransactionRunner;
-    Infrastructure::Persistence::Store::ReviewSession::ReviewSessionStore& m_ReviewSessionStore;
+    Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
     explicit ReviewSessionService(Infrastructure::Persistence::Database::TransactionRunner& TransactionRunner,
-                                  Infrastructure::Persistence::Store::ReviewSession::ReviewSessionStore& ReviewSessionStore) noexcept
+                                  Infrastructure::Persistence::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_TransactionRunner{ TransactionRunner }
-        , m_ReviewSessionStore{ ReviewSessionStore } {
+        , m_ReviewSessionRepository{ ReviewSessionRepository } {
     }
 
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)

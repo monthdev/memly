@@ -11,7 +11,7 @@
 #include "Layer/Application/Domain/ReviewSession/RecoverableReviewSessionMutationError.hpp"
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Layer/Infrastructure/Persistence/Database/TransactionRunner.hpp"
-#include "Layer/Infrastructure/Persistence/Store/ReviewSession/ReviewSessionStore.hpp"
+#include "Layer/Infrastructure/Persistence/Repository/ReviewSession/ReviewSessionRepository.hpp"
 
 namespace Layer::Application::Service::ReviewSession {
 
@@ -19,7 +19,7 @@ namespace Layer::Application::Service::ReviewSession {
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return this->m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-            return this->m_ReviewSessionStore.CreateOrReadExistingDefaultReviewSession(RootDeckId, ReviewSessionDefinitionKey);
+            return this->m_ReviewSessionRepository.CreateOrReadExistingDefaultReviewSession(RootDeckId, ReviewSessionDefinitionKey);
         });
 }
 
@@ -30,7 +30,7 @@ namespace Layer::Application::Service::ReviewSession {
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return this->m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-            return this->m_ReviewSessionStore.CreateOrReadExistingCustomReviewSession(
+            return this->m_ReviewSessionRepository.CreateOrReadExistingCustomReviewSession(
                 ReviewSessionName, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
         });
 }
@@ -39,7 +39,7 @@ namespace Layer::Application::Service::ReviewSession {
     -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return this->m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
         const std::optional<Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
-            this->m_ReviewSessionStore.RenameReviewSession(ReviewSessionId, ReviewSessionName)
+            this->m_ReviewSessionRepository.RenameReviewSession(ReviewSessionId, ReviewSessionName)
         };
         if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
             return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
@@ -54,7 +54,7 @@ namespace Layer::Application::Service::ReviewSession {
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return this->m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-            return this->m_ReviewSessionStore.EditReviewSessionToDefault(CurrentReviewSessionId, RootDeckId, ReviewSessionDefinitionKey);
+            return this->m_ReviewSessionRepository.EditReviewSessionToDefault(CurrentReviewSessionId, RootDeckId, ReviewSessionDefinitionKey);
         });
 }
 
@@ -65,14 +65,14 @@ namespace Layer::Application::Service::ReviewSession {
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return this->m_TransactionRunner.TransactionWrapper(
         [&]() -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-            return this->m_ReviewSessionStore.EditReviewSessionToCustom(CurrentReviewSessionId, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
+            return this->m_ReviewSessionRepository.EditReviewSessionToCustom(CurrentReviewSessionId, ReviewSessionDefinitionKey, ReviewSessionDeckSelectionVector);
         });
 }
 
 [[nodiscard]] auto ReviewSessionService::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId)
     -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return this->m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-        this->m_ReviewSessionStore.UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(ReviewSessionId);
+        this->m_ReviewSessionRepository.UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(ReviewSessionId);
         return std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>{};
     });
 }
@@ -80,7 +80,7 @@ namespace Layer::Application::Service::ReviewSession {
 [[nodiscard]] auto ReviewSessionService::DeleteReviewSession(const std::string& ReviewSessionId)
     -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     return this->m_TransactionRunner.TransactionWrapper([&]() -> std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-        this->m_ReviewSessionStore.DeleteReviewSession(ReviewSessionId);
+        this->m_ReviewSessionRepository.DeleteReviewSession(ReviewSessionId);
         return std::expected<void, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>{};
     });
 }
