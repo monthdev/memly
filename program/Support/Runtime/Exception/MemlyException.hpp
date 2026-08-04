@@ -18,7 +18,7 @@ private:
     std::size_t m_ErrorMessageSize;
 
 public:
-    explicit MemlyException(const std::initializer_list<std::string_view> ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
+    explicit MemlyException(const std::initializer_list<std::string_view>& ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
         : std::exception{}
         , SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_ErrorMessageArray{}

@@ -11,11 +11,11 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Layer::Infrastructure::Persistence::Database {
 class TransactionRunner;
 }
 
-namespace Layer::Infrastructure::Store::ReviewSession {
+namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
 class ReviewSessionStore;
 }
 
@@ -23,12 +23,12 @@ namespace Layer::Application::Service::ReviewSession {
 
 class ReviewSessionService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Database::TransactionRunner& m_TransactionRunner;
-    Infrastructure::Store::ReviewSession::ReviewSessionStore& m_ReviewSessionStore;
+    Infrastructure::Persistence::Database::TransactionRunner& m_TransactionRunner;
+    Infrastructure::Persistence::Store::ReviewSession::ReviewSessionStore& m_ReviewSessionStore;
 
 public:
-    explicit ReviewSessionService(Infrastructure::Database::TransactionRunner& TransactionRunner,
-                                  Infrastructure::Store::ReviewSession::ReviewSessionStore& ReviewSessionStore) noexcept
+    explicit ReviewSessionService(Infrastructure::Persistence::Database::TransactionRunner& TransactionRunner,
+                                  Infrastructure::Persistence::Store::ReviewSession::ReviewSessionStore& ReviewSessionStore) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_TransactionRunner{ TransactionRunner }
         , m_ReviewSessionStore{ ReviewSessionStore } {

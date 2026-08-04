@@ -8,9 +8,9 @@
 #include "Layer/Application/Domain/Deck/Constraint/DeckConstraint.hpp"
 #include "Layer/Application/Domain/Deck/Index/DeckForestSnapshotNode.hpp"
 #include "Layer/Application/IndexCache/Deck/DeckForestSnapshotIndexCache.hpp"
-#include "Layer/Infrastructure/Store/Deck/DeckSnapshotRecord.hpp"
-#include "Layer/Infrastructure/Store/Deck/DeckSnapshotStore.hpp"
-#include "Layer/Infrastructure/Store/Deck/DeckStore.hpp"
+#include "Layer/Infrastructure/Persistence/Store/Deck/DeckSnapshotRecord.hpp"
+#include "Layer/Infrastructure/Persistence/Store/Deck/DeckSnapshotStore.hpp"
+#include "Layer/Infrastructure/Persistence/Store/Deck/DeckStore.hpp"
 
 namespace Layer::Application::Service::Deck {
 
@@ -48,11 +48,11 @@ void DeckService::DeleteDeck(const std::string& DeckId) {
 
 void DeckService::RefreshDeckForestSnapshotIndexCache(const IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease& DeckForestSnapshotIndexCacheLease,
                                                       const std::int64_t AsOfMillisecondsSinceEpoch) {
-    std::vector<Infrastructure::Store::Deck::DeckSnapshotRecord> DeckSnapshotRecordVector{ this->m_DeckSnapshotStore.ReadDeckSnapshotRecords(
+    std::vector<Infrastructure::Persistence::Store::Deck::DeckSnapshotRecord> DeckSnapshotRecordVector{ this->m_DeckSnapshotStore.ReadDeckSnapshotRecords(
         AsOfMillisecondsSinceEpoch) };
     std::vector<Domain::Deck::Index::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
     DeckForestSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
-    for (Infrastructure::Store::Deck::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
+    for (Infrastructure::Persistence::Store::Deck::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
         DeckForestSnapshotNodeVector.emplace_back(std::move(DeckSnapshotRecord.m_DeckId),
                                                   std::move(DeckSnapshotRecord.m_ParentDeckIdOptional),
                                                   std::move(DeckSnapshotRecord.m_DeckName),

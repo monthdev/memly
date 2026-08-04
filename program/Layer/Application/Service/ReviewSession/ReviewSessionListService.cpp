@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
-#include "Layer/Infrastructure/Store/ReviewSession/ReviewSessionListStore.hpp"
+#include "Layer/Infrastructure/Persistence/Store/ReviewSession/ReviewSessionListStore.hpp"
 
 namespace Layer::Application::Service::ReviewSession {
 

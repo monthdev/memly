@@ -8,7 +8,7 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Store::ReviewSession {
+namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
 class ReviewSessionListStore;
 }
 
@@ -16,10 +16,10 @@ namespace Layer::Application::Service::ReviewSession {
 
 class ReviewSessionListService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Store::ReviewSession::ReviewSessionListStore& m_ReviewSessionListStore;
+    Infrastructure::Persistence::Store::ReviewSession::ReviewSessionListStore& m_ReviewSessionListStore;
 
 public:
-    explicit ReviewSessionListService(Infrastructure::Store::ReviewSession::ReviewSessionListStore& ReviewSessionListStore) noexcept
+    explicit ReviewSessionListService(Infrastructure::Persistence::Store::ReviewSession::ReviewSessionListStore& ReviewSessionListStore) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_ReviewSessionListStore{ ReviewSessionListStore } {
     }

@@ -12,7 +12,7 @@
 
 #include "Layer/Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Layer/Application/Invalidation/LibraryInvalidationTarget.hpp"
-#include "Layer/Infrastructure/Store/Library/LibraryClockStore.hpp"
+#include "Layer/Infrastructure/Persistence/Store/Library/LibraryClockStore.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 
 namespace Layer::Application::Invalidation {

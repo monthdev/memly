@@ -24,20 +24,20 @@ class DeckService;
 // class ReviewSessionService;
 // }
 
-namespace Layer::Infrastructure::Database {
+namespace Layer::Infrastructure::Persistence::Database {
 class DatabaseRuntime;
 }
 
-namespace Layer::Infrastructure::Store::Deck {
+namespace Layer::Infrastructure::Persistence::Store::Deck {
 class DeckStore;
 class DeckSnapshotStore;
 }
 
-// namespace Layer::Infrastructure::Store::Library {
+// namespace Layer::Infrastructure::Persistence::Store::Library {
 // class LibraryClockStore;
 // }
 
-// namespace Layer::Infrastructure::Store::ReviewSession {
+// namespace Layer::Infrastructure::Persistence::Store::ReviewSession {
 // class ReviewSessionListStore;
 // class ReviewSessionStore;
 // }
@@ -46,14 +46,14 @@ namespace CompositionRoot {
 
 class RuntimeContext final : private Support::SpecialMemberPolicy::NonInstantiableMixin {
 private:
-    static std::unique_ptr<Layer::Infrastructure::Database::DatabaseRuntime> s_DatabaseRuntime;
+    static std::unique_ptr<Layer::Infrastructure::Persistence::Database::DatabaseRuntime> s_DatabaseRuntime;
     // static std::unique_ptr<Layer::Application::Invalidation::LibraryInvalidationChannel> s_LibraryInvalidationChannel;
-    // static std::unique_ptr<Layer::Infrastructure::Store::Library::LibraryClockStore> s_LibraryClockStore;
+    // static std::unique_ptr<Layer::Infrastructure::Persistence::Store::Library::LibraryClockStore> s_LibraryClockStore;
     // static std::unique_ptr<Layer::Application::Invalidation::LibraryInvalidationCoordinator> s_LibraryInvalidationCoordinator;
-    static std::unique_ptr<Layer::Infrastructure::Store::Deck::DeckStore> s_DeckStore;
-    static std::unique_ptr<Layer::Infrastructure::Store::Deck::DeckSnapshotStore> s_DeckSnapshotStore;
-    // static std::unique_ptr<Layer::Infrastructure::Store::ReviewSession::ReviewSessionListStore> s_ReviewSessionListStore;
-    // static std::unique_ptr<Layer::Infrastructure::Store::ReviewSession::ReviewSessionStore> s_ReviewSessionStore;
+    static std::unique_ptr<Layer::Infrastructure::Persistence::Store::Deck::DeckStore> s_DeckStore;
+    static std::unique_ptr<Layer::Infrastructure::Persistence::Store::Deck::DeckSnapshotStore> s_DeckSnapshotStore;
+    // static std::unique_ptr<Layer::Infrastructure::Persistence::Store::ReviewSession::ReviewSessionListStore> s_ReviewSessionListStore;
+    // static std::unique_ptr<Layer::Infrastructure::Persistence::Store::ReviewSession::ReviewSessionStore> s_ReviewSessionStore;
     static std::unique_ptr<Layer::Application::Service::Deck::DeckService> s_DeckService;
     // static std::unique_ptr<Layer::Application::Service::ReviewSession::ReviewSessionListService> s_ReviewSessionListService;
     // static std::unique_ptr<Layer::Application::Service::ReviewSession::ReviewSessionService> s_ReviewSessionService;

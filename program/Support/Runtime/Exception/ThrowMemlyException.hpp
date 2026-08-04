@@ -5,5 +5,5 @@
 #include <string_view>
 
 namespace Support::Runtime::Exception {
-[[noreturn]] void ThrowMemlyException(std::initializer_list<std::string_view>, const std::source_location& = std::source_location::current());
+[[noreturn]] void ThrowMemlyException(const std::initializer_list<std::string_view>&, const std::source_location& = std::source_location::current());
 }

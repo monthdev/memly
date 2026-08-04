@@ -210,6 +210,9 @@ assumed to satisfy schema and application invariants established by Memly write
 paths. Violations of those invariants are programming errors; database-engine
 failures remain runtime errors at the database boundary.
 
+`Layer/Infrastructure/Persistence` groups the database engine boundary, SQL
+resources, and concrete stores.
+
 `DatabaseRuntime` owns the live DuckDB database and connection and the
 store-facing prepared-statement factory. It retains the single startup
 transaction that orders migration before seeding. The ephemeral

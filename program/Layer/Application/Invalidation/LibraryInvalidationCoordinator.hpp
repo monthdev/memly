@@ -10,7 +10,7 @@
 #include "Layer/Application/Invalidation/LibraryInvalidationTarget.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
-namespace Layer::Infrastructure::Store::Library {
+namespace Layer::Infrastructure::Persistence::Store::Library {
 class LibraryClockStore;
 }
 
@@ -22,12 +22,12 @@ class LibraryInvalidationCoordinator final : public QObject, private Support::Sp
     Q_OBJECT
 private:
     LibraryInvalidationChannel& m_LibraryInvalidationChannel;
-    Infrastructure::Store::Library::LibraryClockStore& m_LibraryClockStore;
+    Infrastructure::Persistence::Store::Library::LibraryClockStore& m_LibraryClockStore;
     QTimer m_LibraryInvalidationQTimer;
 
 public:
     explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel& LibraryInvalidationChannel,
-                                            Infrastructure::Store::Library::LibraryClockStore& LibraryClockStore,
+                                            Infrastructure::Persistence::Store::Library::LibraryClockStore& LibraryClockStore,
                                             QObject* Parent = nullptr)
         : QObject{ Parent }
         , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}

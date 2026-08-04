@@ -10,7 +10,7 @@ namespace Layer::Application::Domain::Deck::Index {
 class DeckForestSnapshotIndex;
 }
 
-namespace Layer::Infrastructure::Store::Deck {
+namespace Layer::Infrastructure::Persistence::Store::Deck {
 class DeckStore;
 class DeckSnapshotStore;
 }
@@ -19,12 +19,13 @@ namespace Layer::Application::Service::Deck {
 
 class DeckService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
-    Infrastructure::Store::Deck::DeckStore& m_DeckStore;
-    Infrastructure::Store::Deck::DeckSnapshotStore& m_DeckSnapshotStore;
+    Infrastructure::Persistence::Store::Deck::DeckStore& m_DeckStore;
+    Infrastructure::Persistence::Store::Deck::DeckSnapshotStore& m_DeckSnapshotStore;
     IndexCache::Deck::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
 
 public:
-    explicit DeckService(Infrastructure::Store::Deck::DeckStore& DeckStore, Infrastructure::Store::Deck::DeckSnapshotStore& DeckSnapshotStore) noexcept
+    explicit DeckService(Infrastructure::Persistence::Store::Deck::DeckStore& DeckStore,
+                         Infrastructure::Persistence::Store::Deck::DeckSnapshotStore& DeckSnapshotStore) noexcept
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
         , m_DeckStore{ DeckStore }
         , m_DeckSnapshotStore{ DeckSnapshotStore }
