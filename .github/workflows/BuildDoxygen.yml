@@ -1,4 +1,4 @@
-name: Check Doxygen
+name: Build Doxygen
 
 on:
   pull_request:
@@ -11,11 +11,13 @@ permissions:
 
 jobs:
   doxygen:
+    name: Doxygen
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      DOXYGEN_VERSION: "1.17.0"
       DOXYGEN_SHA256: "75419ef4f446fc1c24ef12514b574e66e898ee6f527c6ae2ad84f91a905823c2"
+      DOXYGEN_VERSION: "1.17.0"
+
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

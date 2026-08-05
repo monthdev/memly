@@ -1,0 +1,471 @@
+name: Check Format
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      AQTINSTALL_VERSION: "3.3.0"
+      CMAKELANG_VERSION: "0.6.13"
+      LLVM_MAJOR: "22"
+      NODE_VERSION: "26.5.1"
+      PRETTIER_VERSION: "3.9.6"
+      PYTHON_VERSION: "3.14.6"
+      QT_ARCH: "linux_gcc_64"
+      QT_DIR: ${{ github.workspace }}/Qt
+      QT_VERSION: "6.11.1"
+      SQL_FORMATTER_VERSION: "15.8.2"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Determine comparison base
+        id: comparison
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BASE_SHA="$PULL_REQUEST_BASE_SHA"
+          else
+            BASE_SHA="${BEFORE_SHA:-}"
+            if [[ -z "$BASE_SHA" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+              BASE_SHA="$(git hash-object -t tree /dev/null)"
+            fi
+          fi
+
+          echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Collect target C/C++ files
+        id: cxx_files
+        env:
+          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CXX_PATHS=(
+            ':(glob)**/*.c'
+            ':(glob)**/*.cc'
+            ':(glob)**/*.cpp'
+            ':(glob)**/*.cxx'
+            ':(glob)**/*.h'
+            ':(glob)**/*.hh'
+            ':(glob)**/*.hpp'
+            ':(glob)**/*.hxx'
+            ':(glob)**/*.m'
+            ':(glob)**/*.mm'
+          )
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .clang-format \
+              .github/workflows/CheckFormat.yml
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "ClangFormat check configuration changed; checking all C/C++ files."
+            git ls-files "${CXX_PATHS[@]}" > /tmp/clang_format_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              "${CXX_PATHS[@]}" > /tmp/clang_format_files.txt
+          fi
+
+          if [[ ! -s /tmp/clang_format_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No C/C++ files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target C/C++ files:"
+          cat /tmp/clang_format_files.txt
+
+      - name: Collect target CMake listfiles
+        id: cmake_files
+        env:
+          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .cmake-format.yaml \
+              .cmakelintrc \
+              .github/workflows/CheckFormat.yml
+          )
+          mapfile -t CHANGED_LISTFILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              ':(glob)**/CMakeLists.txt' \
+              ':(glob)**/*.cmake' \
+              ':(glob)**/*.cmake.in'
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "CMake check configuration changed; checking all CMake listfiles."
+            git ls-files \
+              ':(glob)**/CMakeLists.txt' \
+              ':(glob)**/*.cmake' \
+              ':(glob)**/*.cmake.in' \
+              > /tmp/cmake_files.txt
+          elif [[ ${#CHANGED_LISTFILES[@]} -gt 0 ]]; then
+            printf '%s\n' "${CHANGED_LISTFILES[@]}" > /tmp/cmake_files.txt
+          else
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No CMake listfiles changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target CMake listfiles:"
+          cat /tmp/cmake_files.txt
+
+      - name: Collect target Markdown files
+        id: markdown_files
+        env:
+          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .prettierignore \
+              .prettierrc \
+              .prettierrc.json \
+              .prettierrc.yaml \
+              .prettierrc.yml \
+              prettier.config.js \
+              .github/workflows/CheckFormat.yml
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "Markdown check configuration changed; checking all Markdown files."
+            git ls-files '*.md' '*.markdown' > /tmp/markdown_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              '*.md' '*.markdown' > /tmp/markdown_files.txt
+          fi
+
+          if [[ ! -s /tmp/markdown_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No Markdown files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target Markdown files:"
+          cat /tmp/markdown_files.txt
+
+      - name: Collect target QML files
+        id: qml_files
+        env:
+          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .qmlformat.ini \
+              .github/workflows/CheckFormat.yml
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "QML format check configuration changed; checking all QML files."
+            git ls-files '*.qml' > /tmp/qml_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              '*.qml' > /tmp/qml_files.txt
+          fi
+
+          if [[ ! -s /tmp/qml_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No QML files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target QML files:"
+          cat /tmp/qml_files.txt
+
+      - name: Collect target SQL files
+        id: sql_files
+        env:
+          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .github/workflows/CheckFormat.yml
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "SQL format check configuration changed; checking all SQL files."
+            git ls-files '*.sql' > /tmp/sql_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              '*.sql' > /tmp/sql_files.txt
+          fi
+
+          if [[ ! -s /tmp/sql_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No SQL files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target SQL files:"
+          cat /tmp/sql_files.txt
+
+      - name: Collect target YAML files
+        id: yaml_files
+        env:
+          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t CONFIG_FILES < <(
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              .prettierignore \
+              .prettierrc \
+              .prettierrc.json \
+              .prettierrc.yaml \
+              .prettierrc.yml \
+              prettier.config.js \
+              .github/workflows/CheckFormat.yml
+          )
+
+          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
+            echo "YAML check configuration changed; checking all YAML files."
+            git ls-files '*.yaml' '*.yml' .clang-tidy > /tmp/yaml_files.txt
+          else
+            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
+              '*.yaml' '*.yml' .clang-tidy > /tmp/yaml_files.txt
+          fi
+
+          if [[ ! -s /tmp/yaml_files.txt ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            echo "No YAML files changed."
+            exit 0
+          fi
+
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "Target YAML files:"
+          cat /tmp/yaml_files.txt
+
+      - name: Set up Node.js
+        if: >-
+          steps.markdown_files.outputs.has_files == 'true' ||
+          steps.sql_files.outputs.has_files == 'true' ||
+          steps.yaml_files.outputs.has_files == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Set up Python
+        if: >-
+          steps.cmake_files.outputs.has_files == 'true' ||
+          steps.qml_files.outputs.has_files == 'true'
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install clang-format ${{ env.LLVM_MAJOR }}
+        if: steps.cxx_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y wget gnupg lsb-release software-properties-common
+          wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+          sudo bash /tmp/llvm.sh "$LLVM_MAJOR"
+          sudo apt-get update
+          CLANG_FORMAT_PACKAGE="clang-format-${LLVM_MAJOR}"
+          sudo apt-get install --no-install-recommends -y "$CLANG_FORMAT_PACKAGE"
+          CLANG_FORMAT_EXECUTABLE="/usr/bin/${CLANG_FORMAT_PACKAGE}"
+          echo "CLANG_FORMAT_EXECUTABLE=$CLANG_FORMAT_EXECUTABLE" >> "$GITHUB_ENV"
+          VERSION_OUTPUT="$("$CLANG_FORMAT_EXECUTABLE" --version)"
+          echo "$VERSION_OUTPUT"
+          if [[ "$VERSION_OUTPUT" != *"version ${LLVM_MAJOR}."* ]]; then
+            echo "::error::Expected clang-format $LLVM_MAJOR.x, got: $VERSION_OUTPUT"
+            exit 1
+          fi
+
+      - name: Check C/C++ formatting
+        if: steps.cxx_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/clang_format_files.txt
+          : "${CLANG_FORMAT_EXECUTABLE:?CLANG_FORMAT_EXECUTABLE not set}"
+
+          if ! "$CLANG_FORMAT_EXECUTABLE" --dry-run -Werror -style=file "${FILES[@]}"; then
+            echo "::error::Some files are not formatted. Run: clang-format -i -style=file <file>..."
+            exit 1
+          fi
+
+      - name: Install cmakelang
+        if: steps.cmake_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check "cmakelang[YAML]==${CMAKELANG_VERSION}"
+          cmake-format --version
+          cmake-lint --version
+
+      - name: Check CMake formatting
+        if: steps.cmake_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/cmake_files.txt
+          cmake-format --check "${FILES[@]}"
+
+      - name: Lint CMake listfiles
+        if: steps.cmake_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/cmake_files.txt
+          cmake-lint --suppress-decorations -c .cmakelintrc -- "${FILES[@]}"
+
+      - name: Check Markdown formatting
+        if: steps.markdown_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/markdown_files.txt
+          npx --yes "prettier@${PRETTIER_VERSION}" --version
+          npx --yes "prettier@${PRETTIER_VERSION}" --check "${FILES[@]}"
+
+      - name: Cache Qt
+        if: steps.qml_files.outputs.has_files == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.QT_DIR }}
+          key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
+
+      - name: Install aqtinstall
+        if: steps.qml_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check "aqtinstall==${AQTINSTALL_VERSION}"
+          python -m aqt version
+
+      - name: Install Qt ${{ env.QT_VERSION }}
+        if: steps.qml_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -d "${QT_DIR}/${QT_VERSION}/gcc_64" ]]; then
+            python -m aqt install-qt linux desktop "${QT_VERSION}" "${QT_ARCH}" \
+              --outputdir "${QT_DIR}"
+          fi
+
+      - name: Locate qmlformat
+        if: steps.qml_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          QMLFORMAT_BIN="${QT_DIR}/${QT_VERSION}/gcc_64/bin/qmlformat"
+          if [[ -z "$QMLFORMAT_BIN" || ! -x "$QMLFORMAT_BIN" ]]; then
+            echo "::error::qmlformat not found at $QMLFORMAT_BIN"
+            exit 1
+          fi
+
+          echo "QT_DIR=$QT_DIR"
+          echo "QMLFORMAT_BIN=$QMLFORMAT_BIN"
+          echo "QMLFORMAT_BIN=$QMLFORMAT_BIN" >> "$GITHUB_ENV"
+
+          "$QMLFORMAT_BIN" --version
+
+      - name: Check QML formatting
+        if: steps.qml_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/qml_files.txt
+          : "${QMLFORMAT_BIN:?QMLFORMAT_BIN not set}"
+          FAIL=0
+          FORMATTED_FILE="$(mktemp)"
+          trap 'rm -f "$FORMATTED_FILE"' EXIT
+
+          for f in "${FILES[@]}"; do
+            echo "Checking $f"
+            "$QMLFORMAT_BIN" --settings .qmlformat.ini "$f" > "$FORMATTED_FILE"
+
+            if ! diff -u "$f" "$FORMATTED_FILE"; then
+              echo "::error file=$f::File is not properly formatted with qmlformat"
+              FAIL=1
+            fi
+          done
+
+          if [[ $FAIL -ne 0 ]]; then
+            echo "::error::Some files are not formatted. Run qmlformat from Qt ${QT_VERSION} and compare the diff above."
+            exit 1
+          fi
+
+      - name: Install sql-formatter
+        if: steps.sql_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global "sql-formatter@${SQL_FORMATTER_VERSION}"
+          sql-formatter --version
+
+      - name: Check SQL formatting
+        if: steps.sql_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/sql_files.txt
+          FAIL=0
+          FORMATTED_FILE="$(mktemp)"
+          trap 'rm -f "$FORMATTED_FILE"' EXIT
+
+          for f in "${FILES[@]}"; do
+            echo "Checking $f"
+            sql-formatter --language duckdb "$f" > "$FORMATTED_FILE"
+
+            if ! diff -u "$f" "$FORMATTED_FILE"; then
+              echo "::error file=$f::File is not properly formatted with sql-formatter"
+              FAIL=1
+            fi
+          done
+
+          if [[ $FAIL -ne 0 ]]; then
+            echo "::error::Some files are not formatted. Run: sql-formatter --language duckdb --fix <file>..."
+            exit 1
+          fi
+
+      - name: Check YAML formatting
+        if: steps.yaml_files.outputs.has_files == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < /tmp/yaml_files.txt
+          npx --yes "prettier@${PRETTIER_VERSION}" --version
+          npx --yes "prettier@${PRETTIER_VERSION}" --check "${FILES[@]}"
