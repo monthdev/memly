@@ -2,11 +2,13 @@
 
 #include <duckdb.hpp>
 
+#include <initializer_list>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 #include "Layer/Infrastructure/DuckDb/Database/QueryResultDecoder.hpp"
-#include "Layer/Infrastructure/DuckDb/Database/ThrowOnDatabaseError.hpp"
+#include "Support/Runtime/Exception/ThrowMemlyException.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Database {
 
@@ -17,7 +19,9 @@ namespace Layer::Infrastructure::DuckDb::Database {
 // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 [[nodiscard]] auto PreparedStatementExecution::Execute(duckdb::vector<duckdb::Value>&& DuckDbValueVector) -> QueryResultDecoder {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ this->m_DuckDbPreparedStatement.Execute(DuckDbValueVector, true) };
-    ThrowOnQueryResultError(*QueryResult, this->m_SourceLocation);
+    if (QueryResult->HasError()) {
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ QueryResult->GetError() }, this->m_SourceLocation);
+    }
     return QueryResultDecoder{ std::move(QueryResult), this->m_SourceLocation };
 }
 

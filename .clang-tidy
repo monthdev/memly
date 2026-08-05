@@ -546,10 +546,10 @@ CustomChecks:
   - Name: memly-unnamed-namespace-declaration-prefix
     Query: >-
       match namedDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
-      hasParent(namespaceDecl(isAnonymous())), unless(matchesName("::a_[^:]*$")) ).bind("declaration")
+      hasParent(namespaceDecl(isAnonymous())), unless(matchesName("::u_[^:]*$")) ).bind("declaration")
     Diagnostic:
       - BindName: declaration
-        Message: declarations made directly in an unnamed namespace must use the a_ prefix
+        Message: declarations made directly in an unnamed namespace must use the u_ prefix
         Level: Warning
   - Name: memly-unnamed-namespace-nesting
     Query: >-

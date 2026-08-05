@@ -1,10 +1,10 @@
 #include "Layer/Application/Domain/Text/Data/HumanTextInput.hpp"
 
 #include <unicode/brkiter.h>
+#include <unicode/errorcode.h>
 #include <unicode/locid.h>
 #include <unicode/normalizer2.h>
 #include <unicode/unistr.h>
-#include <unicode/utypes.h>
 
 #include <cstddef>
 #include <functional>
@@ -19,39 +19,39 @@
 namespace Layer::Application::Domain::Text::Data {
 namespace {
 
-void a_ThrowOnIcuError(const UErrorCode ErrorCode) {
-    if (U_FAILURE(ErrorCode) not_eq 0) {
-        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ u_errorName(ErrorCode) });
+void u_ThrowOnIcuError(const icu::ErrorCode& IcuErrorCode) {
+    if (IcuErrorCode.isFailure() not_eq 0) {
+        Support::Runtime::Exception::ThrowMemlyException(std::initializer_list<std::string_view>{ IcuErrorCode.errorName() });
     }
 }
 
-[[nodiscard]] auto a_NormalizeText(const icu::UnicodeString& UnicodeString) -> icu::UnicodeString {
-    UErrorCode ErrorCode{ U_ZERO_ERROR };
-    const icu::Normalizer2* NormalizerPointer{ icu::Normalizer2::getNFCInstance(ErrorCode) };
-    a_ThrowOnIcuError(ErrorCode);
+[[nodiscard]] auto u_NormalizeText(const icu::UnicodeString& UnicodeString) -> icu::UnicodeString {
+    icu::ErrorCode IcuErrorCode{};
+    const icu::Normalizer2* NormalizerPointer{ icu::Normalizer2::getNFCInstance(IcuErrorCode) };
+    u_ThrowOnIcuError(IcuErrorCode);
     icu::UnicodeString NormalizedUnicodeString{};
-    NormalizerPointer->normalize(UnicodeString, NormalizedUnicodeString, ErrorCode);
-    a_ThrowOnIcuError(ErrorCode);
+    NormalizerPointer->normalize(UnicodeString, NormalizedUnicodeString, IcuErrorCode);
+    u_ThrowOnIcuError(IcuErrorCode);
     return icu::UnicodeString{ std::move(NormalizedUnicodeString) };
 }
 
 }
 
 [[nodiscard]] auto HumanTextInput::FromInput(const std::string& Text) -> HumanTextInput {
-    return HumanTextInput{ a_NormalizeText(icu::UnicodeString::fromUTF8(Text)) };
+    return HumanTextInput{ u_NormalizeText(icu::UnicodeString::fromUTF8(Text)) };
 }
 
 namespace {
 
-[[nodiscard]] auto a_GetThreadLocalIcuBreakIterator() -> icu::BreakIterator& {
+[[nodiscard]] auto u_GetThreadLocalIcuBreakIterator() -> icu::BreakIterator& {
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
 #endif
     thread_local std::unique_ptr<icu::BreakIterator> s_IcuBreakIteratorUniquePointer{ std::invoke([]() -> std::unique_ptr<icu::BreakIterator> {
-        UErrorCode ErrorCode{ U_ZERO_ERROR };
-        std::unique_ptr<icu::BreakIterator> IcuBreakIteratorUniquePointer{ icu::BreakIterator::createCharacterInstance(icu::Locale::getRoot(), ErrorCode) };
-        a_ThrowOnIcuError(ErrorCode);
+        icu::ErrorCode IcuErrorCode{};
+        std::unique_ptr<icu::BreakIterator> IcuBreakIteratorUniquePointer{ icu::BreakIterator::createCharacterInstance(icu::Locale::getRoot(), IcuErrorCode) };
+        u_ThrowOnIcuError(IcuErrorCode);
         return std::unique_ptr<icu::BreakIterator>{ std::move(IcuBreakIteratorUniquePointer) };
     }) };
 #if defined(__clang__)
@@ -63,7 +63,7 @@ namespace {
 }
 
 [[nodiscard]] auto HumanTextInput::ComputeGraphemeClusterLength() const -> std::size_t {
-    icu::BreakIterator& IcuBreakIterator{ a_GetThreadLocalIcuBreakIterator() };
+    icu::BreakIterator& IcuBreakIterator{ u_GetThreadLocalIcuBreakIterator() };
     IcuBreakIterator.setText(this->m_NormalizedUnicodeString);
     std::size_t GraphemeClusterLength{ 0 };
     IcuBreakIterator.first();

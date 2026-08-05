@@ -221,9 +221,9 @@ repository its implementation.
 DuckDB SQL resources are implementation details of their direct consumer.
 Repository SQL lives under the corresponding `DuckDb/Repository/<Domain>/Sql`
 folder. Migration and seed SQL live under `DuckDb/Database/Sql/Migration` and
-`DuckDb/Database/Sql/Seed`, respectively. The migrator and seeder themselves
-remain direct members of the Database component. Do not collect SQL from
-independent consumers into a shared horizontal folder.
+`DuckDb/Database/Sql/Seed`, respectively. Migration and seeding orchestration
+remains private `DatabaseRuntime` behavior. Do not collect SQL from independent
+consumers into a shared horizontal folder.
 
 Single-operation SQL resources are classified by their primary SQL statement
 under `Select/`, `Update/`, `Insert/`, or `Delete/`. Each resource filename and
@@ -241,18 +241,16 @@ uses SQL-operation folders, currently `Insert/`. Do not add a redundant
 `Statement/` directory around SQL resources.
 
 `DatabaseRuntime` owns the live DuckDB database and connection and the
-repository-facing prepared-statement factory. It retains the single startup
-transaction that orders migration before seeding. The ephemeral
-`DatabaseMigrator` and `DatabaseSeeder` receive the live connection and own
-their respective startup-only direct SQL through raw DuckDB connection,
-prepared-statement, and result APIs. The Memly prepared-statement execution and
-decoding chain is the capability boundary for database consumers outside the
-Database component; internal migration and seeding must not route through it. A
-`PreparedStatement` is self-contained after preparation and begins execution
-through its own `Execute()` method. `QueryResultDecoder` owns the result from
-that execution path and fetches its chunks directly. Do not route an operation
-back through `DatabaseRuntime` when the corresponding DuckDB handle already owns
-that operation.
+repository-facing prepared-statement factory. Its private `ApplyMigrations()`
+and `SeedTableDefaults()` methods run inside the single startup transaction in
+that order. Startup SQL uses the same result-decoding chain as repository SQL:
+`Query()` begins parameterless direct and multi-statement execution, while
+parameterized startup SQL uses `PrepareStatement()`. A `PreparedStatement` is
+self-contained after preparation and begins execution through its own
+`Execute()` method. `QueryResultDecoder` owns a result from either execution
+path and fetches its chunks directly. Do not route an operation back through
+`DatabaseRuntime` when the corresponding DuckDB handle already owns that
+operation.
 
 Prepared-statement execution and result decoding form one ephemeral, rvalue-only
 chain beginning at `PreparedStatement::Execute()`. Invoke `WithParameters()` for
@@ -379,7 +377,7 @@ the four architectural layers therefore begin with `Layer::`. An unnamed helper
 namespace is nested inside that matching namespace. The custom matcher enforces
 the minimum structural requirement that it have a Memly namespace ancestor
 (`custom-memly-unnamed-namespace-nesting`). Every declaration made directly at
-unnamed-namespace scope uses an `a_` prefix, including functions, types, enums,
+unnamed-namespace scope uses a `u_` prefix, including functions, types, enums,
 concepts, and aliases; members of an unnamed-namespace type retain their normal
 member naming (`custom-memly-unnamed-namespace-declaration-prefix`).
 
@@ -410,7 +408,7 @@ dependency-distance signal.
 Lambdas always declare their return type. Named lambda closure variables are
 disallowed (`custom-memly-no-named-lambda`); pass a lambda directly to its
 consumer or invoke it immediately with `std::invoke`. Reusable callable logic
-belongs in an unnamed-namespace `a_` helper or in a private method when it needs
+belongs in an unnamed-namespace `u_` helper or in a private method when it needs
 object state or private types.
 
 Invoke every indirect callable expression with `std::invoke`, including an
@@ -421,7 +419,7 @@ readability over easily missed operator() invocations. Calls outside this
 requirement are limited to:
 
 - ordinary direct free or static functions, such as
-  `a_ThrowOnIcuError(ErrorCode)`;
+  `u_ThrowOnIcuError(IcuErrorCode)`;
 - ordinary direct member functions, such as `IcuBreakIterator.next()`; and
 - namespace-level library callable APIs designed for direct function syntax,
   such as `std::ranges::copy(...)` and `std::ranges::equal(...)`.

@@ -28,7 +28,7 @@ namespace Layer::Infrastructure::DuckDb::Repository::ReviewSession {
 
 namespace {
 
-[[nodiscard]] auto a_CountResultRows(Database::DatabaseRuntime& DatabaseRuntime,
+[[nodiscard]] auto u_CountResultRows(Database::DatabaseRuntime& DatabaseRuntime,
                                      duckdb::QueryResult& QueryResult,
                                      const std::source_location& SourceLocation = std::source_location::current()) -> std::size_t {
     std::size_t ResultRowCount{ 0 };
@@ -38,7 +38,7 @@ namespace {
     return ResultRowCount;
 }
 
-[[maybe_unused, nodiscard]] auto a_TryGetRecoverableReviewSessionMutationError(duckdb::QueryResult& QueryResult)
+[[maybe_unused, nodiscard]] auto u_TryGetRecoverableReviewSessionMutationError(duckdb::QueryResult& QueryResult)
     -> std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
     if (not QueryResult.HasError()) {
         return std::nullopt;
@@ -95,13 +95,13 @@ namespace {
         ExistingReviewSessionIdOptional.has_value()) {
         return ExistingReviewSessionIdOptional.value();
     }
-    [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
+    [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_InsertDefaultReviewSessionPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey, RootDeckId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
-    //     a_TryGetRecoverableReviewSessionMutationError(*QueryResult)
+    //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
@@ -121,13 +121,13 @@ namespace {
         ExistingReviewSessionIdOptional.has_value()) {
         return ExistingReviewSessionIdOptional.value();
     }
-    [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
+    [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_InsertCustomReviewSessionPreparedStatement)
              .WithParameters(ReviewSessionName, ReviewSessionDefinitionKey)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
-    //     a_TryGetRecoverableReviewSessionMutationError(*QueryResult)
+    //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
@@ -149,12 +149,12 @@ namespace {
 
 [[nodiscard]] auto ReviewSessionRepository::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName)
     -> std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {
-    [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
+    [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionNamePreparedStatement).WithParameters(ReviewSessionName, ReviewSessionId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
-    //     a_TryGetRecoverableReviewSessionMutationError(*QueryResult)
+    //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // return RecoverableReviewSessionMutationErrorOptional;
     return std::nullopt;
@@ -170,13 +170,13 @@ namespace {
             return std::unexpected{ Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
-    [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
+    [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionToDefaultPreparedStatement).WithParameters(
             RootDeckId, ReviewSessionDefinitionKey, CurrentReviewSessionId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
-    //     a_TryGetRecoverableReviewSessionMutationError(*QueryResult)
+    //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
@@ -197,13 +197,13 @@ namespace {
             return std::unexpected{ Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
-    [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
+    [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionToCustomPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey, CurrentReviewSessionId)) };
     assert(ResultRowCount == 1);
     // std::optional<Application::Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
-    //     a_TryGetRecoverableReviewSessionMutationError(*QueryResult)
+    //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
@@ -221,7 +221,7 @@ namespace {
 }
 
 void ReviewSessionRepository::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string& ReviewSessionId) {
-    [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
+    [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement)
              .WithParameters(ReviewSessionId)) };
@@ -230,14 +230,14 @@ void ReviewSessionRepository::UpdateReviewSessionLastCardReviewAtMillisecondsSin
 
 void ReviewSessionRepository::DeleteReviewSession(const std::string& ReviewSessionId) {
     this->DeleteCustomReviewSessionDeckSelections(ReviewSessionId);
-    [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
+    [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime, *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_DeleteReviewSessionPreparedStatement).WithParameters(ReviewSessionId)) };
     assert(ResultRowCount == 1);
 }
 
 namespace {
 
-[[nodiscard]] auto a_TryReadSingleStringResult(Database::DatabaseRuntime& DatabaseRuntime,
+[[nodiscard]] auto u_TryReadSingleStringResult(Database::DatabaseRuntime& DatabaseRuntime,
                                                duckdb::QueryResult& QueryResult,
                                                const std::source_location& SourceLocation = std::source_location::current()) -> std::optional<std::string> {
     std::optional<std::string> ResultOptional{};
@@ -255,14 +255,14 @@ namespace {
 }
 
 [[nodiscard]] auto ReviewSessionRepository::TryReadDefaultReviewSessionIdByRootDeckId(const std::string& RootDeckId) -> std::optional<std::string> {
-    return a_TryReadSingleStringResult(
+    return u_TryReadSingleStringResult(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement).WithParameters(RootDeckId));
 }
 
 [[nodiscard]] auto ReviewSessionRepository::TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string& ReviewSessionDefinitionKey)
     -> std::optional<std::string> {
-    return a_TryReadSingleStringResult(
+    return u_TryReadSingleStringResult(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey));
@@ -271,7 +271,7 @@ namespace {
 namespace {
 
 [[nodiscard]] constexpr auto
-a_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) noexcept
+u_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) noexcept
     -> const char* {
     switch (DeckSelectionType) {
     case Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Self:
@@ -294,17 +294,17 @@ void ReviewSessionRepository::CreateCustomReviewSessionDeckSelection(
     const std::string& ReviewSessionId,
     const std::string& DeckId,
     const Application::Domain::ReviewSession::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) {
-    const char* const DeckSelectionTypeString{ a_ReviewSessionDeckSelectionTypeToString(DeckSelectionType) };
-    [[maybe_unused]] const std::size_t ResultRowCount{ a_CountResultRows(
+    const char* const DeckSelectionTypeString{ u_ReviewSessionDeckSelectionTypeToString(DeckSelectionType) };
+    [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_InsertCustomReviewSessionDeckSelectionPreparedStatement).WithParameters(
             ReviewSessionId, DeckId, DeckSelectionTypeString)) };
     assert(ResultRowCount == 1);
-    // return a_TryGetRecoverableReviewSessionMutationError(*QueryResult);
+    // return u_TryGetRecoverableReviewSessionMutationError(*QueryResult);
 }
 
 void ReviewSessionRepository::DeleteCustomReviewSessionDeckSelections(const std::string& ReviewSessionId) {
-    static_cast<void>(a_CountResultRows(
+    static_cast<void>(u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement).WithParameters(ReviewSessionId)));
 }
