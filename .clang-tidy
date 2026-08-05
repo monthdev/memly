@@ -218,9 +218,9 @@ CustomChecks:
         Level: Warning
   - Name: memly-explicit-return-type-construction
     Query: >-
-      match returnStmt( hasReturnValue(expr()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasAncestor( functionDecl(
-      unless(isTemplateInstantiation()), unless(returns(voidType())), unless(returns(referenceType())), unless(returns(pointerType())), returns( qualType(
-      hasCanonicalType( qualType().bind("return_type") ) ) ) ) ), unless( allOf( hasAncestor( functionDecl( hasAncestor(functionTemplateDecl()) ) ),
+      match returnStmt( hasReturnValue(expr()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasAncestor(
+      functionDecl( unless(isTemplateInstantiation()), unless(returns(voidType())), unless(returns(referenceType())), unless(returns(pointerType())), returns(
+      qualType( hasCanonicalType( qualType().bind("return_type") ) ) ) ) ), unless( allOf( hasAncestor( functionDecl( hasAncestor(functionTemplateDecl()) ) ),
       hasReturnValue( ignoringImplicit( callExpr( callee( unresolvedLookupExpr( hasAnyDeclaration( namedDecl(hasName("::std::invoke")) ) ) ), hasArgument( 0,
       ignoringImplicit( callExpr( callee( unresolvedLookupExpr( hasAnyDeclaration( namedDecl(hasName("::std::forward")) ) ) ), hasArgument( 0,
       ignoringParenImpCasts( declRefExpr( to( parmVarDecl( hasType(rValueReferenceType()) ) ) ) ) ) ) ) ) ) ) ) ) ), unless( hasReturnValue( ignoringImplicit(
@@ -328,8 +328,8 @@ CustomChecks:
         Level: Warning
   - Name: memly-no-named-lambda
     Query: >-
-      match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasType(
-      qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(isLambda()) ) ) ) ) ) ).bind("variable")
+      match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(isLambda()) ) ) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: named lambda closure variables are disallowed; pass the lambda directly or use a reusable helper
@@ -353,11 +353,12 @@ CustomChecks:
   - Name: memly-no-database-chain-proxy-field
     Query: >-
       match fieldDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType(
-      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution",
-      "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder", "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType(
-      pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName(
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName(
       "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution", "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder",
-      "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("field")
+      "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType(
+      recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution",
+      "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder", "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) )
+      ).bind("field")
     Diagnostic:
       - BindName: field
         Message: database chain proxies must remain within one chained full expression and must not be stored or named
@@ -367,9 +368,10 @@ CustomChecks:
       match varDecl( unless(isImplicit()), unless(hasAncestor(functionDecl(isImplicit()))), unless(isExpansionInSystemHeader()),
       isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(
       hasAnyName( "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution", "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder",
-      "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType(
-      hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution",
-      "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder", "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("variable")
+      "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType(
+      recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::DuckDb::Database::PreparedStatementExecution",
+      "::Layer::Infrastructure::DuckDb::Database::QueryResultDecoder", "::Layer::Infrastructure::DuckDb::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) )
+      ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: database chain proxies must remain within one chained full expression and must not be stored or named
@@ -525,9 +527,9 @@ CustomChecks:
         Level: Warning
   - Name: memly-string-view-parameter-by-value
     Query: >-
-      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasType( qualType( anyOf( referenceType( pointee(
-      qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::basic_string_view") ) ) ) ) ) ) ),
-      pointerType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl(
+      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasType( qualType( anyOf( referenceType(
+      pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::basic_string_view") ) ) ) ) )
+      ) ), pointerType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl(
       hasName("::std::basic_string_view") ) ) ) ) ) ) ) ) ) ) ).bind("parameter")
     Diagnostic:
       - BindName: parameter

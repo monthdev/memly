@@ -1,0 +1,133 @@
+{
+  "cmake.configureOnOpen": true,
+  "cmake.configureOnEdit": true,
+  "cmake.sourceDirectory": "${workspaceFolder}",
+  "cmake.useCMakePresets": "always",
+  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+  "clangd.arguments": [
+    "--compile-commands-dir=${workspaceFolder}"
+  ],
+  "lintRunner.respectGitignore": true,
+  "lintRunner.tools": {
+    "clang-tidy": {
+      "kind": "diagnostic",
+      "command": "clang-tidy",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--experimental-custom-checks",
+        "--quiet",
+        "--config-file=${workspaceFolder}/.clang-tidy",
+        "--header-filter=^$",
+        "-p",
+        "${workspaceFolder}",
+        "${file}"
+      ],
+      "successExitCodes": [
+        0,
+        1
+      ],
+      "timeout": 120000,
+      "parser": {
+        "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)(?:\\s+\\[(?<code>[^\\]]+)\\])?$",
+        "flags": "gm",
+        "defaultSeverity": "warning"
+      }
+    },
+    "cmake-lint": {
+      "kind": "diagnostic",
+      "command": "cmake-lint",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--suppress-decorations",
+        "-c",
+        "${workspaceFolder}/.cmakelintrc",
+        "--",
+        "${file}"
+      ],
+      "successExitCodes": [
+        0,
+        1
+      ],
+      "parser": {
+        "pattern": "^(?:.*?):(?<line>\\d+)(?:,(?<col>\\d+))?:\\s+\\[(?<code>[A-Z]\\d{4})\\]\\s+(?<message>.*)$",
+        "flags": "gm",
+        "defaultSeverity": "warning"
+      }
+    },
+    "cmake-format": {
+      "kind": "write",
+      "command": "cmake-format",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-i",
+        "${file}"
+      ],
+      "successExitCodes": [
+        0
+      ],
+      "timeout": 120000
+    }
+  },
+  "lintRunner.targets": [
+    {
+      "name": "C and C++",
+      "match": {
+        "languages": [
+          "c",
+          "cpp"
+        ],
+        "files": [
+          "program/**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx}",
+          "test/**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx}"
+        ]
+      },
+      "onOpen": {
+        "strategy": "sequence",
+        "tools": [
+          "clang-tidy"
+        ]
+      },
+      "manual": {
+        "strategy": "sequence",
+        "tools": [
+          "clang-tidy"
+        ]
+      }
+    },
+    {
+      "name": "CMake",
+      "match": {
+        "languages": [
+          "cmake"
+        ],
+        "files": [
+          "CMakeLists.txt",
+          "*.cmake",
+          "*.cmake.in"
+        ]
+      },
+      "onOpen": {
+        "strategy": "sequence",
+        "tools": [
+          "cmake-lint"
+        ]
+      },
+      "onSave": {
+        "strategy": "sequence",
+        "tools": [
+          "cmake-format"
+        ]
+      },
+      "manual": {
+        "strategy": "sequence",
+        "tools": [
+          "cmake-format",
+          "cmake-lint"
+        ]
+      }
+    }
+  ],
+  "[cmake]": {
+    "editor.formatOnSave": false
+  }
+}

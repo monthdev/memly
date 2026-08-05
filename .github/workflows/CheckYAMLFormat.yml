@@ -53,10 +53,10 @@ jobs:
 
           if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
             echo "YAML check configuration changed; checking all YAML files."
-            git ls-files '*.yaml' '*.yml' > /tmp/yaml_files.txt
+            git ls-files '*.yaml' '*.yml' .clang-tidy > /tmp/yaml_files.txt
           else
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              '*.yaml' '*.yml' > /tmp/yaml_files.txt
+              '*.yaml' '*.yml' .clang-tidy > /tmp/yaml_files.txt
           fi
 
           if [[ ! -s /tmp/yaml_files.txt ]]; then

@@ -1,7 +1,7 @@
 ---
 Diagnostics:
   ClangTidy:
-    FastCheckFilter: None
+    Remove: ['*']
 
 ---
 If:
@@ -9,14 +9,6 @@ If:
 
 CompileFlags:
   Remove: [-W*, -pedantic, /W*, /clang:-W*, /clang:-pedantic]
-
-Diagnostics:
-  ClangTidy:
-    Remove: ['*']
-
----
-If:
-  PathExclude: (program|test)/.*
 
 Diagnostics:
   Suppress: ['*']
