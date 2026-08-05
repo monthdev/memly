@@ -112,3 +112,5 @@ output/
 
 # Testing artifacts
 test.duckdb
+
+.git

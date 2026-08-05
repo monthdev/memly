@@ -66,6 +66,21 @@
         0
       ],
       "timeout": 120000
+    },
+    "qmlformat": {
+      "kind": "write",
+      "command": "qmlformat",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--settings",
+        "${workspaceFolder}/.qmlformat.ini",
+        "--inplace",
+        "${file}"
+      ],
+      "successExitCodes": [
+        0
+      ],
+      "timeout": 120000
     }
   },
   "lintRunner.targets": [
@@ -125,9 +140,36 @@
           "cmake-lint"
         ]
       }
+    },
+    {
+      "name": "QML",
+      "match": {
+        "languages": [
+          "qml"
+        ],
+        "files": [
+          "program/**/*.qml"
+        ]
+      },
+      "onSave": {
+        "strategy": "sequence",
+        "tools": [
+          "qmlformat"
+        ]
+      },
+      "manual": {
+        "strategy": "sequence",
+        "tools": [
+          "qmlformat"
+        ]
+      }
     }
   ],
   "[cmake]": {
+    "editor.formatOnSave": false
+  },
+  "[qml]": {
+    "editor.defaultFormatter": "theqtcompany.qt-qml",
     "editor.formatOnSave": false
   }
 }
