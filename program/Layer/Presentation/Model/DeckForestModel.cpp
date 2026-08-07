@@ -19,17 +19,6 @@
 
 namespace Layer::Presentation::Model {
 
-DeckForestModel::DeckNode::DeckNode(Application::Domain::Deck::Index::DeckForestSnapshotNode&& DeckForestSnapshotNode,
-                                    std::optional<std::size_t>&& ParentDeckNodeIndexOptional,
-                                    const std::size_t RowInParentIndex,
-                                    std::vector<std::size_t>&& ChildDeckNodeIndexesVector) noexcept
-    : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
-    , m_DeckForestSnapshotNode{ std::move(DeckForestSnapshotNode) }
-    , m_ParentDeckNodeIndexOptional{ std::move(ParentDeckNodeIndexOptional) }
-    , m_RowInParentIndex{ RowInParentIndex }
-    , m_ChildDeckNodeIndexesVector{ std::move(ChildDeckNodeIndexesVector) } {
-}
-
 DeckForestModel::DeckForestModel(QObject* Parent) noexcept
     : QAbstractItemModel{ Parent }
     , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}

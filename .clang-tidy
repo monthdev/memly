@@ -37,6 +37,7 @@ Checks: |
   custom-memly-braced-variable-initialization,
   custom-memly-complete-constructor-initializer-list,
   custom-memly-constexpr-special-member-policy-constructor,
+  custom-memly-data-struct-constructor-noexcept,
   custom-memly-header-required-constructor-definition-in-class,
   custom-memly-runtime-constructor-definition-in-implementation-file,
   custom-memly-conversion-operator,
@@ -143,21 +144,32 @@ CustomChecks:
       - BindName: constructor
         Message: non-deleted special-member policy constructors must be constexpr
         Level: Warning
-  - Name: memly-header-required-constructor-definition-in-class
+  - Name: memly-data-struct-constructor-noexcept
     Query: >-
-      match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()),
-      unless(isExpansionInSystemHeader()), anyOf( isConstexpr(), hasParent(functionTemplateDecl()), ofClass(cxxRecordDecl(hasAncestor(classTemplateDecl()))) ),
-      unless( anyOf( hasParent(cxxRecordDecl()), hasParent(functionTemplateDecl(hasParent(cxxRecordDecl()))) ) ),
+      match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()), unless(isNoThrow()),
+      unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl( isStruct(),
+      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::") ) ),
       isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
-        Message: constexpr and template-dependent constructor definitions must appear inside their class or struct declaration
+        Message: data-struct constructors must be declared noexcept
+        Level: Warning
+  - Name: memly-header-required-constructor-definition-in-class
+    Query: >-
+      match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()),
+      unless(isExpansionInSystemHeader()), anyOf( isConstexpr(), hasParent(functionTemplateDecl()), ofClass(cxxRecordDecl(anyOf(isStruct(),
+      hasAncestor(classTemplateDecl())))) ), unless( anyOf( hasParent(cxxRecordDecl()), hasParent(functionTemplateDecl(hasParent(cxxRecordDecl()))) ) ),
+      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+    Diagnostic:
+      - BindName: constructor
+        Message: data-struct, constexpr, and template-dependent constructor definitions must appear inside their class or struct declaration
         Level: Warning
   - Name: memly-runtime-constructor-definition-in-implementation-file
     Query: >-
       match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isConstexpr()), unless(isTemplateInstantiation()),
-      unless(isExpansionInSystemHeader()), unless(hasParent(functionTemplateDecl())), unless(ofClass(cxxRecordDecl(hasAncestor(classTemplateDecl())))),
-      unless(isExpansionInFileMatching("[.]cpp$")), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      unless(isExpansionInSystemHeader()), unless(hasParent(functionTemplateDecl())), unless(ofClass(cxxRecordDecl(isStruct()))),
+      unless(ofClass(cxxRecordDecl(hasAncestor(classTemplateDecl())))), unless(isExpansionInFileMatching("[.]cpp$")),
+      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: non-template non-constexpr constructor definitions must appear in a .cpp implementation file

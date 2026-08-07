@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
 
@@ -18,11 +19,18 @@ struct [[nodiscard]] ReviewSessionListRow final : private Support::SpecialMember
     std::optional<std::int64_t> m_LastUpdatedAtMillisecondsSinceEpochOptional;
     std::optional<std::int64_t> m_LastCardReviewAtMillisecondsSinceEpochOptional;
 
-    explicit ReviewSessionListRow(std::string&&,
-                                  std::string&&,
-                                  std::int64_t,
-                                  const std::optional<std::int64_t>&,
-                                  const std::optional<std::int64_t>&);
+    explicit ReviewSessionListRow(std::string&& ReviewSessionId,
+                                  std::string&& ReviewSessionName,
+                                  const std::int64_t CreatedAtMillisecondsSinceEpoch,
+                                  const std::optional<std::int64_t>& LastUpdatedAtMillisecondsSinceEpochOptional,
+                                  const std::optional<std::int64_t>& LastCardReviewAtMillisecondsSinceEpochOptional) noexcept
+        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+        , m_ReviewSessionId{ std::move(ReviewSessionId) }
+        , m_ReviewSessionName{ std::move(ReviewSessionName) }
+        , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
+        , m_LastUpdatedAtMillisecondsSinceEpochOptional{ LastUpdatedAtMillisecondsSinceEpochOptional }
+        , m_LastCardReviewAtMillisecondsSinceEpochOptional{ LastCardReviewAtMillisecondsSinceEpochOptional } {
+    }
 };
 
 }

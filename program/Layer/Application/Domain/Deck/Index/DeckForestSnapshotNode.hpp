@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
 
@@ -22,15 +23,29 @@ struct DeckForestSnapshotNode final : private Support::SpecialMemberPolicy::NoCo
     std::uint32_t m_SubtreeByTodayCount;
     std::uint32_t m_SubtreeTotalCount;
 
-    explicit DeckForestSnapshotNode(std::string&&,
-                                    std::optional<std::string>&&,
-                                    std::string&&,
-                                    std::int64_t,
-                                    const std::optional<std::int64_t>&,
-                                    std::uint32_t,
-                                    std::uint32_t,
-                                    std::uint32_t,
-                                    std::uint8_t);
+    explicit DeckForestSnapshotNode(std::string&& DeckId,
+                                    std::optional<std::string>&& ParentDeckIdOptional,
+                                    std::string&& DeckName,
+                                    const std::int64_t CreatedAtMillisecondsSinceEpoch,
+                                    const std::optional<std::int64_t>& LastUpdatedAtMillisecondsSinceEpochOptional,
+                                    const std::uint32_t SelfDueNowCount,
+                                    const std::uint32_t SelfByTodayCount,
+                                    const std::uint32_t SelfTotalCount,
+                                    const std::uint8_t TargetLanguageCode) noexcept
+        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+        , m_DeckId{ std::move(DeckId) }
+        , m_ParentDeckIdOptional{ std::move(ParentDeckIdOptional) }
+        , m_DeckName{ std::move(DeckName) }
+        , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
+        , m_LastUpdatedAtMillisecondsSinceEpochOptional{ LastUpdatedAtMillisecondsSinceEpochOptional }
+        , m_SelfDueNowCount{ SelfDueNowCount }
+        , m_SelfByTodayCount{ SelfByTodayCount }
+        , m_SelfTotalCount{ SelfTotalCount }
+        , m_TargetLanguageCode{ TargetLanguageCode }
+        , m_SubtreeDueNowCount{ SelfDueNowCount }
+        , m_SubtreeByTodayCount{ SelfByTodayCount }
+        , m_SubtreeTotalCount{ SelfTotalCount } {
+    }
 };
 
 }
