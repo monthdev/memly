@@ -8,7 +8,6 @@
 #include <qstring.h>
 #include <qtypes.h>
 
-#include "CompositionRoot/RuntimeContext.hpp"
 #include "Layer/Presentation/Controller/DeckPageController.hpp"
 #include "Layer/View/Bridge/ProxyModel/DeckForestProxyModel.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
@@ -25,12 +24,7 @@ private:
     ProxyModel::DeckForestProxyModel m_DeckForestProxyModel;
 
 public:
-    explicit DeckPageControllerBridge(QObject* Parent = nullptr)
-        : QObject{ Parent }
-        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DeckPageController{ CompositionRoot::RuntimeContext::GetRequiredLibraryInvalidationChannel(), CompositionRoot::RuntimeContext::GetRequiredDeckService() }
-        , m_DeckForestProxyModel{ *this->m_DeckPageController.GetDeckForestModel(), this } {
-    }
+    explicit DeckPageControllerBridge(QObject* = nullptr);
     [[nodiscard]] ProxyModel::DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
 
     [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString&, quint8) noexcept;

@@ -4,7 +4,6 @@
 
 #include <source_location>
 #include <string>
-#include <utility>
 
 #include "Layer/Infrastructure/DuckDb/Database/PreparedStatement.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
@@ -19,11 +18,7 @@ private:
     duckdb::DuckDB m_Database;
     duckdb::Connection m_DatabaseConnection;
 
-    explicit DatabaseRuntime(duckdb::DatabaseInstance& DatabaseInstance, duckdb::Connection&& DatabaseConnection)
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_Database{ DatabaseInstance }
-        , m_DatabaseConnection{ std::move(DatabaseConnection) } {
-    }
+    explicit DatabaseRuntime(duckdb::DatabaseInstance&, duckdb::Connection&&);
 
 public:
     [[nodiscard]] auto PrepareStatement(const std::string&, const std::source_location& = std::source_location::current()) -> PreparedStatement;

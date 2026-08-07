@@ -5,6 +5,7 @@
 #include <utility>
 
 namespace Layer::Application::Domain::Language {
+
 [[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)>& {
     // TODO: Move array to unnamed namespace?
     static constexpr std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)> s_TargetLanguageInfoArray{

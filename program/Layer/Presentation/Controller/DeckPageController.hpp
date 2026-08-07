@@ -28,16 +28,9 @@ private:
     Model::DeckForestModel m_DeckForestModel;
 
 public:
-    explicit DeckPageController(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
-                                Application::Service::Deck::DeckService& DeckService,
-                                QObject* Parent = nullptr)
-        : QObject{ Parent }
-        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DeckService{ DeckService }
-        , m_DeckForestModel{ this } {
-        LibraryInvalidationChannel.ConnectSnapshot(
-            this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckForestSnapshot, &DeckPageController::RefreshDeckForestModel);
-    }
+    explicit DeckPageController(Application::Invalidation::LibraryInvalidationChannel&,
+                                Application::Service::Deck::DeckService&,
+                                QObject* = nullptr);
     [[nodiscard]] auto GetDeckForestModel() noexcept -> Model::DeckForestModel*;
 
     [[nodiscard]] std::expected<void, const char*> CreateRootDeck(const std::string&, std::uint8_t) noexcept;

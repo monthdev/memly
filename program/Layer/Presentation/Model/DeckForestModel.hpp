@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <functional>
 #include <optional>
-#include <utility>
 #include <vector>
 
 #include "Layer/Application/Domain/Deck/Index/DeckForestSnapshotNode.hpp"
@@ -28,16 +27,10 @@ private:
         std::size_t m_RowInParentIndex;
         std::vector<std::size_t> m_ChildDeckNodeIndexesVector;
 
-        explicit DeckNode(Application::Domain::Deck::Index::DeckForestSnapshotNode&& DeckForestSnapshotNode,
-                 std::optional<std::size_t>&& ParentDeckNodeIndexOptional,
-                 const std::size_t RowInParentIndex,
-                 std::vector<std::size_t>&& ChildDeckNodeIndexesVector) noexcept
-            : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
-            , m_DeckForestSnapshotNode{ std::move(DeckForestSnapshotNode) }
-            , m_ParentDeckNodeIndexOptional{ std::move(ParentDeckNodeIndexOptional) }
-            , m_RowInParentIndex{ RowInParentIndex }
-            , m_ChildDeckNodeIndexesVector{ std::move(ChildDeckNodeIndexesVector) } {
-        }
+        explicit DeckNode(Application::Domain::Deck::Index::DeckForestSnapshotNode&&,
+                          std::optional<std::size_t>&&,
+                          std::size_t,
+                          std::vector<std::size_t>&&) noexcept;
     };
 
     static constexpr int s_UnsortedColumn{ -1 };
@@ -47,14 +40,7 @@ private:
     Qt::SortOrder m_SortOrder;
 
 public:
-    explicit DeckForestModel(QObject* Parent = nullptr) noexcept
-        : QAbstractItemModel{ Parent }
-        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DeckNodesVector{}
-        , m_RootDeckNodeIndexesVector{}
-        , m_SortColumn{ s_UnsortedColumn }
-        , m_SortOrder{ Qt::AscendingOrder } {
-    }
+    explicit DeckForestModel(QObject* = nullptr) noexcept;
     enum class RoleEnum : int {
         DeckIdRole = Qt::UserRole + 1,
         ParentDeckIdRole,

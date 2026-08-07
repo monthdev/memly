@@ -5,6 +5,7 @@
 #include <cassert>
 #include <charconv>
 #include <cstddef>
+#include <exception>
 #include <initializer_list>
 #include <limits>
 #include <source_location>
@@ -12,7 +13,17 @@
 #include <string_view>
 #include <system_error>
 
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
+
 namespace Support::Runtime::Exception {
+
+MemlyException::MemlyException(const std::initializer_list<std::string_view>& ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
+    : std::exception{}
+    , SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_ErrorMessageArray{}
+    , m_ErrorMessageSize{} {
+    this->ConstructErrorMessage(ErrorMessageInitializerList, SourceLocation);
+}
 
 [[nodiscard]] auto MemlyException::what() const noexcept -> const char* {
     return this->m_ErrorMessageArray.data();

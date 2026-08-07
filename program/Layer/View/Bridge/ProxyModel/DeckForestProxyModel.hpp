@@ -20,11 +20,7 @@ class DeckForestProxyModel final : public QIdentityProxyModel, private Support::
     QML_ANONYMOUS
 
 public:
-    explicit DeckForestProxyModel(Presentation::Model::DeckForestModel& DeckForestModel, QObject* Parent = nullptr)
-        : QIdentityProxyModel{ Parent }
-        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
-        this->setSourceModel(&DeckForestModel);
-    }
+    explicit DeckForestProxyModel(Presentation::Model::DeckForestModel&, QObject* = nullptr);
 
     void sort(int, Qt::SortOrder = Qt::AscendingOrder) noexcept override;
     [[nodiscard]] QVariant headerData(int, Qt::Orientation, int = Qt::DisplayRole) const noexcept override;

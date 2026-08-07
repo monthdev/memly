@@ -9,8 +9,15 @@
 
 #include "Layer/Infrastructure/DuckDb/Database/PreparedStatement.hpp"
 #include "Layer/Infrastructure/DuckDb/Database/ThrowOnDatabaseError.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Database {
+
+DatabaseRuntime::DatabaseRuntime(duckdb::DatabaseInstance& DatabaseInstance, duckdb::Connection&& DatabaseConnection)
+    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_Database{ DatabaseInstance }
+    , m_DatabaseConnection{ std::move(DatabaseConnection) } {
+}
 
 [[nodiscard]] auto DatabaseRuntime::PrepareStatement(const std::string& Sql, const std::source_location& SourceLocation) -> PreparedStatement {
     std::unique_ptr<duckdb::PreparedStatement> DuckDbPreparedStatement{ this->m_DatabaseConnection.Prepare(Sql) };

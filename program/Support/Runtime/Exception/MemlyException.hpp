@@ -18,13 +18,7 @@ private:
     std::size_t m_ErrorMessageSize;
 
 public:
-    explicit MemlyException(const std::initializer_list<std::string_view>& ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
-        : std::exception{}
-        , SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_ErrorMessageArray{}
-        , m_ErrorMessageSize{} {
-        this->ConstructErrorMessage(ErrorMessageInitializerList, SourceLocation);
-    }
+    explicit MemlyException(const std::initializer_list<std::string_view>&, const std::source_location&) noexcept;
 
     [[nodiscard]] auto what() const noexcept -> const char* override;
 

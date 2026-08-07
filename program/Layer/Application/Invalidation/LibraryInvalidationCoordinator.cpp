@@ -4,6 +4,8 @@
 #include "Layer/Application/Invalidation/LibraryInvalidationCoordinator.hpp"
 
 #include <qdatetime.h>
+#include <qobject.h>
+#include <qtimer.h>
 #include <qtmetamacros.h>
 
 #include <algorithm>
@@ -14,8 +16,23 @@
 #include "Layer/Application/Invalidation/LibraryInvalidationTarget.hpp"
 #include "Layer/Infrastructure/DuckDb/Repository/Library/LibraryRepository.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Invalidation {
+
+LibraryInvalidationCoordinator::LibraryInvalidationCoordinator(
+    LibraryInvalidationChannel& LibraryInvalidationChannel,
+    Infrastructure::DuckDb::Repository::Library::LibraryRepository& LibraryRepository,
+    QObject* Parent)
+    : QObject{ Parent }
+    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
+    , m_LibraryRepository{ LibraryRepository }
+    , m_LibraryInvalidationQTimer{} {
+    this->m_LibraryInvalidationQTimer.setSingleShot(true);
+    QObject::connect(&this->m_LibraryInvalidationQTimer, &QTimer::timeout, this, &LibraryInvalidationCoordinator::HandleScheduledInvalidation);
+    this->ScheduleNextLibraryInvalidation();
+}
 
 void LibraryInvalidationCoordinator::Invalidate(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
     emit this->m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);

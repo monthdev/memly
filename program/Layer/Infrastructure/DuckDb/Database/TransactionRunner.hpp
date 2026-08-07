@@ -21,10 +21,7 @@ private:
     duckdb::Connection& m_DatabaseConnection;
 
 public:
-    explicit TransactionRunner(duckdb::Connection& DatabaseConnection) noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DatabaseConnection{ DatabaseConnection } {
-    }
+    explicit TransactionRunner(duckdb::Connection&) noexcept;
 
     template <typename LambdaType>
         requires std::invocable<LambdaType&&>

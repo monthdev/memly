@@ -10,8 +10,15 @@
 #include "Layer/Application/IndexCache/Deck/DeckForestSnapshotIndexCache.hpp"
 #include "Layer/Infrastructure/DuckDb/Repository/Deck/DeckRepository.hpp"
 #include "Layer/Infrastructure/DuckDb/Repository/Deck/DeckSnapshotRecord.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Service::Deck {
+
+DeckService::DeckService(Infrastructure::DuckDb::Repository::Deck::DeckRepository& DeckRepository) noexcept
+    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_DeckRepository{ DeckRepository }
+    , m_DeckForestSnapshotIndexCache{} {
+}
 
 [[nodiscard]] auto DeckService::AcquireDeckForestSnapshotIndexCacheLease() -> IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease {
     return IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease{ this->m_DeckForestSnapshotIndexCache.AcquireLease() };

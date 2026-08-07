@@ -15,11 +15,7 @@ private:
     duckdb::Connection m_DatabaseConnection;
 
 public:
-    explicit DatabaseMigrator(const std::string& DatabaseFilePath)
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_Database{ DatabaseFilePath }
-        , m_DatabaseConnection{ this->m_Database } {
-    }
+    explicit DatabaseMigrator(const std::string&);
 
     [[nodiscard]] auto ApplyMigrations() && -> DatabaseRuntime;
 };

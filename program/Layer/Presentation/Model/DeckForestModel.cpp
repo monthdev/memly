@@ -14,8 +14,30 @@
 #include <utility>
 
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Presentation::Model {
+
+DeckForestModel::DeckNode::DeckNode(Application::Domain::Deck::Index::DeckForestSnapshotNode&& DeckForestSnapshotNode,
+                                    std::optional<std::size_t>&& ParentDeckNodeIndexOptional,
+                                    const std::size_t RowInParentIndex,
+                                    std::vector<std::size_t>&& ChildDeckNodeIndexesVector) noexcept
+    : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+    , m_DeckForestSnapshotNode{ std::move(DeckForestSnapshotNode) }
+    , m_ParentDeckNodeIndexOptional{ std::move(ParentDeckNodeIndexOptional) }
+    , m_RowInParentIndex{ RowInParentIndex }
+    , m_ChildDeckNodeIndexesVector{ std::move(ChildDeckNodeIndexesVector) } {
+}
+
+DeckForestModel::DeckForestModel(QObject* Parent) noexcept
+    : QAbstractItemModel{ Parent }
+    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_DeckNodesVector{}
+    , m_RootDeckNodeIndexesVector{}
+    , m_SortColumn{ s_UnsortedColumn }
+    , m_SortOrder{ Qt::AscendingOrder } {
+}
 
 [[nodiscard]] QModelIndex DeckForestModel::index(const int Row, const int Column, const QModelIndex& Parent) const noexcept {
     return Support::Runtime::Exception::TryCatchWrapper([&]() -> QModelIndex {

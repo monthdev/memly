@@ -5,11 +5,27 @@
 #include <string>
 #include <vector>
 
+#include "Layer/Infrastructure/DuckDb/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/DuckDb/Database/QueryResultRowCountRange.hpp"
 #include "Layer/Infrastructure/DuckDb/Repository/Deck/DeckSnapshotRecord.hpp"
+#include "Layer/Infrastructure/DuckDb/Repository/Deck/Sql/DeckSql.hpp"
 #include "Layer/Infrastructure/DuckDb/Repository/MutatedId.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Repository::Deck {
+
+DeckRepository::DeckRepository(Database::DatabaseRuntime& DatabaseRuntime)
+    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_SelectDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectDeckSnapshotRecordsSql()) }
+    , m_InsertRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertRootDeckSql()) }
+    , m_InsertChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertChildDeckSql()) }
+    , m_UpdateDeckParentToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateDeckParentToRootSql()) }
+    , m_UpdateDeckParentPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateDeckParentSql()) }
+    , m_UpdateDeckNamePreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateDeckNameSql()) }
+    , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteDeckCardReviewsSql()) }
+    , m_DeleteDeckCardsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteDeckCardsSql()) }
+    , m_DeleteDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteDeckSql()) } {
+}
 
 [[nodiscard]] auto DeckRepository::ReadDeckSnapshotRecords(const std::int64_t AsOfMillisecondsSinceEpoch) -> std::vector<DeckSnapshotRecord> {
     return std::vector<DeckSnapshotRecord>{ this->m_SelectDeckSnapshotRecordsPreparedStatement.Execute()

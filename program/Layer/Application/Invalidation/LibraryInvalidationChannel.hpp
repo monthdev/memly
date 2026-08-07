@@ -3,7 +3,6 @@
 #if 0
 #pragma once
 
-#include <qdatetime.h>
 #include <qnamespace.h>
 #include <qobject.h>
 #include <qtmetamacros.h>
@@ -28,11 +27,7 @@ private:
     std::int64_t m_CurrentSnapshotAsOfMillisecondsSinceEpoch;
 
 public:
-    explicit LibraryInvalidationChannel(QObject* Parent = nullptr)
-        : QObject{ Parent }
-        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch()) } {
-    }
+    explicit LibraryInvalidationChannel(QObject* = nullptr);
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*>

@@ -8,7 +8,6 @@
 
 #include "Layer/Infrastructure/DuckDb/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/DuckDb/Database/PreparedStatement.hpp"
-#include "Layer/Infrastructure/DuckDb/Repository/Library/Sql/LibrarySql.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Repository::Library {
@@ -19,13 +18,7 @@ private:
     Database::PreparedStatement m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
 
 public:
-    explicit LibraryRepository(Database::DatabaseRuntime& DatabaseRuntime)
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DatabaseRuntime{ DatabaseRuntime }
-        , m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
-            DatabaseRuntime.PrepareStatement(Sql::SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
-        } {
-    }
+    explicit LibraryRepository(Database::DatabaseRuntime&);
 
     [[nodiscard]] auto ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(std::int64_t) -> std::optional<std::int64_t>;
 };

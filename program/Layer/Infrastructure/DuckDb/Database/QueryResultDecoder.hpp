@@ -27,11 +27,7 @@ private:
     std::unique_ptr<duckdb::QueryResult> m_QueryResult;
     const std::source_location& m_SourceLocation;
 
-    explicit QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&& QueryResult, const std::source_location& SourceLocation) noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_QueryResult{ std::move(QueryResult) }
-        , m_SourceLocation{ SourceLocation } {
-    }
+    explicit QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&&, const std::source_location&) noexcept;
 
 public:
     template <DecodableQueryResultRow QueryResultRowType>

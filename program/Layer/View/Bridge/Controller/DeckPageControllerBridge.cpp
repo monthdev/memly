@@ -7,7 +7,18 @@
 #include <expected>
 #include <optional>
 
+#include "CompositionRoot/RuntimeContext.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
+
 namespace Layer::View::Bridge::Controller {
+
+DeckPageControllerBridge::DeckPageControllerBridge(QObject* Parent)
+    : QObject{ Parent }
+    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_DeckPageController{ CompositionRoot::RuntimeContext::GetRequiredLibraryInvalidationChannel(),
+                            CompositionRoot::RuntimeContext::GetRequiredDeckService() }
+    , m_DeckForestProxyModel{ *this->m_DeckPageController.GetDeckForestModel(), this } {
+}
 
 [[nodiscard]] ProxyModel::DeckForestProxyModel* DeckPageControllerBridge::GetDeckForestProxyModel() noexcept {
     return &this->m_DeckForestProxyModel;

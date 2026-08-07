@@ -4,7 +4,6 @@
 
 #include <cstddef>
 #include <string>
-#include <utility>
 
 #include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
 
@@ -14,10 +13,7 @@ class [[nodiscard]] HumanTextInput final : private Support::SpecialMemberPolicy:
 private:
     icu::UnicodeString m_NormalizedUnicodeString;
 
-    explicit HumanTextInput(icu::UnicodeString&& NormalizedUnicodeString) noexcept
-        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
-        , m_NormalizedUnicodeString{ std::move(NormalizedUnicodeString) } {
-    }
+    explicit HumanTextInput(icu::UnicodeString&&) noexcept;
 
 public:
     [[nodiscard]] static auto FromInput(const std::string&) -> HumanTextInput;

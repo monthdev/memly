@@ -22,11 +22,7 @@ private:
     IndexCache::Deck::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
 
 public:
-    explicit DeckService(Infrastructure::DuckDb::Repository::Deck::DeckRepository& DeckRepository) noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DeckRepository{ DeckRepository }
-        , m_DeckForestSnapshotIndexCache{} {
-    }
+    explicit DeckService(Infrastructure::DuckDb::Repository::Deck::DeckRepository&) noexcept;
 
     [[nodiscard]] auto AcquireDeckForestSnapshotIndexCacheLease() -> IndexCache::Deck::DeckForestSnapshotIndexCache::IndexCacheLease;
 

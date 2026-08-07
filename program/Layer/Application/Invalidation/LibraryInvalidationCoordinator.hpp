@@ -26,18 +26,9 @@ private:
     QTimer m_LibraryInvalidationQTimer;
 
 public:
-    explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel& LibraryInvalidationChannel,
-                                            Infrastructure::DuckDb::Repository::Library::LibraryRepository& LibraryRepository,
-                                            QObject* Parent = nullptr)
-        : QObject{ Parent }
-        , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
-        , m_LibraryRepository{ LibraryRepository }
-        , m_LibraryInvalidationQTimer{} {
-        this->m_LibraryInvalidationQTimer.setSingleShot(true);
-        QObject::connect(&this->m_LibraryInvalidationQTimer, &QTimer::timeout, this, &LibraryInvalidationCoordinator::HandleScheduledInvalidation);
-        this->ScheduleNextLibraryInvalidation();
-    }
+    explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel&,
+                                            Infrastructure::DuckDb::Repository::Library::LibraryRepository&,
+                                            QObject* = nullptr);
 
     void Invalidate(const LibraryInvalidationTargetBitset&) noexcept;
     void InvalidateWithReschedule(const LibraryInvalidationTargetBitset&) noexcept;

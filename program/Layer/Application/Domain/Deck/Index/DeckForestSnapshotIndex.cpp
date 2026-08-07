@@ -11,8 +11,17 @@
 #include <vector>
 
 #include "Layer/Application/Domain/Deck/Index/DeckForestSnapshotNode.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Domain::Deck::Index {
+
+DeckForestSnapshotIndex::DeckForestSnapshotIndex() noexcept
+    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_DeckForestSnapshotNodeVector{}
+    , m_RootDeckNodePositionVector{}
+    , m_ChildDeckNodePositionVectorByDeckNodePositionVector{}
+    , m_DeckNodePositionByDeckIdUnorderedMap{} {
+}
 
 [[nodiscard]] auto DeckForestSnapshotIndex::GetDeckNodePosition(const std::string& DeckId) const -> std::size_t {
     const std::unordered_map<std::string_view, std::size_t>::const_iterator DeckNodePositionByDeckIdIterator{ this->m_DeckNodePositionByDeckIdUnorderedMap.find(

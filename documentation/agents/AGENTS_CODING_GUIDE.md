@@ -14,10 +14,25 @@ file-private helper merely because it does not use instance state.
 ## Initialization and Construction
 
 Every Memly type must explicitly declare an ordinary constructor
-(`custom-memly-declared-ordinary-constructor`). Define every constructor inside
-its class or struct declaration wherever that declaration resides, including
-`= default` and `= delete` definitions
-(`custom-memly-constructor-definition-in-class`).
+(`custom-memly-declared-ordinary-constructor`). Declare every non-template,
+non-`constexpr`, non-deleted constructor inside the class or struct declaration,
+but define it in the corresponding `.cpp` implementation file, including when it
+is explicitly defaulted
+(`custom-memly-runtime-constructor-definition-in-implementation-file`). Define a
+`constexpr` constructor, constructor template, or constructor of a class
+template inside its class declaration so its definition remains reachable where
+constant evaluation or template instantiation requires it
+(`custom-memly-header-required-constructor-definition-in-class`). A deleted
+constructor is the other language-required exception: `= delete` must appear on
+its first declaration, so its in-class declaration is also its definition and
+cannot be repeated in an implementation file.
+
+Declare a constructor `constexpr` whenever all of its base and member
+initialization and body operations permit constant evaluation. Every non-deleted
+special-member-policy constructor must be `constexpr`
+(`custom-memly-constexpr-special-member-policy-constructor`). The YAML matcher
+enforces this known eligible constructor set; Clang validates `constexpr`
+eligibility for other constructors when the specifier is written.
 
 Every non-deleted, non-defaulted constructor must explicitly initialize every
 direct base, every non-static data member, and every virtual base for which it
@@ -116,12 +131,14 @@ out-of-class implementation bodies appears at the end of the class declaration.
 Constructors immediately follow the data-member block under their intended
 access. All remaining declarations follow the constructors.
 
-Headers may contain bodies only for in-class constructor definitions and
-templates. Every ordinary non-template method and free function, including a
-one-line accessor, is declared in its header and defined in the corresponding
-source file (`custom-memly-no-header-function-definition`). Defaulted and
-deleted special-member definitions remain inside their class declarations
-because they have no function body.
+Headers may contain bodies only for templates and `constexpr` constructors,
+including in-class constructor templates and constructors of class templates.
+Every ordinary non-template method and free function, including a one-line
+accessor, is declared in its header and defined in the corresponding source file
+(`custom-memly-no-header-function-definition`). Deleted constructors and
+defaulted or deleted non-constructor special-member definitions remain inside
+their class declarations. Defaulted constructors are defined out of class in the
+corresponding implementation file unless they are `constexpr`.
 
 Inside a non-static member function, explicitly qualify every access to the
 current object's data members and methods with `this->`. This includes member

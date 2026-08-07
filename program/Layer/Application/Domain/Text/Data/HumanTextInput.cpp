@@ -15,8 +15,15 @@
 #include <utility>
 
 #include "Support/Runtime/Exception/ThrowMemlyException.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
 
 namespace Layer::Application::Domain::Text::Data {
+
+HumanTextInput::HumanTextInput(icu::UnicodeString&& NormalizedUnicodeString) noexcept
+    : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+    , m_NormalizedUnicodeString{ std::move(NormalizedUnicodeString) } {
+}
+
 namespace {
 
 void u_ThrowOnIcuError(const icu::ErrorCode& IcuErrorCode) {

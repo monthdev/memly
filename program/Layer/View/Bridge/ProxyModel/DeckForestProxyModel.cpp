@@ -5,9 +5,17 @@
 
 #include <qstring.h>
 
+#include "Layer/Presentation/Model/DeckForestModel.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::View::Bridge::ProxyModel {
+
+DeckForestProxyModel::DeckForestProxyModel(Presentation::Model::DeckForestModel& DeckForestModel, QObject* Parent)
+    : QIdentityProxyModel{ Parent }
+    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
+    this->setSourceModel(&DeckForestModel);
+}
 
 void DeckForestProxyModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
     this->sourceModel()->sort(Column, SortOrder);

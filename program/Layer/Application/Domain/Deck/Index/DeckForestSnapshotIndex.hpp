@@ -20,13 +20,7 @@ private:
     std::unordered_map<std::string_view, std::size_t> m_DeckNodePositionByDeckIdUnorderedMap;
 
 public:
-    explicit DeckForestSnapshotIndex() noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DeckForestSnapshotNodeVector{}
-        , m_RootDeckNodePositionVector{}
-        , m_ChildDeckNodePositionVectorByDeckNodePositionVector{}
-        , m_DeckNodePositionByDeckIdUnorderedMap{} {
-    }
+    explicit DeckForestSnapshotIndex() noexcept;
 
     [[nodiscard]] auto GetSubtreeDeckIds(const std::string&) const -> std::vector<std::string_view>;
 

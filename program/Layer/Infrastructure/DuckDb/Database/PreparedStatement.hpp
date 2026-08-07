@@ -4,7 +4,6 @@
 
 #include <memory>
 #include <source_location>
-#include <utility>
 
 #include "Layer/Infrastructure/DuckDb/Database/PreparedStatementExecution.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
@@ -18,10 +17,7 @@ class [[nodiscard]] PreparedStatement final : private Support::SpecialMemberPoli
 private:
     std::unique_ptr<duckdb::PreparedStatement> m_DuckDbPreparedStatement;
 
-    explicit PreparedStatement(std::unique_ptr<duckdb::PreparedStatement>&& DuckDbPreparedStatement) noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DuckDbPreparedStatement{ std::move(DuckDbPreparedStatement) } {
-    }
+    explicit PreparedStatement(std::unique_ptr<duckdb::PreparedStatement>&&) noexcept;
 
 public:
     [[nodiscard]] auto Execute(const std::source_location& = std::source_location::current()) noexcept -> PreparedStatementExecution;

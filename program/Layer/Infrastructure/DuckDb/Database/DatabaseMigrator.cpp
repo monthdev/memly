@@ -20,8 +20,15 @@
 #include "Layer/Infrastructure/DuckDb/Database/ThrowOnDatabaseError.hpp"
 #include "Layer/Infrastructure/DuckDb/Database/TransactionRunner.hpp"
 #include "Support/Runtime/Exception/ThrowMemlyException.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Database {
+
+DatabaseMigrator::DatabaseMigrator(const std::string& DatabaseFilePath)
+    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_Database{ DatabaseFilePath }
+    , m_DatabaseConnection{ this->m_Database } {
+}
 
 [[nodiscard]] auto DatabaseMigrator::ApplyMigrations() && -> DatabaseRuntime {
     TransactionRunner{ this->m_DatabaseConnection }.TransactionWrapper([this]() -> void {

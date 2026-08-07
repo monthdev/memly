@@ -11,11 +11,7 @@ private:
     std::size_t m_MinimumRowCount;
     std::size_t m_MaximumRowCount;
 
-    explicit QueryResultRowCountRange(const std::size_t MinimumRowCount, const std::size_t MaximumRowCount) noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_MinimumRowCount{ MinimumRowCount }
-        , m_MaximumRowCount{ MaximumRowCount } {
-    }
+    explicit QueryResultRowCountRange(std::size_t, std::size_t) noexcept;
 
 public:
     [[nodiscard]] static auto ZeroOrMore() noexcept -> QueryResultRowCountRange;

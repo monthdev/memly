@@ -19,11 +19,7 @@ private:
     duckdb::PreparedStatement& m_DuckDbPreparedStatement;
     const std::source_location& m_SourceLocation;
 
-    explicit PreparedStatementExecution(duckdb::PreparedStatement& DuckDbPreparedStatement, const std::source_location& SourceLocation) noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_DuckDbPreparedStatement{ DuckDbPreparedStatement }
-        , m_SourceLocation{ SourceLocation } {
-    }
+    explicit PreparedStatementExecution(duckdb::PreparedStatement&, const std::source_location&) noexcept;
 
 public:
     template <typename... SqlParameterType>

@@ -12,8 +12,17 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionDeckSelection.hpp"
 #include "Layer/Infrastructure/DuckDb/Database/TransactionRunner.hpp"
 #include "Layer/Infrastructure/DuckDb/Repository/ReviewSession/ReviewSessionRepository.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Service::ReviewSession {
+
+ReviewSessionService::ReviewSessionService(
+    Infrastructure::DuckDb::Database::TransactionRunner& TransactionRunner,
+    Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
+    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_TransactionRunner{ TransactionRunner }
+    , m_ReviewSessionRepository{ ReviewSessionRepository } {
+}
 
 [[nodiscard]] auto ReviewSessionService::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey)
     -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum> {

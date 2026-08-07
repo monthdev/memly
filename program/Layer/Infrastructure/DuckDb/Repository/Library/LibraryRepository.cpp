@@ -11,8 +11,18 @@
 #include <optional>
 
 #include "Layer/Infrastructure/DuckDb/Database/DatabaseRuntime.hpp"
+#include "Layer/Infrastructure/DuckDb/Repository/Library/Sql/LibrarySql.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Repository::Library {
+
+LibraryRepository::LibraryRepository(Database::DatabaseRuntime& DatabaseRuntime)
+    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_DatabaseRuntime{ DatabaseRuntime }
+    , m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
+        DatabaseRuntime.PrepareStatement(Sql::SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
+    } {
+}
 
 [[nodiscard]] auto LibraryRepository::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const std::int64_t AsOfMillisecondsSinceEpoch)
     -> std::optional<std::int64_t> {

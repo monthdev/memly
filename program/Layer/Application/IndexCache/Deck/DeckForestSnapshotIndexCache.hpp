@@ -7,9 +7,7 @@ namespace Layer::Application::IndexCache::Deck {
 
 class DeckForestSnapshotIndexCache final : public IndexCacheBase<DeckForestSnapshotIndexCacheDefinition> {
 public:
-    explicit DeckForestSnapshotIndexCache() noexcept
-        : IndexCacheBase<DeckForestSnapshotIndexCacheDefinition>{} {
-    }
+    explicit DeckForestSnapshotIndexCache() noexcept;
 };
 
 }

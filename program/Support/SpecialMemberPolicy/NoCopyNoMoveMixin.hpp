@@ -3,7 +3,7 @@
 namespace Support::SpecialMemberPolicy {
 class NoCopyNoMoveMixin {
 protected:
-    explicit NoCopyNoMoveMixin() noexcept = default;
+    explicit constexpr NoCopyNoMoveMixin() noexcept = default;
     ~NoCopyNoMoveMixin() noexcept = default;
 
 public:

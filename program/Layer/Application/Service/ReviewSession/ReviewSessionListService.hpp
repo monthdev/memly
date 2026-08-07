@@ -19,10 +19,7 @@ private:
     Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
-    explicit ReviewSessionListService(Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_ReviewSessionRepository{ ReviewSessionRepository } {
-    }
+    explicit ReviewSessionListService(Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository&) noexcept;
 
     [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Domain::ReviewSession::ReviewSessionListRow>;
 };

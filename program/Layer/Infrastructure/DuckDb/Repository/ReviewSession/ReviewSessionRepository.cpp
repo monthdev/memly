@@ -22,9 +22,32 @@
 #include "Layer/Application/Domain/ReviewSession/ReviewSessionListRow.hpp"
 #include "Layer/Infrastructure/DuckDb/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/DuckDb/Database/PreparedStatement.hpp"
+#include "Layer/Infrastructure/DuckDb/Repository/ReviewSession/Sql/ReviewSessionSql.hpp"
 #include "Support/Runtime/Exception/ThrowMemlyException.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Repository::ReviewSession {
+
+ReviewSessionRepository::ReviewSessionRepository(Database::DatabaseRuntime& DatabaseRuntime)
+    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_DatabaseRuntime{ DatabaseRuntime }
+    , m_SelectReviewSessionListRowsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectReviewSessionListRowsSql()) }
+    , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectDefaultReviewSessionIdByRootDeckIdSql()) }
+    , m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
+        DatabaseRuntime.PrepareStatement(Sql::SelectReviewSessionIdByReviewSessionDefinitionKeySql())
+    }
+    , m_InsertCustomReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertCustomReviewSessionSql()) }
+    , m_InsertDefaultReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertDefaultReviewSessionSql()) }
+    , m_InsertCustomReviewSessionDeckSelectionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertCustomReviewSessionDeckSelectionSql()) }
+    , m_UpdateReviewSessionNamePreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateReviewSessionNameSql()) }
+    , m_UpdateReviewSessionToDefaultPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateReviewSessionToDefaultSql()) }
+    , m_UpdateReviewSessionToCustomPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateReviewSessionToCustomSql()) }
+    , m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement{
+        DatabaseRuntime.PrepareStatement(Sql::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql())
+    }
+    , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteCustomReviewSessionDeckSelectionsSql()) }
+    , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteReviewSessionSql()) } {
+}
 
 namespace {
 

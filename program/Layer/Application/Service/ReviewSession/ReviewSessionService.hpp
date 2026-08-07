@@ -27,12 +27,8 @@ private:
     Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
-    explicit ReviewSessionService(Infrastructure::DuckDb::Database::TransactionRunner& TransactionRunner,
-                                  Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository& ReviewSessionRepository) noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_TransactionRunner{ TransactionRunner }
-        , m_ReviewSessionRepository{ ReviewSessionRepository } {
-    }
+    explicit ReviewSessionService(Infrastructure::DuckDb::Database::TransactionRunner&,
+                                  Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository&) noexcept;
 
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
         -> std::expected<std::string, Domain::ReviewSession::RecoverableReviewSessionMutationErrorEnum>;

@@ -10,10 +10,23 @@
 #include <vector>
 
 #include "Layer/Application/Domain/Deck/Index/DeckForestSnapshotNode.hpp"
+#include "Layer/Application/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Layer/Application/Service/Deck/DeckService.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
+#include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Presentation::Controller {
+
+DeckPageController::DeckPageController(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
+                                       Application::Service::Deck::DeckService& DeckService,
+                                       QObject* Parent)
+    : QObject{ Parent }
+    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
+    , m_DeckService{ DeckService }
+    , m_DeckForestModel{ this } {
+    LibraryInvalidationChannel.ConnectSnapshot(
+        this, Application::Invalidation::LibraryInvalidationTargetEnum::DeckForestSnapshot, &DeckPageController::RefreshDeckForestModel);
+}
 
 [[nodiscard]] auto DeckPageController::GetDeckForestModel() noexcept -> Model::DeckForestModel* {
     return &this->m_DeckForestModel;
