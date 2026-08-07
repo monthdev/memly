@@ -242,17 +242,11 @@ file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_CPP CONFIGURE_DEPENDS
 file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_HDR CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/*.[Hh]*"
 )
-file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_MIGRATION_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Migration/*.cpp"
+file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_CPP CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/*.cpp"
 )
-file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_MIGRATION_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Migration/*.[Hh]*"
-)
-file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_SEED_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Seed/*.cpp"
-)
-file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_SEED_HDR CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Seed/*.[Hh]*"
+file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_HDR CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/*.[Hh]*"
 )
 file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_REPOSITORY_HDR CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Repository/*.[Hh]*"
@@ -294,20 +288,17 @@ file(GLOB LAYER_INFRASTRUCTURE_DUCKDB_REPOSITORY_REVIEW_SESSION_SQL_HDR CONFIGUR
      "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Repository/ReviewSession/Sql/*.[Hh]*"
 )
 
-file(GLOB DUCKDB_DATABASE_SQL_MIGRATION_BOOTSTRAP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Migration/Bootstrap/*.sql"
+file(GLOB DUCKDB_DATABASE_SQL_BOOTSTRAP CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Bootstrap/*.sql"
 )
-file(GLOB DUCKDB_DATABASE_SQL_MIGRATION_VERSION CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Migration/Version/*.sql"
+file(GLOB DUCKDB_DATABASE_SQL_VERSION CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Version/*.sql"
 )
-file(GLOB DUCKDB_DATABASE_SQL_MIGRATION_SELECT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Migration/Select/*.sql"
+file(GLOB DUCKDB_DATABASE_SQL_SELECT CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Select/*.sql"
 )
-file(GLOB DUCKDB_DATABASE_SQL_MIGRATION_INSERT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Migration/Insert/*.sql"
-)
-file(GLOB DUCKDB_DATABASE_SQL_SEED_INSERT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Seed/Insert/*.sql"
+file(GLOB DUCKDB_DATABASE_SQL_INSERT CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Insert/*.sql"
 )
 file(GLOB DUCKDB_REPOSITORY_DECK_SQL_SELECT CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Repository/Deck/Sql/Select/*.sql"
@@ -495,24 +486,14 @@ qt_add_resources(
   memly_duckdb_sql_resources
   "DuckDbMigrationSql"
   PREFIX
-  "/Sql/Migration"
+  "/Sql"
   BASE
-  "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Migration"
+  "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql"
   FILES
-  ${DUCKDB_DATABASE_SQL_MIGRATION_BOOTSTRAP}
-  ${DUCKDB_DATABASE_SQL_MIGRATION_VERSION}
-  ${DUCKDB_DATABASE_SQL_MIGRATION_SELECT}
-  ${DUCKDB_DATABASE_SQL_MIGRATION_INSERT}
-)
-qt_add_resources(
-  memly_duckdb_sql_resources
-  "DuckDbSeedSql"
-  PREFIX
-  "/Sql/Seed"
-  BASE
-  "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/DuckDb/Database/Sql/Seed"
-  FILES
-  ${DUCKDB_DATABASE_SQL_SEED_INSERT}
+  ${DUCKDB_DATABASE_SQL_BOOTSTRAP}
+  ${DUCKDB_DATABASE_SQL_VERSION}
+  ${DUCKDB_DATABASE_SQL_SELECT}
+  ${DUCKDB_DATABASE_SQL_INSERT}
 )
 qt_add_resources(
   memly_duckdb_sql_resources
@@ -553,10 +534,8 @@ set(MEMLY_CORE_SOURCE_FILES
     ${LAYER_APPLICATION_SERVICE_REVIEW_SESSION_HDR}
     ${LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_CPP}
     ${LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_HDR}
-    ${LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_MIGRATION_CPP}
-    ${LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_MIGRATION_HDR}
-    ${LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_SEED_CPP}
-    ${LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_SEED_HDR}
+    ${LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_CPP}
+    ${LAYER_INFRASTRUCTURE_DUCKDB_DATABASE_SQL_HDR}
     ${LAYER_INFRASTRUCTURE_DUCKDB_REPOSITORY_HDR}
     ${LAYER_INFRASTRUCTURE_DUCKDB_REPOSITORY_DECK_CPP}
     ${LAYER_INFRASTRUCTURE_DUCKDB_REPOSITORY_DECK_HDR}

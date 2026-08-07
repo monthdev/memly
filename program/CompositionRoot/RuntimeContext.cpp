@@ -14,6 +14,7 @@
 #include "Layer/Application/Service/Deck/DeckService.hpp"
 // #include "Layer/Application/Service/ReviewSession/ReviewSessionListService.hpp"
 // #include "Layer/Application/Service/ReviewSession/ReviewSessionService.hpp"
+#include "Layer/Infrastructure/DuckDb/Database/DatabaseMigrator.hpp"
 #include "Layer/Infrastructure/DuckDb/Database/DatabaseRuntime.hpp"
 #include "Layer/Infrastructure/DuckDb/Repository/Deck/DeckRepository.hpp"
 
@@ -52,7 +53,10 @@ void RuntimeContext::Initialize(const std::string& DatabaseFilePath) {
     // assert(s_ReviewSessionListService == nullptr);
     // assert(s_ReviewSessionService == nullptr);
 
-    s_DatabaseRuntime = std::make_unique<Layer::Infrastructure::DuckDb::Database::DatabaseRuntime>(DatabaseFilePath);
+    // Direct construction preserves guaranteed copy elision for the nonmovable returned runtime.
+    // NOLINTNEXTLINE(modernize-make-unique)
+    s_DatabaseRuntime = std::unique_ptr<Layer::Infrastructure::DuckDb::Database::DatabaseRuntime>{ new Layer::Infrastructure::DuckDb::Database::DatabaseRuntime{
+        Layer::Infrastructure::DuckDb::Database::DatabaseMigrator{ DatabaseFilePath }.ApplyMigrations() } };
     // s_LibraryInvalidationChannel = std::make_unique<Layer::Application::Invalidation::LibraryInvalidationChannel>();
     // s_LibraryRepository = std::make_unique<Layer::Infrastructure::DuckDb::Repository::Library::LibraryRepository>(*s_DatabaseRuntime);
     // s_LibraryInvalidationCoordinator =
@@ -62,9 +66,7 @@ void RuntimeContext::Initialize(const std::string& DatabaseFilePath) {
     // std::make_unique<Layer::Infrastructure::DuckDb::Repository::ReviewSession::ReviewSessionRepository>(*s_DatabaseRuntime);
     s_DeckService = std::make_unique<Layer::Application::Service::Deck::DeckService>(*s_DeckRepository);
     // s_ReviewSessionListService = std::make_unique<Layer::Application::Service::ReviewSession::ReviewSessionListService>(*s_ReviewSessionRepository);
-    // s_ReviewSessionService =
-    //     std::make_unique<Layer::Application::Service::ReviewSession::ReviewSessionService>(s_DatabaseRuntime->GetTransactionRunner(),
-    //     *s_ReviewSessionRepository);
+    // Reintroduce ReviewSessionService after the application transaction boundary is defined.
 }
 
 // [[nodiscard]] auto RuntimeContext::GetRequiredLibraryInvalidationChannel() noexcept -> Layer::Application::Invalidation::LibraryInvalidationChannel& {

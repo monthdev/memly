@@ -4,40 +4,29 @@
 
 #include <source_location>
 #include <string>
+#include <utility>
 
 #include "Layer/Infrastructure/DuckDb/Database/PreparedStatement.hpp"
-#include "Layer/Infrastructure/DuckDb/Database/TransactionRunner.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Database {
+class DatabaseMigrator;
 
-class QueryResultDecoder;
+class [[nodiscard]] DatabaseRuntime final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+    friend class DatabaseMigrator;
 
-class DatabaseRuntime final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
 private:
     duckdb::DuckDB m_Database;
     duckdb::Connection m_DatabaseConnection;
-    TransactionRunner m_TransactionRunner;
 
-public:
-    explicit DatabaseRuntime(const std::string& DatabaseFilePath)
+    explicit DatabaseRuntime(duckdb::DatabaseInstance& DatabaseInstance, duckdb::Connection&& DatabaseConnection)
         : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_Database{ DatabaseFilePath }
-        , m_DatabaseConnection{ this->m_Database }
-        , m_TransactionRunner{ this->m_DatabaseConnection } {
-        this->BootstrapDatabase();
+        , m_Database{ DatabaseInstance }
+        , m_DatabaseConnection{ std::move(DatabaseConnection) } {
     }
 
+public:
     [[nodiscard]] auto PrepareStatement(const std::string&, const std::source_location& = std::source_location::current()) -> PreparedStatement;
-
-    [[nodiscard]] auto GetTransactionRunner() noexcept -> TransactionRunner&;
-
-private:
-    [[nodiscard]] auto Query(const std::string&, const std::source_location& = std::source_location::current()) -> QueryResultDecoder;
-
-    void BootstrapDatabase();
-    void ApplyMigrations();
-    void SeedTableDefaults();
 };
 
 }

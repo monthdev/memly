@@ -220,10 +220,9 @@ repository its implementation.
 
 DuckDB SQL resources are implementation details of their direct consumer.
 Repository SQL lives under the corresponding `DuckDb/Repository/<Domain>/Sql`
-folder. Migration and seed SQL live under `DuckDb/Database/Sql/Migration` and
-`DuckDb/Database/Sql/Seed`, respectively. Migration and seeding orchestration
-remains private `DatabaseRuntime` behavior. Do not collect SQL from independent
-consumers into a shared horizontal folder.
+folder. Migration SQL lives directly under
+`DuckDb/Database/Sql`. Do not collect SQL from independent consumers
+into a shared horizontal folder.
 
 Single-operation SQL resources are classified by their primary SQL statement
 under `Select/`, `Update/`, `Insert/`, or `Delete/`. Each resource filename and
@@ -233,24 +232,35 @@ retain domain-operation language. Each SQL owner exposes one root-level
 `<Domain>Sql.hpp/.cpp` accessor pair, and consumers depend on that accessor
 rather than on operation folders.
 
-Migration SQL separates unconditional setup under `Bootstrap/`, ordered atomic
+Migration SQL separates unconditional setup under `Bootstrap/`, ordered
 migration scripts under `Version/`, and migration-log support statements under
 their SQL-operation folders. Versioned migration filenames retain their `MNN_`
-execution-order prefix and may contain multiple SQL statement kinds. Seed SQL
-uses SQL-operation folders, currently `Insert/`. Do not add a redundant
-`Statement/` directory around SQL resources.
+execution-order prefix and may contain schema and data operations. Do not add a
+redundant `Statement/` directory around SQL resources.
 
-`DatabaseRuntime` owns the live DuckDB database and connection and the
-repository-facing prepared-statement factory. Its private `ApplyMigrations()`
-and `SeedTableDefaults()` methods run inside the single startup transaction in
-that order. Startup SQL uses the same result-decoding chain as repository SQL:
-`Query()` begins parameterless direct and multi-statement execution, while
-parameterized startup SQL uses `PrepareStatement()`. A `PreparedStatement` is
-self-contained after preparation and begins execution through its own
-`Execute()` method. `QueryResultDecoder` owns a result from either execution
-path and fetches its chunks directly. Do not route an operation back through
-`DatabaseRuntime` when the corresponding DuckDB handle already owns that
-operation.
+Database construction is an rvalue-only ownership chain.
+`DatabaseMigrator::ApplyMigrations()` completes migration and migration-log
+writes in one transaction, then returns the completed `DatabaseRuntime` by
+value to the composition root. Only the completed migration chain releases the
+runtime.
+
+Database C++ types live directly under `DuckDb/Database`. This folder owns
+startup migration, raw transaction execution and rollback handling, the
+completed live database and connection, the repository-facing
+prepared-statement factory, and the prepared-statement execution and
+result-decoding chain. Required initial defaults are inserted by
+`M02_SeedTableDefaults.sql` after `M01_CreateSchema.sql`, and future changes to
+those defaults belong in later migrations. `DatabaseRuntime` does not expose
+the bootstrap transaction runner. A `PreparedStatement` is self-contained after
+preparation and begins execution through its own `Execute()` method. Its
+`QueryResultDecoder` owns the execution result and fetches chunks directly. Do
+not route an operation back through `DatabaseRuntime` when the corresponding
+DuckDB handle already owns that operation.
+
+Guard constructed DuckDB prepared statements and query results with
+`ThrowOnPreparedStatementError()` and `ThrowOnQueryResultError()`, respectively.
+Chunk-fetch failures expose `duckdb::ErrorData` instead and remain guarded at
+the decoding boundary.
 
 Prepared-statement execution and result decoding form one ephemeral, rvalue-only
 chain beginning at `PreparedStatement::Execute()`. Invoke `WithParameters()` for
@@ -269,14 +279,14 @@ explicitly discard the decoder produced by `WithParameters()` or
 `WithoutParameters()`.
 
 A database-decoded row publicly inherits
-`Database::DecodableQueryResultRowMixin<ColumnType...>`. The ordered column-type
-pack generates compile-time positional decoding and constructs the concrete row
-without a repository-owned DuckDB decoder. Use `std::optional<ColumnType>` in
-that pack for a nullable result column; SQL `NULL` in a non-optional column
-violates a programming invariant. Keep the SQL projection, column-type pack, and
-row-constructor parameter order aligned. The mixin supplies the row's
-special-member policy, so the row does not inherit a second policy mixin
-directly.
+`Database::DecodableQueryResultRowMixin<ColumnType...>`. The ordered
+column-type pack generates compile-time positional decoding and constructs the
+concrete row without a repository-owned DuckDB decoder. Use
+`std::optional<ColumnType>` in that pack for a nullable result column; SQL `NULL`
+in a non-optional column violates a programming invariant. Keep the SQL
+projection, column-type pack, and row-constructor parameter order aligned. The
+mixin supplies the row's special-member policy, so the row does not inherit a
+second policy mixin directly.
 
 Decoding and row-count validation are separate stages. Express every repository
 contract with `QueryResultRowCountRange::ZeroOrMore()`, `Exactly()`,

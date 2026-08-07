@@ -10,7 +10,6 @@
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::DuckDb::Database {
-
 class DatabaseRuntime;
 
 class [[nodiscard]] PreparedStatement final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {

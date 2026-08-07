@@ -18,11 +18,9 @@
 
 namespace Layer::Infrastructure::DuckDb::Database {
 
-class DatabaseRuntime;
 class PreparedStatementExecution;
 
 class [[nodiscard]] QueryResultDecoder final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
-    friend class DatabaseRuntime;
     friend class PreparedStatementExecution;
 
 private:

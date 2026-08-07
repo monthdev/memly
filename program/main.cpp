@@ -14,7 +14,6 @@
 auto main(int argc, char** argv) noexcept -> int {
     return int{ Support::Runtime::Exception::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(DuckDbMigrationSql);
-        Q_INIT_RESOURCE(DuckDbSeedSql);
         Q_INIT_RESOURCE(DuckDbDeckSql);
         [[maybe_unused]] const QGuiApplication QtApplicationLifetime{ argc, argv };
         constexpr const char* AppName{ "Memly" };
