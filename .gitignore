@@ -38,7 +38,8 @@ compile_commands.json
 *.stackdump
 
 # IDE and editor specific files
-.codex/
+.codex/*
+!.codex/hooks.json
 !.vscode/
 .vscode/*
 !.vscode/extensions.json
