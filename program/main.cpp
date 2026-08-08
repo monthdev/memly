@@ -7,7 +7,7 @@
 
 #include <cstdlib>
 
-#include "CompositionRoot/RuntimeContext.hpp"
+#include "CompositionRoot/ApplicationRuntime.hpp"
 #include "Support/Runtime/Exception/ExceptionBoundary.hpp"
 #include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
 
@@ -22,7 +22,7 @@ auto main(int argc, char** argv) noexcept -> int {
         QGuiApplication::setApplicationDisplayName(AppName);
         QCoreApplication::setOrganizationDomain(OrgName);
         QCoreApplication::setOrganizationName(OrgName);
-        CompositionRoot::RuntimeContext::Initialize(Support::Runtime::QtApp::DatabaseFilePath());
+        [[maybe_unused]] const CompositionRoot::ApplicationRuntime ApplicationRuntime{ Support::Runtime::QtApp::DatabaseFilePath() };
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

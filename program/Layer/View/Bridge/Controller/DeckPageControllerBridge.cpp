@@ -7,16 +7,18 @@
 #include <expected>
 #include <optional>
 
-#include "CompositionRoot/RuntimeContext.hpp"
+#include "Layer/Application/Invalidation/LibraryInvalidationChannel.hpp"
+#include "Layer/Application/Service/Deck/DeckService.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::View::Bridge::Controller {
 
-DeckPageControllerBridge::DeckPageControllerBridge(QObject* Parent)
+DeckPageControllerBridge::DeckPageControllerBridge(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
+                                                   Application::Service::Deck::DeckService& DeckService,
+                                                   QObject* Parent)
     : QObject{ Parent }
     , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-    , m_DeckPageController{ CompositionRoot::RuntimeContext::GetRequiredLibraryInvalidationChannel(),
-                            CompositionRoot::RuntimeContext::GetRequiredDeckService() }
+    , m_DeckPageController{ LibraryInvalidationChannel, DeckService }
     , m_DeckForestProxyModel{ *this->m_DeckPageController.GetDeckForestModel(), this } {
 }
 

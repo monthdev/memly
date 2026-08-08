@@ -12,6 +12,14 @@
 #include "Layer/View/Bridge/ProxyModel/DeckForestProxyModel.hpp"
 #include "Support/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
+namespace Layer::Application::Invalidation {
+class LibraryInvalidationChannel;
+}
+
+namespace Layer::Application::Service::Deck {
+class DeckService;
+}
+
 namespace Layer::View::Bridge::Controller {
 
 class DeckPageControllerBridge : public QObject, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
@@ -24,7 +32,9 @@ private:
     ProxyModel::DeckForestProxyModel m_DeckForestProxyModel;
 
 public:
-    explicit DeckPageControllerBridge(QObject* = nullptr);
+    explicit DeckPageControllerBridge(Application::Invalidation::LibraryInvalidationChannel&,
+                                      Application::Service::Deck::DeckService&,
+                                      QObject* = nullptr);
     [[nodiscard]] ProxyModel::DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
 
     [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString&, quint8) noexcept;

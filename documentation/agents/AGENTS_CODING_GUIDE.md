@@ -2,9 +2,13 @@
 
 ## Runtime Composition and Services
 
-Constructor parameters and data members of objects owned by
-`CompositionRoot::RuntimeContext` must follow their order in
-`RuntimeContext.hpp/cpp`.
+`CompositionRoot::ApplicationRuntime` owns the live application object graph by
+value. Its constructor initializers and data members follow dependency order
+from lower-level dependencies to higher-level dependents. `main.cpp` constructs
+the Qt application, `ApplicationRuntime`, and the QML engine in that order so
+the engine is destroyed before its factories and their dependencies. Expose only
+narrow View-layer factories to QML; never expose `ApplicationRuntime` or allow a
+lower layer to retrieve dependencies from it.
 
 Services form the domain capability surface used by application commands; they
 do not model stateful domain entities. A state-free operation remains on its
