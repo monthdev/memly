@@ -5,7 +5,9 @@
 #include <initializer_list>
 #include <memory>
 #include <source_location>
+#include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 #include "Support/Runtime/Exception/ThrowMemlyException.hpp"
@@ -27,5 +29,21 @@ QueryResultDecoder::QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&& Qu
     }
     return duckdb::unique_ptr<duckdb::DataChunk>{ std::move(DataChunk) };
 }
+
+void QueryResultDecoder::VerifyUnifiedVectorFormatStorageType(const duckdb::UnifiedVectorFormat& UnifiedVectorFormat, const std::type_identity<std::string>) {
+    UnifiedVectorFormat.VerifyVectorType<duckdb::string_t>();
+}
+
+#pragma clang unsafe_buffer_usage begin
+
+[[nodiscard]] auto QueryResultDecoder::DecodeColumnValue(const duckdb::UnifiedVectorFormat& UnifiedVectorFormat,
+                                                         const duckdb::idx_t SelectedRowIndex,
+                                                         const std::type_identity<std::string>) -> std::string {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    const duckdb::string_t& DuckDbStringT{ duckdb::UnifiedVectorFormat::GetDataUnsafe<duckdb::string_t>(UnifiedVectorFormat)[SelectedRowIndex] };
+    return std::string{ DuckDbStringT.GetData(), DuckDbStringT.GetSize() };
+}
+
+#pragma clang unsafe_buffer_usage end
 
 }

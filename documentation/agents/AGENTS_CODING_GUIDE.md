@@ -306,7 +306,15 @@ that pack for a nullable result column; SQL `NULL` in a non-optional column
 violates a programming invariant. Keep the SQL projection, column-type pack, and
 row-constructor parameter order aligned. The mixin supplies the row's
 special-member policy, so the row does not inherit a second policy mixin
-directly.
+directly. Decode each fetched `DataChunk` through its unified vector formats; do
+not materialize an intermediate `duckdb::Value` for each cell. Construct an
+owning `std::string` directly from DuckDB's `string_t` bytes so each string
+crosses the database boundary with one required byte copy. Verify every column's
+physical storage type once per fetched chunk, then use
+`GetDataUnsafe<ColumnType>()` only while decoding that same verified chunk; do
+not repeat `GetData<ColumnType>()` for every cell. Confine the required
+unsafe-buffer suppression to this adapter because DuckDB exposes the unified
+format array and its physical column storage without bounds-carrying views.
 
 Decoding and row-count validation are separate stages. Express every repository
 contract with `QueryResultRowCountRange::ZeroOrMore()`, `Exactly()`,
