@@ -1,0 +1,40 @@
+#pragma once
+
+#include <cstddef>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
+
+#include "Memly/Domain/DeckForestSnapshotNode.hpp"
+#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
+
+namespace Layer::Application::Domain {
+
+class DeckForestSnapshotIndex final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+private:
+    std::vector<DeckForestSnapshotNode> m_DeckForestSnapshotNodeVector;
+    std::vector<std::size_t> m_RootDeckNodePositionVector;
+    std::vector<std::vector<std::size_t>> m_ChildDeckNodePositionVectorByDeckNodePositionVector;
+    std::unordered_map<std::string_view, std::size_t> m_DeckNodePositionByDeckIdUnorderedMap;
+
+public:
+    explicit DeckForestSnapshotIndex() noexcept;
+
+    [[nodiscard]] auto GetSubtreeDeckIds(const std::string&) const -> std::vector<std::string_view>;
+
+    [[nodiscard]] auto DoesDuplicateSiblingDeckNameExist(const std::optional<std::string>&, const std::string&) const -> bool;
+    [[nodiscard]] auto WouldMoveDeckBeNoOp(const std::string&, const std::optional<std::string>&) const -> bool;
+    [[nodiscard]] auto WouldMoveDeckCreateCycle(const std::string&, const std::optional<std::string>&) const -> bool;
+    [[nodiscard]] auto WouldMoveDeckCreateTargetLanguageMismatch(const std::string&, const std::optional<std::string>&) const -> bool;
+
+    void RefreshFromDeckForestSnapshotNodes(std::vector<DeckForestSnapshotNode>&&);
+
+private:
+    [[nodiscard]] auto GetDeckNodePosition(const std::string&) const -> std::size_t;
+
+    void AccumulateSubtreeCounts();
+};
+
+}

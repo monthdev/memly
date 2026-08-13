@@ -1,20 +1,22 @@
+#include <qbytearrayview.h>
 #include <qcoreapplication.h>
 #include <qguiapplication.h>
 #include <qnamespace.h>
 #include <qobject.h>
+#include <qobjectdefs.h>
 #include <qqmlapplicationengine.h>
 #include <qtresource.h>
 
 #include <cstdlib>
 
-#include "CompositionRoot/ApplicationRuntime.hpp"
-#include "Support/Runtime/Exception/ExceptionBoundary.hpp"
-#include "Support/Runtime/QtApp/QtAppStoragePath.hpp"
+#include "Memly/CompositionRoot/ApplicationRuntime.hpp"
+#include "Memly/Exception/ExceptionBoundary.hpp"
+#include "Memly/QtApp/QtAppStoragePath.hpp"
 
 auto main(int argc, char** argv) noexcept -> int {
-    return int{ Support::Runtime::Exception::TryCatchWrapper([&]() -> int {
-        Q_INIT_RESOURCE(DuckDbMigrationSql);
-        Q_INIT_RESOURCE(DuckDbDeckSql);
+    return int{ Support::Exception::TryCatchWrapper([&]() -> int {
+        Q_INIT_RESOURCE(DatabaseMigrationSql);
+        Q_INIT_RESOURCE(RepositoryDeckSql);
         [[maybe_unused]] const QGuiApplication QtApplicationLifetime{ argc, argv };
         constexpr const char* AppName{ "Memly" };
         constexpr const char* OrgName{ "MemlyProject" };
@@ -22,7 +24,7 @@ auto main(int argc, char** argv) noexcept -> int {
         QGuiApplication::setApplicationDisplayName(AppName);
         QCoreApplication::setOrganizationDomain(OrgName);
         QCoreApplication::setOrganizationName(OrgName);
-        [[maybe_unused]] const CompositionRoot::ApplicationRuntime ApplicationRuntime{ Support::Runtime::QtApp::DatabaseFilePath() };
+        [[maybe_unused]] const CompositionRoot::ApplicationRuntime ApplicationRuntime{ Support::QtApp::DatabaseFilePath() };
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

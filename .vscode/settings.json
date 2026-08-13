@@ -5,8 +5,10 @@
   "cmake.useCMakePresets": "always",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "clangd.arguments": [
+    "--enable-config",
     "--compile-commands-dir=${workspaceFolder}"
   ],
+  "qt-qml.qmlls.useNoCMakeCalls": true,
   "lintRunner.respectGitignore": true,
   "lintRunner.tools": {
     "clang-tidy": {

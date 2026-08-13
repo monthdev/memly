@@ -1,0 +1,33 @@
+// Temporarily disabled during review session control path refactor.
+// NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
+#if 0
+#pragma once
+
+#include <cstdint>
+#include <string>
+#include <utility>
+
+#include "Memly/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
+
+namespace Layer::Application::Domain {
+
+struct ReviewSessionDeckSelection : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
+    enum class [[nodiscard]] DeckSelectionTypeEnum : std::uint8_t {
+        Self,
+        Subtree,
+        ExcludeSelf,
+        ExcludeSubtree
+    };
+
+    std::string m_DeckId;
+    DeckSelectionTypeEnum m_DeckSelectionType;
+
+    explicit ReviewSessionDeckSelection(std::string&& DeckId, const DeckSelectionTypeEnum DeckSelectionType) noexcept
+        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
+        , m_DeckId{ std::move(DeckId) }
+        , m_DeckSelectionType{ DeckSelectionType } {
+    }
+};
+
+}
+#endif

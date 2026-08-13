@@ -1,5 +1,7 @@
 ---
 Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
   ClangTidy:
     Remove: ['*']
 

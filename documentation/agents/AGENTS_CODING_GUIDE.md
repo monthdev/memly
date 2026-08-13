@@ -142,11 +142,11 @@ Headers may contain bodies only for data-struct constructors, templates, and
 `constexpr` constructors, including in-class constructor templates and
 constructors of class templates. Every ordinary non-template method and free
 function, including a one-line accessor, is declared in its header and defined
-in the corresponding source file (`custom-memly-no-header-function-definition`).
-Deleted constructors and defaulted or deleted non-constructor special-member
-definitions remain inside their class declarations. Defaulted class constructors
-are defined out of class in the corresponding implementation file unless they
-are `constexpr`.
+in the corresponding `.cpp` source file
+(`custom-memly-no-header-function-definition`). Deleted constructors and
+defaulted or deleted non-constructor special-member definitions remain inside
+their class declarations. Defaulted class constructors are defined out of class
+in the corresponding source file unless they are `constexpr`.
 
 Inside a non-static member function, explicitly qualify every access to the
 current object's data members and methods with `this->`. This includes member
@@ -223,6 +223,16 @@ Write exception-message prose as a noun phrase followed by a verb phrase, such
 as `Database query failed`. Do not use verb-first wording such as
 `Failed to execute database query`.
 
+Throw `Support::Exception::MemlyException` explicitly. Its constructor captures
+the throwing call site's source location by default; pass an existing source
+location only when an adapter intentionally preserves an earlier public
+operation boundary. Do not add forwarding functions whose only behavior is to
+throw or forward construction arguments into `MemlyException`.
+
+Keep the non-allocating `MemlyException` payload and the outer
+`ExceptionBoundary` logging and termination behavior in separate types and
+implementation files within the `Exception` component.
+
 Validate user input and other untrusted values at their input boundary before
 converting them into internal state. Downstream code may assert the established
 invariant instead of repeating runtime validation. Do not add both an assertion
@@ -235,18 +245,23 @@ assumed to satisfy schema and application invariants established by Memly write
 paths. Violations of those invariants are programming errors; database-engine
 failures remain runtime errors at the database boundary.
 
-`Layer/Infrastructure/DuckDb` contains the concrete DuckDB database boundary and
-repositories. A repository is the domain-shaped persistence boundary for one
-domain and groups that domain's reads and mutations. Do not split read and
-mutation operations into separate repository types merely because their result
-shapes differ. If persistence dependency inversion is introduced, preserve this
-domain grouping in the Application-owned port and make the Infrastructure
-repository its implementation.
+`Layer/Infrastructure/Database` contains the concrete embedded-database
+boundary, and `Layer/Infrastructure/Repository` contains its repositories. The
+embedded database engine is a fixed implementation detail rather than a
+swappable architectural dimension; do not introduce an engine-named folder or
+namespace around these components. A repository is the domain-shaped persistence
+boundary for one domain and groups that domain's reads and mutations. Do not
+split read and mutation operations into separate repository types merely because
+their result shapes differ. If persistence dependency inversion is introduced,
+preserve this domain grouping in the Application-owned port and make the
+Infrastructure repository its implementation.
 
 DuckDB SQL resources are implementation details of their direct consumer.
-Repository SQL lives under the corresponding `DuckDb/Repository/<Domain>/Sql`
-folder. Migration SQL lives directly under `DuckDb/Database/Sql`. Do not collect
-SQL from independent consumers into a shared horizontal folder.
+Repository SQL lives under
+`Layer/Infrastructure/Repository/source/Sql/<Domain>`, while migration SQL lives
+under `Layer/Infrastructure/Database/source/Sql`. `Database` and `Repository`
+each form one CMake component with one public `include/` root and one private
+`source/` root.
 
 Single-operation SQL resources are classified by their primary SQL statement
 under `Select/`, `Update/`, `Insert/`, or `Delete/`. Each resource filename and
@@ -268,11 +283,13 @@ writes in one transaction, then returns the completed `DatabaseRuntime` by value
 to the composition root. Only the completed migration chain releases the
 runtime.
 
-Database C++ types live directly under `DuckDb/Database`. This folder owns
-startup migration, raw transaction execution and rollback handling, the
-completed live database and connection, the repository-facing prepared-statement
-factory, and the prepared-statement execution and result-decoding chain.
-Required initial defaults are inserted by `M02_SeedTableDefaults.sql` after
+`Layer/Infrastructure/Database` is one component and target containing startup
+migration, raw transaction execution and rollback handling, the completed live
+database and connection, the repository-facing prepared-statement factory,
+shared database error guards, and the prepared-statement execution and
+result-decoding chain. `Layer/Infrastructure/Repository` is one component and
+target containing the domain-grouped repositories and their SQL. Required
+initial defaults are inserted by `M02_SeedTableDefaults.sql` after
 `M01_CreateSchema.sql`, and future changes to those defaults belong in later
 migrations. `DatabaseRuntime` does not expose the bootstrap transaction runner.
 A `PreparedStatement` is self-contained after preparation and begins execution
@@ -284,7 +301,9 @@ operation.
 Guard constructed DuckDB prepared statements and query results with
 `ThrowOnPreparedStatementError()` and `ThrowOnQueryResultError()`, respectively.
 Chunk-fetch failures expose `duckdb::ErrorData` instead and remain guarded at
-the decoding boundary.
+the decoding boundary. These guards contain the DuckDB state inspection; do not
+wrap their resulting `MemlyException` throw in another database-error forwarding
+helper.
 
 Prepared-statement execution and result decoding form one ephemeral, rvalue-only
 chain beginning at `PreparedStatement::Execute()`. Invoke `WithParameters()` for
@@ -332,17 +351,17 @@ paired `NOLINTBEGIN` and `NOLINTEND` around the decoding expression.
 ## Qt and QML Boundaries
 
 `Layer/Presentation` and `Layer/View` own UI-facing Qt and QML integration.
-Focused `Layer/Application` runtime-coordination modules may use Qt when their
-behavior depends on the Qt event loop, signals, or timers; keep those
+Focused `Layer/Application` runtime-coordination components may use Qt when
+their behavior depends on the Qt event loop, signals, or timers; keep those
 dependencies contained and out of domain, service, repository, and database
 contracts. `main.cpp` owns process startup and QML engine bootstrap.
-`Support/Runtime/QtApp` contains Qt adapters for application runtime support
-such as standard paths and embedded resources.
+`Support/QtApp` contains Qt adapters for application runtime support such as
+standard paths and embedded resources.
 
 Use standard-library types and containers at non-Qt-facing boundaries. Qt types
-and containers appear only in explicitly Qt-bound modules or where Qt framework,
-QML, resource, signal, timer, event-loop, or override interfaces require them,
-with conversion at that boundary.
+and containers appear only in explicitly Qt-bound components or where Qt
+framework, QML, resource, signal, timer, event-loop, or override interfaces
+require them, with conversion at that boundary.
 
 TODO: The two paragraphs above will be subject to change as architecture has not
 solidified yet.
@@ -506,12 +525,74 @@ subfolders into their own variables.
 Order glob declarations and target source lists by source-tree order so the
 build file mirrors the repository layout.
 
+A component stores public headers under `include/Memly/<Component>/<Header>.hpp`
+and implementation files directly in a lowercase `source/` folder. Include every
+public Memly header through its full `Memly/<Component>/<Header>.hpp` path. The
+`Memly/` prefix prevents collisions with dependencies, and the component folder
+identifies the owning include surface without repeating the complete source-tree
+path. Private implementation headers remain under `source/` and do not become
+part of this public include surface. Private SQL resources and their accessors
+remain under the owning component's `source/Sql` subtree. Place the component
+`CMakeLists.txt` boundary conceptually at the folder containing the `include/`
+and `source/` roots even while target declarations remain centralized in the
+top-level build file.
+
+Each logical component maps to one CMake target. Header-only components use an
+`INTERFACE` target; components with translation units use a static library. Do
+not subdivide one logical component into public declaration facades plus a
+shared implementation bag. Application `Domain`, `IndexCache`, and `Service` are
+each flat components with one public include surface, one implementation folder,
+one namespace, and one target. `Layer/Infrastructure/Database`,
+`Layer/Infrastructure/Repository`, `Support/Exception`, and `Support/QtApp`
+likewise each use one component target.
+
+Publish only a component interface's `include/` directory and headers. Add a
+`source/` directory only as a private include root when implementation helpers
+need it. Do not publish `program/` as a broad include root and do not introduce
+layer or top-level umbrella targets.
+
+Every `.cpp` includes its same-stem header first. For each header and
+implementation file, retain the smallest include set that both clangd's strict
+include diagnostics and Clang-Tidy's `misc-include-cleaner` accept. Do not
+repeat an include in an implementation file merely because its declarations are
+used there when the associated header already supplies those declarations and
+both cleaners accept the smaller set. Neither cleaner detects every benign
+redundant include, so manually avoid a known superfluous include without
+treating silence from the tools as proof of global minimality.
+
+Express required include relationships as CMake target-link relationships. Use
+`PUBLIC` when a dependency is required to compile a component's public headers
+and `PRIVATE` when it is confined to the source implementation. While public
+headers expose third-party types, the corresponding third-party target
+necessarily remains a public dependency; defer narrowing that edge until
+representation hiding is deliberately introduced.
+
 ## Lint Policy
 
 Memly-specific lint enforcement must remain expressible in `.clang-tidy` YAML,
 including query-based custom checks. Do not introduce compiled clang-tidy
 extensions or a separate text-based style linter solely to enforce this guide.
 Rules beyond the YAML interface remain documented conventions.
+
+Run Clang-Tidy through the explicit `memly-clang-tidy` target, not through the
+`CXX_CLANG_TIDY` compilation boundary. Every Memly translation unit depends on
+the Clang-Tidy stamp, so a normal build completes the full-tree lint pass before
+compiling any changed Memly translation unit. The stamp depends on its policy
+inputs, `compile_commands.json`, and the complete source tree; unchanged inputs
+do not repeat the analysis. Do not cap the full-tree tool's worker count.
+
+Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
+missing- and unused-include diagnostics are the automated acceptance checks for
+Memly include sets, but neither enforces a unique direct provider or proves that
+the accepted set is minimal. Enable CMake's native interface-header verification
+for every component so each generated probe includes exactly one public header
+and receives that component's transitive public usage requirements. A normal
+build requires the independently callable `memly-public-header-verification`
+target before its final executable is complete. Ordinary component compilation
+may proceed after Clang-Tidy without waiting for the complete public-header
+verification set; only the final executable is gated by that set. Preserve the
+system-include classification of imported and explicitly system public
+dependencies; Memly include directories remain warning-checked.
 
 Keep unavoidable `NOLINT` exceptions local to the exact declaration or
 expression and name the suppressed check.
