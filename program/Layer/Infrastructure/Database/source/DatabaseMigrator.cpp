@@ -18,15 +18,13 @@
 #include "Memly/Database/DatabaseRuntime.hpp"
 #include "Memly/Database/TransactionRunner.hpp"
 #include "Memly/Exception/MemlyException.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 #include "Sql/MigrationSql.hpp"
 #include "ThrowOnDatabaseError.hpp"
 
 namespace Layer::Infrastructure::Database {
 
 DatabaseMigrator::DatabaseMigrator(const std::string& DatabaseFilePath)
-    : NoCopyNoMoveMixin{}
-    , m_Database{ DatabaseFilePath }
+    : m_Database{ DatabaseFilePath }
     , m_DatabaseConnection{ this->m_Database } {
 }
 

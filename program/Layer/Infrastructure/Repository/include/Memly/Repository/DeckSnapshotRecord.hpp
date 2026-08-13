@@ -48,6 +48,14 @@ struct [[nodiscard]] DeckSnapshotRecord final : public Database::DecodableQueryR
         , m_SelfTotalCount{ SelfTotalCount }
         , m_TargetLanguageCode{ TargetLanguageCode } {
     }
+
+    explicit DeckSnapshotRecord(const DeckSnapshotRecord&) = delete;
+    auto operator=(const DeckSnapshotRecord&) -> DeckSnapshotRecord& = delete;
+
+    explicit DeckSnapshotRecord(DeckSnapshotRecord&&) noexcept = default;
+    auto operator=(DeckSnapshotRecord&&) -> DeckSnapshotRecord& = delete;
+
+    ~DeckSnapshotRecord() noexcept = default;
 };
 
 }

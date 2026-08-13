@@ -12,16 +12,23 @@
 #include <utility>
 
 #include "Memly/Exception/MemlyException.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 
-class TransactionRunner final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class TransactionRunner final {
 private:
     duckdb::Connection& m_DatabaseConnection;
 
 public:
     explicit TransactionRunner(duckdb::Connection&) noexcept;
+
+    explicit TransactionRunner(const TransactionRunner&) = delete;
+    auto operator=(const TransactionRunner&) -> TransactionRunner& = delete;
+
+    explicit TransactionRunner(TransactionRunner&&) = delete;
+    auto operator=(TransactionRunner&&) -> TransactionRunner& = delete;
+
+    ~TransactionRunner() noexcept = default;
 
     template <typename LambdaType>
         requires std::invocable<LambdaType&&>

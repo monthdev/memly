@@ -4,13 +4,10 @@
 #include <cstddef>
 #include <limits>
 
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
-
 namespace Layer::Infrastructure::Database {
 
 QueryResultRowCountRange::QueryResultRowCountRange(const std::size_t MinimumRowCount, const std::size_t MaximumRowCount) noexcept
-    : NoCopyNoMoveMixin{}
-    , m_MinimumRowCount{ MinimumRowCount }
+    : m_MinimumRowCount{ MinimumRowCount }
     , m_MaximumRowCount{ MaximumRowCount } {
 }
 

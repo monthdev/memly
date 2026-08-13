@@ -10,7 +10,6 @@
 
 #include "Memly/Controller/DeckPageController.hpp"
 #include "Memly/ProxyModel/DeckForestProxyModel.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Invalidation {
 class LibraryInvalidationChannel;
@@ -22,7 +21,7 @@ class DeckService;
 
 namespace Layer::View::Bridge::Controller {
 
-class DeckPageControllerBridge : public QObject, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class DeckPageControllerBridge : public QObject {
     Q_OBJECT
     Q_PROPERTY(ProxyModel::DeckForestProxyModel* deckForestModel READ GetDeckForestProxyModel CONSTANT)
     QML_NAMED_ELEMENT(DeckPageController)
@@ -35,6 +34,15 @@ public:
     explicit DeckPageControllerBridge(Application::Invalidation::LibraryInvalidationChannel&,
                                       Application::Service::DeckService&,
                                       QObject* = nullptr);
+
+    explicit DeckPageControllerBridge(const DeckPageControllerBridge&) = delete;
+    auto operator=(const DeckPageControllerBridge&) -> DeckPageControllerBridge& = delete;
+
+    explicit DeckPageControllerBridge(DeckPageControllerBridge&&) = delete;
+    auto operator=(DeckPageControllerBridge&&) -> DeckPageControllerBridge& = delete;
+
+    ~DeckPageControllerBridge() noexcept override = default;
+
     [[nodiscard]] ProxyModel::DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
 
     [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString&, quint8) noexcept;

@@ -10,13 +10,11 @@
 #include "Memly/IndexCache/DeckForestSnapshotIndexCache.hpp"
 #include "Memly/Repository/DeckRepository.hpp"
 #include "Memly/Repository/DeckSnapshotRecord.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Service {
 
 DeckService::DeckService(Infrastructure::Repository::DeckRepository& DeckRepository) noexcept
-    : NoCopyNoMoveMixin{}
-    , m_DeckRepository{ DeckRepository }
+    : m_DeckRepository{ DeckRepository }
     , m_DeckForestSnapshotIndexCache{} {
 }
 

@@ -7,10 +7,8 @@
 #include <source_location>
 #include <string_view>
 
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
-
 namespace Support::Exception {
-class [[nodiscard]] MemlyException final : public std::exception, private SpecialMemberPolicy::NoCopyNoMoveMixin {
+class [[nodiscard]] MemlyException final : public std::exception {
 private:
     static constexpr std::size_t s_ErrorMessageCapacity{ 1024 };
 
@@ -19,6 +17,14 @@ private:
 
 public:
     explicit MemlyException(const std::initializer_list<std::string_view>&, const std::source_location& = std::source_location::current()) noexcept;
+
+    explicit MemlyException(const MemlyException&) = delete;
+    auto operator=(const MemlyException&) -> MemlyException& = delete;
+
+    explicit MemlyException(MemlyException&&) = delete;
+    auto operator=(MemlyException&&) -> MemlyException& = delete;
+
+    ~MemlyException() noexcept override = default;
 
     [[nodiscard]] auto what() const noexcept -> const char* override;
 

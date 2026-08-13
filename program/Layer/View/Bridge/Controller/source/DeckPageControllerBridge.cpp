@@ -9,7 +9,6 @@
 
 #include "Memly/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Memly/Service/DeckService.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::View::Bridge::Controller {
 
@@ -17,7 +16,6 @@ DeckPageControllerBridge::DeckPageControllerBridge(Application::Invalidation::Li
                                                    Application::Service::DeckService& DeckService,
                                                    QObject* Parent)
     : QObject{ Parent }
-    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
     , m_DeckPageController{ LibraryInvalidationChannel, DeckService }
     , m_DeckForestProxyModel{ *this->m_DeckPageController.GetDeckForestModel(), this } {
 }

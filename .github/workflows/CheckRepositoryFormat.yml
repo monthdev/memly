@@ -1,4 +1,4 @@
-name: Check Format
+name: Check Repository Format
 
 on:
   pull_request:
@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  format:
-    name: Format
+  check_repository_format:
+    name: Check Repository Format
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
@@ -75,7 +75,7 @@ jobs:
           mapfile -t CONFIG_FILES < <(
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
               .clang-format \
-              .github/workflows/CheckFormat.yml
+              .github/workflows/CheckRepositoryFormat.yml
           )
 
           if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
@@ -108,7 +108,7 @@ jobs:
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
               .cmake-format.yaml \
               .cmakelintrc \
-              .github/workflows/CheckFormat.yml
+              .github/workflows/CheckRepositoryFormat.yml
           )
           mapfile -t CHANGED_LISTFILES < <(
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
@@ -152,7 +152,7 @@ jobs:
               .prettierrc.yaml \
               .prettierrc.yml \
               prettier.config.js \
-              .github/workflows/CheckFormat.yml
+              .github/workflows/CheckRepositoryFormat.yml
           )
 
           if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
@@ -184,7 +184,7 @@ jobs:
           mapfile -t CONFIG_FILES < <(
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
               .qmlformat.ini \
-              .github/workflows/CheckFormat.yml
+              .github/workflows/CheckRepositoryFormat.yml
           )
 
           if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
@@ -215,7 +215,7 @@ jobs:
 
           mapfile -t CONFIG_FILES < <(
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              .github/workflows/CheckFormat.yml
+              .github/workflows/CheckRepositoryFormat.yml
           )
 
           if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
@@ -252,7 +252,7 @@ jobs:
               .prettierrc.yaml \
               .prettierrc.yml \
               prettier.config.js \
-              .github/workflows/CheckFormat.yml
+              .github/workflows/CheckRepositoryFormat.yml
           )
 
           if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then

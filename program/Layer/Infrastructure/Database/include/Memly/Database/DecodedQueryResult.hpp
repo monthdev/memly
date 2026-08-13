@@ -5,20 +5,26 @@
 
 #include "Memly/Database/DecodableQueryResultRowMixin.hpp"
 #include "Memly/Database/QueryResultRowCountRange.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 
 template <DecodableQueryResultRow QueryResultRowType>
-class [[nodiscard]] DecodedQueryResult final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class [[nodiscard]] DecodedQueryResult final {
 private:
     std::vector<QueryResultRowType> m_QueryResultRowVector;
 
 public:
     explicit DecodedQueryResult(std::vector<QueryResultRowType>&& QueryResultRowVector)
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_QueryResultRowVector{ std::move(QueryResultRowVector) } {
+        : m_QueryResultRowVector{ std::move(QueryResultRowVector) } {
     }
+
+    explicit DecodedQueryResult(const DecodedQueryResult&) = delete;
+    auto operator=(const DecodedQueryResult&) -> DecodedQueryResult& = delete;
+
+    explicit DecodedQueryResult(DecodedQueryResult&&) = delete;
+    auto operator=(DecodedQueryResult&&) -> DecodedQueryResult& = delete;
+
+    ~DecodedQueryResult() noexcept = default;
 
     [[nodiscard]] auto AssertRowCount([[maybe_unused]] const QueryResultRowCountRange& ExpectedQueryResultRowCountRange) && -> std::vector<QueryResultRowType> {
         ExpectedQueryResultRowCountRange.AssertContains(this->m_QueryResultRowVector.size());

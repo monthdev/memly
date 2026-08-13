@@ -11,16 +11,23 @@
 #include <qvariant.h>
 
 #include "Memly/Model/DeckForestModel.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::View::Bridge::ProxyModel {
 
-class DeckForestProxyModel final : public QIdentityProxyModel, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class DeckForestProxyModel final : public QIdentityProxyModel {
     Q_OBJECT
     QML_ANONYMOUS
 
 public:
     explicit DeckForestProxyModel(Presentation::Model::DeckForestModel&, QObject* = nullptr);
+
+    explicit DeckForestProxyModel(const DeckForestProxyModel&) = delete;
+    auto operator=(const DeckForestProxyModel&) -> DeckForestProxyModel& = delete;
+
+    explicit DeckForestProxyModel(DeckForestProxyModel&&) = delete;
+    auto operator=(DeckForestProxyModel&&) -> DeckForestProxyModel& = delete;
+
+    ~DeckForestProxyModel() noexcept override = default;
 
     void sort(int, Qt::SortOrder = Qt::AscendingOrder) noexcept override;
     [[nodiscard]] QVariant headerData(int, Qt::Orientation, int = Qt::DisplayRole) const noexcept override;

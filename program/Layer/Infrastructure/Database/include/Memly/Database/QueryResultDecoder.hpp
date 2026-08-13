@@ -15,17 +15,24 @@
 
 #include "Memly/Database/DecodableQueryResultRowMixin.hpp"
 #include "Memly/Database/DecodedQueryResult.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 
-class [[nodiscard]] QueryResultDecoder final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class [[nodiscard]] QueryResultDecoder final {
 private:
     std::unique_ptr<duckdb::QueryResult> m_QueryResult;
     const std::source_location& m_SourceLocation;
 
 public:
     explicit QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&&, const std::source_location&) noexcept;
+
+    explicit QueryResultDecoder(const QueryResultDecoder&) = delete;
+    auto operator=(const QueryResultDecoder&) -> QueryResultDecoder& = delete;
+
+    explicit QueryResultDecoder(QueryResultDecoder&&) = delete;
+    auto operator=(QueryResultDecoder&&) -> QueryResultDecoder& = delete;
+
+    ~QueryResultDecoder() noexcept = default;
 
     template <DecodableQueryResultRow QueryResultRowType>
     [[nodiscard]] auto DecodedTo() && -> DecodedQueryResult<QueryResultRowType> {

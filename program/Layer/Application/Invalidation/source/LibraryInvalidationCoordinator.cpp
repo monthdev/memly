@@ -16,7 +16,6 @@
 #include "Memly/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Memly/Invalidation/LibraryInvalidationTarget.hpp"
 #include "Memly/Repository/LibraryRepository.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Invalidation {
 
@@ -25,7 +24,6 @@ LibraryInvalidationCoordinator::LibraryInvalidationCoordinator(
     Infrastructure::Repository::LibraryRepository& LibraryRepository,
     QObject* Parent)
     : QObject{ Parent }
-    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
     , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
     , m_LibraryRepository{ LibraryRepository }
     , m_LibraryInvalidationQTimer{} {

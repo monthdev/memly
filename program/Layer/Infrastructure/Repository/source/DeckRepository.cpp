@@ -9,14 +9,12 @@
 #include "Memly/Database/QueryResultRowCountRange.hpp"
 #include "Memly/Repository/DeckSnapshotRecord.hpp"
 #include "Memly/Repository/MutatedId.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 #include "Sql/Deck/DeckSql.hpp"
 
 namespace Layer::Infrastructure::Repository {
 
 DeckRepository::DeckRepository(Database::DatabaseRuntime& DatabaseRuntime)
-    : NoCopyNoMoveMixin{}
-    , m_SelectDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectDeckSnapshotRecordsSql()) }
+    : m_SelectDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectDeckSnapshotRecordsSql()) }
     , m_InsertRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertRootDeckSql()) }
     , m_InsertChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertChildDeckSql()) }
     , m_UpdateDeckParentToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateDeckParentToRootSql()) }

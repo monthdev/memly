@@ -13,7 +13,6 @@
 #include "Memly/Exception/ExceptionBoundary.hpp"
 #include "Memly/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Memly/Service/DeckService.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Presentation::Controller {
 
@@ -21,7 +20,6 @@ DeckPageController::DeckPageController(Application::Invalidation::LibraryInvalid
                                        Application::Service::DeckService& DeckService,
                                        QObject* Parent)
     : QObject{ Parent }
-    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
     , m_DeckService{ DeckService }
     , m_DeckForestModel{ this } {
     LibraryInvalidationChannel.ConnectSnapshot(

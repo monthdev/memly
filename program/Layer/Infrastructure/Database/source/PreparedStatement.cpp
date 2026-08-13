@@ -7,13 +7,11 @@
 #include <utility>
 
 #include "Memly/Database/PreparedStatementExecution.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 
 PreparedStatement::PreparedStatement(std::unique_ptr<duckdb::PreparedStatement>&& DuckDbPreparedStatement) noexcept
-    : NoCopyNoMoveMixin{}
-    , m_DuckDbPreparedStatement{ std::move(DuckDbPreparedStatement) } {
+    : m_DuckDbPreparedStatement{ std::move(DuckDbPreparedStatement) } {
 }
 
 [[nodiscard]] auto PreparedStatement::Execute(const std::source_location& SourceLocation) noexcept -> PreparedStatementExecution {

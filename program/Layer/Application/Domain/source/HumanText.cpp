@@ -3,13 +3,10 @@
 #include <string>
 #include <utility>
 
-#include "Memly/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
-
 namespace Layer::Application::Domain {
 
 HumanText::HumanText(std::string&& NormalizedText, std::string&& NormalizedCaseFoldedText) noexcept
-    : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
-    , m_NormalizedText{ std::move(NormalizedText) }
+    : m_NormalizedText{ std::move(NormalizedText) }
     , m_NormalizedCaseFoldedText{ std::move(NormalizedCaseFoldedText) } {
 }
 

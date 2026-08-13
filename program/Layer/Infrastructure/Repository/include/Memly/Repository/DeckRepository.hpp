@@ -6,7 +6,6 @@
 
 #include "Memly/Database/PreparedStatement.hpp"
 #include "Memly/Repository/DeckSnapshotRecord.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 class DatabaseRuntime;
@@ -14,7 +13,7 @@ class DatabaseRuntime;
 
 namespace Layer::Infrastructure::Repository {
 
-class DeckRepository final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class DeckRepository final {
 private:
     Database::PreparedStatement m_SelectDeckSnapshotRecordsPreparedStatement;
     Database::PreparedStatement m_InsertRootDeckPreparedStatement;
@@ -28,6 +27,14 @@ private:
 
 public:
     explicit DeckRepository(Database::DatabaseRuntime&);
+
+    explicit DeckRepository(const DeckRepository&) = delete;
+    auto operator=(const DeckRepository&) -> DeckRepository& = delete;
+
+    explicit DeckRepository(DeckRepository&&) = delete;
+    auto operator=(DeckRepository&&) -> DeckRepository& = delete;
+
+    ~DeckRepository() noexcept = default;
 
     [[nodiscard]] auto ReadDeckSnapshotRecords(std::int64_t) -> std::vector<DeckSnapshotRecord>;
     void CreateRootDeck(const std::string&, std::uint8_t);

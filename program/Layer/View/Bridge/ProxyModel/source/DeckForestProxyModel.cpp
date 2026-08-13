@@ -7,13 +7,11 @@
 
 #include "Memly/Exception/ExceptionBoundary.hpp"
 #include "Memly/Model/DeckForestModel.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::View::Bridge::ProxyModel {
 
 DeckForestProxyModel::DeckForestProxyModel(Presentation::Model::DeckForestModel& DeckForestModel, QObject* Parent)
-    : QIdentityProxyModel{ Parent }
-    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{} {
+    : QIdentityProxyModel{ Parent } {
     this->setSourceModel(&DeckForestModel);
 }
 

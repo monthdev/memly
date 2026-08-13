@@ -11,13 +11,11 @@
 #include <utility>
 
 #include "Memly/Exception/MemlyException.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 
 QueryResultDecoder::QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&& QueryResult, const std::source_location& SourceLocation) noexcept
-    : NoCopyNoMoveMixin{}
-    , m_QueryResult{ std::move(QueryResult) }
+    : m_QueryResult{ std::move(QueryResult) }
     , m_SourceLocation{ SourceLocation } {
 }
 

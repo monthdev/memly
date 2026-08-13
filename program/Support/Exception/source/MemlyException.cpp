@@ -13,13 +13,10 @@
 #include <string_view>
 #include <system_error>
 
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
-
 namespace Support::Exception {
 
 MemlyException::MemlyException(const std::initializer_list<std::string_view>& ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
     : std::exception{}
-    , SpecialMemberPolicy::NoCopyNoMoveMixin{}
     , m_ErrorMessageArray{}
     , m_ErrorMessageSize{} {
     this->ConstructErrorMessage(ErrorMessageInitializerList, SourceLocation);

@@ -6,13 +6,11 @@
 #include <string>
 
 #include "Memly/Database/DatabaseMigrator.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace CompositionRoot {
 
 ApplicationRuntime::ApplicationRuntime(const std::string& DatabaseFilePath)
-    : NoCopyNoMoveMixin{}
-    , m_DatabaseRuntime{ Layer::Infrastructure::Database::DatabaseMigrator{ DatabaseFilePath }.ApplyMigrations() } // , m_LibraryInvalidationChannel{}
+    : m_DatabaseRuntime{ Layer::Infrastructure::Database::DatabaseMigrator{ DatabaseFilePath }.ApplyMigrations() } // , m_LibraryInvalidationChannel{}
                                                                                                                    // , m_LibraryRepository{ m_DatabaseRuntime }
                                                                                                                    // , m_LibraryInvalidationCoordinator{
                                                                                                                    // m_LibraryInvalidationChannel,

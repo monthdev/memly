@@ -12,15 +12,13 @@
 #include "Memly/Domain/RecoverableReviewSessionMutationError.hpp"
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
 #include "Memly/Repository/ReviewSessionRepository.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Service {
 
 ReviewSessionService::ReviewSessionService(
     Infrastructure::Database::TransactionRunner& TransactionRunner,
     Infrastructure::Repository::ReviewSessionRepository& ReviewSessionRepository) noexcept
-    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-    , m_TransactionRunner{ TransactionRunner }
+    : m_TransactionRunner{ TransactionRunner }
     , m_ReviewSessionRepository{ ReviewSessionRepository } {
 }
 

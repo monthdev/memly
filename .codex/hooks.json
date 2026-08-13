@@ -1,29 +1,13 @@
 {
-  "description": "Format Memly files after Codex applies a patch.",
+  "description": "Format the repository and require a successful integrity build before Codex completes a turn.",
   "hooks": {
-    "PostToolUse": [
+    "Stop": [
       {
-        "matcher": "^apply_patch$",
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && find program -type f \\( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \\) -print0 | xargs -0 clang-format -i",
-            "statusMessage": "Formatting Memly C++ sources"
-          },
-          {
-            "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && cmake-format -i CMakeLists.txt",
-            "statusMessage": "Formatting Memly CMakeLists.txt"
-          },
-          {
-            "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && git ls-files -z '*.md' '*.markdown' | xargs -0 npx --yes prettier@3.9.6 --write",
-            "statusMessage": "Formatting Memly Markdown files"
-          },
-          {
-            "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && git ls-files -z '*.yaml' '*.yml' .clang-tidy | xargs -0 npx --yes prettier@3.9.6 --write",
-            "statusMessage": "Formatting Memly YAML files"
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && sh .codex/hooks/verify-project-integrity.sh",
+            "statusMessage": "Verifying Memly project integrity"
           }
         ]
       }

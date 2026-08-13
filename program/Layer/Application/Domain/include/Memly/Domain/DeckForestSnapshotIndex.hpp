@@ -8,11 +8,10 @@
 #include <vector>
 
 #include "Memly/Domain/DeckForestSnapshotNode.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Domain {
 
-class DeckForestSnapshotIndex final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class DeckForestSnapshotIndex final {
 private:
     std::vector<DeckForestSnapshotNode> m_DeckForestSnapshotNodeVector;
     std::vector<std::size_t> m_RootDeckNodePositionVector;
@@ -21,6 +20,14 @@ private:
 
 public:
     explicit DeckForestSnapshotIndex() noexcept;
+
+    explicit DeckForestSnapshotIndex(const DeckForestSnapshotIndex&) = delete;
+    auto operator=(const DeckForestSnapshotIndex&) -> DeckForestSnapshotIndex& = delete;
+
+    explicit DeckForestSnapshotIndex(DeckForestSnapshotIndex&&) = delete;
+    auto operator=(DeckForestSnapshotIndex&&) -> DeckForestSnapshotIndex& = delete;
+
+    ~DeckForestSnapshotIndex() noexcept = default;
 
     [[nodiscard]] auto GetSubtreeDeckIds(const std::string&) const -> std::vector<std::string_view>;
 

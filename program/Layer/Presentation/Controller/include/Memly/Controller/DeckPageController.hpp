@@ -12,7 +12,6 @@
 
 #include "Memly/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Memly/Model/DeckForestModel.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Service {
 class DeckService;
@@ -20,7 +19,7 @@ class DeckService;
 
 namespace Layer::Presentation::Controller {
 
-class DeckPageController final : public QObject, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class DeckPageController final : public QObject {
     Q_OBJECT
 
 private:
@@ -31,6 +30,15 @@ public:
     explicit DeckPageController(Application::Invalidation::LibraryInvalidationChannel&,
                                 Application::Service::DeckService&,
                                 QObject* = nullptr);
+
+    explicit DeckPageController(const DeckPageController&) = delete;
+    auto operator=(const DeckPageController&) -> DeckPageController& = delete;
+
+    explicit DeckPageController(DeckPageController&&) = delete;
+    auto operator=(DeckPageController&&) -> DeckPageController& = delete;
+
+    ~DeckPageController() noexcept override = default;
+
     [[nodiscard]] auto GetDeckForestModel() noexcept -> Model::DeckForestModel*;
 
     [[nodiscard]] std::expected<void, const char*> CreateRootDeck(const std::string&, std::uint8_t) noexcept;

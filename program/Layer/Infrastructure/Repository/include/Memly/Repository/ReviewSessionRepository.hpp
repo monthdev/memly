@@ -13,11 +13,10 @@
 #include "Memly/Domain/RecoverableReviewSessionMutationError.hpp"
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
 #include "Memly/Domain/ReviewSessionListRow.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Repository {
 
-class ReviewSessionRepository final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class ReviewSessionRepository final {
 private:
     Database::DatabaseRuntime& m_DatabaseRuntime;
     Database::PreparedStatement m_SelectReviewSessionListRowsPreparedStatement;
@@ -35,6 +34,14 @@ private:
 
 public:
     explicit ReviewSessionRepository(Database::DatabaseRuntime&);
+
+    explicit ReviewSessionRepository(const ReviewSessionRepository&) = delete;
+    auto operator=(const ReviewSessionRepository&) -> ReviewSessionRepository& = delete;
+
+    explicit ReviewSessionRepository(ReviewSessionRepository&&) = delete;
+    auto operator=(ReviewSessionRepository&&) -> ReviewSessionRepository& = delete;
+
+    ~ReviewSessionRepository() noexcept = default;
 
     [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSessionListRow>;
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)

@@ -9,7 +9,6 @@
 
 #include "Memly/Domain/RecoverableReviewSessionMutationError.hpp"
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 class TransactionRunner;
@@ -21,7 +20,7 @@ class ReviewSessionRepository;
 
 namespace Layer::Application::Service {
 
-class ReviewSessionService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class ReviewSessionService final {
 private:
     Infrastructure::Database::TransactionRunner& m_TransactionRunner;
     Infrastructure::Repository::ReviewSessionRepository& m_ReviewSessionRepository;
@@ -29,6 +28,14 @@ private:
 public:
     explicit ReviewSessionService(Infrastructure::Database::TransactionRunner&,
                                   Infrastructure::Repository::ReviewSessionRepository&) noexcept;
+
+    explicit ReviewSessionService(const ReviewSessionService&) = delete;
+    auto operator=(const ReviewSessionService&) -> ReviewSessionService& = delete;
+
+    explicit ReviewSessionService(ReviewSessionService&&) = delete;
+    auto operator=(ReviewSessionService&&) -> ReviewSessionService& = delete;
+
+    ~ReviewSessionService() noexcept = default;
 
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
         -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum>;

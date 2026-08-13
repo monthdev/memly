@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "Memly/Domain/ReviewSessionListRow.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Repository {
 class ReviewSessionRepository;
@@ -14,12 +13,20 @@ class ReviewSessionRepository;
 
 namespace Layer::Application::Service {
 
-class ReviewSessionListService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class ReviewSessionListService final {
 private:
     Infrastructure::Repository::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
     explicit ReviewSessionListService(Infrastructure::Repository::ReviewSessionRepository&) noexcept;
+
+    explicit ReviewSessionListService(const ReviewSessionListService&) = delete;
+    auto operator=(const ReviewSessionListService&) -> ReviewSessionListService& = delete;
+
+    explicit ReviewSessionListService(ReviewSessionListService&&) = delete;
+    auto operator=(ReviewSessionListService&&) -> ReviewSessionListService& = delete;
+
+    ~ReviewSessionListService() noexcept = default;
 
     [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Domain::ReviewSessionListRow>;
 };

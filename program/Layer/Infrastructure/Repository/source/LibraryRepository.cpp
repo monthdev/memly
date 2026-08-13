@@ -11,14 +11,12 @@
 #include <optional>
 
 #include "Memly/Database/DatabaseRuntime.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 #include "Sql/Library/LibrarySql.hpp"
 
 namespace Layer::Infrastructure::Repository {
 
 LibraryRepository::LibraryRepository(Database::DatabaseRuntime& DatabaseRuntime)
-    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-    , m_DatabaseRuntime{ DatabaseRuntime }
+    : m_DatabaseRuntime{ DatabaseRuntime }
     , m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
         DatabaseRuntime.PrepareStatement(Sql::SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
     } {

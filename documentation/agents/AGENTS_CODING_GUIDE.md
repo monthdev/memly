@@ -35,11 +35,8 @@ its first declaration, so its in-class declaration is also its definition and
 cannot be repeated in an implementation file.
 
 Declare a constructor `constexpr` whenever all of its base and member
-initialization and body operations permit constant evaluation. Every non-deleted
-special-member-policy constructor must be `constexpr`
-(`custom-memly-constexpr-special-member-policy-constructor`). The YAML matcher
-enforces this known eligible constructor set; Clang validates `constexpr`
-eligibility for other constructors when the specifier is written.
+initialization and body operations permit constant evaluation. Clang validates
+`constexpr` eligibility when the specifier is written.
 
 Every non-deleted, non-defaulted constructor must explicitly initialize every
 direct base, every non-static data member, and every virtual base for which it
@@ -81,44 +78,44 @@ Every constructor, including copy and move constructors, must be `explicit`
 (`custom-memly-always-explicit-constructor`). Conversion operators are
 disallowed (`custom-memly-conversion-operator`).
 
-## Special-Member Policy
+## Special Members
 
-Every Memly class and data-carrying struct must obtain a policy from
-`Support::SpecialMemberPolicy` (`custom-memly-required-special-member-policy`):
+Every Memly class and data-carrying struct explicitly declares the complete Rule
+of Five (`custom-memly-explicit-rule-of-five`). Copy and move operations must be
+explicitly `= default` or `= delete`
+(`custom-memly-defaulted-or-deleted-copy-move-operation`). A destructor must
+either be defined in its class declaration as `= default` or `= delete`, or be
+declared there and defined out of line as `= default`
+(`custom-memly-defaulted-or-deleted-destructor-definition`).
 
-- `NoCopyNoMoveMixin` when current control paths require neither copying nor
-  moving, including runtime objects with stable identity or state.
-- `NoCopyMoveConstructOnlyMixin` only when a current control path requires move
-  construction but does not require copying or assignment.
-- `NonInstantiableMixin` for static-only types.
+Place the declarations immediately after the ordinary constructors in this exact
+grouping, with a blank line between groups:
 
-Always select the most restrictive policy that supports the type's actual
-current use. Do not grant copy or move capability for hypothetical future uses;
-loosen the policy only when introducing a control path that requires that
-operation. Returning a direct prvalue through guaranteed copy elision does not
-require move construction.
+```cpp
+explicit Type(const Type&) = delete;
+auto operator=(const Type&) -> Type& = delete;
 
-A type without a policy-bearing Memly base must inherit its policy directly. Any
-directly inherited policy mixin must be private
-(`custom-memly-private-direct-special-member-policy`). A derived Memly type must
-inherit the policy transitively from an existing policy-bearing base. Exactly
-one effective policy is allowed: different policies and direct repetition of a
-policy already inherited through another base are rejected
-(`custom-memly-nonconflicting-special-member-policy`). A same-policy diamond
-through two ordinary bases is also disallowed but cannot be detected by the
-current YAML matcher.
+explicit Type(Type&&) = delete;
+auto operator=(Type&&) -> Type& = delete;
 
-Policy consumers must not redeclare copy or move constructors or copy or move
-assignment operators (`custom-memly-no-consumer-special-member`), and must not
-declare destructors (`custom-memly-no-consumer-destructor`). Each policy mixin
-must explicitly default a protected destructor
-(`custom-memly-policy-mixin-destructor`).
+~Type() noexcept = default;
+```
 
-A `NonInstantiableMixin` consumer must explicitly reiterate its ordinary default
-constructor `= delete` as the visual marker that it cannot be instantiated
-(`custom-memly-explicit-non-instantiable-default-constructor`). Other consumers
-must not delete an ordinary default constructor
-(`custom-memly-deleted-default-constructor-only-for-non-instantiable`).
+Add `noexcept` to a defaulted move operation when the operation is non-throwing,
+and add `override` to a destructor that overrides a virtual base destructor.
+Each special member operation must be individually defaulted or deleted
+according to the type's narrowest required semantics. Do not grant copy or move
+capability for hypothetical future uses; loosen an operation only when
+introducing a control path that requires it. Returning a direct prvalue through
+guaranteed copy elision does not require move construction.
+
+A static-only type explicitly deletes its ordinary default constructor as the
+visual marker that it cannot be instantiated. A type may declare its destructor
+in the class and define it out of line as `= default`, including when a PImpl
+requires the implementation type to be complete at the definition. YAML checks
+enforce the presence and permitted definition forms of the five special members.
+Their source order and separating blank lines remain a documented formatting
+rule because AST matchers do not retain that presentation.
 
 ## Declaration Layout and Definition Placement
 
@@ -138,15 +135,15 @@ out-of-class implementation bodies appears at the end of the class declaration.
 Constructors immediately follow the data-member block under their intended
 access. All remaining declarations follow the constructors.
 
-Headers may contain bodies only for data-struct constructors, templates, and
-`constexpr` constructors, including in-class constructor templates and
-constructors of class templates. Every ordinary non-template method and free
-function, including a one-line accessor, is declared in its header and defined
-in the corresponding `.cpp` source file
-(`custom-memly-no-header-function-definition`). Deleted constructors and
-defaulted or deleted non-constructor special-member definitions remain inside
-their class declarations. Defaulted class constructors are defined out of class
-in the corresponding source file unless they are `constexpr`.
+Headers may contain bodies only for data-struct constructors, templates,
+`constexpr` constructors, and explicitly defaulted or deleted special members,
+including in-class constructor templates and constructors of class templates.
+Every ordinary non-template method and free function, including a one-line
+accessor, is declared in its header and defined in the corresponding `.cpp`
+source file (`custom-memly-no-header-function-definition`). Defaulted class
+ordinary constructors are defined out of class in the corresponding source file
+unless they are `constexpr`. A destructor may use the out-of-line defaulted form
+described under Special Members.
 
 Inside a non-static member function, explicitly qualify every access to the
 current object's data members and methods with `this->`. This includes member
@@ -327,17 +324,17 @@ pack generates compile-time positional decoding and constructs the concrete row
 without a repository-owned DuckDB decoder. Use `std::optional<ColumnType>` in
 that pack for a nullable result column; SQL `NULL` in a non-optional column
 violates a programming invariant. Keep the SQL projection, column-type pack, and
-row-constructor parameter order aligned. The mixin supplies the row's
-special-member policy, so the row does not inherit a second policy mixin
-directly. Decode each fetched `DataChunk` through its unified vector formats; do
-not materialize an intermediate `duckdb::Value` for each cell. Construct an
-owning `std::string` directly from DuckDB's `string_t` bytes so each string
-crosses the database boundary with one required byte copy. Verify every column's
-physical storage type once per fetched chunk, then use
-`GetDataUnsafe<ColumnType>()` only while decoding that same verified chunk; do
-not repeat `GetData<ColumnType>()` for every cell. Confine the required
-unsafe-buffer suppression to this adapter because DuckDB exposes the unified
-format array and its physical column storage without bounds-carrying views.
+row-constructor parameter order aligned. The metadata mixin does not define the
+concrete row's ownership contract; every decoded row declares its own Rule of
+Five. Decode each fetched `DataChunk` through its unified vector formats; do not
+materialize an intermediate `duckdb::Value` for each cell. Construct an owning
+`std::string` directly from DuckDB's `string_t` bytes so each string crosses the
+database boundary with one required byte copy. Verify every column's physical
+storage type once per fetched chunk, then use `GetDataUnsafe<ColumnType>()` only
+while decoding that same verified chunk; do not repeat `GetData<ColumnType>()`
+for every cell. Confine the required unsafe-buffer suppression to this adapter
+because DuckDB exposes the unified format array and its physical column storage
+without bounds-carrying views.
 
 Decoding and row-count validation are separate stages. Express every repository
 contract with `QueryResultRowCountRange::ZeroOrMore()`, `Exactly()`,
@@ -581,18 +578,32 @@ compiling any changed Memly translation unit. The stamp depends on its policy
 inputs, `compile_commands.json`, and the complete source tree; unchanged inputs
 do not repeat the analysis. Do not cap the full-tree tool's worker count.
 
+Before Codex may finish, the project `Stop` integrity hook formats C++, CMake,
+Markdown, YAML, and `.clang-tidy`, then configures and builds the
+`macos-debug-local` preset, including the mandatory Clang-Tidy and public-header
+gates. A formatter, configuration, or build failure returns the turn to Codex
+for repair. Every gate must pass. Do not bypass this hook.
+
+The integrity hook invokes the CMake-required standalone Prettier executable
+from `PATH` at the same pinned version used by formatting CI. Do not use `npx`
+or otherwise download formatters during hook execution.
+
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
 missing- and unused-include diagnostics are the automated acceptance checks for
 Memly include sets, but neither enforces a unique direct provider or proves that
-the accepted set is minimal. Enable CMake's native interface-header verification
-for every component so each generated probe includes exactly one public header
-and receives that component's transitive public usage requirements. A normal
-build requires the independently callable `memly-public-header-verification`
-target before its final executable is complete. Ordinary component compilation
-may proceed after Clang-Tidy without waiting for the complete public-header
-verification set; only the final executable is gated by that set. Preserve the
-system-include classification of imported and explicitly system public
-dependencies; Memly include directories remain warning-checked.
+the accepted set is minimal. The mandatory gate runs the complete `.clang-tidy`
+policy once over implementation translation units and once with every Memly
+header as a main file. Main-file header analysis is required because
+`misc-include-cleaner` does not evaluate an included header's own include set.
+Enable CMake's native interface-header verification for every component so each
+generated probe includes exactly one public header and receives that component's
+transitive public usage requirements. A normal build requires the independently
+callable `memly-public-header-verification` target before its final executable
+is complete. Ordinary component compilation may proceed after Clang-Tidy without
+waiting for the complete public-header verification set; only the final
+executable is gated by that set. Preserve the system-include classification of
+imported and explicitly system public dependencies; Memly include directories
+remain warning-checked.
 
 Keep unavoidable `NOLINT` exceptions local to the exact declaration or
 expression and name the suppressed check.

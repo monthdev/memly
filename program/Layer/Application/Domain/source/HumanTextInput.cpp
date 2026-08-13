@@ -15,13 +15,11 @@
 #include <utility>
 
 #include "Memly/Exception/MemlyException.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
 
 namespace Layer::Application::Domain {
 
 HumanTextInput::HumanTextInput(icu::UnicodeString&& NormalizedUnicodeString) noexcept
-    : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
-    , m_NormalizedUnicodeString{ std::move(NormalizedUnicodeString) } {
+    : m_NormalizedUnicodeString{ std::move(NormalizedUnicodeString) } {
 }
 
 namespace {

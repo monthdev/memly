@@ -13,13 +13,12 @@
 #include <utility>
 
 #include "Memly/Invalidation/LibraryInvalidationTarget.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Invalidation {
 
 class LibraryInvalidationCoordinator;
 
-class LibraryInvalidationChannel final : public QObject, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class LibraryInvalidationChannel final : public QObject {
     Q_OBJECT
     friend class LibraryInvalidationCoordinator;
 
@@ -28,6 +27,14 @@ private:
 
 public:
     explicit LibraryInvalidationChannel(QObject* = nullptr);
+
+    explicit LibraryInvalidationChannel(const LibraryInvalidationChannel&) = delete;
+    auto operator=(const LibraryInvalidationChannel&) -> LibraryInvalidationChannel& = delete;
+
+    explicit LibraryInvalidationChannel(LibraryInvalidationChannel&&) = delete;
+    auto operator=(LibraryInvalidationChannel&&) -> LibraryInvalidationChannel& = delete;
+
+    ~LibraryInvalidationChannel() noexcept override = default;
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*>

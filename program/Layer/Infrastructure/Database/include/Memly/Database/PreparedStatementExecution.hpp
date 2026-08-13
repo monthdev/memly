@@ -6,17 +6,24 @@
 #include <utility>
 
 #include "Memly/Database/QueryResultDecoder.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Database {
 
-class [[nodiscard]] PreparedStatementExecution final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class [[nodiscard]] PreparedStatementExecution final {
 private:
     duckdb::PreparedStatement& m_DuckDbPreparedStatement;
     const std::source_location& m_SourceLocation;
 
 public:
     explicit PreparedStatementExecution(duckdb::PreparedStatement&, const std::source_location&) noexcept;
+
+    explicit PreparedStatementExecution(const PreparedStatementExecution&) = delete;
+    auto operator=(const PreparedStatementExecution&) -> PreparedStatementExecution& = delete;
+
+    explicit PreparedStatementExecution(PreparedStatementExecution&&) = delete;
+    auto operator=(PreparedStatementExecution&&) -> PreparedStatementExecution& = delete;
+
+    ~PreparedStatementExecution() noexcept = default;
 
     template <typename... SqlParameterType>
         requires(sizeof...(SqlParameterType) > 0)

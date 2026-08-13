@@ -11,13 +11,11 @@
 #include <vector>
 
 #include "Memly/Domain/DeckForestSnapshotNode.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Application::Domain {
 
 DeckForestSnapshotIndex::DeckForestSnapshotIndex() noexcept
-    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-    , m_DeckForestSnapshotNodeVector{}
+    : m_DeckForestSnapshotNodeVector{}
     , m_RootDeckNodePositionVector{}
     , m_ChildDeckNodePositionVectorByDeckNodePositionVector{}
     , m_DeckNodePositionByDeckIdUnorderedMap{} {

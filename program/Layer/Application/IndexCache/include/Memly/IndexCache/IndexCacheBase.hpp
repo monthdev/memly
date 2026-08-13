@@ -3,33 +3,45 @@
 #include <memory>
 #include <utility>
 
-#include "Memly/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
-
 namespace Layer::Application::IndexCache {
 
 template <typename IndexCacheDefinitionType>
-class IndexCacheBase : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class IndexCacheBase {
 private:
     std::weak_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexWeakPointer;
 
 protected:
     explicit IndexCacheBase() noexcept
-        : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-        , m_IndexWeakPointer{} {
+        : m_IndexWeakPointer{} {
     }
 
 public:
-    class [[nodiscard]] IndexCacheLease final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
+    explicit IndexCacheBase(const IndexCacheBase&) = delete;
+    auto operator=(const IndexCacheBase&) -> IndexCacheBase& = delete;
+
+    explicit IndexCacheBase(IndexCacheBase&&) = delete;
+    auto operator=(IndexCacheBase&&) -> IndexCacheBase& = delete;
+
+    ~IndexCacheBase() noexcept = default;
+
+    class [[nodiscard]] IndexCacheLease final {
         friend class IndexCacheBase;
 
     private:
         std::shared_ptr<typename IndexCacheDefinitionType::IndexType> m_IndexSharedPointer;
 
         explicit IndexCacheLease(std::shared_ptr<typename IndexCacheDefinitionType::IndexType>&& IndexSharedPointer) noexcept
-            : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
-            , m_IndexSharedPointer{ std::move(IndexSharedPointer) } {
+            : m_IndexSharedPointer{ std::move(IndexSharedPointer) } {
         }
+
+    public:
+        explicit IndexCacheLease(const IndexCacheLease&) = delete;
+        auto operator=(const IndexCacheLease&) -> IndexCacheLease& = delete;
+
+        explicit IndexCacheLease(IndexCacheLease&&) noexcept = default;
+        auto operator=(IndexCacheLease&&) -> IndexCacheLease& = delete;
+
+        ~IndexCacheLease() noexcept = default;
     };
 
     [[nodiscard]] auto AcquireLease() -> IndexCacheLease {

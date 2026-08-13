@@ -14,14 +14,11 @@
 #include <utility>
 
 #include "Memly/Exception/ExceptionBoundary.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Presentation::Model {
 
 DeckForestModel::DeckForestModel(QObject* Parent) noexcept
     : QAbstractItemModel{ Parent }
-    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
     , m_DeckNodesVector{}
     , m_RootDeckNodeIndexesVector{}
     , m_SortColumn{ s_UnsortedColumn }

@@ -2,11 +2,9 @@
 
 #include <string>
 
-#include "Memly/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
-
 namespace Layer::Application::Domain {
 
-class [[nodiscard]] HumanText final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
+class [[nodiscard]] HumanText final {
 private:
     std::string m_NormalizedText;
     std::string m_NormalizedCaseFoldedText;
@@ -14,6 +12,14 @@ private:
     explicit HumanText(std::string&&, std::string&&) noexcept;
 
 public:
+    explicit HumanText(const HumanText&) = delete;
+    auto operator=(const HumanText&) -> HumanText& = delete;
+
+    explicit HumanText(HumanText&&) noexcept = default;
+    auto operator=(HumanText&&) -> HumanText& = delete;
+
+    ~HumanText() noexcept = default;
+
     [[nodiscard]] static auto FromPersisted(std::string&&, std::string&&) noexcept -> HumanText;
 
     [[nodiscard]] auto GetNormalizedStdString() const noexcept -> const std::string&;

@@ -36,21 +36,19 @@ Checks: |
   custom-memly-braced-constructor-initializer,
   custom-memly-braced-variable-initialization,
   custom-memly-complete-constructor-initializer-list,
-  custom-memly-constexpr-special-member-policy-constructor,
   custom-memly-data-struct-constructor-noexcept,
+  custom-memly-defaulted-or-deleted-copy-move-operation,
+  custom-memly-defaulted-or-deleted-destructor-definition,
   custom-memly-header-required-constructor-definition-in-class,
   custom-memly-runtime-constructor-definition-in-implementation-file,
   custom-memly-conversion-operator,
   custom-memly-declared-ordinary-constructor,
-  custom-memly-deleted-default-constructor-only-for-non-instantiable,
   custom-memly-expected-value-suffix,
   custom-memly-explicit-contextual-braced-default-argument,
   custom-memly-explicit-contextual-braced-expression,
-  custom-memly-explicit-non-instantiable-default-constructor,
+  custom-memly-explicit-rule-of-five,
   custom-memly-explicit-return-type-construction,
   custom-memly-no-class-template-argument-deduction,
-  custom-memly-no-consumer-destructor,
-  custom-memly-no-consumer-special-member,
   custom-memly-no-database-chain-proxy-field,
   custom-memly-no-database-chain-proxy-variable,
   custom-memly-no-default-member-initializer,
@@ -71,10 +69,6 @@ Checks: |
   custom-memly-no-stateful-defaulted-default-constructor,
   custom-memly-no-two-statement-pass-through-variable,
   custom-memly-optional-value-suffix,
-  custom-memly-policy-mixin-destructor,
-  custom-memly-private-direct-special-member-policy,
-  custom-memly-required-special-member-policy,
-  custom-memly-nonconflicting-special-member-policy,
   custom-memly-standard-container-value-suffix,
   custom-memly-string-view-definition-parameter-const,
   custom-memly-string-view-parameter-by-value,
@@ -136,14 +130,6 @@ CustomChecks:
       - BindName: constructor
         Message: constructor must explicitly initialize every direct base and non-static data member
         Level: Warning
-  - Name: memly-constexpr-special-member-policy-constructor
-    Query: >-
-      match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isConstexpr()), unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl(
-      matchesName("^::Support::SpecialMemberPolicy::(NoCopyNoMoveMixin|NoCopyMoveConstructOnlyMixin)$") ) ) ).bind("constructor")
-    Diagnostic:
-      - BindName: constructor
-        Message: non-deleted special-member policy constructors must be constexpr
-        Level: Warning
   - Name: memly-data-struct-constructor-noexcept
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()), unless(isNoThrow()),
@@ -153,6 +139,23 @@ CustomChecks:
     Diagnostic:
       - BindName: constructor
         Message: data-struct constructors must be declared noexcept
+        Level: Warning
+  - Name: memly-defaulted-or-deleted-copy-move-operation
+    Query: >-
+      match cxxMethodDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( cxxConstructorDecl( anyOf(isCopyConstructor(), isMoveConstructor()) ),
+      isCopyAssignmentOperator(), isMoveAssignmentOperator() ), unless(anyOf(isDefaulted(), isDeleted())) ).bind("special_member")
+    Diagnostic:
+      - BindName: special_member
+        Message: copy and move operations must be explicitly defaulted or deleted
+        Level: Warning
+  - Name: memly-defaulted-or-deleted-destructor-definition
+    Query: >-
+      match cxxDestructorDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless(anyOf(isDefaulted(), isDeleted())) ).bind("destructor")
+    Diagnostic:
+      - BindName: destructor
+        Message: destructor definitions must be explicitly defaulted or deleted
         Level: Warning
   - Name: memly-header-required-constructor-definition-in-class
     Query: >-
@@ -166,10 +169,10 @@ CustomChecks:
         Level: Warning
   - Name: memly-runtime-constructor-definition-in-implementation-file
     Query: >-
-      match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isConstexpr()), unless(isTemplateInstantiation()),
-      unless(isExpansionInSystemHeader()), unless(hasParent(functionTemplateDecl())), unless(ofClass(cxxRecordDecl(isStruct()))),
-      unless(ofClass(cxxRecordDecl(hasAncestor(classTemplateDecl())))), unless(isExpansionInFileMatching("[.]cpp$")),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isConstexpr()),
+      unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), unless(hasParent(functionTemplateDecl())),
+      unless(ofClass(cxxRecordDecl(isStruct()))), unless(ofClass(cxxRecordDecl(hasAncestor(classTemplateDecl())))),
+      unless(isExpansionInFileMatching("[.]cpp$")), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: non-template non-constexpr constructor definitions must appear in a .cpp implementation file
@@ -191,17 +194,6 @@ CustomChecks:
     Diagnostic:
       - BindName: record
         Message: Memly types must explicitly declare an ordinary constructor
-        Level: Warning
-  - Name: memly-deleted-default-constructor-only-for-non-instantiable
-    Query: >-
-      match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isDefaultConstructor(),
-      isDeleted(), ofClass( cxxRecordDecl(
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-      unless(hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin")), unless( isDerivedFrom(
-      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ) ) ) ).bind("constructor")
-    Diagnostic:
-      - BindName: constructor
-        Message: only non-instantiable types may explicitly delete their ordinary default constructor
         Level: Warning
   - Name: memly-expected-value-suffix
     Query: >-
@@ -238,15 +230,15 @@ CustomChecks:
       - BindName: initializer
         Message: a contextual braced expression must explicitly spell its constructed type
         Level: Warning
-  - Name: memly-explicit-non-instantiable-default-constructor
+  - Name: memly-explicit-rule-of-five
     Query: >-
-      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"), isDerivedFrom(
-      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ), unless( has( cxxConstructorDecl( unless(isImplicit()), isDefaultConstructor(),
-      isDeleted() ) ) ) ).bind("record")
+      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless( allOf( has(cxxConstructorDecl(unless(isImplicit()), isCopyConstructor())),
+      has(cxxMethodDecl(unless(isImplicit()), isCopyAssignmentOperator())), has(cxxConstructorDecl(unless(isImplicit()), isMoveConstructor())),
+      has(cxxMethodDecl(unless(isImplicit()), isMoveAssignmentOperator())), has(cxxDestructorDecl(unless(isImplicit()))) ) ) ).bind("record")
     Diagnostic:
       - BindName: record
-        Message: non-instantiable types must explicitly reiterate their ordinary default constructor = delete
+        Message: Memly classes and data-carrying structs must explicitly declare the complete Rule of Five
         Level: Warning
   - Name: memly-explicit-return-type-construction
     Query: >-
@@ -269,25 +261,6 @@ CustomChecks:
     Diagnostic:
       - BindName: variable
         Message: named variable declarations must explicitly specify every class template argument
-        Level: Warning
-  - Name: memly-no-consumer-destructor
-    Query: >-
-      match cxxDestructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl(
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-      unless(matchesName("^::Support::SpecialMemberPolicy::")) ) ) ).bind("destructor")
-    Diagnostic:
-      - BindName: destructor
-        Message: special-member policy consumers must not declare destructors
-        Level: Warning
-  - Name: memly-no-consumer-special-member
-    Query: >-
-      match cxxMethodDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), anyOf( cxxConstructorDecl( anyOf(
-      isCopyConstructor(), isMoveConstructor() ) ), isCopyAssignmentOperator(), isMoveAssignmentOperator() ), ofClass( cxxRecordDecl(
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-      unless(matchesName("^::Support::SpecialMemberPolicy::")) ) ) ).bind("special_member")
-    Diagnostic:
-      - BindName: special_member
-        Message: special-member policy consumers must not redeclare copy or move operations
         Level: Warning
   - Name: memly-no-default-member-initializer
     Query: >-
@@ -396,12 +369,14 @@ CustomChecks:
         Level: Warning
   - Name: memly-no-database-chain-proxy-variable
     Query: >-
-      match varDecl( unless(isImplicit()), unless(hasAncestor(functionDecl(isImplicit()))), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(
-      hasAnyName( "::Layer::Infrastructure::Database::PreparedStatementExecution", "::Layer::Infrastructure::Database::QueryResultDecoder",
-      "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType(
-      hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::Database::PreparedStatementExecution",
-      "::Layer::Infrastructure::Database::QueryResultDecoder", "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("variable")
+      match varDecl( unless(isImplicit()), unless(hasAncestor(functionDecl(isImplicit()))), unless( parmVarDecl( hasAncestor( cxxMethodDecl( anyOf(
+      cxxConstructorDecl(anyOf(isCopyConstructor(), isMoveConstructor())), isCopyAssignmentOperator(), isMoveAssignmentOperator() ) ) ) ) ),
+      unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType(
+      recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::Database::PreparedStatementExecution",
+      "::Layer::Infrastructure::Database::QueryResultDecoder", "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType(
+      pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName(
+      "::Layer::Infrastructure::Database::PreparedStatementExecution", "::Layer::Infrastructure::Database::QueryResultDecoder",
+      "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: database chain proxies must remain within one chained full expression and must not be stored or named
@@ -470,56 +445,6 @@ CustomChecks:
     Diagnostic:
       - BindName: value
         Message: named std::optional values must use the Optional suffix
-        Level: Warning
-  - Name: memly-policy-mixin-destructor
-    Query: >-
-      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      matchesName("^::Support::SpecialMemberPolicy::(NoCopyNoMoveMixin|NoCopyMoveConstructOnlyMixin|NonInstantiableMixin)$"), unless( has( cxxDestructorDecl(
-      unless(isImplicit()), isProtected(), isDefaulted() ) ) ) ).bind("policy")
-    Diagnostic:
-      - BindName: policy
-        Message: special-member policy mixins must explicitly default a protected destructor
-        Level: Warning
-  - Name: memly-private-direct-special-member-policy
-    Query: >-
-      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-      unless(matchesName("^::Support::SpecialMemberPolicy::")), hasDirectBase( cxxBaseSpecifier( hasType( cxxRecordDecl(
-      matchesName("^::Support::SpecialMemberPolicy::(NoCopyNoMoveMixin|NoCopyMoveConstructOnlyMixin|NonInstantiableMixin)$") ) ), unless(isPrivate()) ) )
-      ).bind("record")
-    Diagnostic:
-      - BindName: record
-        Message: directly inherited special-member policy mixins must be private bases
-        Level: Warning
-  - Name: memly-required-special-member-policy
-    Query: >-
-      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-      unless(matchesName("^::Support::SpecialMemberPolicy::")), unless( anyOf( isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ),
-      isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ), isDerivedFrom(
-      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ) ) ).bind("record")
-    Diagnostic:
-      - BindName: record
-        Message: Memly classes and data-carrying structs must inherit a special-member policy directly or transitively
-        Level: Warning
-  - Name: memly-nonconflicting-special-member-policy
-    Query: >-
-      match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"),
-      unless(matchesName("^::Support::SpecialMemberPolicy::")), anyOf( allOf( isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ),
-      isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ) ), allOf( isDerivedFrom(
-      hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ), isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ), allOf(
-      isDerivedFrom( hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ), isDerivedFrom(
-      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ), allOf( hasDirectBase( hasType( cxxRecordDecl(
-      hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ) ) ), hasDirectBase( hasType( cxxRecordDecl( isDerivedFrom(
-      hasName("::Support::SpecialMemberPolicy::NoCopyNoMoveMixin") ) ) ) ) ), allOf( hasDirectBase( hasType( cxxRecordDecl(
-      hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ) ) ), hasDirectBase( hasType( cxxRecordDecl( isDerivedFrom(
-      hasName("::Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin") ) ) ) ) ), allOf( hasDirectBase( hasType( cxxRecordDecl(
-      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ) ), hasDirectBase( hasType( cxxRecordDecl( isDerivedFrom(
-      hasName("::Support::SpecialMemberPolicy::NonInstantiableMixin") ) ) ) ) ) ) ).bind("record")
-    Diagnostic:
-      - BindName: record
-        Message: Memly types must not combine different policies or directly repeat a policy already inherited through another base
         Level: Warning
   - Name: memly-standard-container-value-suffix
     Query: >-

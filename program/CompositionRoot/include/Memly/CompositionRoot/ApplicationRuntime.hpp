@@ -8,12 +8,11 @@
 #include "Memly/Database/DatabaseRuntime.hpp"
 #include "Memly/Repository/DeckRepository.hpp"
 #include "Memly/Service/DeckService.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace CompositionRoot {
 
 /// \attention Keep `ApplicationRuntime` members ordered from lower-level dependencies to higher-level dependents.
-class ApplicationRuntime final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class ApplicationRuntime final {
 private:
     Layer::Infrastructure::Database::DatabaseRuntime m_DatabaseRuntime;
     // Layer::Application::Invalidation::LibraryInvalidationChannel m_LibraryInvalidationChannel;
@@ -27,6 +26,14 @@ private:
 
 public:
     explicit ApplicationRuntime(const std::string&);
+
+    explicit ApplicationRuntime(const ApplicationRuntime&) = delete;
+    auto operator=(const ApplicationRuntime&) -> ApplicationRuntime& = delete;
+
+    explicit ApplicationRuntime(ApplicationRuntime&&) = delete;
+    auto operator=(ApplicationRuntime&&) -> ApplicationRuntime& = delete;
+
+    ~ApplicationRuntime() noexcept = default;
 };
 
 }

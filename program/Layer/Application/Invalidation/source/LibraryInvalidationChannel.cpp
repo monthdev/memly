@@ -8,13 +8,10 @@
 
 #include <cstdint>
 
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
-
 namespace Layer::Application::Invalidation {
 
 LibraryInvalidationChannel::LibraryInvalidationChannel(QObject* Parent)
     : QObject{ Parent }
-    , Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
     , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch()) } {
 }
 

@@ -40,6 +40,10 @@ compile_commands.json
 # IDE and editor specific files
 .codex/*
 !.codex/hooks.json
+!.codex/hooks/
+.codex/hooks/*
+!.codex/hooks/enforce-formatting.sh
+!.codex/hooks/verify-project-integrity.sh
 !.vscode/
 .vscode/*
 !.vscode/extensions.json

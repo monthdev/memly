@@ -7,11 +7,9 @@
 #include <string>
 #include <utility>
 
-#include "Memly/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
-
 namespace Layer::Application::Domain {
 
-struct ReviewSessionDeckSelection : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
+struct ReviewSessionDeckSelection {
     enum class [[nodiscard]] DeckSelectionTypeEnum : std::uint8_t {
         Self,
         Subtree,
@@ -23,10 +21,17 @@ struct ReviewSessionDeckSelection : private Support::SpecialMemberPolicy::NoCopy
     DeckSelectionTypeEnum m_DeckSelectionType;
 
     explicit ReviewSessionDeckSelection(std::string&& DeckId, const DeckSelectionTypeEnum DeckSelectionType) noexcept
-        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
-        , m_DeckId{ std::move(DeckId) }
+        : m_DeckId{ std::move(DeckId) }
         , m_DeckSelectionType{ DeckSelectionType } {
     }
+
+    explicit ReviewSessionDeckSelection(const ReviewSessionDeckSelection&) = delete;
+    auto operator=(const ReviewSessionDeckSelection&) -> ReviewSessionDeckSelection& = delete;
+
+    explicit ReviewSessionDeckSelection(ReviewSessionDeckSelection&&) noexcept = default;
+    auto operator=(ReviewSessionDeckSelection&&) -> ReviewSessionDeckSelection& = delete;
+
+    ~ReviewSessionDeckSelection() noexcept = default;
 };
 
 }

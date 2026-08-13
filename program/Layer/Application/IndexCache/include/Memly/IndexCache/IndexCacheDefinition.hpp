@@ -3,14 +3,20 @@
 #include <functional>
 #include <utility>
 
-#include "Memly/SpecialMemberPolicy/NonInstantiableMixin.hpp"
-
 namespace Layer::Application::IndexCache {
 
 template <typename IndexObjectType, typename IndexRefreshDataObjectType, void (IndexObjectType::*RefreshIndexMethod)(IndexRefreshDataObjectType&&)>
-class IndexCacheDefinition : private Support::SpecialMemberPolicy::NonInstantiableMixin {
+class IndexCacheDefinition {
 public:
     explicit IndexCacheDefinition() = delete;
+
+    explicit IndexCacheDefinition(const IndexCacheDefinition&) = delete;
+    auto operator=(const IndexCacheDefinition&) -> IndexCacheDefinition& = delete;
+
+    explicit IndexCacheDefinition(IndexCacheDefinition&&) = delete;
+    auto operator=(IndexCacheDefinition&&) -> IndexCacheDefinition& = delete;
+
+    ~IndexCacheDefinition() noexcept = default;
 
     using IndexType = IndexObjectType;
     using IndexRefreshDataType = IndexRefreshDataObjectType;

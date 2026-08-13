@@ -23,14 +23,12 @@
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
 #include "Memly/Domain/ReviewSessionListRow.hpp"
 #include "Memly/Exception/MemlyException.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 #include "Sql/ReviewSession/ReviewSessionSql.hpp"
 
 namespace Layer::Infrastructure::Repository {
 
 ReviewSessionRepository::ReviewSessionRepository(Database::DatabaseRuntime& DatabaseRuntime)
-    : Support::SpecialMemberPolicy::NoCopyNoMoveMixin{}
-    , m_DatabaseRuntime{ DatabaseRuntime }
+    : m_DatabaseRuntime{ DatabaseRuntime }
     , m_SelectReviewSessionListRowsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectReviewSessionListRowsSql()) }
     , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectDefaultReviewSessionIdByRootDeckIdSql()) }
     , m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{

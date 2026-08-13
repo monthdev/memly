@@ -8,7 +8,6 @@
 #include <qtmetamacros.h>
 
 #include "Memly/Invalidation/LibraryInvalidationTarget.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Repository {
 class LibraryRepository;
@@ -18,7 +17,7 @@ namespace Layer::Application::Invalidation {
 
 class LibraryInvalidationChannel;
 
-class LibraryInvalidationCoordinator final : public QObject, private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class LibraryInvalidationCoordinator final : public QObject {
     Q_OBJECT
 private:
     LibraryInvalidationChannel& m_LibraryInvalidationChannel;
@@ -29,6 +28,14 @@ public:
     explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel&,
                                             Infrastructure::Repository::LibraryRepository&,
                                             QObject* = nullptr);
+
+    explicit LibraryInvalidationCoordinator(const LibraryInvalidationCoordinator&) = delete;
+    auto operator=(const LibraryInvalidationCoordinator&) -> LibraryInvalidationCoordinator& = delete;
+
+    explicit LibraryInvalidationCoordinator(LibraryInvalidationCoordinator&&) = delete;
+    auto operator=(LibraryInvalidationCoordinator&&) -> LibraryInvalidationCoordinator& = delete;
+
+    ~LibraryInvalidationCoordinator() noexcept override = default;
 
     void Invalidate(const LibraryInvalidationTargetBitset&) noexcept;
     void InvalidateWithReschedule(const LibraryInvalidationTargetBitset&) noexcept;

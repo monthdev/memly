@@ -8,14 +8,12 @@
 #include <utility>
 
 #include "Memly/Database/PreparedStatement.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 #include "ThrowOnDatabaseError.hpp"
 
 namespace Layer::Infrastructure::Database {
 
 DatabaseRuntime::DatabaseRuntime(duckdb::DatabaseInstance& DatabaseInstance, duckdb::Connection&& DatabaseConnection)
-    : NoCopyNoMoveMixin{}
-    , m_Database{ DatabaseInstance }
+    : m_Database{ DatabaseInstance }
     , m_DatabaseConnection{ std::move(DatabaseConnection) } {
 }
 

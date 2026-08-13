@@ -5,11 +5,9 @@
 #include <string>
 #include <utility>
 
-#include "Memly/SpecialMemberPolicy/NoCopyMoveConstructOnlyMixin.hpp"
-
 namespace Layer::Application::Domain {
 
-struct DeckForestSnapshotNode final : private Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin {
+struct DeckForestSnapshotNode final {
     std::string m_DeckId;
     std::optional<std::string> m_ParentDeckIdOptional;
     std::string m_DeckName;
@@ -32,8 +30,7 @@ struct DeckForestSnapshotNode final : private Support::SpecialMemberPolicy::NoCo
                                     const std::uint32_t SelfByTodayCount,
                                     const std::uint32_t SelfTotalCount,
                                     const std::uint8_t TargetLanguageCode) noexcept
-        : Support::SpecialMemberPolicy::NoCopyMoveConstructOnlyMixin{}
-        , m_DeckId{ std::move(DeckId) }
+        : m_DeckId{ std::move(DeckId) }
         , m_ParentDeckIdOptional{ std::move(ParentDeckIdOptional) }
         , m_DeckName{ std::move(DeckName) }
         , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
@@ -46,6 +43,14 @@ struct DeckForestSnapshotNode final : private Support::SpecialMemberPolicy::NoCo
         , m_SubtreeByTodayCount{ SelfByTodayCount }
         , m_SubtreeTotalCount{ SelfTotalCount } {
     }
+
+    explicit DeckForestSnapshotNode(const DeckForestSnapshotNode&) = delete;
+    auto operator=(const DeckForestSnapshotNode&) -> DeckForestSnapshotNode& = delete;
+
+    explicit DeckForestSnapshotNode(DeckForestSnapshotNode&&) noexcept = default;
+    auto operator=(DeckForestSnapshotNode&&) -> DeckForestSnapshotNode& = delete;
+
+    ~DeckForestSnapshotNode() noexcept = default;
 };
 
 }

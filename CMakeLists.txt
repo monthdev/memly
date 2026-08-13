@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 4.4)
 project(memly LANGUAGES C CXX)
 
 set(MEMLY_LLVM_MAJOR_VERSION 22)
+set(MEMLY_PRETTIER_VERSION 3.9.6)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
   message(FATAL_ERROR "Memly's Android and iOS toolchain contracts have not been defined yet")
@@ -67,6 +68,23 @@ include(FetchContent)
 
 if(NOT CMAKE_GENERATOR MATCHES "Ninja")
   message(FATAL_ERROR "Memly requires a Ninja generator for its mandatory full-tree Clang-Tidy gate")
+endif()
+
+find_program(MEMLY_PRETTIER_EXECUTABLE NAMES prettier REQUIRED)
+execute_process(
+  COMMAND "${MEMLY_PRETTIER_EXECUTABLE}" --version
+  RESULT_VARIABLE MEMLY_PRETTIER_VERSION_RESULT
+  OUTPUT_VARIABLE MEMLY_PRETTIER_VERSION_OUTPUT
+  ERROR_VARIABLE MEMLY_PRETTIER_VERSION_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(NOT MEMLY_PRETTIER_VERSION_RESULT EQUAL 0)
+  message(FATAL_ERROR "Unable to read Prettier version: ${MEMLY_PRETTIER_VERSION_ERROR}")
+endif()
+if(NOT "${MEMLY_PRETTIER_VERSION_OUTPUT}" STREQUAL "${MEMLY_PRETTIER_VERSION}")
+  message(FATAL_ERROR "Memly requires Prettier ${MEMLY_PRETTIER_VERSION}; "
+                      "found ${MEMLY_PRETTIER_VERSION_OUTPUT} at ${MEMLY_PRETTIER_EXECUTABLE}"
+  )
 endif()
 
 cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH MEMLY_LLVM_BINARY_DIRECTORY)
@@ -171,9 +189,6 @@ file(GLOB COMPOSITION_ROOT_INCLUDE_HPP CONFIGURE_DEPENDS
 )
 file(GLOB COMPOSITION_ROOT_SOURCE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/CompositionRoot/source/*.cpp")
 
-file(GLOB SUPPORT_SPECIAL_MEMBER_POLICY_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Support/SpecialMemberPolicy/include/Memly/SpecialMemberPolicy/*.hpp"
-)
 file(GLOB SUPPORT_QT_APP_INCLUDE_HPP CONFIGURE_DEPENDS
      "${CMAKE_SOURCE_DIR}/program/Support/QtApp/include/Memly/QtApp/*.hpp"
 )
@@ -442,23 +457,6 @@ function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCL
   set_property(GLOBAL APPEND PROPERTY MEMLY_COMPONENT_TARGETS "${MEMLY_COMPONENT_TARGET}")
 endfunction()
 
-# Add a header-only component with one public include root.
-function(memly_add_header_component MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCLUDE_DIRECTORY)
-  add_library("${MEMLY_COMPONENT_TARGET}" INTERFACE)
-  target_sources(
-    "${MEMLY_COMPONENT_TARGET}" INTERFACE FILE_SET HEADERS BASE_DIRS "${MEMLY_COMPONENT_INCLUDE_DIRECTORY}" FILES
-                                          ${ARGN}
-  )
-  target_link_libraries("${MEMLY_COMPONENT_TARGET}" INTERFACE memly_asan)
-  set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
-  set_property(GLOBAL APPEND PROPERTY MEMLY_COMPONENT_TARGETS "${MEMLY_COMPONENT_TARGET}")
-endfunction()
-
-memly_add_header_component(
-  memly_support_special_member_policy "${CMAKE_SOURCE_DIR}/program/Support/SpecialMemberPolicy/include"
-  ${SUPPORT_SPECIAL_MEMBER_POLICY_INCLUDE_HPP}
-)
-
 memly_add_component_library(
   memly_support_qt_app "${CMAKE_SOURCE_DIR}/program/Support/QtApp/include" HEADERS ${SUPPORT_QT_APP_INCLUDE_HPP}
   SOURCES ${SUPPORT_QT_APP_SOURCE_CPP}
@@ -474,7 +472,6 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_support_exception
-  PUBLIC memly_support_special_member_policy
   PRIVATE memly_support_qt_app
 )
 
@@ -484,7 +481,7 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_application_domain
-  PUBLIC ICU::i18n ICU::uc memly_support_special_member_policy
+  PUBLIC ICU::i18n ICU::uc
   PRIVATE memly_support_exception
 )
 
@@ -494,7 +491,7 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_application_index_cache
-  PUBLIC memly_application_domain memly_support_special_member_policy
+  PUBLIC memly_application_domain
 )
 
 memly_add_component_library(
@@ -503,7 +500,6 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_application_invalidation
-  PUBLIC memly_support_special_member_policy
   PRIVATE memly_support_exception
 )
 
@@ -525,7 +521,7 @@ target_include_directories(
 target_include_directories(memly_infrastructure_database SYSTEM PUBLIC "${_duckdb_inc}")
 target_link_libraries(
   memly_infrastructure_database
-  PUBLIC duckdb memly_support_exception memly_support_special_member_policy
+  PUBLIC duckdb memly_support_exception
   PRIVATE memly_support_qt_app
 )
 set_target_properties(
@@ -565,7 +561,7 @@ target_include_directories(
 )
 target_link_libraries(
   memly_infrastructure_repository
-  PUBLIC memly_application_domain memly_infrastructure_database memly_support_special_member_policy
+  PUBLIC memly_application_domain memly_infrastructure_database
   PRIVATE memly_support_exception memly_support_qt_app
 )
 qt_add_resources(
@@ -588,7 +584,7 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_application_service
-  PUBLIC memly_application_domain memly_application_index_cache memly_support_special_member_policy
+  PUBLIC memly_application_domain memly_application_index_cache
   PRIVATE memly_infrastructure_database memly_infrastructure_repository
 )
 
@@ -598,7 +594,7 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_presentation_model
-  PUBLIC Qt6::Core memly_application_domain memly_support_special_member_policy
+  PUBLIC Qt6::Core memly_application_domain
   PRIVATE memly_support_exception
 )
 
@@ -608,7 +604,7 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_presentation_controller
-  PUBLIC Qt6::Core memly_application_invalidation memly_presentation_model memly_support_special_member_policy
+  PUBLIC Qt6::Core memly_application_invalidation memly_presentation_model
   PRIVATE memly_application_service memly_support_exception
 )
 
@@ -619,7 +615,6 @@ memly_add_component_library(
 target_link_libraries(
   memly_composition_root
   PUBLIC memly_application_service memly_infrastructure_database memly_infrastructure_repository
-         memly_support_special_member_policy
 )
 
 set(MEMLY_QML_SOURCE_FILES ${LAYER_VIEW_BRIDGE_CONTROLLER_INCLUDE_HPP} ${LAYER_VIEW_BRIDGE_CONTROLLER_SOURCE_CPP}
@@ -656,7 +651,6 @@ target_link_libraries(
           memly_presentation_controller
           memly_presentation_model
           memly_support_exception
-          memly_support_special_member_policy
           memly_asan
 )
 
@@ -690,7 +684,6 @@ endif()
 set(MEMLY_CXX_SOURCE_FILES
     ${COMPOSITION_ROOT_INCLUDE_HPP}
     ${COMPOSITION_ROOT_SOURCE_CPP}
-    ${SUPPORT_SPECIAL_MEMBER_POLICY_INCLUDE_HPP}
     ${SUPPORT_QT_APP_INCLUDE_HPP}
     ${SUPPORT_QT_APP_SOURCE_CPP}
     ${SUPPORT_EXCEPTION_INCLUDE_HPP}
@@ -740,6 +733,8 @@ endforeach()
 
 set(MEMLY_CXX_TRANSLATION_UNIT_FILES ${MEMLY_CXX_SOURCE_FILES})
 list(FILTER MEMLY_CXX_TRANSLATION_UNIT_FILES INCLUDE REGEX "\\.(cc|cpp|cxx)$")
+set(MEMLY_CXX_HEADER_FILES ${MEMLY_CXX_SOURCE_FILES})
+list(FILTER MEMLY_CXX_HEADER_FILES INCLUDE REGEX "\\.(h|hh|hpp|hxx)$")
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
   set(MEMLY_CLANG_WARNING_OPTIONS
@@ -803,6 +798,8 @@ add_custom_command(
     "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -clang-tidy-binary
     "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
     "^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet -hide-progress "^${CMAKE_SOURCE_DIR}/(program|test)/.*\\.cpp$"
+  COMMAND "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -config-file
+          "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter "^$" -quiet ${MEMLY_CXX_HEADER_FILES}
   COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_CLANG_TIDY_STAMP}"
   DEPENDS "${CMAKE_SOURCE_DIR}/.clang-tidy" "${CMAKE_BINARY_DIR}/compile_commands.json"
           "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"

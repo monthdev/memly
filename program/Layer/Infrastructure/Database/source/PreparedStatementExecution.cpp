@@ -7,14 +7,12 @@
 #include <utility>
 
 #include "Memly/Database/QueryResultDecoder.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 #include "ThrowOnDatabaseError.hpp"
 
 namespace Layer::Infrastructure::Database {
 
 PreparedStatementExecution::PreparedStatementExecution(duckdb::PreparedStatement& DuckDbPreparedStatement, const std::source_location& SourceLocation) noexcept
-    : NoCopyNoMoveMixin{}
-    , m_DuckDbPreparedStatement{ DuckDbPreparedStatement }
+    : m_DuckDbPreparedStatement{ DuckDbPreparedStatement }
     , m_SourceLocation{ SourceLocation } {
 }
 

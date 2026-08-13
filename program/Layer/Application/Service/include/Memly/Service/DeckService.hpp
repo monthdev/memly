@@ -4,7 +4,6 @@
 #include <string>
 
 #include "Memly/IndexCache/DeckForestSnapshotIndexCache.hpp"
-#include "Memly/SpecialMemberPolicy/NoCopyNoMoveMixin.hpp"
 
 namespace Layer::Infrastructure::Repository {
 class DeckRepository;
@@ -12,13 +11,21 @@ class DeckRepository;
 
 namespace Layer::Application::Service {
 
-class DeckService final : private Support::SpecialMemberPolicy::NoCopyNoMoveMixin {
+class DeckService final {
 private:
     Infrastructure::Repository::DeckRepository& m_DeckRepository;
     IndexCache::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
 
 public:
     explicit DeckService(Infrastructure::Repository::DeckRepository&) noexcept;
+
+    explicit DeckService(const DeckService&) = delete;
+    auto operator=(const DeckService&) -> DeckService& = delete;
+
+    explicit DeckService(DeckService&&) = delete;
+    auto operator=(DeckService&&) -> DeckService& = delete;
+
+    ~DeckService() noexcept = default;
 
     [[nodiscard]] auto AcquireDeckForestSnapshotIndexCacheLease() -> IndexCache::DeckForestSnapshotIndexCache::IndexCacheLease;
 

@@ -14,6 +14,14 @@ struct [[nodiscard]] MutatedId final : public Database::DecodableQueryResultRowM
         : DecodableQueryResultRowMixin{}
         , m_MutatedId{ std::move(MutatedId) } {
     }
+
+    explicit MutatedId(const MutatedId&) = delete;
+    auto operator=(const MutatedId&) -> MutatedId& = delete;
+
+    explicit MutatedId(MutatedId&&) noexcept = default;
+    auto operator=(MutatedId&&) -> MutatedId& = delete;
+
+    ~MutatedId() noexcept = default;
 };
 
 }
