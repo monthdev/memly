@@ -9,7 +9,7 @@
 #include "Memly/Database/QueryResultRowCountRange.hpp"
 #include "Memly/Repository/DeckSnapshotRecord.hpp"
 #include "Memly/Repository/MutatedId.hpp"
-#include "Sql/Deck/DeckSql.hpp"
+#include "Sql/DeckSql.hpp"
 
 namespace Layer::Infrastructure::Repository {
 

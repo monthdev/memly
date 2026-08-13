@@ -8,13 +8,13 @@ namespace Layer::Infrastructure::Database {
 template <typename... ColumnType>
 class DecodableQueryResultRowMixin {
 protected:
-    explicit constexpr DecodableQueryResultRowMixin() noexcept = default;
+    explicit DecodableQueryResultRowMixin() noexcept = default;
 
 public:
     explicit DecodableQueryResultRowMixin(const DecodableQueryResultRowMixin&) = delete;
     auto operator=(const DecodableQueryResultRowMixin&) -> DecodableQueryResultRowMixin& = delete;
 
-    explicit constexpr DecodableQueryResultRowMixin(DecodableQueryResultRowMixin&&) noexcept = default;
+    explicit DecodableQueryResultRowMixin(DecodableQueryResultRowMixin&&) noexcept = default;
     auto operator=(DecodableQueryResultRowMixin&&) -> DecodableQueryResultRowMixin& = delete;
 
     ~DecodableQueryResultRowMixin() noexcept = default;

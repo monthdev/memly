@@ -11,7 +11,7 @@
 #include <optional>
 
 #include "Memly/Database/DatabaseRuntime.hpp"
-#include "Sql/Library/LibrarySql.hpp"
+#include "Sql/LibrarySql.hpp"
 
 namespace Layer::Infrastructure::Repository {
 

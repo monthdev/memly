@@ -23,7 +23,7 @@
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
 #include "Memly/Domain/ReviewSessionListRow.hpp"
 #include "Memly/Exception/MemlyException.hpp"
-#include "Sql/ReviewSession/ReviewSessionSql.hpp"
+#include "Sql/ReviewSessionSql.hpp"
 
 namespace Layer::Infrastructure::Repository {
 

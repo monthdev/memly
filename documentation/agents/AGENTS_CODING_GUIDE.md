@@ -34,10 +34,6 @@ constructor is the other language-required exception: `= delete` must appear on
 its first declaration, so its in-class declaration is also its definition and
 cannot be repeated in an implementation file.
 
-Declare a constructor `constexpr` whenever all of its base and member
-initialization and body operations permit constant evaluation. Clang validates
-`constexpr` eligibility when the specifier is written.
-
 Every non-deleted, non-defaulted constructor must explicitly initialize every
 direct base, every non-static data member, and every virtual base for which it
 is the most-derived constructor
@@ -102,12 +98,17 @@ auto operator=(Type&&) -> Type& = delete;
 ```
 
 Add `noexcept` to a defaulted move operation when the operation is non-throwing,
-and add `override` to a destructor that overrides a virtual base destructor.
-Each special member operation must be individually defaulted or deleted
-according to the type's narrowest required semantics. Do not grant copy or move
-capability for hypothetical future uses; loosen an operation only when
-introducing a control path that requires it. Returning a direct prvalue through
-guaranteed copy elision does not require move construction.
+and add `override` to a destructor that overrides a virtual base destructor. Do
+not explicitly add `constexpr` to a defaulted special member merely because the
+operation is eligible for constant evaluation; omit the qualifier and let the
+language determine its implicit `constexpr` status. Use an explicit `constexpr`
+constructor only when a concrete constant-evaluation control path requires its
+reachable definition. Each special member operation must be individually
+defaulted or deleted according to the type's narrowest required semantics. Do
+not grant copy or move capability for hypothetical future uses; loosen an
+operation only when introducing a control path that requires it. Returning a
+direct prvalue through guaranteed copy elision does not require move
+construction.
 
 A static-only type explicitly deletes its ordinary default constructor as the
 visual marker that it cannot be instantiated. A type may declare its destructor
@@ -254,19 +255,21 @@ preserve this domain grouping in the Application-owned port and make the
 Infrastructure repository its implementation.
 
 DuckDB SQL resources are implementation details of their direct consumer.
-Repository SQL lives under
-`Layer/Infrastructure/Repository/source/Sql/<Domain>`, while migration SQL lives
-under `Layer/Infrastructure/Database/source/Sql`. `Database` and `Repository`
-each form one CMake component with one public `include/` root and one private
+Repository SQL resources live under
+`Layer/Infrastructure/Repository/source/Sql/<Domain>`, while their
+`<Domain>Sql.hpp/.cpp` accessor pairs live directly under the repository's
+`source/Sql` root. Migration SQL and its accessors live under
+`Layer/Infrastructure/Database/source/Sql`. `Database` and `Repository` each
+form one CMake component with one public `include/` root and one private
 `source/` root.
 
 Single-operation SQL resources are classified by their primary SQL statement
 under `Select/`, `Update/`, `Insert/`, or `Delete/`. Each resource filename and
 accessor begins with that SQL statement name, followed by its domain purpose;
 prepared-statement members repeat the same operation name. Repository methods
-retain domain-operation language. Each SQL owner exposes one root-level
-`<Domain>Sql.hpp/.cpp` accessor pair, and consumers depend on that accessor
-rather than on operation folders.
+retain domain-operation language. Each repository SQL domain exposes one
+`<Domain>Sql.hpp/.cpp` accessor pair in the shared `source/Sql` root, and
+consumers depend on that accessor rather than on operation folders.
 
 Migration SQL separates unconditional setup under `Bootstrap/`, ordered
 migration scripts under `Version/`, and migration-log support statements under
@@ -578,15 +581,21 @@ compiling any changed Memly translation unit. The stamp depends on its policy
 inputs, `compile_commands.json`, and the complete source tree; unchanged inputs
 do not repeat the analysis. Do not cap the full-tree tool's worker count.
 
-Before Codex may finish, the project `Stop` integrity hook formats C++, CMake,
-Markdown, YAML, and `.clang-tidy`, then configures and builds the
-`macos-debug-local` preset, including the mandatory Clang-Tidy and public-header
-gates. A formatter, configuration, or build failure returns the turn to Codex
-for repair. Every gate must pass. Do not bypass this hook.
+Before Codex may finish, the project `Stop` integrity hook runs the same C/C++,
+CMake, Markdown, QML, SQL, YAML, and `.clang-tidy` formatters and pinned
+versions as formatting CI; Doxygen remains an independent workflow. The hook
+rewrites only files whose formatted contents differ so unchanged source
+timestamps do not invalidate downstream build work. It configures the
+`macos-debug-local` preset only when the Ninja build tree is absent or the
+selected preset files change, then always invokes the incremental preset build.
+Ninja runs the mandatory Clang-Tidy, public-header verification, compilation,
+and linking stages only when their actual inputs changed. A formatter,
+configuration, or build failure returns the turn to Codex for repair. Every
+applicable gate must pass. Do not bypass this hook.
 
-The integrity hook invokes the CMake-required standalone Prettier executable
-from `PATH` at the same pinned version used by formatting CI. Do not use `npx`
-or otherwise download formatters during hook execution.
+The integrity hook invokes standalone formatter executables from `PATH` at the
+same pinned versions used by formatting CI. Do not use `npx` or otherwise
+download formatters during hook execution.
 
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
 missing- and unused-include diagnostics are the automated acceptance checks for
