@@ -7,6 +7,6 @@
 
 namespace Memly::Repository {
 
-[[nodiscard]] auto SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string;
+[[nodiscard]] auto i_SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string;
 }
 #endif

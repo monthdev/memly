@@ -265,21 +265,20 @@ Infrastructure repository its implementation.
 
 DuckDB SQL resources are implementation details of their direct consumer.
 Repository SQL resources live under
-`Layer/Infrastructure/Repository/source/Sql/<Domain>`, while their
+`Layer/Infrastructure/Repository/source/_Sql/<Domain>`, while their
 `_<Domain>Sql.hpp/.cpp` accessor pairs live directly under the repository's
-`source/` root. Migration SQL resources live under
-`Layer/Infrastructure/Database/source/Sql`, while `_MigrationSql.hpp/.cpp` live
-directly under the database's `source/` root. `Database` and `Repository` each
-form one CMake component with one public `include/` root and one private
-`source/` root.
+`source/_Sql` root. Migration SQL resources and `_MigrationSql.hpp/.cpp`
+likewise live under `Layer/Infrastructure/Database/source/_Sql`. `Database` and
+`Repository` each form one CMake component with one public `include/` root and
+one private `source/` root.
 
 Single-operation SQL resources are classified by their primary SQL statement
 under `Select/`, `Update/`, `Insert/`, or `Delete/`. Each resource filename and
 accessor begins with that SQL statement name, followed by its domain purpose;
 prepared-statement members repeat the same operation name. Repository methods
-retain domain-operation language. Each repository SQL domain exposes one
-`_<Domain>Sql.hpp/.cpp` accessor pair in the shared `source/` root, and
-consumers depend on that accessor rather than on operation folders.
+retain domain-operation language. Each repository SQL domain exposes its own
+target-private `_Sql/_<Domain>Sql.hpp/.cpp` accessor pair, and consumers depend
+on that pair rather than on operation folders.
 
 Migration SQL separates unconditional setup under `Bootstrap/`, ordered
 migration scripts under `Version/`, and migration-log support statements under
@@ -309,11 +308,11 @@ result and fetches chunks directly. Do not route an operation back through
 operation.
 
 Guard constructed DuckDB prepared statements and query results with
-`ThrowOnPreparedStatementError()` and `ThrowOnQueryResultError()`, respectively.
-Chunk-fetch failures expose `duckdb::ErrorData` instead and remain guarded at
-the decoding boundary. These guards contain the DuckDB state inspection; do not
-wrap their resulting `MemlyException` throw in another database-error forwarding
-helper.
+`i_ThrowOnPreparedStatementError()` and `i_ThrowOnQueryResultError()`,
+respectively. Chunk-fetch failures expose `duckdb::ErrorData` instead and remain
+guarded at the decoding boundary. These guards contain the DuckDB state
+inspection; do not wrap their resulting `MemlyException` throw in another
+database-error forwarding helper.
 
 Prepared-statement execution and result decoding form one ephemeral, rvalue-only
 chain beginning at `PreparedStatement::Execute()`. Invoke `WithParameters()` for
@@ -401,6 +400,11 @@ expression.
 Global and namespace-scope variables are disallowed
 (`custom-memly-no-namespace-variable`).
 
+The `g_` prefix is forbidden for every Memly identifier, without exception
+(`custom-memly-no-global-prefix`). Global scope is not an ownership category in
+Memly: exported namespace-scope declarations use ordinary names, target-private
+declarations use `i_`, and translation-unit-local declarations use `u_`.
+
 Use representation suffixes for non-layer-API names when the concrete
 representation matters. For every type governed by this rule, regardless of
 whether it is defined by Memly, the standard library, or a third-party library,
@@ -451,13 +455,29 @@ use `Memly::Bridge`, and declarations directly under the Repository and Database
 target roots—including their private SQL accessors—use `Memly::Repository` and
 `Memly::Database`. Architectural grouping folders above a target root, such as
 `Layer`, `Application`, `Infrastructure`, `Presentation`, `View`, and `Support`,
-do not appear in C++ namespace names. An unnamed helper namespace is nested
-inside the complete matching named namespace. The custom matcher enforces the
-minimum structural requirement that it have a `Memly` namespace ancestor
-(`custom-memly-unnamed-namespace-nesting`). Every declaration made directly at
-unnamed-namespace scope uses a `u_` prefix, including functions, types, enums,
-concepts, and aliases; members of an unnamed-namespace type retain their normal
-member naming (`custom-memly-unnamed-namespace-declaration-prefix`).
+do not appear in C++ namespace names. An implementation-organization folder
+whose name begins with `_` is likewise namespace-transparent: declarations in
+`source/_Sql/_DeckSql.hpp/.cpp` remain directly in the owning `Memly::<Target>`
+namespace rather than adding `_Sql` or `Sql`. An unnamed helper namespace is
+nested inside the complete matching named namespace. The custom matcher enforces
+the minimum structural requirement that it have a `Memly` namespace ancestor
+(`custom-memly-unnamed-namespace-nesting`).
+
+A namespace-scope type or free function shared by translation units within one
+target, but absent from that target's public include surface, uses the `i_`
+prefix. The prefix is required in target-private `_*.hpp/.cpp` helper pairs and
+reserved exclusively for declarations at that boundary
+(`custom-memly-target-private-declaration-prefix` and
+`custom-memly-target-private-prefix-reserved`). Do not apply `i_` merely because
+a class member is private; instance and static members retain their ordinary
+member naming.
+
+Every declaration made directly at unnamed-namespace scope uses a `u_` prefix,
+including functions, types, enums, concepts, and aliases; members of an
+unnamed-namespace type retain their normal member naming
+(`custom-memly-unnamed-namespace-declaration-prefix`). A `u_` declaration is
+confined to one translation unit, whereas an `i_` declaration is a
+target-private cross-translation-unit interface.
 
 A custom type whose required visibility is confined to one translation unit is
 declared in that translation unit's unnamed namespace. Do not place it in a
@@ -548,17 +568,18 @@ public Memly header through its full `Memly/<Component>/<Header>.hpp` path. The
 `Memly/` prefix prevents collisions with dependencies, and the component folder
 identifies the owning include surface without repeating the complete source-tree
 path. Private implementation headers remain under `source/` and do not become
-part of this public include surface. Private SQL resources remain under the
-owning component's `source/Sql` subtree; their target-private C++ accessor pairs
-remain directly under the owning `source/` root.
+part of this public include surface. Private SQL resources and their
+target-private accessor pairs remain under the owning component's `source/_Sql`
+subtree.
 
 A declaration-and-implementation helper pair whose `.hpp` and `.cpp` both remain
 private under one target's `source/` tree begins both filenames with `_`, such
-as `_ThrowOnDatabaseError.hpp/.cpp` and `_DeckSql.hpp/.cpp`. The prefix visually
-identifies target-private includes at their include sites and sorts these
-helpers before implementation files corresponding to exposed headers. This
-applies to every target, not only the Database component, and only to filenames;
-declarations retain their ordinary names. Do not carry the marker into C++
+as `_ThrowOnDatabaseError.hpp/.cpp` and `_Sql/_DeckSql.hpp/.cpp`. The prefix
+visually identifies target-private includes at their include sites and sorts
+these helpers before implementation files corresponding to exposed headers. This
+applies to every target, not only the Database component. Namespace-scope types
+and free functions declared by such a pair use `i_`; other declarations retain
+their ordinary naming. Do not carry a private path marker into C++ namespaces or
 declarations: a leading underscore followed by the uppercase first letter of a
 PascalCase name is reserved to the implementation.
 

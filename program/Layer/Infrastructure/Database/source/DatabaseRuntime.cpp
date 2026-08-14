@@ -19,7 +19,7 @@ DatabaseRuntime::DatabaseRuntime(duckdb::DatabaseInstance& DatabaseInstance, duc
 
 [[nodiscard]] auto DatabaseRuntime::PrepareStatement(const std::string& Sql, const std::source_location& SourceLocation) -> PreparedStatement {
     std::unique_ptr<duckdb::PreparedStatement> DuckDbPreparedStatement{ this->m_DatabaseConnection.Prepare(Sql) };
-    ThrowOnPreparedStatementError(*DuckDbPreparedStatement, SourceLocation);
+    i_ThrowOnPreparedStatementError(*DuckDbPreparedStatement, SourceLocation);
     return PreparedStatement{ std::move(DuckDbPreparedStatement) };
 }
 

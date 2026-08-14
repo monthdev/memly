@@ -56,6 +56,7 @@ Checks: |
   custom-memly-no-deduced-variable-type,
   custom-memly-no-forward-declared-enum,
   custom-memly-no-forward-declaration,
+  custom-memly-no-global-prefix,
   custom-memly-no-header-function-definition,
   custom-memly-no-magic-integer-in-assertion,
   custom-memly-no-magic-integer-in-constant-declaration-type,
@@ -74,6 +75,8 @@ Checks: |
   custom-memly-standard-container-value-suffix,
   custom-memly-string-view-definition-parameter-const,
   custom-memly-string-view-parameter-by-value,
+  custom-memly-target-private-declaration-prefix,
+  custom-memly-target-private-prefix-reserved,
   custom-memly-type-template-parameter-name,
   custom-memly-unnamed-namespace-declaration-prefix,
   custom-memly-unnamed-namespace-nesting,
@@ -375,6 +378,14 @@ CustomChecks:
       - BindName: variable
         Message: global and namespace-scope variables are disallowed
         Level: Warning
+  - Name: memly-no-global-prefix
+    Query: >-
+      match namedDecl( unless(isImplicit()), unless(cxxConstructorDecl()), unless(cxxDestructorDecl()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("(^|::)g_[^:]*$") ).bind("declaration")
+    Diagnostic:
+      - BindName: declaration
+        Message: the g_ prefix is forbidden for every Memly identifier
+        Level: Warning
   - Name: memly-no-database-chain-proxy-field
     Query: >-
       match fieldDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType(
@@ -507,6 +518,24 @@ CustomChecks:
     Diagnostic:
       - BindName: parameter
         Message: std::string_view parameters must be passed by value
+        Level: Warning
+  - Name: memly-target-private-declaration-prefix
+    Query: >-
+      match namedDecl( anyOf( functionDecl(unless(cxxMethodDecl())), cxxRecordDecl(), enumDecl(), typedefNameDecl() ), unless(isImplicit()),
+      unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](hpp|cpp)$"),
+      hasParent(namespaceDecl(unless(isAnonymous()))), unless(matchesName("(^|::)i_[^:]*$") ) ).bind("declaration")
+    Diagnostic:
+      - BindName: declaration
+        Message: namespace-scope types and free functions declared in target-private helper files must use the i_ prefix
+        Level: Warning
+  - Name: memly-target-private-prefix-reserved
+    Query: >-
+      match namedDecl( anyOf( functionDecl(unless(cxxMethodDecl())), cxxRecordDecl(), enumDecl(), typedefNameDecl() ), unless(isImplicit()),
+      unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("(^|::)i_[^:]*$"), unless(
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](hpp|cpp)$") ) ).bind("declaration")
+    Diagnostic:
+      - BindName: declaration
+        Message: the i_ prefix is reserved for namespace-scope types and free functions declared in target-private helper files
         Level: Warning
   - Name: memly-type-template-parameter-name
     Query: >-

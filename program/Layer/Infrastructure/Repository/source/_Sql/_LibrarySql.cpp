@@ -9,7 +9,7 @@
 
 namespace Memly::Repository {
 
-[[nodiscard]] auto SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string {
+[[nodiscard]] auto i_SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/Library/Select/SelectNextLibraryInvalidationAtMillisecondsSinceEpoch.sql");
 }
 }

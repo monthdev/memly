@@ -9,52 +9,52 @@
 
 namespace Memly::Repository {
 
-[[nodiscard]] auto SelectReviewSessionListRowsSql() -> std::string {
+[[nodiscard]] auto i_SelectReviewSessionListRowsSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/SelectReviewSessionListRows.sql");
 }
 
-[[nodiscard]] auto SelectDefaultReviewSessionIdByRootDeckIdSql() -> std::string {
+[[nodiscard]] auto i_SelectDefaultReviewSessionIdByRootDeckIdSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/SelectDefaultReviewSessionIdByRootDeckId.sql");
 }
 
-[[nodiscard]] auto SelectReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string {
+[[nodiscard]] auto i_SelectReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Select/SelectReviewSessionIdByReviewSessionDefinitionKey.sql");
 }
 
-[[nodiscard]] auto InsertCustomReviewSessionSql() -> std::string {
+[[nodiscard]] auto i_InsertCustomReviewSessionSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/InsertCustomReviewSession.sql");
 }
 
-[[nodiscard]] auto InsertDefaultReviewSessionSql() -> std::string {
+[[nodiscard]] auto i_InsertDefaultReviewSessionSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/InsertDefaultReviewSession.sql");
 }
 
-[[nodiscard]] auto InsertCustomReviewSessionDeckSelectionSql() -> std::string {
+[[nodiscard]] auto i_InsertCustomReviewSessionDeckSelectionSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Insert/InsertCustomReviewSessionDeckSelection.sql");
 }
 
-[[nodiscard]] auto UpdateReviewSessionNameSql() -> std::string {
+[[nodiscard]] auto i_UpdateReviewSessionNameSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Update/UpdateReviewSessionName.sql");
 }
 
-[[nodiscard]] auto UpdateReviewSessionToDefaultSql() -> std::string {
+[[nodiscard]] auto i_UpdateReviewSessionToDefaultSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Update/UpdateReviewSessionToDefault.sql");
 }
 
-[[nodiscard]] auto UpdateReviewSessionToCustomSql() -> std::string {
+[[nodiscard]] auto i_UpdateReviewSessionToCustomSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Update/UpdateReviewSessionToCustom.sql");
 }
 
-[[nodiscard]] auto UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql() -> std::string {
+[[nodiscard]] auto i_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(
         ":/Sql/ReviewSession/Update/UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch.sql");
 }
 
-[[nodiscard]] auto DeleteCustomReviewSessionDeckSelectionsSql() -> std::string {
+[[nodiscard]] auto i_DeleteCustomReviewSessionDeckSelectionsSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Delete/DeleteCustomReviewSessionDeckSelections.sql");
 }
 
-[[nodiscard]] auto DeleteReviewSessionSql() -> std::string {
+[[nodiscard]] auto i_DeleteReviewSessionSql() -> std::string {
     return QtApp::ReadQtAppResourceBytes(":/Sql/ReviewSession/Delete/DeleteReviewSession.sql");
 }
 }
