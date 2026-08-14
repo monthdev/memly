@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace Support::Exception {
+namespace Memly::Exception {
 void LogException(std::string_view) noexcept;
 
 template <typename LambdaType>

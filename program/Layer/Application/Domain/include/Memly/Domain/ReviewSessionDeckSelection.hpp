@@ -7,7 +7,7 @@
 #include <string>
 #include <utility>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 struct ReviewSessionDeckSelection {
     enum class [[nodiscard]] DeckSelectionTypeEnum : std::uint8_t {

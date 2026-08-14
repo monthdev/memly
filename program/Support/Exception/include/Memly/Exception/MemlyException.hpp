@@ -7,7 +7,7 @@
 #include <source_location>
 #include <string_view>
 
-namespace Support::Exception {
+namespace Memly::Exception {
 class [[nodiscard]] MemlyException final : public std::exception {
 private:
     static constexpr std::size_t s_ErrorMessageCapacity{ 1024 };

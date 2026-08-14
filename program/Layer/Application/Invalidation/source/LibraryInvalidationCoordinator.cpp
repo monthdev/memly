@@ -17,11 +17,11 @@
 #include "Memly/Invalidation/LibraryInvalidationTarget.hpp"
 #include "Memly/Repository/LibraryRepository.hpp"
 
-namespace Layer::Application::Invalidation {
+namespace Memly::Invalidation {
 
 LibraryInvalidationCoordinator::LibraryInvalidationCoordinator(
     LibraryInvalidationChannel& LibraryInvalidationChannel,
-    Infrastructure::Repository::LibraryRepository& LibraryRepository,
+    Repository::LibraryRepository& LibraryRepository,
     QObject* Parent)
     : QObject{ Parent }
     , m_LibraryInvalidationChannel{ LibraryInvalidationChannel }
@@ -33,18 +33,18 @@ LibraryInvalidationCoordinator::LibraryInvalidationCoordinator(
 }
 
 void LibraryInvalidationCoordinator::Invalidate(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
-    emit this->m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
+    this->m_LibraryInvalidationChannel.PublishInvalidation(SignaledLibraryInvalidationTargetBitset);
 }
 
 void LibraryInvalidationCoordinator::InvalidateWithReschedule(const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
-    emit this->m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
+    this->m_LibraryInvalidationChannel.PublishInvalidation(SignaledLibraryInvalidationTargetBitset);
     this->ScheduleNextLibraryInvalidation();
 }
 
 void LibraryInvalidationCoordinator::InvalidateWithRescheduleAndNewSnapshotEpoch(
     const LibraryInvalidationTargetBitset& SignaledLibraryInvalidationTargetBitset) noexcept {
-    this->m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch = static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch());
-    emit this->m_LibraryInvalidationChannel.InvalidationSignal(SignaledLibraryInvalidationTargetBitset);
+    this->m_LibraryInvalidationChannel.SetCurrentSnapshotAsOfMillisecondsSinceEpoch(static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch()));
+    this->m_LibraryInvalidationChannel.PublishInvalidation(SignaledLibraryInvalidationTargetBitset);
     this->ScheduleNextLibraryInvalidation();
 }
 
@@ -53,11 +53,11 @@ void LibraryInvalidationCoordinator::HandleScheduledInvalidation() noexcept {
 }
 
 void LibraryInvalidationCoordinator::ScheduleNextLibraryInvalidation() noexcept {
-    Support::Exception::TryCatchWrapper([&]() -> void {
+    Exception::TryCatchWrapper([&]() -> void {
         this->m_LibraryInvalidationQTimer.stop();
         const std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpochOptional{
             this->m_LibraryRepository.ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(
-                this->m_LibraryInvalidationChannel.m_CurrentSnapshotAsOfMillisecondsSinceEpoch)
+                this->m_LibraryInvalidationChannel.GetCurrentSnapshotAsOfMillisecondsSinceEpoch())
         };
         if (not NextLibraryInvalidationAtMillisecondsSinceEpochOptional.has_value()) {
             return;

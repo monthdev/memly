@@ -54,6 +54,8 @@ Checks: |
   custom-memly-no-default-member-initializer,
   custom-memly-no-delegating-constructor,
   custom-memly-no-deduced-variable-type,
+  custom-memly-no-forward-declared-enum,
+  custom-memly-no-forward-declaration,
   custom-memly-no-header-function-definition,
   custom-memly-no-magic-integer-in-assertion,
   custom-memly-no-magic-integer-in-constant-declaration-type,
@@ -133,9 +135,8 @@ CustomChecks:
   - Name: memly-data-struct-constructor-noexcept
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()), unless(isNoThrow()),
-      unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl( isStruct(),
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::") ) ),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl( isStruct(), matchesName("^::Memly::") ) ), isExpansionInFileMatching("[/\\\\]program[/\\\\]")
+      ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: data-struct constructors must be declared noexcept
@@ -180,7 +181,7 @@ CustomChecks:
   - Name: memly-conversion-operator
     Query: >-
       match cxxConversionDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl(
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::") ) ) ).bind("conversion")
+      matchesName("^::Memly::") ) ) ).bind("conversion")
     Diagnostic:
       - BindName: conversion
         Message: conversion operators are disallowed
@@ -188,9 +189,9 @@ CustomChecks:
   - Name: memly-declared-ordinary-constructor
     Query: >-
       match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)::"), unless( anyOf( has(
-      cxxConstructorDecl( unless(isImplicit()), unless(isCopyConstructor()), unless(isMoveConstructor()) ) ), has( functionTemplateDecl( has(
-      cxxConstructorDecl( unless(isImplicit()), unless(isCopyConstructor()), unless(isMoveConstructor()) ) ) ) ) ) ) ).bind("record")
+      matchesName("^::Memly::"), unless( anyOf( has( cxxConstructorDecl( unless(isImplicit()), unless(isCopyConstructor()), unless(isMoveConstructor()) ) ),
+      has( functionTemplateDecl( has( cxxConstructorDecl( unless(isImplicit()), unless(isCopyConstructor()), unless(isMoveConstructor()) ) ) ) ) ) )
+      ).bind("record")
     Diagnostic:
       - BindName: record
         Message: Memly types must explicitly declare an ordinary constructor
@@ -286,6 +287,25 @@ CustomChecks:
       - BindName: variable
         Message: deduced variable types require a narrow documented exception
         Level: Warning
+  - Name: memly-no-forward-declared-enum
+    Query: >-
+      match enumDecl( unless(isDefinition()), unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]")
+      ).bind("forward_declaration")
+    Diagnostic:
+      - BindName: forward_declaration
+        Message: enum forward declarations are disallowed
+        Level: Warning
+  - Name: memly-no-forward-declaration
+    Query: >-
+      match cxxRecordDecl( unless(isDefinition()), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless( allOf( isClass(), hasName("Implementation"), isPrivate(), hasParent( cxxRecordDecl(
+      isDefinition(), has( fieldDecl( hasName("m_Implementation"), hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      classTemplateSpecializationDecl( hasName("::std::unique_ptr"), hasTemplateArgument( 0, refersToType( qualType( hasDeclaration(
+      cxxRecordDecl(hasName("Implementation")) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ).bind("forward_declaration")
+    Diagnostic:
+      - BindName: forward_declaration
+        Message: forward declarations are disallowed outside the canonical private PImpl pattern
+        Level: Warning
   - Name: memly-no-header-function-definition
     Query: >-
       match functionDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isTemplateInstantiation()),
@@ -358,11 +378,10 @@ CustomChecks:
   - Name: memly-no-database-chain-proxy-field
     Query: >-
       match fieldDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType(
-      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::Database::PreparedStatementExecution",
-      "::Layer::Infrastructure::Database::QueryResultDecoder", "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType(
-      pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName(
-      "::Layer::Infrastructure::Database::PreparedStatementExecution", "::Layer::Infrastructure::Database::QueryResultDecoder",
-      "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("field")
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution",
+      "::Memly::Database::QueryResultDecoder", "::Memly::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType(
+      hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution",
+      "::Memly::Database::QueryResultDecoder", "::Memly::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("field")
     Diagnostic:
       - BindName: field
         Message: database chain proxies must remain within one chained full expression and must not be stored or named
@@ -372,11 +391,10 @@ CustomChecks:
       match varDecl( unless(isImplicit()), unless(hasAncestor(functionDecl(isImplicit()))), unless( parmVarDecl( hasAncestor( cxxMethodDecl( anyOf(
       cxxConstructorDecl(anyOf(isCopyConstructor(), isMoveConstructor())), isCopyAssignmentOperator(), isMoveAssignmentOperator() ) ) ) ) ),
       unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType(
-      recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Layer::Infrastructure::Database::PreparedStatementExecution",
-      "::Layer::Infrastructure::Database::QueryResultDecoder", "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType(
-      pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName(
-      "::Layer::Infrastructure::Database::PreparedStatementExecution", "::Layer::Infrastructure::Database::QueryResultDecoder",
-      "::Layer::Infrastructure::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("variable")
+      recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution", "::Memly::Database::QueryResultDecoder",
+      "::Memly::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution", "::Memly::Database::QueryResultDecoder",
+      "::Memly::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: database chain proxies must remain within one chained full expression and must not be stored or named
@@ -509,8 +527,7 @@ CustomChecks:
   - Name: memly-unnamed-namespace-nesting
     Query: >-
       match namespaceDecl( isAnonymous(), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless( hasAncestor(
-      namespaceDecl( matchesName("^::(CompositionRoot|Layer::Application|Layer::Infrastructure|Layer::Presentation|Layer::View|Support)(::|$)") ) ) )
-      ).bind("namespace")
+      namespaceDecl( matchesName("^::Memly(::|$)") ) ) ) ).bind("namespace")
     Diagnostic:
       - BindName: namespace
         Message: unnamed helper namespaces must be nested inside the matching Memly namespace

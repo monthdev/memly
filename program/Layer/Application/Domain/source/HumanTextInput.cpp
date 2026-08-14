@@ -16,7 +16,7 @@
 
 #include "Memly/Exception/MemlyException.hpp"
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 HumanTextInput::HumanTextInput(icu::UnicodeString&& NormalizedUnicodeString) noexcept
     : m_NormalizedUnicodeString{ std::move(NormalizedUnicodeString) } {
@@ -26,7 +26,7 @@ namespace {
 
 void u_ThrowOnIcuError(const icu::ErrorCode& IcuErrorCode) {
     if (IcuErrorCode.isFailure() not_eq 0) {
-        throw Support::Exception::MemlyException{ std::initializer_list<std::string_view>{ IcuErrorCode.errorName() } };
+        throw Exception::MemlyException{ std::initializer_list<std::string_view>{ IcuErrorCode.errorName() } };
     }
 }
 

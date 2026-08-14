@@ -8,10 +8,10 @@
 #include "Memly/Domain/ReviewSessionListRow.hpp"
 #include "Memly/Repository/ReviewSessionRepository.hpp"
 
-namespace Layer::Application::Service {
+namespace Memly::Service {
 
 ReviewSessionListService::ReviewSessionListService(
-    Infrastructure::Repository::ReviewSessionRepository& ReviewSessionRepository) noexcept
+    Repository::ReviewSessionRepository& ReviewSessionRepository) noexcept
     : m_ReviewSessionRepository{ ReviewSessionRepository } {
 }
 

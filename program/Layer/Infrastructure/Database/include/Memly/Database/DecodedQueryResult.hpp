@@ -6,7 +6,7 @@
 #include "Memly/Database/DecodableQueryResultRowMixin.hpp"
 #include "Memly/Database/QueryResultRowCountRange.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 template <DecodableQueryResultRow QueryResultRowType>
 class [[nodiscard]] DecodedQueryResult final {

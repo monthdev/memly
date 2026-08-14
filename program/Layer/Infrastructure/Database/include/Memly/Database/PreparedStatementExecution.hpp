@@ -7,7 +7,7 @@
 
 #include "Memly/Database/QueryResultDecoder.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 class [[nodiscard]] PreparedStatementExecution final {
 private:

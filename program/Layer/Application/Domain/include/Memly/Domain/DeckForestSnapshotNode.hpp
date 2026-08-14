@@ -5,7 +5,7 @@
 #include <string>
 #include <utility>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 struct DeckForestSnapshotNode final {
     std::string m_DeckId;

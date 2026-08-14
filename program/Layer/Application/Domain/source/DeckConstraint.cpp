@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <string>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 [[nodiscard]] auto IsDeckNameLengthValid(const std::string& DeckName) noexcept -> bool {
     static constexpr std::size_t s_DeckNameMaximumLength{ 40 };

@@ -144,12 +144,58 @@ if(WIN32)
   file(GENERATE OUTPUT "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
        CONTENT "@echo off\r\n\"${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}\" --experimental-custom-checks %*\r\n"
   )
+
+  set(MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-header-driver.cmd")
+  string(
+    CONCAT MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_CONTENT
+           "@echo off\r\n"
+           "setlocal\r\n"
+           "set \"MemlyClangTidyOutputFile=%TEMP%\\memly-clang-tidy-%RANDOM%-%RANDOM%.txt\"\r\n"
+           "call \"${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}\" %* 2>\"%MemlyClangTidyOutputFile%\"\r\n"
+           "set \"MemlyClangTidyResult=%ERRORLEVEL%\"\r\n"
+           "findstr /V /R /C:\"^\\[[0-9][0-9]*/[0-9][0-9]*\\] Processing file \" "
+           "\"%MemlyClangTidyOutputFile%\" 1>&2\r\n"
+           "del /Q \"%MemlyClangTidyOutputFile%\"\r\n"
+           "exit /B %MemlyClangTidyResult%\r\n"
+  )
+  file(GENERATE OUTPUT "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}"
+       CONTENT "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_CONTENT}"
+  )
 else()
   set(MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-driver")
   file(
     GENERATE
     OUTPUT "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
     CONTENT "#!/bin/sh\nexec \"${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}\" --experimental-custom-checks \"$@\"\n"
+            FILE_PERMISSIONS
+            OWNER_READ
+            OWNER_WRITE
+            OWNER_EXECUTE
+            GROUP_READ
+            GROUP_EXECUTE
+            WORLD_READ
+            WORLD_EXECUTE
+            NEWLINE_STYLE
+            UNIX
+  )
+
+  set(MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-header-driver")
+  string(
+    CONCAT MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_CONTENT
+           "#!/bin/sh\n"
+           "ClangTidyOutputFile=\"\$(mktemp \"\${TMPDIR:-/tmp}/memly-clang-tidy-header-output.XXXXXX\")\" || exit 2\n"
+           "trap 'rm -f \"\$ClangTidyOutputFile\"' EXIT HUP INT TERM\n"
+           "\"${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}\" \"\$@\" 2>\"\$ClangTidyOutputFile\"\n"
+           "ClangTidyResult=\$?\n"
+           "if ! sed '/^\\[[0-9][0-9]*\\\/[0-9][0-9]*\\] Processing file /d' \"\$ClangTidyOutputFile\" >&2; then\n"
+           "  exit 2\n"
+           "fi\n"
+           "exit \"\$ClangTidyResult\"\n"
+  )
+  file(
+    GENERATE
+    OUTPUT "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}"
+    CONTENT "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_CONTENT}"
             FILE_PERMISSIONS
             OWNER_READ
             OWNER_WRITE
@@ -181,155 +227,6 @@ if(DOXYGEN_FOUND)
 else()
   message(STATUS "Doxygen not found; memly-documentation target will not be available")
 endif()
-
-set(APP_MAIN_CPP "${CMAKE_SOURCE_DIR}/program/main.cpp")
-
-file(GLOB COMPOSITION_ROOT_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/CompositionRoot/include/Memly/CompositionRoot/*.hpp"
-)
-file(GLOB COMPOSITION_ROOT_SOURCE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/CompositionRoot/source/*.cpp")
-
-file(GLOB SUPPORT_QT_APP_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Support/QtApp/include/Memly/QtApp/*.hpp"
-)
-file(GLOB SUPPORT_QT_APP_SOURCE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Support/QtApp/source/*.cpp")
-file(GLOB SUPPORT_EXCEPTION_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Support/Exception/include/Memly/Exception/*.hpp"
-)
-file(GLOB SUPPORT_EXCEPTION_SOURCE_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/Support/Exception/source/*.cpp")
-
-file(GLOB LAYER_APPLICATION_DOMAIN_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/include/Memly/Domain/*.hpp"
-)
-file(GLOB LAYER_APPLICATION_DOMAIN_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/source/*.cpp"
-)
-file(GLOB LAYER_APPLICATION_INDEX_CACHE_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Application/IndexCache/include/Memly/IndexCache/*.hpp"
-)
-file(GLOB LAYER_APPLICATION_INDEX_CACHE_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Application/IndexCache/source/*.cpp"
-)
-file(GLOB LAYER_APPLICATION_INVALIDATION_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Invalidation/include/Memly/Invalidation/*.hpp"
-)
-file(GLOB LAYER_APPLICATION_INVALIDATION_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Invalidation/source/*.cpp"
-)
-file(GLOB LAYER_APPLICATION_SERVICE_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Service/include/Memly/Service/*.hpp"
-)
-file(GLOB LAYER_APPLICATION_SERVICE_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Application/Service/source/*.cpp"
-)
-
-file(GLOB LAYER_INFRASTRUCTURE_DATABASE_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/include/Memly/Database/*.hpp"
-)
-file(GLOB LAYER_INFRASTRUCTURE_DATABASE_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/*.cpp"
-)
-file(GLOB LAYER_INFRASTRUCTURE_DATABASE_SOURCE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/*.hpp"
-)
-file(GLOB LAYER_INFRASTRUCTURE_DATABASE_SQL_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/Sql/*.cpp"
-)
-file(GLOB LAYER_INFRASTRUCTURE_DATABASE_SQL_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/Sql/*.hpp"
-)
-file(GLOB DATABASE_SQL_BOOTSTRAP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/Sql/Bootstrap/*.sql"
-)
-file(GLOB DATABASE_SQL_INSERT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/Sql/Insert/*.sql"
-)
-file(GLOB DATABASE_SQL_SELECT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/Sql/Select/*.sql"
-)
-file(GLOB DATABASE_SQL_VERSION CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/Sql/Version/*.sql"
-)
-
-file(GLOB LAYER_INFRASTRUCTURE_REPOSITORY_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/include/Memly/Repository/*.hpp"
-)
-file(GLOB LAYER_INFRASTRUCTURE_REPOSITORY_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/*.cpp"
-)
-file(GLOB LAYER_INFRASTRUCTURE_REPOSITORY_SQL_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/*.cpp"
-)
-file(GLOB LAYER_INFRASTRUCTURE_REPOSITORY_SQL_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/*.hpp"
-)
-file(GLOB REPOSITORY_DECK_SQL_DELETE CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/Deck/Delete/*.sql"
-)
-file(GLOB REPOSITORY_DECK_SQL_INSERT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/Deck/Insert/*.sql"
-)
-file(GLOB REPOSITORY_DECK_SQL_SELECT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/Deck/Select/*.sql"
-)
-file(GLOB REPOSITORY_DECK_SQL_UPDATE CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/Deck/Update/*.sql"
-)
-file(GLOB REPOSITORY_LIBRARY_SQL_SELECT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/Library/Select/*.sql"
-)
-file(GLOB REPOSITORY_REVIEW_SESSION_SQL_DELETE CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/ReviewSession/Delete/*.sql"
-)
-file(GLOB REPOSITORY_REVIEW_SESSION_SQL_INSERT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/ReviewSession/Insert/*.sql"
-)
-file(GLOB REPOSITORY_REVIEW_SESSION_SQL_SELECT CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/ReviewSession/Select/*.sql"
-)
-file(GLOB REPOSITORY_REVIEW_SESSION_SQL_UPDATE CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/ReviewSession/Update/*.sql"
-)
-
-file(GLOB LAYER_PRESENTATION_CONTROLLER_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Controller/include/Memly/Controller/*.hpp"
-)
-file(GLOB LAYER_PRESENTATION_CONTROLLER_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Controller/source/*.cpp"
-)
-file(GLOB LAYER_PRESENTATION_MODEL_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Model/include/Memly/Model/*.hpp"
-)
-file(GLOB LAYER_PRESENTATION_MODEL_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Model/source/*.cpp"
-)
-file(GLOB LAYER_VIEW_BRIDGE_CONTROLLER_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/Controller/include/Memly/Controller/*.hpp"
-)
-file(GLOB LAYER_VIEW_BRIDGE_CONTROLLER_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/Controller/source/*.cpp"
-)
-file(GLOB LAYER_VIEW_BRIDGE_PROXY_MODEL_INCLUDE_HPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/ProxyModel/include/Memly/ProxyModel/*.hpp"
-)
-file(GLOB LAYER_VIEW_BRIDGE_PROXY_MODEL_SOURCE_CPP CONFIGURE_DEPENDS
-     "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/ProxyModel/source/*.cpp"
-)
-
-set(QML_DIR "${CMAKE_SOURCE_DIR}/program/Layer/View/Qml")
-file(GLOB QML_ROOT CONFIGURE_DEPENDS "${QML_DIR}/*.qml")
-file(GLOB QML_COMPONENT CONFIGURE_DEPENDS "${QML_DIR}/Component/*.qml")
-file(GLOB QML_SCREEN_CARD CONFIGURE_DEPENDS "${QML_DIR}/Screen/Card/*.qml")
-file(GLOB QML_SECTION_ADD_CARD CONFIGURE_DEPENDS "${QML_DIR}/Section/AddCard/*.qml")
-file(GLOB QML_SECTION_BROWSE CONFIGURE_DEPENDS "${QML_DIR}/Section/Browse/*.qml")
-file(GLOB QML_SECTION_DECKS CONFIGURE_DEPENDS "${QML_DIR}/Section/Decks/*.qml")
-set(QT_QML ${QML_ROOT} ${QML_COMPONENT} ${QML_SCREEN_CARD} ${QML_SECTION_ADD_CARD} ${QML_SECTION_BROWSE}
-           ${QML_SECTION_DECKS}
-)
-foreach(qml_file IN LISTS QT_QML)
-  file(RELATIVE_PATH rel_qml "${QML_DIR}" "${qml_file}")
-  set_source_files_properties("${qml_file}" PROPERTIES QT_RESOURCE_ALIAS "${rel_qml}")
-endforeach()
 
 set(DUCKDB_VERSION "1.4.4")
 set(DUCKDB_TAG "v${DUCKDB_VERSION}")
@@ -432,7 +329,7 @@ target_link_options(
   memly_asan INTERFACE $<$<CONFIG:Debug>:-fsanitize=address>
 )
 
-# Add a conventional static component with one public include root and one private source set.
+# Adds a static component and registers its complete C++ surface with the global lint and verification gates.
 function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCLUDE_DIRECTORY)
   cmake_parse_arguments(PARSE_ARGV 2 MEMLY_COMPONENT "" "" "HEADERS;SOURCES")
   add_library("${MEMLY_COMPONENT_TARGET}" STATIC)
@@ -443,259 +340,16 @@ function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCL
   target_link_libraries("${MEMLY_COMPONENT_TARGET}" PRIVATE memly_asan)
   set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF VERIFY_INTERFACE_HEADER_SETS ON)
   set_property(GLOBAL APPEND PROPERTY MEMLY_COMPONENT_TARGETS "${MEMLY_COMPONENT_TARGET}")
+  set_property(GLOBAL APPEND PROPERTY MEMLY_CXX_SOURCE_FILES ${MEMLY_COMPONENT_HEADERS} ${MEMLY_COMPONENT_SOURCES})
 endfunction()
 
-memly_add_component_library(
-  memly_support_qt_app "${CMAKE_SOURCE_DIR}/program/Support/QtApp/include" HEADERS ${SUPPORT_QT_APP_INCLUDE_HPP}
-  SOURCES ${SUPPORT_QT_APP_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_support_qt_app
-  PRIVATE Qt6::Core
-)
-
-memly_add_component_library(
-  memly_support_exception "${CMAKE_SOURCE_DIR}/program/Support/Exception/include" HEADERS
-  ${SUPPORT_EXCEPTION_INCLUDE_HPP} SOURCES ${SUPPORT_EXCEPTION_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_support_exception
-  PRIVATE memly_support_qt_app
-)
-
-memly_add_component_library(
-  memly_application_domain "${CMAKE_SOURCE_DIR}/program/Layer/Application/Domain/include" HEADERS
-  ${LAYER_APPLICATION_DOMAIN_INCLUDE_HPP} SOURCES ${LAYER_APPLICATION_DOMAIN_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_application_domain
-  PUBLIC ICU::i18n ICU::uc
-  PRIVATE memly_support_exception
-)
-
-memly_add_component_library(
-  memly_application_index_cache "${CMAKE_SOURCE_DIR}/program/Layer/Application/IndexCache/include" HEADERS
-  ${LAYER_APPLICATION_INDEX_CACHE_INCLUDE_HPP} SOURCES ${LAYER_APPLICATION_INDEX_CACHE_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_application_index_cache
-  PUBLIC memly_application_domain
-)
-
-memly_add_component_library(
-  memly_application_invalidation "${CMAKE_SOURCE_DIR}/program/Layer/Application/Invalidation/include" HEADERS
-  ${LAYER_APPLICATION_INVALIDATION_INCLUDE_HPP} SOURCES ${LAYER_APPLICATION_INVALIDATION_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_application_invalidation
-  PRIVATE memly_support_exception
-)
-
-memly_add_component_library(
-  memly_infrastructure_database
-  "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/include"
-  HEADERS
-  ${LAYER_INFRASTRUCTURE_DATABASE_INCLUDE_HPP}
-  SOURCES
-  ${LAYER_INFRASTRUCTURE_DATABASE_SOURCE_CPP}
-  ${LAYER_INFRASTRUCTURE_DATABASE_SOURCE_HPP}
-  ${LAYER_INFRASTRUCTURE_DATABASE_SQL_CPP}
-  ${LAYER_INFRASTRUCTURE_DATABASE_SQL_HPP}
-)
-target_include_directories(
-  memly_infrastructure_database BEFORE PUBLIC "${_duckdb_wrapper_dir}"
-  PRIVATE "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source"
-)
-target_include_directories(memly_infrastructure_database SYSTEM PUBLIC "${_duckdb_inc}")
-target_link_libraries(
-  memly_infrastructure_database
-  PUBLIC duckdb memly_support_exception
-  PRIVATE memly_support_qt_app
-)
-set_target_properties(
-  memly_infrastructure_database
-  PROPERTIES BUILD_RPATH "${_duckdb_libdir}"
-)
-qt_add_resources(
-  memly_infrastructure_database
-  "DatabaseMigrationSql"
-  PREFIX
-  "/Sql"
-  BASE
-  "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Database/source/Sql"
-  FILES
-  ${DATABASE_SQL_BOOTSTRAP}
-  ${DATABASE_SQL_INSERT}
-  ${DATABASE_SQL_SELECT}
-  ${DATABASE_SQL_VERSION}
-)
-
-memly_add_component_library(
-  memly_infrastructure_repository
-  "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/include"
-  HEADERS
-  ${LAYER_INFRASTRUCTURE_REPOSITORY_INCLUDE_HPP}
-  SOURCES
-  ${LAYER_INFRASTRUCTURE_REPOSITORY_SOURCE_CPP}
-  ${LAYER_INFRASTRUCTURE_REPOSITORY_SQL_CPP}
-  ${LAYER_INFRASTRUCTURE_REPOSITORY_SQL_HPP}
-)
-target_include_directories(
-  memly_infrastructure_repository BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source"
-)
-target_link_libraries(
-  memly_infrastructure_repository
-  PUBLIC memly_application_domain memly_infrastructure_database
-  PRIVATE memly_support_exception memly_support_qt_app
-)
-qt_add_resources(
-  memly_infrastructure_repository
-  "RepositoryDeckSql"
-  PREFIX
-  "/Sql/Deck"
-  BASE
-  "${CMAKE_SOURCE_DIR}/program/Layer/Infrastructure/Repository/source/Sql/Deck"
-  FILES
-  ${REPOSITORY_DECK_SQL_SELECT}
-  ${REPOSITORY_DECK_SQL_UPDATE}
-  ${REPOSITORY_DECK_SQL_INSERT}
-  ${REPOSITORY_DECK_SQL_DELETE}
-)
-
-memly_add_component_library(
-  memly_application_service "${CMAKE_SOURCE_DIR}/program/Layer/Application/Service/include" HEADERS
-  ${LAYER_APPLICATION_SERVICE_INCLUDE_HPP} SOURCES ${LAYER_APPLICATION_SERVICE_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_application_service
-  PUBLIC memly_application_domain memly_application_index_cache
-  PRIVATE memly_infrastructure_database memly_infrastructure_repository
-)
-
-memly_add_component_library(
-  memly_presentation_model "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Model/include" HEADERS
-  ${LAYER_PRESENTATION_MODEL_INCLUDE_HPP} SOURCES ${LAYER_PRESENTATION_MODEL_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_presentation_model
-  PUBLIC Qt6::Core memly_application_domain
-  PRIVATE memly_support_exception
-)
-
-memly_add_component_library(
-  memly_presentation_controller "${CMAKE_SOURCE_DIR}/program/Layer/Presentation/Controller/include" HEADERS
-  ${LAYER_PRESENTATION_CONTROLLER_INCLUDE_HPP} SOURCES ${LAYER_PRESENTATION_CONTROLLER_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_presentation_controller
-  PUBLIC Qt6::Core memly_application_invalidation memly_presentation_model
-  PRIVATE memly_application_service memly_support_exception
-)
-
-memly_add_component_library(
-  memly_composition_root "${CMAKE_SOURCE_DIR}/program/CompositionRoot/include" HEADERS ${COMPOSITION_ROOT_INCLUDE_HPP}
-  SOURCES ${COMPOSITION_ROOT_SOURCE_CPP}
-)
-target_link_libraries(
-  memly_composition_root
-  PUBLIC memly_application_service memly_infrastructure_database memly_infrastructure_repository
-)
-
-set(MEMLY_QML_SOURCE_FILES ${LAYER_VIEW_BRIDGE_CONTROLLER_INCLUDE_HPP} ${LAYER_VIEW_BRIDGE_CONTROLLER_SOURCE_CPP}
-                           ${LAYER_VIEW_BRIDGE_PROXY_MODEL_INCLUDE_HPP} ${LAYER_VIEW_BRIDGE_PROXY_MODEL_SOURCE_CPP}
-)
-
-qt_add_qml_module(
-  memly_qml
-  STATIC
-  URI
-  Memly
-  VERSION
-  1.0
-  PLUGIN_TARGET
-  memly_qml_plugin
-  OUTPUT_DIRECTORY
-  "${CMAKE_CURRENT_BINARY_DIR}/Memly"
-  SOURCES
-  ${MEMLY_QML_SOURCE_FILES}
-  QML_FILES
-  ${QT_QML}
-)
-
-target_include_directories(
-  memly_qml BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/Controller/include"
-                           "${CMAKE_SOURCE_DIR}/program/Layer/View/Bridge/ProxyModel/include"
-)
-
-target_link_libraries(
-  memly_qml
-  PRIVATE Qt6::Quick
-          memly_application_invalidation
-          memly_application_service
-          memly_presentation_controller
-          memly_presentation_model
-          memly_support_exception
-          memly_asan
-)
-
-set(MEMLY_EXECUTABLE_SOURCE_FILES "${APP_MAIN_CPP}")
-
-qt_add_executable(memly MANUAL_FINALIZATION ${MEMLY_EXECUTABLE_SOURCE_FILES})
-
-target_link_libraries(
-  memly
-  PRIVATE Qt6::Core
-          Qt6::Qml
-          Qt6::Quick
-          memly_composition_root
-          memly_qml_plugin
-          memly_support_exception
-          memly_support_qt_app
-          memly_asan
-)
-
-set_target_properties(
-  memly
-  PROPERTIES BUILD_RPATH "${_duckdb_libdir}"
-)
-
-qt_finalize_executable(memly)
+add_subdirectory(program)
 
 if(BUILD_TESTING)
   add_custom_target(memly-test COMMENT "Memly tests are not currently implemented")
 endif()
 
-set(MEMLY_CXX_SOURCE_FILES
-    ${COMPOSITION_ROOT_INCLUDE_HPP}
-    ${COMPOSITION_ROOT_SOURCE_CPP}
-    ${SUPPORT_QT_APP_INCLUDE_HPP}
-    ${SUPPORT_QT_APP_SOURCE_CPP}
-    ${SUPPORT_EXCEPTION_INCLUDE_HPP}
-    ${SUPPORT_EXCEPTION_SOURCE_CPP}
-    ${LAYER_APPLICATION_DOMAIN_INCLUDE_HPP}
-    ${LAYER_APPLICATION_DOMAIN_SOURCE_CPP}
-    ${LAYER_APPLICATION_INDEX_CACHE_INCLUDE_HPP}
-    ${LAYER_APPLICATION_INDEX_CACHE_SOURCE_CPP}
-    ${LAYER_APPLICATION_INVALIDATION_INCLUDE_HPP}
-    ${LAYER_APPLICATION_INVALIDATION_SOURCE_CPP}
-    ${LAYER_APPLICATION_SERVICE_INCLUDE_HPP}
-    ${LAYER_APPLICATION_SERVICE_SOURCE_CPP}
-    ${LAYER_INFRASTRUCTURE_DATABASE_INCLUDE_HPP}
-    ${LAYER_INFRASTRUCTURE_DATABASE_SOURCE_CPP}
-    ${LAYER_INFRASTRUCTURE_DATABASE_SOURCE_HPP}
-    ${LAYER_INFRASTRUCTURE_DATABASE_SQL_CPP}
-    ${LAYER_INFRASTRUCTURE_DATABASE_SQL_HPP}
-    ${LAYER_INFRASTRUCTURE_REPOSITORY_INCLUDE_HPP}
-    ${LAYER_INFRASTRUCTURE_REPOSITORY_SOURCE_CPP}
-    ${LAYER_INFRASTRUCTURE_REPOSITORY_SQL_CPP}
-    ${LAYER_INFRASTRUCTURE_REPOSITORY_SQL_HPP}
-    ${LAYER_PRESENTATION_CONTROLLER_INCLUDE_HPP}
-    ${LAYER_PRESENTATION_CONTROLLER_SOURCE_CPP}
-    ${LAYER_PRESENTATION_MODEL_INCLUDE_HPP}
-    ${LAYER_PRESENTATION_MODEL_SOURCE_CPP}
-    ${MEMLY_QML_SOURCE_FILES}
-    ${MEMLY_EXECUTABLE_SOURCE_FILES}
-)
+get_property(MEMLY_CXX_SOURCE_FILES GLOBAL PROPERTY MEMLY_CXX_SOURCE_FILES)
 file(
   GLOB_RECURSE
   MEMLY_PROGRAM_HEADERS
@@ -778,12 +432,13 @@ add_custom_command(
     "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -clang-tidy-binary
     "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
     "^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet -hide-progress "^${CMAKE_SOURCE_DIR}/(program|test)/.*\\.cpp$"
-  COMMAND "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -config-file
+  COMMAND "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -config-file
           "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter "^$" -quiet ${MEMLY_CXX_HEADER_FILES}
   COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_CLANG_TIDY_STAMP}"
   DEPENDS "${CMAKE_SOURCE_DIR}/.clang-tidy"
           "${CMAKE_BINARY_DIR}/compile_commands.json"
           "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}"
+          "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}"
           "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
           "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}"
           ${MEMLY_CXX_TRANSLATION_UNIT_FILES}

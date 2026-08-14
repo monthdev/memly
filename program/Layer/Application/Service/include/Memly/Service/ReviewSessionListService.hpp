@@ -6,19 +6,16 @@
 #include <vector>
 
 #include "Memly/Domain/ReviewSessionListRow.hpp"
+#include "Memly/Repository/ReviewSessionRepository.hpp"
 
-namespace Layer::Infrastructure::Repository {
-class ReviewSessionRepository;
-}
-
-namespace Layer::Application::Service {
+namespace Memly::Service {
 
 class ReviewSessionListService final {
 private:
-    Infrastructure::Repository::ReviewSessionRepository& m_ReviewSessionRepository;
+    Repository::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
-    explicit ReviewSessionListService(Infrastructure::Repository::ReviewSessionRepository&) noexcept;
+    explicit ReviewSessionListService(Repository::ReviewSessionRepository&) noexcept;
 
     explicit ReviewSessionListService(const ReviewSessionListService&) = delete;
     auto operator=(const ReviewSessionListService&) -> ReviewSessionListService& = delete;

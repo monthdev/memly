@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 enum class [[nodiscard]] RecoverableReviewSessionMutationErrorEnum : std::uint8_t {
     ReviewSessionNameLengthError,

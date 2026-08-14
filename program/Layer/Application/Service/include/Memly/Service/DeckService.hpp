@@ -4,20 +4,17 @@
 #include <string>
 
 #include "Memly/IndexCache/DeckForestSnapshotIndexCache.hpp"
+#include "Memly/Repository/DeckRepository.hpp"
 
-namespace Layer::Infrastructure::Repository {
-class DeckRepository;
-}
-
-namespace Layer::Application::Service {
+namespace Memly::Service {
 
 class DeckService final {
 private:
-    Infrastructure::Repository::DeckRepository& m_DeckRepository;
+    Repository::DeckRepository& m_DeckRepository;
     IndexCache::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
 
 public:
-    explicit DeckService(Infrastructure::Repository::DeckRepository&) noexcept;
+    explicit DeckService(Repository::DeckRepository&) noexcept;
 
     explicit DeckService(const DeckService&) = delete;
     auto operator=(const DeckService&) -> DeckService& = delete;

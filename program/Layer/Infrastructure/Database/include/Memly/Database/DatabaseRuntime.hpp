@@ -7,7 +7,7 @@
 
 #include "Memly/Database/PreparedStatement.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 class [[nodiscard]] DatabaseRuntime final {
 private:

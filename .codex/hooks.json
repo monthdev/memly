@@ -1,5 +1,5 @@
 {
-  "description": "Format the repository and require a successful integrity build before Codex completes a turn.",
+  "description": "Format and lint the repository and require a successful integrity build before Codex completes a turn.",
   "hooks": {
     "Stop": [
       {

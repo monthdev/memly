@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Layer::Infrastructure::Repository::Sql {
+namespace Memly::Repository {
 
 [[nodiscard]] auto SelectDeckSnapshotRecordsSql() -> std::string;
 

@@ -3,7 +3,7 @@
 #include <string>
 #include <utility>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 HumanText::HumanText(std::string&& NormalizedText, std::string&& NormalizedCaseFoldedText) noexcept
     : m_NormalizedText{ std::move(NormalizedText) }

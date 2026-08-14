@@ -1,4 +1,4 @@
-#include "ThrowOnDatabaseError.hpp"
+#include "_ThrowOnDatabaseError.hpp"
 
 #include <duckdb.hpp>
 
@@ -8,17 +8,17 @@
 
 #include "Memly/Exception/MemlyException.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 void ThrowOnPreparedStatementError(duckdb::PreparedStatement& PreparedStatement, const std::source_location& SourceLocation) {
     if (PreparedStatement.HasError()) {
-        throw Support::Exception::MemlyException{ std::initializer_list<std::string_view>{ PreparedStatement.GetError() }, SourceLocation };
+        throw Exception::MemlyException{ std::initializer_list<std::string_view>{ PreparedStatement.GetError() }, SourceLocation };
     }
 }
 
 void ThrowOnQueryResultError(duckdb::QueryResult& QueryResult, const std::source_location& SourceLocation) {
     if (QueryResult.HasError()) {
-        throw Support::Exception::MemlyException{ std::initializer_list<std::string_view>{ QueryResult.GetError() }, SourceLocation };
+        throw Exception::MemlyException{ std::initializer_list<std::string_view>{ QueryResult.GetError() }, SourceLocation };
     }
 }
 

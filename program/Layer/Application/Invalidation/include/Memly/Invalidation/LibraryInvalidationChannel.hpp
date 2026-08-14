@@ -14,13 +14,10 @@
 
 #include "Memly/Invalidation/LibraryInvalidationTarget.hpp"
 
-namespace Layer::Application::Invalidation {
-
-class LibraryInvalidationCoordinator;
+namespace Memly::Invalidation {
 
 class LibraryInvalidationChannel final : public QObject {
     Q_OBJECT
-    friend class LibraryInvalidationCoordinator;
 
 private:
     std::int64_t m_CurrentSnapshotAsOfMillisecondsSinceEpoch;
@@ -35,6 +32,10 @@ public:
     auto operator=(LibraryInvalidationChannel&&) -> LibraryInvalidationChannel& = delete;
 
     ~LibraryInvalidationChannel() noexcept override = default;
+
+    [[nodiscard]] auto GetCurrentSnapshotAsOfMillisecondsSinceEpoch() const noexcept -> std::int64_t;
+    void SetCurrentSnapshotAsOfMillisecondsSinceEpoch(std::int64_t) noexcept;
+    void PublishInvalidation(const LibraryInvalidationTargetBitset&) noexcept;
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*>

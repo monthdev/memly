@@ -5,7 +5,7 @@
 #include <string_view>
 #include <utility>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 enum class [[nodiscard]] TargetLanguageEnum : std::uint8_t {
     NoLanguage,
     Afrikaans,

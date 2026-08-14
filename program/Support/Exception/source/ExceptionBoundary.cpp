@@ -19,7 +19,7 @@
 
 #include "Memly/QtApp/QtAppStoragePath.hpp"
 
-namespace Support::Exception {
+namespace Memly::Exception {
 namespace {
 [[nodiscard]] auto u_WriteStdErrBytes(const char* const Bytes, const std::size_t ByteCount) noexcept -> std::ptrdiff_t {
 #if defined(_WIN32)

@@ -7,26 +7,22 @@
 #include <qtimer.h>
 #include <qtmetamacros.h>
 
+#include "Memly/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Memly/Invalidation/LibraryInvalidationTarget.hpp"
+#include "Memly/Repository/LibraryRepository.hpp"
 
-namespace Layer::Infrastructure::Repository {
-class LibraryRepository;
-}
-
-namespace Layer::Application::Invalidation {
-
-class LibraryInvalidationChannel;
+namespace Memly::Invalidation {
 
 class LibraryInvalidationCoordinator final : public QObject {
     Q_OBJECT
 private:
     LibraryInvalidationChannel& m_LibraryInvalidationChannel;
-    Infrastructure::Repository::LibraryRepository& m_LibraryRepository;
+    Repository::LibraryRepository& m_LibraryRepository;
     QTimer m_LibraryInvalidationQTimer;
 
 public:
     explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel&,
-                                            Infrastructure::Repository::LibraryRepository&,
+                                            Repository::LibraryRepository&,
                                             QObject* = nullptr);
 
     explicit LibraryInvalidationCoordinator(const LibraryInvalidationCoordinator&) = delete;

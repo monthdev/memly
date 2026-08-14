@@ -12,23 +12,20 @@
 
 #include "Memly/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Memly/Model/DeckForestModel.hpp"
+#include "Memly/Service/DeckService.hpp"
 
-namespace Layer::Application::Service {
-class DeckService;
-}
-
-namespace Layer::Presentation::Controller {
+namespace Memly::Controller {
 
 class DeckPageController final : public QObject {
     Q_OBJECT
 
 private:
-    Application::Service::DeckService& m_DeckService;
+    Service::DeckService& m_DeckService;
     Model::DeckForestModel m_DeckForestModel;
 
 public:
-    explicit DeckPageController(Application::Invalidation::LibraryInvalidationChannel&,
-                                Application::Service::DeckService&,
+    explicit DeckPageController(Invalidation::LibraryInvalidationChannel&,
+                                Service::DeckService&,
                                 QObject* = nullptr);
 
     explicit DeckPageController(const DeckPageController&) = delete;

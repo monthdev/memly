@@ -3,7 +3,7 @@
 #include <functional>
 #include <utility>
 
-namespace Layer::Application::IndexCache {
+namespace Memly::IndexCache {
 
 template <typename IndexObjectType, typename IndexRefreshDataObjectType, void (IndexObjectType::*RefreshIndexMethod)(IndexRefreshDataObjectType&&)>
 class IndexCacheDefinition {

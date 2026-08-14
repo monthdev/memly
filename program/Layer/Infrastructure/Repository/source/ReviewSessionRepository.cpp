@@ -23,28 +23,28 @@
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
 #include "Memly/Domain/ReviewSessionListRow.hpp"
 #include "Memly/Exception/MemlyException.hpp"
-#include "Sql/ReviewSessionSql.hpp"
+#include "_ReviewSessionSql.hpp"
 
-namespace Layer::Infrastructure::Repository {
+namespace Memly::Repository {
 
 ReviewSessionRepository::ReviewSessionRepository(Database::DatabaseRuntime& DatabaseRuntime)
     : m_DatabaseRuntime{ DatabaseRuntime }
-    , m_SelectReviewSessionListRowsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectReviewSessionListRowsSql()) }
-    , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectDefaultReviewSessionIdByRootDeckIdSql()) }
+    , m_SelectReviewSessionListRowsPreparedStatement{ DatabaseRuntime.PrepareStatement(SelectReviewSessionListRowsSql()) }
+    , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{ DatabaseRuntime.PrepareStatement(SelectDefaultReviewSessionIdByRootDeckIdSql()) }
     , m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
-        DatabaseRuntime.PrepareStatement(Sql::SelectReviewSessionIdByReviewSessionDefinitionKeySql())
+        DatabaseRuntime.PrepareStatement(SelectReviewSessionIdByReviewSessionDefinitionKeySql())
     }
-    , m_InsertCustomReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertCustomReviewSessionSql()) }
-    , m_InsertDefaultReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertDefaultReviewSessionSql()) }
-    , m_InsertCustomReviewSessionDeckSelectionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertCustomReviewSessionDeckSelectionSql()) }
-    , m_UpdateReviewSessionNamePreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateReviewSessionNameSql()) }
-    , m_UpdateReviewSessionToDefaultPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateReviewSessionToDefaultSql()) }
-    , m_UpdateReviewSessionToCustomPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateReviewSessionToCustomSql()) }
+    , m_InsertCustomReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(InsertCustomReviewSessionSql()) }
+    , m_InsertDefaultReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(InsertDefaultReviewSessionSql()) }
+    , m_InsertCustomReviewSessionDeckSelectionPreparedStatement{ DatabaseRuntime.PrepareStatement(InsertCustomReviewSessionDeckSelectionSql()) }
+    , m_UpdateReviewSessionNamePreparedStatement{ DatabaseRuntime.PrepareStatement(UpdateReviewSessionNameSql()) }
+    , m_UpdateReviewSessionToDefaultPreparedStatement{ DatabaseRuntime.PrepareStatement(UpdateReviewSessionToDefaultSql()) }
+    , m_UpdateReviewSessionToCustomPreparedStatement{ DatabaseRuntime.PrepareStatement(UpdateReviewSessionToCustomSql()) }
     , m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement{
-        DatabaseRuntime.PrepareStatement(Sql::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql())
+        DatabaseRuntime.PrepareStatement(UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql())
     }
-    , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteCustomReviewSessionDeckSelectionsSql()) }
-    , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteReviewSessionSql()) } {
+    , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{ DatabaseRuntime.PrepareStatement(DeleteCustomReviewSessionDeckSelectionsSql()) }
+    , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(DeleteReviewSessionSql()) } {
 }
 
 namespace {
@@ -60,36 +60,36 @@ namespace {
 }
 
 [[maybe_unused, nodiscard]] auto u_TryGetRecoverableReviewSessionMutationError(duckdb::QueryResult& QueryResult)
-    -> std::optional<Application::Domain::RecoverableReviewSessionMutationErrorEnum> {
+    -> std::optional<Domain::RecoverableReviewSessionMutationErrorEnum> {
     if (not QueryResult.HasError()) {
         return std::nullopt;
     }
     const std::string& ErrorMessage{ QueryResult.GetError() };
     if (ErrorMessage.contains("review_session_custom_name_is_valid(\"custom_name\")")) {
-        return Application::Domain::RecoverableReviewSessionMutationErrorEnum::ReviewSessionNameLengthError;
+        return Domain::RecoverableReviewSessionMutationErrorEnum::ReviewSessionNameLengthError;
     }
     if (ErrorMessage.contains("self_selection_conflict")) {
-        return Application::Domain::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckSelfSelectionError;
+        return Domain::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckSelfSelectionError;
     }
     if (ErrorMessage.contains("subtree_selection_conflict")) {
-        return Application::Domain::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckSubtreeSelectionError;
+        return Domain::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckSubtreeSelectionError;
     }
     if (ErrorMessage.contains("include_selection_conflict")) {
-        return Application::Domain::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckIncludeSelectionError;
+        return Domain::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckIncludeSelectionError;
     }
     if (ErrorMessage.contains("exclude_selection_conflict")) {
-        return Application::Domain::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckExcludeSelectionError;
+        return Domain::RecoverableReviewSessionMutationErrorEnum::ConflictingReviewSessionDeckExcludeSelectionError;
     }
-    throw Support::Exception::MemlyException{ std::initializer_list<std::string_view>{ QueryResult.GetError() } };
+    throw Exception::MemlyException{ std::initializer_list<std::string_view>{ QueryResult.GetError() } };
 }
 
 }
 
-[[nodiscard]] auto ReviewSessionRepository::ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSessionListRow> {
+[[nodiscard]] auto ReviewSessionRepository::ReadReviewSessionListRows() -> std::vector<Domain::ReviewSessionListRow> {
     std::unique_ptr<duckdb::QueryResult> QueryResult{
         this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectReviewSessionListRowsPreparedStatement).WithoutParameters()
     };
-    std::vector<Application::Domain::ReviewSessionListRow> ReviewSessionListRowVector{};
+    std::vector<Domain::ReviewSessionListRow> ReviewSessionListRowVector{};
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ this->m_DatabaseRuntime.FetchNextDataChunk(*QueryResult) }) {
         for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
@@ -111,7 +111,7 @@ namespace {
 }
 
 [[nodiscard]] auto ReviewSessionRepository::CreateOrReadExistingDefaultReviewSession(const std::string& RootDeckId, const std::string& ReviewSessionDefinitionKey)
-    -> std::expected<std::string, Application::Domain::RecoverableReviewSessionMutationErrorEnum> {
+    -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum> {
     if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
         ExistingReviewSessionIdOptional.has_value()) {
         return ExistingReviewSessionIdOptional.value();
@@ -121,7 +121,7 @@ namespace {
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_InsertDefaultReviewSessionPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey, RootDeckId)) };
     assert(ResultRowCount == 1);
-    // std::optional<Application::Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
+    // std::optional<Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
     //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
@@ -135,8 +135,8 @@ namespace {
 [[nodiscard]] auto ReviewSessionRepository::CreateOrReadExistingCustomReviewSession(
     const std::string& ReviewSessionName,
     const std::string& ReviewSessionDefinitionKey,
-    const std::vector<Application::Domain::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
-    -> std::expected<std::string, Application::Domain::RecoverableReviewSessionMutationErrorEnum> {
+    const std::vector<Domain::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
+    -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum> {
     if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadReviewSessionIdByReviewSessionDefinitionKey(
             ReviewSessionDefinitionKey) };
         ExistingReviewSessionIdOptional.has_value()) {
@@ -147,7 +147,7 @@ namespace {
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_InsertCustomReviewSessionPreparedStatement)
              .WithParameters(ReviewSessionName, ReviewSessionDefinitionKey)) };
     assert(ResultRowCount == 1);
-    // std::optional<Application::Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
+    // std::optional<Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
     //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
@@ -157,7 +157,7 @@ namespace {
     assert(NewCustomReviewSessionIdOptional.has_value());
     // TODO: The fact that this can't be marked const to allow automatic move at the end suggests separate helper method
     std::string NewCustomReviewSessionId{ std::move(NewCustomReviewSessionIdOptional).value() };
-    for (const Application::Domain::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
+    for (const Domain::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
         // RecoverableReviewSessionMutationErrorOptional =
         this->CreateCustomReviewSessionDeckSelection(
             NewCustomReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
@@ -169,12 +169,12 @@ namespace {
 }
 
 [[nodiscard]] auto ReviewSessionRepository::RenameReviewSession(const std::string& ReviewSessionId, const std::string& ReviewSessionName)
-    -> std::optional<Application::Domain::RecoverableReviewSessionMutationErrorEnum> {
+    -> std::optional<Domain::RecoverableReviewSessionMutationErrorEnum> {
     [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionNamePreparedStatement).WithParameters(ReviewSessionName, ReviewSessionId)) };
     assert(ResultRowCount == 1);
-    // std::optional<Application::Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
+    // std::optional<Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
     //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // return RecoverableReviewSessionMutationErrorOptional;
@@ -184,11 +184,11 @@ namespace {
 [[nodiscard]] auto ReviewSessionRepository::EditReviewSessionToDefault(const std::string& CurrentReviewSessionId,
                                                                   const std::string& RootDeckId,
                                                                   const std::string& ReviewSessionDefinitionKey)
-    -> std::expected<std::string, Application::Domain::RecoverableReviewSessionMutationErrorEnum> {
+    -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum> {
     if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadDefaultReviewSessionIdByRootDeckId(RootDeckId) };
         ExistingReviewSessionIdOptional.has_value()) {
         if (ExistingReviewSessionIdOptional.value() not_eq CurrentReviewSessionId) {
-            return std::unexpected{ Application::Domain::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
+            return std::unexpected{ Domain::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
     [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
@@ -196,7 +196,7 @@ namespace {
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionToDefaultPreparedStatement).WithParameters(
             RootDeckId, ReviewSessionDefinitionKey, CurrentReviewSessionId)) };
     assert(ResultRowCount == 1);
-    // std::optional<Application::Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
+    // std::optional<Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
     //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
@@ -209,13 +209,13 @@ namespace {
 [[nodiscard]] auto ReviewSessionRepository::EditReviewSessionToCustom(
     const std::string& CurrentReviewSessionId,
     const std::string& ReviewSessionDefinitionKey,
-    const std::vector<Application::Domain::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
-    -> std::expected<std::string, Application::Domain::RecoverableReviewSessionMutationErrorEnum> {
+    const std::vector<Domain::ReviewSessionDeckSelection>& ReviewSessionDeckSelectionVector)
+    -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum> {
     if (const std::optional<std::string> ExistingReviewSessionIdOptional{ this->TryReadReviewSessionIdByReviewSessionDefinitionKey(
             ReviewSessionDefinitionKey) };
         ExistingReviewSessionIdOptional.has_value()) {
         if (ExistingReviewSessionIdOptional.value() not_eq CurrentReviewSessionId) {
-            return std::unexpected{ Application::Domain::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
+            return std::unexpected{ Domain::RecoverableReviewSessionMutationErrorEnum::DuplicateReviewSessionDefinitionKeyError };
         }
     }
     [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
@@ -223,14 +223,14 @@ namespace {
         *this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_UpdateReviewSessionToCustomPreparedStatement)
              .WithParameters(ReviewSessionDefinitionKey, CurrentReviewSessionId)) };
     assert(ResultRowCount == 1);
-    // std::optional<Application::Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
+    // std::optional<Domain::RecoverableReviewSessionMutationErrorEnum> RecoverableReviewSessionMutationErrorOptional{
     //     u_TryGetRecoverableReviewSessionMutationError(*QueryResult)
     // };
     // if (RecoverableReviewSessionMutationErrorOptional.has_value()) {
     //     return std::unexpected{ RecoverableReviewSessionMutationErrorOptional.value() };
     // }
     this->DeleteCustomReviewSessionDeckSelections(CurrentReviewSessionId);
-    for (const Application::Domain::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
+    for (const Domain::ReviewSessionDeckSelection& ReviewSessionDeckSelection : ReviewSessionDeckSelectionVector) {
         // RecoverableReviewSessionMutationErrorOptional =
         this->CreateCustomReviewSessionDeckSelection(
             CurrentReviewSessionId, ReviewSessionDeckSelection.m_DeckId, ReviewSessionDeckSelection.m_DeckSelectionType);
@@ -292,16 +292,16 @@ namespace {
 namespace {
 
 [[nodiscard]] constexpr auto
-u_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) noexcept
+u_ReviewSessionDeckSelectionTypeToString(const Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) noexcept
     -> const char* {
     switch (DeckSelectionType) {
-    case Application::Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Self:
+    case Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Self:
         return "self";
-    case Application::Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Subtree:
+    case Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum::Subtree:
         return "subtree";
-    case Application::Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSelf:
+    case Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSelf:
         return "exclude_self";
-    case Application::Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSubtree:
+    case Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum::ExcludeSubtree:
         return "exclude_subtree";
     default:
         assert(false);
@@ -314,7 +314,7 @@ u_ReviewSessionDeckSelectionTypeToString(const Application::Domain::ReviewSessio
 void ReviewSessionRepository::CreateCustomReviewSessionDeckSelection(
     const std::string& ReviewSessionId,
     const std::string& DeckId,
-    const Application::Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) {
+    const Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum DeckSelectionType) {
     const char* const DeckSelectionTypeString{ u_ReviewSessionDeckSelectionTypeToString(DeckSelectionType) };
     [[maybe_unused]] const std::size_t ResultRowCount{ u_CountResultRows(
         this->m_DatabaseRuntime,

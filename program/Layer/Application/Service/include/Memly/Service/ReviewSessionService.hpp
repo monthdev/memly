@@ -7,27 +7,21 @@
 #include <string>
 #include <vector>
 
+#include "Memly/Database/TransactionRunner.hpp"
 #include "Memly/Domain/RecoverableReviewSessionMutationError.hpp"
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
+#include "Memly/Repository/ReviewSessionRepository.hpp"
 
-namespace Layer::Infrastructure::Database {
-class TransactionRunner;
-}
-
-namespace Layer::Infrastructure::Repository {
-class ReviewSessionRepository;
-}
-
-namespace Layer::Application::Service {
+namespace Memly::Service {
 
 class ReviewSessionService final {
 private:
-    Infrastructure::Database::TransactionRunner& m_TransactionRunner;
-    Infrastructure::Repository::ReviewSessionRepository& m_ReviewSessionRepository;
+    Database::TransactionRunner& m_TransactionRunner;
+    Repository::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
-    explicit ReviewSessionService(Infrastructure::Database::TransactionRunner&,
-                                  Infrastructure::Repository::ReviewSessionRepository&) noexcept;
+    explicit ReviewSessionService(Database::TransactionRunner&,
+                                  Repository::ReviewSessionRepository&) noexcept;
 
     explicit ReviewSessionService(const ReviewSessionService&) = delete;
     auto operator=(const ReviewSessionService&) -> ReviewSessionService& = delete;

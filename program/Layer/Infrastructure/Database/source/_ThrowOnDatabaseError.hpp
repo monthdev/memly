@@ -1,13 +1,10 @@
 #pragma once
 
+#include <duckdb.hpp>
+
 #include <source_location>
 
-namespace duckdb {
-class PreparedStatement;
-class QueryResult;
-}
-
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 void ThrowOnPreparedStatementError(duckdb::PreparedStatement&, const std::source_location& = std::source_location::current());
 

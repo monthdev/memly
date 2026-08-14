@@ -14,7 +14,7 @@
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
 #include "Memly/Domain/ReviewSessionListRow.hpp"
 
-namespace Layer::Infrastructure::Repository {
+namespace Memly::Repository {
 
 class ReviewSessionRepository final {
 private:
@@ -43,20 +43,20 @@ public:
 
     ~ReviewSessionRepository() noexcept = default;
 
-    [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Application::Domain::ReviewSessionListRow>;
+    [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Domain::ReviewSessionListRow>;
     [[nodiscard]] auto CreateOrReadExistingDefaultReviewSession(const std::string&, const std::string&)
-        -> std::expected<std::string, Application::Domain::RecoverableReviewSessionMutationErrorEnum>;
+        -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto CreateOrReadExistingCustomReviewSession(const std::string&,
                                                                const std::string&,
-                                                               const std::vector<Application::Domain::ReviewSessionDeckSelection>&)
-        -> std::expected<std::string, Application::Domain::RecoverableReviewSessionMutationErrorEnum>;
+                                                               const std::vector<Domain::ReviewSessionDeckSelection>&)
+        -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto RenameReviewSession(const std::string&, const std::string&)
-        -> std::optional<Application::Domain::RecoverableReviewSessionMutationErrorEnum>;
+        -> std::optional<Domain::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto EditReviewSessionToDefault(const std::string&, const std::string&, const std::string&)
-        -> std::expected<std::string, Application::Domain::RecoverableReviewSessionMutationErrorEnum>;
+        -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum>;
     [[nodiscard]] auto
-    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<Application::Domain::ReviewSessionDeckSelection>&)
-        -> std::expected<std::string, Application::Domain::RecoverableReviewSessionMutationErrorEnum>;
+    EditReviewSessionToCustom(const std::string&, const std::string&, const std::vector<Domain::ReviewSessionDeckSelection>&)
+        -> std::expected<std::string, Domain::RecoverableReviewSessionMutationErrorEnum>;
     void UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpoch(const std::string&);
     void DeleteReviewSession(const std::string&);
 
@@ -65,7 +65,7 @@ private:
     [[nodiscard]] auto TryReadReviewSessionIdByReviewSessionDefinitionKey(const std::string&) -> std::optional<std::string>;
     void CreateCustomReviewSessionDeckSelection(const std::string&,
                                                 const std::string&,
-                                                Application::Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum);
+                                                Domain::ReviewSessionDeckSelection::DeckSelectionTypeEnum);
     void DeleteCustomReviewSessionDeckSelections(const std::string&);
 };
 

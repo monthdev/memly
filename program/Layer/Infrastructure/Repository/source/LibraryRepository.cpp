@@ -11,14 +11,14 @@
 #include <optional>
 
 #include "Memly/Database/DatabaseRuntime.hpp"
-#include "Sql/LibrarySql.hpp"
+#include "_LibrarySql.hpp"
 
-namespace Layer::Infrastructure::Repository {
+namespace Memly::Repository {
 
 LibraryRepository::LibraryRepository(Database::DatabaseRuntime& DatabaseRuntime)
     : m_DatabaseRuntime{ DatabaseRuntime }
     , m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
-        DatabaseRuntime.PrepareStatement(Sql::SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
+        DatabaseRuntime.PrepareStatement(SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
     } {
 }
 

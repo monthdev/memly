@@ -12,14 +12,14 @@
 
 #include "Memly/Model/DeckForestModel.hpp"
 
-namespace Layer::View::Bridge::ProxyModel {
+namespace Memly::Bridge {
 
 class DeckForestProxyModel final : public QIdentityProxyModel {
     Q_OBJECT
     QML_ANONYMOUS
 
 public:
-    explicit DeckForestProxyModel(Presentation::Model::DeckForestModel&, QObject* = nullptr);
+    explicit DeckForestProxyModel(Model::DeckForestModel&, QObject* = nullptr);
 
     explicit DeckForestProxyModel(const DeckForestProxyModel&) = delete;
     auto operator=(const DeckForestProxyModel&) -> DeckForestProxyModel& = delete;

@@ -105,6 +105,11 @@ RequireExecutable cmake-format 0.6.13 --version 0.6.13
 CMakeFormatExecutable="$RequiredExecutablePath"
 CollectExistingFiles CMake 'CMakeLists.txt' ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(glob)**/*.cmake.in'
 FormatFileArrayWithOutput CMake "$CMakeFormatExecutable"
+RequireExecutable cmake-lint 0.6.13 --version 0.6.13
+CMakeLintExecutable="$RequiredExecutablePath"
+if [[ ${#FilePathArray[@]} -gt 0 ]]; then
+    "$CMakeLintExecutable" --suppress-decorations -c .cmakelintrc -- "${FilePathArray[@]}" || Fail 'Memly CMake linting failed.'
+fi
 
 RequireExecutable prettier 3.9.6 --version 3.9.6
 PrettierExecutable="$RequiredExecutablePath"

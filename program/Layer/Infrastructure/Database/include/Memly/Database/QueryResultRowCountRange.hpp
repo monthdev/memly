@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 class [[nodiscard]] QueryResultRowCountRange final {
 private:

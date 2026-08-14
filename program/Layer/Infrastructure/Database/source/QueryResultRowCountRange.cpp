@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <limits>
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 QueryResultRowCountRange::QueryResultRowCountRange(const std::size_t MinimumRowCount, const std::size_t MaximumRowCount) noexcept
     : m_MinimumRowCount{ MinimumRowCount }

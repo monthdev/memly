@@ -3,7 +3,7 @@
 #include <concepts>
 #include <cstdint>
 
-namespace Layer::Application::Invalidation {
+namespace Memly::Invalidation {
 
 enum class [[nodiscard]] LibraryInvalidationTargetEnum : std::uint8_t {
     DeckForestSnapshot = std::uint8_t{ 1 } << std::uint8_t{ 0 },

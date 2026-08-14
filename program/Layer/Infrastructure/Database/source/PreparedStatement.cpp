@@ -8,7 +8,7 @@
 
 #include "Memly/Database/PreparedStatementExecution.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 PreparedStatement::PreparedStatement(std::unique_ptr<duckdb::PreparedStatement>&& DuckDbPreparedStatement) noexcept
     : m_DuckDbPreparedStatement{ std::move(DuckDbPreparedStatement) } {

@@ -13,7 +13,7 @@
 #include <string_view>
 #include <system_error>
 
-namespace Support::Exception {
+namespace Memly::Exception {
 
 MemlyException::MemlyException(const std::initializer_list<std::string_view>& ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
     : std::exception{}

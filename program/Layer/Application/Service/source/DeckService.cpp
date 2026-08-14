@@ -11,9 +11,9 @@
 #include "Memly/Repository/DeckRepository.hpp"
 #include "Memly/Repository/DeckSnapshotRecord.hpp"
 
-namespace Layer::Application::Service {
+namespace Memly::Service {
 
-DeckService::DeckService(Infrastructure::Repository::DeckRepository& DeckRepository) noexcept
+DeckService::DeckService(Repository::DeckRepository& DeckRepository) noexcept
     : m_DeckRepository{ DeckRepository }
     , m_DeckForestSnapshotIndexCache{} {
 }
@@ -52,11 +52,10 @@ void DeckService::DeleteDeck(const std::string& DeckId) {
 
 void DeckService::RefreshDeckForestSnapshotIndexCache(const IndexCache::DeckForestSnapshotIndexCache::IndexCacheLease& DeckForestSnapshotIndexCacheLease,
                                                       const std::int64_t AsOfMillisecondsSinceEpoch) {
-    std::vector<Infrastructure::Repository::DeckSnapshotRecord> DeckSnapshotRecordVector{ this->m_DeckRepository.ReadDeckSnapshotRecords(
-        AsOfMillisecondsSinceEpoch) };
+    std::vector<Repository::DeckSnapshotRecord> DeckSnapshotRecordVector{ this->m_DeckRepository.ReadDeckSnapshotRecords(AsOfMillisecondsSinceEpoch) };
     std::vector<Domain::DeckForestSnapshotNode> DeckForestSnapshotNodeVector{};
     DeckForestSnapshotNodeVector.reserve(DeckSnapshotRecordVector.size());
-    for (Infrastructure::Repository::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
+    for (Repository::DeckSnapshotRecord& DeckSnapshotRecord : DeckSnapshotRecordVector) {
         DeckForestSnapshotNodeVector.emplace_back(std::move(DeckSnapshotRecord.m_DeckId),
                                                   std::move(DeckSnapshotRecord.m_ParentDeckIdOptional),
                                                   std::move(DeckSnapshotRecord.m_DeckName),

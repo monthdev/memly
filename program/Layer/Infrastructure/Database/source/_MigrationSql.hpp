@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Layer::Infrastructure::Database::Sql {
+namespace Memly::Database {
 
 [[nodiscard]] auto CreateMigrationsLogSql() -> std::string;
 

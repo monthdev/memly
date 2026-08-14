@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <utility>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 [[nodiscard]] auto GetSupportedTargetLanguages() noexcept -> const std::array<TargetLanguageInfo, std::to_underlying(TargetLanguageEnum::Size)>& {
     // TODO: Move array to unnamed namespace?

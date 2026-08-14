@@ -12,7 +12,7 @@
 
 #include "Memly/Domain/DeckForestSnapshotNode.hpp"
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 DeckForestSnapshotIndex::DeckForestSnapshotIndex() noexcept
     : m_DeckForestSnapshotNodeVector{}

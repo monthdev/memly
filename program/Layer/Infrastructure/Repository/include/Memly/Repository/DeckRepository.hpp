@@ -4,14 +4,11 @@
 #include <string>
 #include <vector>
 
+#include "Memly/Database/DatabaseRuntime.hpp"
 #include "Memly/Database/PreparedStatement.hpp"
 #include "Memly/Repository/DeckSnapshotRecord.hpp"
 
-namespace Layer::Infrastructure::Database {
-class DatabaseRuntime;
-}
-
-namespace Layer::Infrastructure::Repository {
+namespace Memly::Repository {
 
 class DeckRepository final {
 private:

@@ -6,7 +6,7 @@
 
 #include "Memly/Database/DatabaseRuntime.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 class [[nodiscard]] DatabaseMigrator final {
 private:

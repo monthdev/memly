@@ -3,7 +3,7 @@
 #include <memory>
 #include <utility>
 
-namespace Layer::Application::IndexCache {
+namespace Memly::IndexCache {
 
 template <typename IndexCacheDefinitionType>
 class IndexCacheBase {

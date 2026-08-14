@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Support::QtApp {
+namespace Memly::QtApp {
 [[nodiscard]] auto AudioDirectoryPath() -> std::string;
 
 [[nodiscard]] auto ExceptionLogFilePath() -> std::string;

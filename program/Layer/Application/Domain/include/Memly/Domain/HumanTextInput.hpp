@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <string>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 class [[nodiscard]] HumanTextInput final {
 private:

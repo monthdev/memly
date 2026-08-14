@@ -8,7 +8,7 @@
 #include <string>
 #include <utility>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 struct [[nodiscard]] ReviewSessionListRow final {
     std::string m_ReviewSessionId;

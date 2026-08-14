@@ -3,7 +3,7 @@
 #include "Memly/IndexCache/DeckForestSnapshotIndexCacheDefinition.hpp"
 #include "Memly/IndexCache/IndexCacheBase.hpp"
 
-namespace Layer::Application::IndexCache {
+namespace Memly::IndexCache {
 
 class DeckForestSnapshotIndexCache final : public IndexCacheBase<DeckForestSnapshotIndexCacheDefinition> {
 public:

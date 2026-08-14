@@ -8,9 +8,9 @@
 #include <utility>
 
 #include "Memly/Database/PreparedStatement.hpp"
-#include "ThrowOnDatabaseError.hpp"
+#include "_ThrowOnDatabaseError.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 DatabaseRuntime::DatabaseRuntime(duckdb::DatabaseInstance& DatabaseInstance, duckdb::Connection&& DatabaseConnection)
     : m_Database{ DatabaseInstance }

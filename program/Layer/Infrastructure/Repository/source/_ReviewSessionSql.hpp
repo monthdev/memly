@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace Layer::Infrastructure::Repository::Sql {
+namespace Memly::Repository {
 
 [[nodiscard]] auto SelectReviewSessionListRowsSql() -> std::string;
 

@@ -1,7 +1,7 @@
 // Temporarily disabled during deck page controller bridge refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
 #if 0
-#include "Memly/Controller/DeckPageControllerBridge.hpp"
+#include "Memly/Bridge/DeckPageControllerBridge.hpp"
 
 #include <cstdint>
 #include <expected>
@@ -10,17 +10,17 @@
 #include "Memly/Invalidation/LibraryInvalidationChannel.hpp"
 #include "Memly/Service/DeckService.hpp"
 
-namespace Layer::View::Bridge::Controller {
+namespace Memly::Bridge {
 
-DeckPageControllerBridge::DeckPageControllerBridge(Application::Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
-                                                   Application::Service::DeckService& DeckService,
+DeckPageControllerBridge::DeckPageControllerBridge(Invalidation::LibraryInvalidationChannel& LibraryInvalidationChannel,
+                                                   Service::DeckService& DeckService,
                                                    QObject* Parent)
     : QObject{ Parent }
     , m_DeckPageController{ LibraryInvalidationChannel, DeckService }
     , m_DeckForestProxyModel{ *this->m_DeckPageController.GetDeckForestModel(), this } {
 }
 
-[[nodiscard]] ProxyModel::DeckForestProxyModel* DeckPageControllerBridge::GetDeckForestProxyModel() noexcept {
+[[nodiscard]] DeckForestProxyModel* DeckPageControllerBridge::GetDeckForestProxyModel() noexcept {
     return &this->m_DeckForestProxyModel;
 }
 

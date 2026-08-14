@@ -13,11 +13,11 @@
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
 #include "Memly/Repository/ReviewSessionRepository.hpp"
 
-namespace Layer::Application::Service {
+namespace Memly::Service {
 
 ReviewSessionService::ReviewSessionService(
-    Infrastructure::Database::TransactionRunner& TransactionRunner,
-    Infrastructure::Repository::ReviewSessionRepository& ReviewSessionRepository) noexcept
+    Database::TransactionRunner& TransactionRunner,
+    Repository::ReviewSessionRepository& ReviewSessionRepository) noexcept
     : m_TransactionRunner{ TransactionRunner }
     , m_ReviewSessionRepository{ ReviewSessionRepository } {
 }

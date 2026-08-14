@@ -9,7 +9,7 @@
 #include "Memly/Database/DatabaseRuntime.hpp"
 #include "Memly/Database/PreparedStatement.hpp"
 
-namespace Layer::Infrastructure::Repository {
+namespace Memly::Repository {
 
 class LibraryRepository final {
 private:

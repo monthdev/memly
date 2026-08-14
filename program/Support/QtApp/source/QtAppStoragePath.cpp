@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace Support::QtApp {
+namespace Memly::QtApp {
 namespace {
 [[nodiscard]] auto u_EnsureDirectory(const QString& Directory) -> std::string {
     QDir().mkpath(Directory);

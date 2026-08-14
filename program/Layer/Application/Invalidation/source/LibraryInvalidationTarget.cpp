@@ -4,7 +4,7 @@
 #include <cassert>
 #include <utility>
 
-namespace Layer::Application::Invalidation {
+namespace Memly::Invalidation {
 
 [[nodiscard]] auto LibraryInvalidationTargetBitset::Contains(const LibraryInvalidationTargetEnum LibraryInvalidationTarget) const noexcept -> bool {
     assert(std::has_single_bit(std::to_underlying(LibraryInvalidationTarget)) and

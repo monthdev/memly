@@ -12,7 +12,7 @@
 
 #include "Memly/Exception/MemlyException.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 QueryResultDecoder::QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&& QueryResult, const std::source_location& SourceLocation) noexcept
     : m_QueryResult{ std::move(QueryResult) }
@@ -23,7 +23,7 @@ QueryResultDecoder::QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&& Qu
     duckdb::unique_ptr<duckdb::DataChunk> DataChunk{};
     duckdb::ErrorData ErrorData{};
     if (not this->m_QueryResult->TryFetch(DataChunk, ErrorData)) {
-        throw Support::Exception::MemlyException{ std::initializer_list<std::string_view>{ ErrorData.Message() }, this->m_SourceLocation };
+        throw Exception::MemlyException{ std::initializer_list<std::string_view>{ ErrorData.Message() }, this->m_SourceLocation };
     }
     return duckdb::unique_ptr<duckdb::DataChunk>{ std::move(DataChunk) };
 }

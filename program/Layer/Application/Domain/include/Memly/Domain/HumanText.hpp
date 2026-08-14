@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 class [[nodiscard]] HumanText final {
 private:

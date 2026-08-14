@@ -9,20 +9,20 @@
 #include "Memly/Repository/DeckRepository.hpp"
 #include "Memly/Service/DeckService.hpp"
 
-namespace CompositionRoot {
+namespace Memly::CompositionRoot {
 
 /// \attention Keep `ApplicationRuntime` members ordered from lower-level dependencies to higher-level dependents.
 class ApplicationRuntime final {
 private:
-    Layer::Infrastructure::Database::DatabaseRuntime m_DatabaseRuntime;
-    // Layer::Application::Invalidation::LibraryInvalidationChannel m_LibraryInvalidationChannel;
-    // Layer::Infrastructure::Repository::LibraryRepository m_LibraryRepository;
-    // Layer::Application::Invalidation::LibraryInvalidationCoordinator m_LibraryInvalidationCoordinator;
-    Layer::Infrastructure::Repository::DeckRepository m_DeckRepository;
-    // Layer::Infrastructure::Repository::ReviewSessionRepository m_ReviewSessionRepository;
-    Layer::Application::Service::DeckService m_DeckService;
-    // Layer::Application::Service::ReviewSessionListService m_ReviewSessionListService;
-    // Layer::Application::Service::ReviewSessionService m_ReviewSessionService;
+    Database::DatabaseRuntime m_DatabaseRuntime;
+    // Invalidation::LibraryInvalidationChannel m_LibraryInvalidationChannel;
+    // Repository::LibraryRepository m_LibraryRepository;
+    // Invalidation::LibraryInvalidationCoordinator m_LibraryInvalidationCoordinator;
+    Repository::DeckRepository m_DeckRepository;
+    // Repository::ReviewSessionRepository m_ReviewSessionRepository;
+    Service::DeckService m_DeckService;
+    // Service::ReviewSessionListService m_ReviewSessionListService;
+    // Service::ReviewSessionService m_ReviewSessionService;
 
 public:
     explicit ApplicationRuntime(const std::string&);

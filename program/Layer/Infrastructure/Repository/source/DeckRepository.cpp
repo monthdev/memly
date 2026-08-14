@@ -9,20 +9,20 @@
 #include "Memly/Database/QueryResultRowCountRange.hpp"
 #include "Memly/Repository/DeckSnapshotRecord.hpp"
 #include "Memly/Repository/MutatedId.hpp"
-#include "Sql/DeckSql.hpp"
+#include "_DeckSql.hpp"
 
-namespace Layer::Infrastructure::Repository {
+namespace Memly::Repository {
 
 DeckRepository::DeckRepository(Database::DatabaseRuntime& DatabaseRuntime)
-    : m_SelectDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::SelectDeckSnapshotRecordsSql()) }
-    , m_InsertRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertRootDeckSql()) }
-    , m_InsertChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::InsertChildDeckSql()) }
-    , m_UpdateDeckParentToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateDeckParentToRootSql()) }
-    , m_UpdateDeckParentPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateDeckParentSql()) }
-    , m_UpdateDeckNamePreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::UpdateDeckNameSql()) }
-    , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteDeckCardReviewsSql()) }
-    , m_DeleteDeckCardsPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteDeckCardsSql()) }
-    , m_DeleteDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(Sql::DeleteDeckSql()) } {
+    : m_SelectDeckSnapshotRecordsPreparedStatement{ DatabaseRuntime.PrepareStatement(SelectDeckSnapshotRecordsSql()) }
+    , m_InsertRootDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(InsertRootDeckSql()) }
+    , m_InsertChildDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(InsertChildDeckSql()) }
+    , m_UpdateDeckParentToRootPreparedStatement{ DatabaseRuntime.PrepareStatement(UpdateDeckParentToRootSql()) }
+    , m_UpdateDeckParentPreparedStatement{ DatabaseRuntime.PrepareStatement(UpdateDeckParentSql()) }
+    , m_UpdateDeckNamePreparedStatement{ DatabaseRuntime.PrepareStatement(UpdateDeckNameSql()) }
+    , m_DeleteDeckCardReviewsPreparedStatement{ DatabaseRuntime.PrepareStatement(DeleteDeckCardReviewsSql()) }
+    , m_DeleteDeckCardsPreparedStatement{ DatabaseRuntime.PrepareStatement(DeleteDeckCardsSql()) }
+    , m_DeleteDeckPreparedStatement{ DatabaseRuntime.PrepareStatement(DeleteDeckSql()) } {
 }
 
 [[nodiscard]] auto DeckRepository::ReadDeckSnapshotRecords(const std::int64_t AsOfMillisecondsSinceEpoch) -> std::vector<DeckSnapshotRecord> {

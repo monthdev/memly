@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Layer::Application::Domain {
+namespace Memly::Domain {
 
 [[nodiscard]] auto IsDeckNameLengthValid(const std::string&) noexcept -> bool;
 

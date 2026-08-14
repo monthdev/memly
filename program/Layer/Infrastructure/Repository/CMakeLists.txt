@@ -1,0 +1,51 @@
+file(GLOB MEMLY_REPOSITORY_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/Memly/Repository/*.hpp")
+file(GLOB MEMLY_REPOSITORY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
+file(GLOB MEMLY_REPOSITORY_PRIVATE_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.hpp")
+file(GLOB MEMLY_REPOSITORY_DECK_DELETE_SQL CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/Deck/Delete/*.sql")
+file(GLOB MEMLY_REPOSITORY_DECK_INSERT_SQL CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/Deck/Insert/*.sql")
+file(GLOB MEMLY_REPOSITORY_DECK_SELECT_SQL CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/Deck/Select/*.sql")
+file(GLOB MEMLY_REPOSITORY_DECK_UPDATE_SQL CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/Deck/Update/*.sql")
+file(GLOB MEMLY_REPOSITORY_LIBRARY_SELECT_SQL CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/Library/Select/*.sql"
+)
+file(GLOB MEMLY_REPOSITORY_REVIEW_SESSION_DELETE_SQL CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/ReviewSession/Delete/*.sql"
+)
+file(GLOB MEMLY_REPOSITORY_REVIEW_SESSION_INSERT_SQL CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/ReviewSession/Insert/*.sql"
+)
+file(GLOB MEMLY_REPOSITORY_REVIEW_SESSION_SELECT_SQL CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/ReviewSession/Select/*.sql"
+)
+file(GLOB MEMLY_REPOSITORY_REVIEW_SESSION_UPDATE_SQL CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/ReviewSession/Update/*.sql"
+)
+
+memly_add_component_library(
+  memly_infrastructure_repository
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  HEADERS
+  ${MEMLY_REPOSITORY_HEADERS}
+  SOURCES
+  ${MEMLY_REPOSITORY_SOURCES}
+  ${MEMLY_REPOSITORY_PRIVATE_HEADERS}
+)
+target_include_directories(memly_infrastructure_repository BEFORE PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source")
+target_link_libraries(
+  memly_infrastructure_repository
+  PUBLIC memly_application_domain memly_infrastructure_database
+  PRIVATE memly_support_exception memly_support_qt_app
+)
+qt_add_resources(
+  memly_infrastructure_repository
+  "RepositoryDeckSql"
+  PREFIX
+  "/Sql/Deck"
+  BASE
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Sql/Deck"
+  FILES
+  ${MEMLY_REPOSITORY_DECK_SELECT_SQL}
+  ${MEMLY_REPOSITORY_DECK_UPDATE_SQL}
+  ${MEMLY_REPOSITORY_DECK_INSERT_SQL}
+  ${MEMLY_REPOSITORY_DECK_DELETE_SQL}
+)

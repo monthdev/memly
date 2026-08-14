@@ -14,7 +14,7 @@
 #include "Memly/QtApp/QtAppStoragePath.hpp"
 
 auto main(int argc, char** argv) noexcept -> int {
-    return int{ Support::Exception::TryCatchWrapper([&]() -> int {
+    return int{ Memly::Exception::TryCatchWrapper([&]() -> int {
         Q_INIT_RESOURCE(DatabaseMigrationSql);
         Q_INIT_RESOURCE(RepositoryDeckSql);
         [[maybe_unused]] const QGuiApplication QtApplicationLifetime{ argc, argv };
@@ -24,7 +24,7 @@ auto main(int argc, char** argv) noexcept -> int {
         QGuiApplication::setApplicationDisplayName(AppName);
         QCoreApplication::setOrganizationDomain(OrgName);
         QCoreApplication::setOrganizationName(OrgName);
-        [[maybe_unused]] const CompositionRoot::ApplicationRuntime ApplicationRuntime{ Support::QtApp::DatabaseFilePath() };
+        [[maybe_unused]] const Memly::CompositionRoot::ApplicationRuntime ApplicationRuntime{ Memly::QtApp::DatabaseFilePath() };
         QQmlApplicationEngine AppEngine{};
         QObject::connect(
             &AppEngine,

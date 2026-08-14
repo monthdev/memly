@@ -15,7 +15,7 @@
 
 #include "Memly/Exception/ExceptionBoundary.hpp"
 
-namespace Layer::Presentation::Model {
+namespace Memly::Model {
 
 DeckForestModel::DeckForestModel(QObject* Parent) noexcept
     : QAbstractItemModel{ Parent }
@@ -26,7 +26,7 @@ DeckForestModel::DeckForestModel(QObject* Parent) noexcept
 }
 
 [[nodiscard]] QModelIndex DeckForestModel::index(const int Row, const int Column, const QModelIndex& Parent) const noexcept {
-    return Support::Exception::TryCatchWrapper([&]() -> QModelIndex {
+    return Exception::TryCatchWrapper([&]() -> QModelIndex {
         if (not this->hasIndex(Row, Column, Parent)) {
             return QModelIndex{};
         }
@@ -37,7 +37,7 @@ DeckForestModel::DeckForestModel(QObject* Parent) noexcept
 }
 
 [[nodiscard]] QModelIndex DeckForestModel::parent(const QModelIndex& Index) const noexcept {
-    return Support::Exception::TryCatchWrapper([&]() -> QModelIndex {
+    return Exception::TryCatchWrapper([&]() -> QModelIndex {
         const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ this->TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
             return QModelIndex{};
@@ -53,7 +53,7 @@ DeckForestModel::DeckForestModel(QObject* Parent) noexcept
 }
 
 [[nodiscard]] int DeckForestModel::rowCount(const QModelIndex& Parent) const noexcept {
-    return Support::Exception::TryCatchWrapper([&]() -> int {
+    return Exception::TryCatchWrapper([&]() -> int {
         if (Parent.column() > 0) {
             return 0;
         }
@@ -62,7 +62,7 @@ DeckForestModel::DeckForestModel(QObject* Parent) noexcept
 }
 
 [[nodiscard]] int DeckForestModel::columnCount(const QModelIndex& Parent) const noexcept {
-    return Support::Exception::TryCatchWrapper([&]() -> int {
+    return Exception::TryCatchWrapper([&]() -> int {
         if (Parent.isValid() and Parent.column() > 0) {
             return 0;
         }
@@ -71,7 +71,7 @@ DeckForestModel::DeckForestModel(QObject* Parent) noexcept
 }
 
 [[nodiscard]] QVariant DeckForestModel::data(const QModelIndex& Index, const int Role) const noexcept {
-    return Support::Exception::TryCatchWrapper([&]() -> QVariant {
+    return Exception::TryCatchWrapper([&]() -> QVariant {
         const std::optional<std::reference_wrapper<const DeckNode>> CurrentDeckNodeOptional{ this->TryGetDeckNode(Index) };
         if (not CurrentDeckNodeOptional.has_value()) {
             return QVariant{};
@@ -128,7 +128,7 @@ DeckForestModel::DeckForestModel(QObject* Parent) noexcept
 }
 
 [[nodiscard]] bool DeckForestModel::hasChildren(const QModelIndex& Parent) const noexcept {
-    return Support::Exception::TryCatchWrapper([&]() -> bool {
+    return Exception::TryCatchWrapper([&]() -> bool {
         if (Parent.column() > 0) {
             return false;
         }
@@ -137,7 +137,7 @@ DeckForestModel::DeckForestModel(QObject* Parent) noexcept
 }
 
 void DeckForestModel::sort(const int Column, const Qt::SortOrder SortOrder) noexcept {
-    Support::Exception::TryCatchWrapper([&]() -> void {
+    Exception::TryCatchWrapper([&]() -> void {
         if (Column < static_cast<int>(ColumnEnum::DeckNameColumn) or Column > static_cast<int>(ColumnEnum::SubtreeTotalCountColumn)) {
             return;
         }
@@ -220,15 +220,15 @@ void DeckForestModel::ApplyCurrentSort() {
     this->UpdateSiblingRowIndexes();
 }
 
-void DeckForestModel::ReplaceAll(std::vector<Application::Domain::DeckForestSnapshotNode>&& DeckForestSnapshotNodeVector) noexcept {
-    Support::Exception::TryCatchWrapper([&]() -> void {
+void DeckForestModel::ReplaceAll(std::vector<Domain::DeckForestSnapshotNode>&& DeckForestSnapshotNodeVector) noexcept {
+    Exception::TryCatchWrapper([&]() -> void {
         std::vector<DeckNode> DeckNodesVector;
         std::vector<std::size_t> RootDeckNodeIndexesVector;
         std::unordered_map<std::string, std::size_t> DeckNodeIndexByIdHash;
         DeckNodesVector.reserve(DeckForestSnapshotNodeVector.size());
         RootDeckNodeIndexesVector.reserve(DeckForestSnapshotNodeVector.size());
         DeckNodeIndexByIdHash.reserve(DeckForestSnapshotNodeVector.size());
-        for (Application::Domain::DeckForestSnapshotNode& DeckForestSnapshotNode : DeckForestSnapshotNodeVector) {
+        for (Domain::DeckForestSnapshotNode& DeckForestSnapshotNode : DeckForestSnapshotNodeVector) {
             const std::size_t DeckNodeIndex{ DeckNodesVector.size() };
             DeckNodeIndexByIdHash.emplace(DeckForestSnapshotNode.m_DeckId, DeckNodeIndex);
             DeckNodesVector.emplace_back(DeckNode{ std::move(DeckForestSnapshotNode), std::nullopt, 0, std::vector<std::size_t>{} });

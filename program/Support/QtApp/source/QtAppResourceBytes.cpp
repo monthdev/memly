@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <string>
 
-namespace Support::QtApp {
+namespace Memly::QtApp {
 [[nodiscard]] auto ReadQtAppResourceBytes(const char* const QtResourcePath) -> std::string {
     const QResource Resource{ QtResourcePath };
     assert(Resource.isValid());

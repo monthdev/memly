@@ -8,31 +8,25 @@
 #include <qstring.h>
 #include <qtypes.h>
 
+#include "Memly/Bridge/DeckForestProxyModel.hpp"
 #include "Memly/Controller/DeckPageController.hpp"
-#include "Memly/ProxyModel/DeckForestProxyModel.hpp"
+#include "Memly/Invalidation/LibraryInvalidationChannel.hpp"
+#include "Memly/Service/DeckService.hpp"
 
-namespace Layer::Application::Invalidation {
-class LibraryInvalidationChannel;
-}
-
-namespace Layer::Application::Service {
-class DeckService;
-}
-
-namespace Layer::View::Bridge::Controller {
+namespace Memly::Bridge {
 
 class DeckPageControllerBridge : public QObject {
     Q_OBJECT
-    Q_PROPERTY(ProxyModel::DeckForestProxyModel* deckForestModel READ GetDeckForestProxyModel CONSTANT)
+    Q_PROPERTY(DeckForestProxyModel* deckForestModel READ GetDeckForestProxyModel CONSTANT)
     QML_NAMED_ELEMENT(DeckPageController)
 
 private:
-    Presentation::Controller::DeckPageController m_DeckPageController;
-    ProxyModel::DeckForestProxyModel m_DeckForestProxyModel;
+    Controller::DeckPageController m_DeckPageController;
+    DeckForestProxyModel m_DeckForestProxyModel;
 
 public:
-    explicit DeckPageControllerBridge(Application::Invalidation::LibraryInvalidationChannel&,
-                                      Application::Service::DeckService&,
+    explicit DeckPageControllerBridge(Invalidation::LibraryInvalidationChannel&,
+                                      Service::DeckService&,
                                       QObject* = nullptr);
 
     explicit DeckPageControllerBridge(const DeckPageControllerBridge&) = delete;
@@ -43,7 +37,7 @@ public:
 
     ~DeckPageControllerBridge() noexcept override = default;
 
-    [[nodiscard]] ProxyModel::DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
+    [[nodiscard]] DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
 
     [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString&, quint8) noexcept;
     [[nodiscard]] Q_INVOKABLE QString CreateChildDeck(const QString&, const QString&) noexcept;

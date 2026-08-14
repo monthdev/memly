@@ -2,13 +2,13 @@
 
 ## Runtime Composition and Services
 
-`CompositionRoot::ApplicationRuntime` owns the live application object graph by
-value. Its constructor initializers and data members follow dependency order
-from lower-level dependencies to higher-level dependents. `main.cpp` constructs
-the Qt application, `ApplicationRuntime`, and the QML engine in that order so
-the engine is destroyed before its factories and their dependencies. Expose only
-narrow View-layer factories to QML; never expose `ApplicationRuntime` or allow a
-lower layer to retrieve dependencies from it.
+`Memly::CompositionRoot::ApplicationRuntime` owns the live application object
+graph by value. Its constructor initializers and data members follow dependency
+order from lower-level dependencies to higher-level dependents. `main.cpp`
+constructs the Qt application, `ApplicationRuntime`, and the QML engine in that
+order so the engine is destroyed before its factories and their dependencies.
+Expose only narrow View-layer factories to QML; never expose
+`ApplicationRuntime` or allow a lower layer to retrieve dependencies from it.
 
 Services form the domain capability surface used by application commands; they
 do not model stateful domain entities. A state-free operation remains on its
@@ -118,6 +118,15 @@ enforce the presence and permitted definition forms of the five special members.
 Their source order and separating blank lines remain a documented formatting
 rule because AST matchers do not retain that presentation.
 
+Class, struct, union, and enum forward declarations are disallowed; include the
+header that owns a required type. The sole exception is the canonical private
+PImpl shape: a class may declare a private nested `class Implementation;`, store
+it as `std::unique_ptr<Implementation> m_Implementation`, and define its
+destructor out of line where `Implementation` is complete. Do not use incomplete
+types for ordinary reference, pointer, friend, parameter, or container
+declarations (`custom-memly-no-forward-declaration` and
+`custom-memly-no-forward-declared-enum`).
+
 ## Declaration Layout and Definition Placement
 
 Class-level Qt metadata macros come first inside a class or struct, followed by
@@ -221,7 +230,7 @@ Write exception-message prose as a noun phrase followed by a verb phrase, such
 as `Database query failed`. Do not use verb-first wording such as
 `Failed to execute database query`.
 
-Throw `Support::Exception::MemlyException` explicitly. Its constructor captures
+Throw `Memly::Exception::MemlyException` explicitly. Its constructor captures
 the throwing call site's source location by default; pass an existing source
 location only when an adapter intentionally preserves an earlier public
 operation boundary. Do not add forwarding functions whose only behavior is to
@@ -257,9 +266,10 @@ Infrastructure repository its implementation.
 DuckDB SQL resources are implementation details of their direct consumer.
 Repository SQL resources live under
 `Layer/Infrastructure/Repository/source/Sql/<Domain>`, while their
-`<Domain>Sql.hpp/.cpp` accessor pairs live directly under the repository's
-`source/Sql` root. Migration SQL and its accessors live under
-`Layer/Infrastructure/Database/source/Sql`. `Database` and `Repository` each
+`_<Domain>Sql.hpp/.cpp` accessor pairs live directly under the repository's
+`source/` root. Migration SQL resources live under
+`Layer/Infrastructure/Database/source/Sql`, while `_MigrationSql.hpp/.cpp` live
+directly under the database's `source/` root. `Database` and `Repository` each
 form one CMake component with one public `include/` root and one private
 `source/` root.
 
@@ -268,7 +278,7 @@ under `Select/`, `Update/`, `Insert/`, or `Delete/`. Each resource filename and
 accessor begins with that SQL statement name, followed by its domain purpose;
 prepared-statement members repeat the same operation name. Repository methods
 retain domain-operation language. Each repository SQL domain exposes one
-`<Domain>Sql.hpp/.cpp` accessor pair in the shared `source/Sql` root, and
+`_<Domain>Sql.hpp/.cpp` accessor pair in the shared `source/` root, and
 consumers depend on that accessor rather than on operation folders.
 
 Migration SQL separates unconditional setup under `Bootstrap/`, ordered
@@ -433,10 +443,17 @@ domain property rather than a wrapper's underlying representation.
 
 ## Namespaces and File-Private Code
 
-Namespaces for code under `program/` mirror its folder nesting; namespaces for
-the four architectural layers therefore begin with `Layer::`. An unnamed helper
-namespace is nested inside that matching namespace. The custom matcher enforces
-the minimum structural requirement that it have a Memly namespace ancestor
+Every named namespace under `program/` begins with `Memly::`, followed by the
+owning target folder and then any meaningful folder hierarchy below that target
+root. Public declarations therefore match their `Memly/<Target>/...` include
+path. For example, Domain declarations use `Memly::Domain`, Bridge declarations
+use `Memly::Bridge`, and declarations directly under the Repository and Database
+target roots—including their private SQL accessors—use `Memly::Repository` and
+`Memly::Database`. Architectural grouping folders above a target root, such as
+`Layer`, `Application`, `Infrastructure`, `Presentation`, `View`, and `Support`,
+do not appear in C++ namespace names. An unnamed helper namespace is nested
+inside the complete matching named namespace. The custom matcher enforces the
+minimum structural requirement that it have a `Memly` namespace ancestor
 (`custom-memly-unnamed-namespace-nesting`). Every declaration made directly at
 unnamed-namespace scope uses a `u_` prefix, including functions, types, enums,
 concepts, and aliases; members of an unnamed-namespace type retain their normal
@@ -531,20 +548,39 @@ public Memly header through its full `Memly/<Component>/<Header>.hpp` path. The
 `Memly/` prefix prevents collisions with dependencies, and the component folder
 identifies the owning include surface without repeating the complete source-tree
 path. Private implementation headers remain under `source/` and do not become
-part of this public include surface. Private SQL resources and their accessors
-remain under the owning component's `source/Sql` subtree. Place the component
-`CMakeLists.txt` boundary conceptually at the folder containing the `include/`
-and `source/` roots even while target declarations remain centralized in the
-top-level build file.
+part of this public include surface. Private SQL resources remain under the
+owning component's `source/Sql` subtree; their target-private C++ accessor pairs
+remain directly under the owning `source/` root.
+
+A declaration-and-implementation helper pair whose `.hpp` and `.cpp` both remain
+private under one target's `source/` tree begins both filenames with `_`, such
+as `_ThrowOnDatabaseError.hpp/.cpp` and `_DeckSql.hpp/.cpp`. The prefix visually
+identifies target-private includes at their include sites and sorts these
+helpers before implementation files corresponding to exposed headers. This
+applies to every target, not only the Database component, and only to filenames;
+declarations retain their ordinary names. Do not carry the marker into C++
+declarations: a leading underscore followed by the uppercase first letter of a
+PascalCase name is reserved to the implementation.
+
+Each target declares its source globs, target, include roots, resources, and
+direct link dependencies in the `CMakeLists.txt` beside its owned source tree.
+Do not add a `CMakeLists.txt` whose only responsibility is forwarding through an
+architectural directory hierarchy. The nearest list file that owns a target adds
+its directly required target directories with `add_subdirectory`; the
+repository-root build file retains only project-wide toolchain, dependency,
+warning, lint, verification, and final build-gate policy. Register every
+component header and translation unit through the shared CMake component helper
+so full-tree linting and header-assignment verification remain complete.
 
 Each logical component maps to one CMake target. Header-only components use an
 `INTERFACE` target; components with translation units use a static library. Do
 not subdivide one logical component into public declaration facades plus a
 shared implementation bag. Application `Domain`, `IndexCache`, and `Service` are
 each flat components with one public include surface, one implementation folder,
-one namespace, and one target. `Layer/Infrastructure/Database`,
-`Layer/Infrastructure/Repository`, `Support/Exception`, and `Support/QtApp`
-likewise each use one component target.
+one namespace, and one target. View `Bridge`, Infrastructure `Database` and
+`Repository`, and Support `Exception` and `QtApp` likewise each use one
+component target. The QML module remains a separate Qt backing target that
+consumes Bridge's QML-registration headers and compiled implementation.
 
 Publish only a component interface's `include/` directory and headers. Add a
 `source/` directory only as a private include root when implementation helpers
@@ -582,20 +618,20 @@ inputs, `compile_commands.json`, and the complete source tree; unchanged inputs
 do not repeat the analysis. Do not cap the full-tree tool's worker count.
 
 Before Codex may finish, the project `Stop` integrity hook runs the same C/C++,
-CMake, Markdown, QML, SQL, YAML, and `.clang-tidy` formatters and pinned
-versions as formatting CI; Doxygen remains an independent workflow. The hook
-rewrites only files whose formatted contents differ so unchanged source
+CMake, Markdown, QML, SQL, YAML, and `.clang-tidy` formatters, CMake linter, and
+pinned tool versions as formatting CI; Doxygen remains an independent workflow.
+The hook rewrites only files whose formatted contents differ so unchanged source
 timestamps do not invalidate downstream build work. It configures the
 `macos-debug-local` preset only when the Ninja build tree is absent or the
 selected preset files change, then always invokes the incremental preset build.
 Ninja runs the mandatory Clang-Tidy, public-header verification, compilation,
-and linking stages only when their actual inputs changed. A formatter,
-configuration, or build failure returns the turn to Codex for repair. Every
-applicable gate must pass. Do not bypass this hook.
+and linking stages only when their actual inputs changed. A formatting, CMake
+linting, configuration, or build failure returns the turn to Codex for repair.
+Every applicable gate must pass. Do not bypass this hook.
 
-The integrity hook invokes standalone formatter executables from `PATH` at the
-same pinned versions used by formatting CI. Do not use `npx` or otherwise
-download formatters during hook execution.
+The integrity hook invokes standalone formatter and CMake-linter executables
+from `PATH` at the same pinned versions used by formatting CI. Do not use `npx`
+or otherwise download formatters during hook execution.
 
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
 missing- and unused-include diagnostics are the automated acceptance checks for

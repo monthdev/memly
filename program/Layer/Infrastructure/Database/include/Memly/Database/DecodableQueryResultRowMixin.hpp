@@ -3,7 +3,7 @@
 #include <concepts>
 #include <tuple>
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 template <typename... ColumnType>
 class DecodableQueryResultRowMixin {

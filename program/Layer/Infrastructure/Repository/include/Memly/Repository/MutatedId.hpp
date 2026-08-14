@@ -5,7 +5,7 @@
 
 #include "Memly/Database/DecodableQueryResultRowMixin.hpp"
 
-namespace Layer::Infrastructure::Repository {
+namespace Memly::Repository {
 
 struct [[nodiscard]] MutatedId final : public Database::DecodableQueryResultRowMixin<std::string> {
     std::string m_MutatedId;

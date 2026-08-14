@@ -7,9 +7,9 @@
 #include <utility>
 
 #include "Memly/Database/QueryResultDecoder.hpp"
-#include "ThrowOnDatabaseError.hpp"
+#include "_ThrowOnDatabaseError.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 PreparedStatementExecution::PreparedStatementExecution(duckdb::PreparedStatement& DuckDbPreparedStatement, const std::source_location& SourceLocation) noexcept
     : m_DuckDbPreparedStatement{ DuckDbPreparedStatement }

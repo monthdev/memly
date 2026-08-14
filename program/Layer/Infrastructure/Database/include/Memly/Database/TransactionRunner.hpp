@@ -13,7 +13,7 @@
 
 #include "Memly/Exception/MemlyException.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 class TransactionRunner final {
 private:
@@ -48,7 +48,7 @@ public:
             try {
                 this->m_DatabaseConnection.Rollback();
             } catch (const std::exception& RollbackException) {
-                throw Support::Exception::MemlyException{
+                throw Exception::MemlyException{
                     std::initializer_list<std::string_view>{
                                                             "Transaction failed:\n\t", TransactionException.what(), "\nRollback also failed:\n\t", RollbackException.what() },
                     SourceLocation
@@ -59,7 +59,7 @@ public:
             try {
                 this->m_DatabaseConnection.Rollback();
             } catch (const std::exception& RollbackException) {
-                throw Support::Exception::MemlyException{
+                throw Exception::MemlyException{
                     std::initializer_list<std::string_view>{ "Transaction failed with a non-standard exception\nRollback also failed:\n\t",
                                                             RollbackException.what() },
                     SourceLocation

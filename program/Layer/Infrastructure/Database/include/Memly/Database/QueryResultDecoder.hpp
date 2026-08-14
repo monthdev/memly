@@ -16,7 +16,7 @@
 #include "Memly/Database/DecodableQueryResultRowMixin.hpp"
 #include "Memly/Database/DecodedQueryResult.hpp"
 
-namespace Layer::Infrastructure::Database {
+namespace Memly::Database {
 
 class [[nodiscard]] QueryResultDecoder final {
 private:

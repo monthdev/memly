@@ -14,19 +14,19 @@
 
 #include "Memly/Domain/DeckForestSnapshotNode.hpp"
 
-namespace Layer::Presentation::Model {
+namespace Memly::Model {
 
 class DeckForestModel final : public QAbstractItemModel {
     Q_OBJECT
 
 private:
     struct DeckNode {
-        Application::Domain::DeckForestSnapshotNode m_DeckForestSnapshotNode;
+        Domain::DeckForestSnapshotNode m_DeckForestSnapshotNode;
         std::optional<std::size_t> m_ParentDeckNodeIndexOptional;
         std::size_t m_RowInParentIndex;
         std::vector<std::size_t> m_ChildDeckNodeIndexesVector;
 
-        explicit DeckNode(Application::Domain::DeckForestSnapshotNode&& DeckForestSnapshotNode,
+        explicit DeckNode(Domain::DeckForestSnapshotNode&& DeckForestSnapshotNode,
                           std::optional<std::size_t>&& ParentDeckNodeIndexOptional,
                           const std::size_t RowInParentIndex,
                           std::vector<std::size_t>&& ChildDeckNodeIndexesVector) noexcept
@@ -92,7 +92,7 @@ public:
     [[nodiscard]] bool hasChildren(const QModelIndex& = QModelIndex{}) const noexcept override;
     void sort(int, Qt::SortOrder = Qt::AscendingOrder) noexcept override;
 
-    void ReplaceAll(std::vector<Application::Domain::DeckForestSnapshotNode>&&) noexcept;
+    void ReplaceAll(std::vector<Domain::DeckForestSnapshotNode>&&) noexcept;
 
 private:
     [[nodiscard]] std::optional<std::reference_wrapper<const DeckNode>> TryGetDeckNode(const QModelIndex&) const noexcept;
