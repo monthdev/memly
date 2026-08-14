@@ -98,21 +98,26 @@ trap 'rm -f "$TemporaryFormattedFilePath"' EXIT
 
 RequireExecutableContainingVersion clang-format 22.x 'version 22.'
 ClangFormatExecutable="$RequiredExecutablePath"
+RequireExecutable cmake-format 0.6.13 --version 0.6.13
+CMakeFormatExecutable="$RequiredExecutablePath"
+RequireExecutable cmake-lint 0.6.13 --version 0.6.13
+CMakeLintExecutable="$RequiredExecutablePath"
+RequireExecutable prettier 3.9.6 --version 3.9.6
+PrettierExecutable="$RequiredExecutablePath"
+RequireExecutable qmlformat 6.11.1 --version 'qmlformat 6.11.1'
+QmlFormatExecutable="$RequiredExecutablePath"
+RequireExecutable sql-formatter 15.8.2 --version 15.8.2
+SqlFormatterExecutable="$RequiredExecutablePath"
+
 CollectExistingFiles C++ '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' '*.m' '*.mm'
 FormatFileArrayWithOutput C++ "$ClangFormatExecutable" -style=file
 
-RequireExecutable cmake-format 0.6.13 --version 0.6.13
-CMakeFormatExecutable="$RequiredExecutablePath"
 CollectExistingFiles CMake 'CMakeLists.txt' ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(glob)**/*.cmake.in'
 FormatFileArrayWithOutput CMake "$CMakeFormatExecutable"
-RequireExecutable cmake-lint 0.6.13 --version 0.6.13
-CMakeLintExecutable="$RequiredExecutablePath"
 if [[ ${#FilePathArray[@]} -gt 0 ]]; then
     "$CMakeLintExecutable" --suppress-decorations -c .cmakelintrc -- "${FilePathArray[@]}" || Fail 'Memly CMake linting failed.'
 fi
 
-RequireExecutable prettier 3.9.6 --version 3.9.6
-PrettierExecutable="$RequiredExecutablePath"
 CollectExistingFiles Markdown '*.md' '*.markdown'
 if [[ ${#FilePathArray[@]} -gt 0 ]]; then
     if [[ "$FormatMode" == write ]]; then
@@ -122,13 +127,9 @@ if [[ ${#FilePathArray[@]} -gt 0 ]]; then
     fi
 fi
 
-RequireExecutable qmlformat 6.11.1 --version 'qmlformat 6.11.1'
-QmlFormatExecutable="$RequiredExecutablePath"
 CollectExistingFiles QML '*.qml'
 FormatFileArrayWithOutput QML "$QmlFormatExecutable" --settings .qmlformat.ini
 
-RequireExecutable sql-formatter 15.8.2 --version 15.8.2
-SqlFormatterExecutable="$RequiredExecutablePath"
 CollectExistingFiles SQL '*.sql'
 FormatFileArrayWithOutput SQL "$SqlFormatterExecutable" --language duckdb
 

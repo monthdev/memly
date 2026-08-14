@@ -652,7 +652,16 @@ Every applicable gate must pass. Do not bypass this hook.
 
 The integrity hook invokes standalone formatter and CMake-linter executables
 from `PATH` at the same pinned versions used by formatting CI. Do not use `npx`
-or otherwise download formatters during hook execution.
+or otherwise download formatters during hook execution. It validates every
+required executable and version before rewriting any file. Formatter and
+editor-only tool requirements ordinarily belong to their direct consumers—the
+integrity hook and editor configuration—not to CMake configuration. The LLVM
+toolchain is the deliberate exception: CMake requires matching LLVM Clang C and
+C++ compilers, `clang-tidy`, `run-clang-tidy`, `clangd`, and `clang-format` from
+the canonical LLVM installation even when an individual Clang tool is consumed
+only by the hook or editor. Non-LLVM formatting tools such as Prettier remain
+requirements of the hook that invokes them rather than configuration
+prerequisites.
 
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
 missing- and unused-include diagnostics are the automated acceptance checks for

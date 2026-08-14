@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 4.4)
 project(memly LANGUAGES C CXX)
 
 set(MEMLY_LLVM_MAJOR_VERSION 22)
-set(MEMLY_PRETTIER_VERSION 3.9.6)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
   message(FATAL_ERROR "Memly's Android and iOS toolchain contracts have not been defined yet")
@@ -68,23 +67,6 @@ include(FetchContent)
 
 if(NOT CMAKE_GENERATOR MATCHES "Ninja")
   message(FATAL_ERROR "Memly requires a Ninja generator for its mandatory full-tree Clang-Tidy gate")
-endif()
-
-find_program(MEMLY_PRETTIER_EXECUTABLE NAMES prettier REQUIRED)
-execute_process(
-  COMMAND "${MEMLY_PRETTIER_EXECUTABLE}" --version
-  RESULT_VARIABLE MEMLY_PRETTIER_VERSION_RESULT
-  OUTPUT_VARIABLE MEMLY_PRETTIER_VERSION_OUTPUT
-  ERROR_VARIABLE MEMLY_PRETTIER_VERSION_ERROR
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-if(NOT MEMLY_PRETTIER_VERSION_RESULT EQUAL 0)
-  message(FATAL_ERROR "Unable to read Prettier version: ${MEMLY_PRETTIER_VERSION_ERROR}")
-endif()
-if(NOT "${MEMLY_PRETTIER_VERSION_OUTPUT}" STREQUAL "${MEMLY_PRETTIER_VERSION}")
-  message(FATAL_ERROR "Memly requires Prettier ${MEMLY_PRETTIER_VERSION}; "
-                      "found ${MEMLY_PRETTIER_VERSION_OUTPUT} at ${MEMLY_PRETTIER_EXECUTABLE}"
-  )
 endif()
 
 cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH MEMLY_LLVM_BINARY_DIRECTORY)
