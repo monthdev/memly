@@ -16,6 +16,14 @@
   "qt-qml.qmlls.useNoCMakeCalls": true,
   "lintRunner.respectGitignore": true,
   "lintRunner.tools": {
+    "clang-format": {
+      "kind": "write",
+      "command": "clang-format",
+      "cwd": "${workspaceFolder}",
+      "args": ["-i", "-style=file", "${file}"],
+      "successExitCodes": [0],
+      "timeout": 120000,
+    },
     "clang-tidy": {
       "kind": "diagnostic",
       "command": "clang-tidy",
@@ -81,6 +89,14 @@
       "successExitCodes": [0],
       "timeout": 120000,
     },
+    "prettier": {
+      "kind": "write",
+      "command": "prettier",
+      "cwd": "${workspaceFolder}",
+      "args": ["--write", "--ignore-unknown", "--log-level", "warn", "${file}"],
+      "successExitCodes": [0],
+      "timeout": 120000,
+    },
     "qmlformat": {
       "kind": "write",
       "command": "qmlformat",
@@ -94,36 +110,55 @@
       "successExitCodes": [0],
       "timeout": 120000,
     },
+    "sql-formatter": {
+      "kind": "write",
+      "command": "sql-formatter",
+      "cwd": "${workspaceFolder}",
+      "args": ["--language", "duckdb", "--fix", "${file}"],
+      "successExitCodes": [0],
+      "timeout": 120000,
+    },
   },
   "lintRunner.targets": [
     {
       "name": "C and C++ Sources",
       "match": {
-        "languages": ["c", "cpp"],
-        "files": ["program/**/*.{c,cc,cpp,cxx}", "test/**/*.{c,cc,cpp,cxx}"],
+        "languages": ["c", "cpp", "objective-c", "objective-cpp"],
+        "files": [
+          "program/**/*.{c,cc,cpp,cxx,m,mm}",
+          "test/**/*.{c,cc,cpp,cxx,m,mm}",
+        ],
       },
       "onOpen": {
         "strategy": "sequence",
         "tools": ["clang-tidy"],
       },
+      "onSave": {
+        "strategy": "sequence",
+        "tools": ["clang-format"],
+      },
       "manual": {
         "strategy": "sequence",
-        "tools": ["clang-tidy"],
+        "tools": ["clang-format", "clang-tidy"],
       },
     },
     {
       "name": "C and C++ Headers",
       "match": {
-        "languages": ["c", "cpp"],
+        "languages": ["c", "cpp", "objective-c", "objective-cpp"],
         "files": ["program/**/*.{h,hh,hpp,hxx}", "test/**/*.{h,hh,hpp,hxx}"],
       },
       "onOpen": {
         "strategy": "sequence",
         "tools": ["include-what-you-use", "clang-tidy"],
       },
+      "onSave": {
+        "strategy": "sequence",
+        "tools": ["clang-format"],
+      },
       "manual": {
         "strategy": "sequence",
-        "tools": ["include-what-you-use", "clang-tidy"],
+        "tools": ["clang-format", "include-what-you-use", "clang-tidy"],
       },
     },
     {
@@ -146,6 +181,27 @@
       },
     },
     {
+      "name": "Prettier",
+      "match": {
+        "languages": [
+          "github-actions-workflow",
+          "json",
+          "jsonc",
+          "markdown",
+          "yaml",
+        ],
+        "files": ["**/*"],
+      },
+      "onSave": {
+        "strategy": "sequence",
+        "tools": ["prettier"],
+      },
+      "manual": {
+        "strategy": "sequence",
+        "tools": ["prettier"],
+      },
+    },
+    {
       "name": "QML",
       "match": {
         "languages": ["qml"],
@@ -160,28 +216,56 @@
         "tools": ["qmlformat"],
       },
     },
+    {
+      "name": "SQL",
+      "match": {
+        "languages": ["sql"],
+        "files": ["program/**/*.sql"],
+      },
+      "onSave": {
+        "strategy": "sequence",
+        "tools": ["sql-formatter"],
+      },
+      "manual": {
+        "strategy": "sequence",
+        "tools": ["sql-formatter"],
+      },
+    },
   ],
+  "[c]": {
+    "editor.formatOnSave": false,
+  },
   "[cmake]": {
     "editor.formatOnSave": false,
   },
+  "[cpp]": {
+    "editor.formatOnSave": false,
+  },
+  "[github-actions-workflow]": {
+    "editor.formatOnSave": false,
+  },
   "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
   },
   "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
   },
   "[markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
+  },
+  "[objective-c]": {
+    "editor.formatOnSave": false,
+  },
+  "[objective-cpp]": {
+    "editor.formatOnSave": false,
   },
   "[qml]": {
-    "editor.defaultFormatter": "theqtcompany.qt-qml",
+    "editor.formatOnSave": false,
+  },
+  "[sql]": {
     "editor.formatOnSave": false,
   },
   "[yaml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
   },
 }

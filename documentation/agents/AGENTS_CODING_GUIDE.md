@@ -673,9 +673,14 @@ an unusual structured configuration filename an explicit parser in
 `.prettierrc.json`; do not force an unsupported format through an unrelated
 parser merely to claim universal coverage.
 
-Workspace settings assign Prettier as the default formatter for JSON, JSONC,
-YAML, and Markdown so editor saves preserve the same formatting that CI and the
-integrity hook enforce.
+Lint Runner is the sole editor adapter for Memly's per-file formatters and CLI
+linters. Its write tools invoke ClangFormat, CMakeFormat, QMLFormat, SQL
+Formatter, and Prettier directly on save; VS Code's native format-on-save
+pipeline remains disabled for their language modes. Keep language and project
+extensions such as clangd, CMake Tools, and Qt QML for the persistent editor
+services that a CLI runner cannot provide. Formatter-only extensions listed in
+`.vscode/extensions.json` as unwanted recommendations conflict with this model
+and should be disabled for the workspace.
 
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
 missing- and unused-include diagnostics govern implementation-file include sets.
