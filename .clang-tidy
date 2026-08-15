@@ -54,8 +54,6 @@ Checks: |
   custom-memly-no-default-member-initializer,
   custom-memly-no-delegating-constructor,
   custom-memly-no-deduced-variable-type,
-  custom-memly-no-forward-declared-enum,
-  custom-memly-no-forward-declaration,
   custom-memly-no-global-prefix,
   custom-memly-no-header-function-definition,
   custom-memly-no-magic-integer-in-assertion,
@@ -290,25 +288,6 @@ CustomChecks:
       - BindName: variable
         Message: deduced variable types require a narrow documented exception
         Level: Warning
-  - Name: memly-no-forward-declared-enum
-    Query: >-
-      match enumDecl( unless(isDefinition()), unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]")
-      ).bind("forward_declaration")
-    Diagnostic:
-      - BindName: forward_declaration
-        Message: enum forward declarations are disallowed
-        Level: Warning
-  - Name: memly-no-forward-declaration
-    Query: >-
-      match cxxRecordDecl( unless(isDefinition()), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless( allOf( isClass(), hasName("Implementation"), isPrivate(), hasParent( cxxRecordDecl(
-      isDefinition(), has( fieldDecl( hasName("m_Implementation"), hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
-      classTemplateSpecializationDecl( hasName("::std::unique_ptr"), hasTemplateArgument( 0, refersToType( qualType( hasDeclaration(
-      cxxRecordDecl(hasName("Implementation")) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ).bind("forward_declaration")
-    Diagnostic:
-      - BindName: forward_declaration
-        Message: forward declarations are disallowed outside the canonical private PImpl pattern
-        Level: Warning
   - Name: memly-no-header-function-definition
     Query: >-
       match functionDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isTemplateInstantiation()),
@@ -523,7 +502,8 @@ CustomChecks:
     Query: >-
       match namedDecl( anyOf( functionDecl(unless(cxxMethodDecl())), cxxRecordDecl(), enumDecl(), typedefNameDecl() ), unless(isImplicit()),
       unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](hpp|cpp)$"),
-      hasParent(namespaceDecl(unless(isAnonymous()))), unless(matchesName("(^|::)i_[^:]*$") ) ).bind("declaration")
+      hasParent(namespaceDecl(unless(isAnonymous()))), hasAncestor(namespaceDecl(matchesName("^::Memly(::|$)"))), unless(matchesName("(^|::)i_[^:]*$") )
+      ).bind("declaration")
     Diagnostic:
       - BindName: declaration
         Message: namespace-scope types and free functions declared in target-private helper files must use the i_ prefix

@@ -3,8 +3,13 @@
 #include <vector>
 
 #include "Memly/Domain/DeckForestSnapshotIndex.hpp"
-#include "Memly/Domain/DeckForestSnapshotNode.hpp"
 #include "Memly/IndexCache/IndexCacheDefinition.hpp"
+
+namespace Memly::Domain {
+
+struct DeckForestSnapshotNode;
+
+}
 
 namespace Memly::IndexCache {
 

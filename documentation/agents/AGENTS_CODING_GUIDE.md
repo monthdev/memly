@@ -118,14 +118,10 @@ enforce the presence and permitted definition forms of the five special members.
 Their source order and separating blank lines remain a documented formatting
 rule because AST matchers do not retain that presentation.
 
-Class, struct, union, and enum forward declarations are disallowed; include the
-header that owns a required type. The sole exception is the canonical private
-PImpl shape: a class may declare a private nested `class Implementation;`, store
-it as `std::unique_ptr<Implementation> m_Implementation`, and define its
-destructor out of line where `Implementation` is complete. Do not use incomplete
-types for ordinary reference, pointer, friend, parameter, or container
-declarations (`custom-memly-no-forward-declaration` and
-`custom-memly-no-forward-declared-enum`).
+Forward-declare a type in a header when every use there supports that
+declaration alone, and include its owning header in the implementation file that
+requires the complete definition or enumerators. This applies to Memly and
+third-party types, including enums when their opaque declaration is sufficient.
 
 ## Declaration Layout and Definition Placement
 
@@ -631,12 +627,13 @@ including query-based custom checks. Do not introduce compiled clang-tidy
 extensions or a separate text-based style linter solely to enforce this guide.
 Rules beyond the YAML interface remain documented conventions.
 
-Run Clang-Tidy through the explicit `memly-clang-tidy` target, not through the
-`CXX_CLANG_TIDY` compilation boundary. Every Memly translation unit depends on
-the Clang-Tidy stamp, so a normal build completes the full-tree lint pass before
-compiling any changed Memly translation unit. The stamp depends on its policy
-inputs, `compile_commands.json`, and the complete source tree; unchanged inputs
-do not repeat the analysis. Do not cap the full-tree tool's worker count.
+Run Include What You Use through `memly-include-what-you-use` and Clang-Tidy
+through `memly-clang-tidy`, not through compilation-boundary tool properties.
+Every Memly translation unit depends on the serialized lint stamps, so a normal
+build completes both gates before compiling any changed Memly translation unit.
+Each stamp depends on its policy inputs, `compile_commands.json`, and the source
+files it analyzes; unchanged inputs do not repeat the analysis. Do not cap
+either full-tree tool's worker count.
 
 Before Codex may finish, the project `Stop` integrity hook runs the same C/C++,
 CMake, Markdown, QML, SQL, YAML, and `.clang-tidy` formatters, CMake linter, and
@@ -645,10 +642,10 @@ The hook rewrites only files whose formatted contents differ so unchanged source
 timestamps do not invalidate downstream build work. It configures the
 `macos-debug-local` preset only when the Ninja build tree is absent or the
 selected preset files change, then always invokes the incremental preset build.
-Ninja runs the mandatory Clang-Tidy, public-header verification, compilation,
-and linking stages only when their actual inputs changed. A formatting, CMake
-linting, configuration, or build failure returns the turn to Codex for repair.
-Every applicable gate must pass. Do not bypass this hook.
+Ninja runs the mandatory Include What You Use, Clang-Tidy, header verification,
+compilation, and linking stages only when their actual inputs changed. A
+formatting, CMake linting, configuration, or build failure returns the turn to
+Codex for repair. Every applicable gate must pass. Do not bypass this hook.
 
 The integrity hook invokes standalone formatter and CMake-linter executables
 from `PATH` at the same pinned versions used by formatting CI. Do not use `npx`
@@ -659,26 +656,49 @@ integrity hook and editor configuration—not to CMake configuration. The LLVM
 toolchain is the deliberate exception: CMake requires matching LLVM Clang C and
 C++ compilers, `clang-tidy`, `run-clang-tidy`, `clangd`, and `clang-format` from
 the canonical LLVM installation even when an individual Clang tool is consumed
-only by the hook or editor. Non-LLVM formatting tools such as Prettier remain
-requirements of the hook that invokes them rather than configuration
-prerequisites.
+only by the hook or editor. CMake also requires Include What You Use and its
+compilation-database driver built against that same Clang major version.
+Non-LLVM formatting tools such as Prettier remain requirements of the hook that
+invokes them rather than configuration prerequisites.
 
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
-missing- and unused-include diagnostics are the automated acceptance checks for
-Memly include sets, but neither enforces a unique direct provider or proves that
-the accepted set is minimal. The mandatory gate runs the complete `.clang-tidy`
-policy once over implementation translation units and once with every Memly
-header as a main file. Main-file header analysis is required because
-`misc-include-cleaner` does not evaluate an included header's own include set.
-Enable CMake's native interface-header verification for every component so each
-generated probe includes exactly one public header and receives that component's
-transitive public usage requirements. A normal build requires the independently
-callable `memly-public-header-verification` target before its final executable
-is complete. Ordinary component compilation may proceed after Clang-Tidy without
-waiting for the complete public-header verification set; only the final
-executable is gated by that set. Preserve the system-include classification of
-imported and explicitly system public dependencies; Memly include directories
-remain warning-checked.
+missing- and unused-include diagnostics govern implementation-file include sets.
+Include What You Use governs header include and forward-declaration decisions.
+Analyze a header that has a corresponding implementation through that real
+implementation translation unit so IWYU observes the completeness requirements
+instantiated there, but emit only diagnostics whose location is the associated
+header. Analyze a genuinely header-only file through CMake's one-header public
+or private probe. Never also run that probe for an associated header: its
+reduced context can contradict the implementation-associated result. Do not use
+`--check_also` to reanalyze headers through unrelated consumer contexts. Keep
+IWYU's normal forward-declaration policy enabled. The root `.iwyu.imp` contains
+only narrow provider mappings required to model third-party public headers
+accurately.
+
+The mandatory Clang-Tidy gate runs the complete `.clang-tidy` policy once over
+implementation translation units and once with every Memly header as a main
+file. Main-file header analysis is required because `misc-include-cleaner` does
+not evaluate an included header's own include set. Enable CMake's native public-
+and private-header verification for every component so each generated probe
+includes exactly one header in its owning target's compile context. A normal
+build requires the independently callable `memly-header-verification` target
+before its final executable is complete. Ordinary component compilation may
+proceed after the lint gates without waiting for the complete
+header-verification set; only the final executable is gated by that set.
+Preserve the system-include classification of imported and explicitly system
+public dependencies; Memly include directories remain warning-checked. Declare
+public headers under `HEADERS`, target-private headers under `PRIVATE_HEADERS`,
+and implementation translation units under `SOURCES` in each component target.
+Do not place headers in `SOURCES` and rely on filename-based classification.
+
+Lint Runner invokes Include What You Use only for the active header. The
+`tool/run_include_what_you_use.py` adapter maps that header to its
+same-component, same-stem implementation translation unit, filters out
+implementation-file diagnostics, and falls back to the corresponding
+CMake-generated probe only for a header without an implementation. The full
+CMake gate uses the same adapter and policy. Keep repository developer-tool
+adapters under the root `tool/` directory rather than inside an editor-specific
+configuration directory.
 
 Keep unavoidable `NOLINT` exceptions local to the exact declaration or
 expression and name the suppressed check.

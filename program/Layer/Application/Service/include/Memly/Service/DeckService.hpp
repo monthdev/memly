@@ -4,7 +4,12 @@
 #include <string>
 
 #include "Memly/IndexCache/DeckForestSnapshotIndexCache.hpp"
-#include "Memly/Repository/DeckRepository.hpp"
+
+namespace Memly::Repository {
+
+class DeckRepository;
+
+}
 
 namespace Memly::Service {
 

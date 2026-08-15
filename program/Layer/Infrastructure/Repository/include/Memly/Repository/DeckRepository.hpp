@@ -4,9 +4,14 @@
 #include <string>
 #include <vector>
 
-#include "Memly/Database/DatabaseRuntime.hpp"
 #include "Memly/Database/PreparedStatement.hpp"
 #include "Memly/Repository/DeckSnapshotRecord.hpp"
+
+namespace Memly::Database {
+
+class DatabaseRuntime;
+
+}
 
 namespace Memly::Repository {
 

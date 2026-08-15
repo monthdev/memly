@@ -121,6 +121,34 @@ find_program(
   NO_DEFAULT_PATH REQUIRED
 )
 
+find_program(MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE NAMES include-what-you-use REQUIRED)
+execute_process(
+  COMMAND "${MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE}" --version
+  RESULT_VARIABLE MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_RESULT
+  OUTPUT_VARIABLE MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_OUTPUT
+  ERROR_VARIABLE MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(NOT MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_RESULT EQUAL 0)
+  message(FATAL_ERROR "Unable to read Include What You Use version: ${MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_ERROR}")
+endif()
+string(REGEX MATCH "clang version ([0-9]+)" MEMLY_INCLUDE_WHAT_YOU_USE_CLANG_VERSION_MATCH
+             "${MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_OUTPUT}"
+)
+if(NOT MEMLY_INCLUDE_WHAT_YOU_USE_CLANG_VERSION_MATCH OR NOT CMAKE_MATCH_1 STREQUAL "${MEMLY_LLVM_MAJOR_VERSION}")
+  message(FATAL_ERROR "Memly requires Include What You Use built against LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x; "
+                      "found ${MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_OUTPUT}"
+  )
+endif()
+cmake_path(GET MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE PARENT_PATH MEMLY_INCLUDE_WHAT_YOU_USE_BINARY_DIRECTORY)
+find_program(
+  MEMLY_INCLUDE_WHAT_YOU_USE_DRIVER_EXECUTABLE
+  NAMES iwyu_tool.py
+  HINTS "${MEMLY_INCLUDE_WHAT_YOU_USE_BINARY_DIRECTORY}"
+  NO_DEFAULT_PATH REQUIRED
+)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
 if(WIN32)
   set(MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-driver.cmd")
   file(GENERATE OUTPUT "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
@@ -313,16 +341,37 @@ target_link_options(
 
 # Adds a static component and registers its complete C++ surface with the global lint and verification gates.
 function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCLUDE_DIRECTORY)
-  cmake_parse_arguments(PARSE_ARGV 2 MEMLY_COMPONENT "" "" "HEADERS;SOURCES")
+  cmake_parse_arguments(PARSE_ARGV 2 MEMLY_COMPONENT "" "" "HEADERS;PRIVATE_HEADERS;SOURCES")
+
   add_library("${MEMLY_COMPONENT_TARGET}" STATIC)
   target_sources(
     "${MEMLY_COMPONENT_TARGET}" PRIVATE ${MEMLY_COMPONENT_SOURCES}
     PUBLIC FILE_SET HEADERS BASE_DIRS "${MEMLY_COMPONENT_INCLUDE_DIRECTORY}" FILES ${MEMLY_COMPONENT_HEADERS}
   )
+  if(MEMLY_COMPONENT_PRIVATE_HEADERS)
+    target_sources(
+      "${MEMLY_COMPONENT_TARGET}"
+      PRIVATE FILE_SET
+              memly_private_headers
+              TYPE
+              HEADERS
+              BASE_DIRS
+              "${CMAKE_CURRENT_SOURCE_DIR}/source"
+              FILES
+              ${MEMLY_COMPONENT_PRIVATE_HEADERS}
+    )
+    set_target_properties(
+      "${MEMLY_COMPONENT_TARGET}" PROPERTIES VERIFY_PRIVATE_HEADER_SETS ON PRIVATE_HEADER_SETS_TO_VERIFY
+                                                                           memly_private_headers
+    )
+  endif()
   target_link_libraries("${MEMLY_COMPONENT_TARGET}" PRIVATE memly_asan)
   set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF VERIFY_INTERFACE_HEADER_SETS ON)
   set_property(GLOBAL APPEND PROPERTY MEMLY_COMPONENT_TARGETS "${MEMLY_COMPONENT_TARGET}")
-  set_property(GLOBAL APPEND PROPERTY MEMLY_CXX_SOURCE_FILES ${MEMLY_COMPONENT_HEADERS} ${MEMLY_COMPONENT_SOURCES})
+  set_property(
+    GLOBAL APPEND PROPERTY MEMLY_CXX_SOURCE_FILES ${MEMLY_COMPONENT_HEADERS} ${MEMLY_COMPONENT_PRIVATE_HEADERS}
+                           ${MEMLY_COMPONENT_SOURCES}
+  )
 endfunction()
 
 add_subdirectory(program)
@@ -399,13 +448,45 @@ foreach(MEMLY_COMPONENT_TARGET IN LISTS MEMLY_COMPONENT_TARGETS)
   string(CONCAT MEMLY_INTERFACE_HEADER_VERIFICATION_CONDITION "$<AND:" "$<COMPILE_LANG_AND_ID:CXX,Clang>,"
                 "$<STREQUAL:$<TARGET_PROPERTY:NAME>,${MEMLY_COMPONENT_TARGET}_verify_interface_header_sets>>"
   )
+  string(CONCAT MEMLY_PRIVATE_HEADER_VERIFICATION_CONDITION "$<AND:" "$<COMPILE_LANG_AND_ID:CXX,Clang>,"
+                "$<STREQUAL:$<TARGET_PROPERTY:NAME>,${MEMLY_COMPONENT_TARGET}_verify_private_header_sets>>"
+  )
   foreach(MEMLY_CLANG_WARNING_OPTION IN LISTS MEMLY_CLANG_WARNING_OPTIONS)
     target_compile_options(
       "${MEMLY_COMPONENT_TARGET}"
       INTERFACE "$<${MEMLY_INTERFACE_HEADER_VERIFICATION_CONDITION}:${MEMLY_CLANG_WARNING_OPTION}>"
     )
+    target_compile_options(
+      "${MEMLY_COMPONENT_TARGET}"
+      PRIVATE "$<${MEMLY_PRIVATE_HEADER_VERIFICATION_CONDITION}:${MEMLY_CLANG_WARNING_OPTION}>"
+    )
   endforeach()
 endforeach()
+
+set(MEMLY_INCLUDE_WHAT_YOU_USE_STAMP "${CMAKE_BINARY_DIR}/.memly-include-what-you-use.stamp")
+add_custom_command(
+  OUTPUT "${MEMLY_INCLUDE_WHAT_YOU_USE_STAMP}"
+  COMMAND
+    "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tool/run_include_what_you_use.py"
+    "${CMAKE_BINARY_DIR}/compile_commands.json" "${CMAKE_SOURCE_DIR}/.iwyu.imp" --output-format clang
+    --include-what-you-use-driver "${MEMLY_INCLUDE_WHAT_YOU_USE_DRIVER_EXECUTABLE}" --include-what-you-use-executable
+    "${MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE}" --project-root "${CMAKE_SOURCE_DIR}"
+  COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_INCLUDE_WHAT_YOU_USE_STAMP}"
+  DEPENDS "${CMAKE_SOURCE_DIR}/.iwyu.imp"
+          "${CMAKE_SOURCE_DIR}/tool/run_include_what_you_use.py"
+          "${CMAKE_BINARY_DIR}/compile_commands.json"
+          "${MEMLY_INCLUDE_WHAT_YOU_USE_DRIVER_EXECUTABLE}"
+          "${MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE}"
+          ${MEMLY_CXX_TRANSLATION_UNIT_FILES}
+          ${MEMLY_CXX_HEADER_FILES}
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  COMMENT "Run the mandatory implementation-associated header Include What You Use gate before compilation"
+  VERBATIM
+)
+add_custom_target(
+  memly-include-what-you-use DEPENDS "${MEMLY_INCLUDE_WHAT_YOU_USE_STAMP}"
+  COMMENT "Run the mandatory implementation-associated header Include What You Use gate"
+)
 
 set(MEMLY_CLANG_TIDY_STAMP "${CMAKE_BINARY_DIR}/.memly-clang-tidy.stamp")
 add_custom_command(
@@ -432,6 +513,7 @@ add_custom_command(
 add_custom_target(
   memly-clang-tidy DEPENDS "${MEMLY_CLANG_TIDY_STAMP}" COMMENT "Run the mandatory full-tree Clang-Tidy gate"
 )
+add_dependencies(memly-clang-tidy memly-include-what-you-use)
 
 foreach(MEMLY_COMPONENT_TARGET IN LISTS MEMLY_COMPONENT_TARGETS)
   add_dependencies("${MEMLY_COMPONENT_TARGET}" memly-clang-tidy)
@@ -439,8 +521,5 @@ endforeach()
 add_dependencies(memly_qml memly-clang-tidy)
 add_dependencies(memly memly-clang-tidy)
 
-add_custom_target(
-  memly-public-header-verification DEPENDS all_verify_interface_header_sets
-  COMMENT "Compile every public header independently"
-)
-add_dependencies(memly memly-public-header-verification)
+add_custom_target(memly-header-verification DEPENDS all_verify_header_sets COMMENT "Compile every header independently")
+add_dependencies(memly memly-header-verification)

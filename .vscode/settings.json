@@ -35,6 +35,27 @@
         "defaultSeverity": "warning"
       }
     },
+    "include-what-you-use": {
+      "kind": "diagnostic",
+      "command": "python3",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "${workspaceFolder}/tool/run_include_what_you_use.py",
+        "${workspaceFolder}/build/macos-debug/compile_commands.json",
+        "${workspaceFolder}/.iwyu.imp",
+        "${file}"
+      ],
+      "successExitCodes": [
+        0,
+        1
+      ],
+      "timeout": 120000,
+      "parser": {
+        "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)$",
+        "flags": "gm",
+        "defaultSeverity": "warning"
+      }
+    },
     "cmake-lint": {
       "kind": "diagnostic",
       "command": "cmake-lint",
@@ -87,15 +108,15 @@
   },
   "lintRunner.targets": [
     {
-      "name": "C and C++",
+      "name": "C and C++ Sources",
       "match": {
         "languages": [
           "c",
           "cpp"
         ],
         "files": [
-          "program/**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx}",
-          "test/**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx}"
+          "program/**/*.{c,cc,cpp,cxx}",
+          "test/**/*.{c,cc,cpp,cxx}"
         ]
       },
       "onOpen": {
@@ -107,6 +128,33 @@
       "manual": {
         "strategy": "sequence",
         "tools": [
+          "clang-tidy"
+        ]
+      }
+    },
+    {
+      "name": "C and C++ Headers",
+      "match": {
+        "languages": [
+          "c",
+          "cpp"
+        ],
+        "files": [
+          "program/**/*.{h,hh,hpp,hxx}",
+          "test/**/*.{h,hh,hpp,hxx}"
+        ]
+      },
+      "onOpen": {
+        "strategy": "sequence",
+        "tools": [
+          "include-what-you-use",
+          "clang-tidy"
+        ]
+      },
+      "manual": {
+        "strategy": "sequence",
+        "tools": [
+          "include-what-you-use",
           "clang-tidy"
         ]
       }

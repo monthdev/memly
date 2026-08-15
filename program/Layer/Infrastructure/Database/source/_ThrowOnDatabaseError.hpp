@@ -1,8 +1,13 @@
 #pragma once
 
-#include <duckdb.hpp>
-
 #include <source_location>
+
+namespace duckdb {
+
+class PreparedStatement;
+class QueryResult;
+
+}
 
 namespace Memly::Database {
 
