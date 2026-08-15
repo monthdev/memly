@@ -4,9 +4,12 @@
   "cmake.sourceDirectory": "${workspaceFolder}",
   "cmake.useCMakePresets": "always",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+  "files.associations": {
+    ".iwyu.imp": "json",
+  },
   "clangd.arguments": [
     "--enable-config",
-    "--compile-commands-dir=${workspaceFolder}"
+    "--compile-commands-dir=${workspaceFolder}",
   ],
   "qt-qml.qmlls.useNoCMakeCalls": true,
   "lintRunner.respectGitignore": true,
@@ -22,7 +25,7 @@
         "--header-filter=^$",
         "-p",
         "${workspaceFolder}",
-        "${file}"
+        "${file}",
       ],
       "successExitCodes": [
         0,
@@ -32,8 +35,8 @@
       "parser": {
         "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)(?:\\s+\\[(?<code>[^\\]]+)\\])?$",
         "flags": "gm",
-        "defaultSeverity": "warning"
-      }
+        "defaultSeverity": "warning",
+      },
     },
     "include-what-you-use": {
       "kind": "diagnostic",
@@ -43,7 +46,7 @@
         "${workspaceFolder}/tool/run_include_what_you_use.py",
         "${workspaceFolder}/build/macos-debug/compile_commands.json",
         "${workspaceFolder}/.iwyu.imp",
-        "${file}"
+        "${file}",
       ],
       "successExitCodes": [
         0,
@@ -53,8 +56,8 @@
       "parser": {
         "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)$",
         "flags": "gm",
-        "defaultSeverity": "warning"
-      }
+        "defaultSeverity": "warning",
+      },
     },
     "cmake-lint": {
       "kind": "diagnostic",
@@ -65,7 +68,7 @@
         "-c",
         "${workspaceFolder}/.cmakelintrc",
         "--",
-        "${file}"
+        "${file}",
       ],
       "successExitCodes": [
         0,
@@ -74,8 +77,8 @@
       "parser": {
         "pattern": "^(?:.*?):(?<line>\\d+)(?:,(?<col>\\d+))?:\\s+\\[(?<code>[A-Z]\\d{4})\\]\\s+(?<message>.*)$",
         "flags": "gm",
-        "defaultSeverity": "warning"
-      }
+        "defaultSeverity": "warning",
+      },
     },
     "cmake-format": {
       "kind": "write",
@@ -88,7 +91,7 @@
       "successExitCodes": [
         0
       ],
-      "timeout": 120000
+      "timeout": 120000,
     },
     "qmlformat": {
       "kind": "write",
@@ -98,13 +101,13 @@
         "--settings",
         "${workspaceFolder}/.qmlformat.ini",
         "--inplace",
-        "${file}"
+        "${file}",
       ],
       "successExitCodes": [
         0
       ],
-      "timeout": 120000
-    }
+      "timeout": 120000,
+    },
   },
   "lintRunner.targets": [
     {
@@ -117,20 +120,20 @@
         "files": [
           "program/**/*.{c,cc,cpp,cxx}",
           "test/**/*.{c,cc,cpp,cxx}"
-        ]
+        ],
       },
       "onOpen": {
         "strategy": "sequence",
         "tools": [
           "clang-tidy"
-        ]
+        ],
       },
       "manual": {
         "strategy": "sequence",
         "tools": [
           "clang-tidy"
-        ]
-      }
+        ],
+      },
     },
     {
       "name": "C and C++ Headers",
@@ -142,22 +145,22 @@
         "files": [
           "program/**/*.{h,hh,hpp,hxx}",
           "test/**/*.{h,hh,hpp,hxx}"
-        ]
+        ],
       },
       "onOpen": {
         "strategy": "sequence",
         "tools": [
           "include-what-you-use",
           "clang-tidy"
-        ]
+        ],
       },
       "manual": {
         "strategy": "sequence",
         "tools": [
           "include-what-you-use",
           "clang-tidy"
-        ]
-      }
+        ],
+      },
     },
     {
       "name": "CMake",
@@ -169,27 +172,27 @@
           "CMakeLists.txt",
           "*.cmake",
           "*.cmake.in"
-        ]
+        ],
       },
       "onOpen": {
         "strategy": "sequence",
         "tools": [
           "cmake-lint"
-        ]
+        ],
       },
       "onSave": {
         "strategy": "sequence",
         "tools": [
           "cmake-format"
-        ]
+        ],
       },
       "manual": {
         "strategy": "sequence",
         "tools": [
           "cmake-format",
           "cmake-lint"
-        ]
-      }
+        ],
+      },
     },
     {
       "name": "QML",
@@ -199,27 +202,27 @@
         ],
         "files": [
           "program/**/*.qml"
-        ]
+        ],
       },
       "onSave": {
         "strategy": "sequence",
         "tools": [
           "qmlformat"
-        ]
+        ],
       },
       "manual": {
         "strategy": "sequence",
         "tools": [
           "qmlformat"
-        ]
-      }
-    }
+        ],
+      },
+    },
   ],
   "[cmake]": {
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
   },
   "[qml]": {
     "editor.defaultFormatter": "theqtcompany.qt-qml",
-    "editor.formatOnSave": false
-  }
+    "editor.formatOnSave": false,
+  },
 }

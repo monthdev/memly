@@ -636,7 +636,7 @@ files it analyzes; unchanged inputs do not repeat the analysis. Do not cap
 either full-tree tool's worker count.
 
 Before Codex may finish, the project `Stop` integrity hook runs the same C/C++,
-CMake, Markdown, QML, SQL, YAML, and `.clang-tidy` formatters, CMake linter, and
+CMake, QML, SQL, and repository-wide Prettier formatters, CMake linter, and
 pinned tool versions as formatting CI; Doxygen remains an independent workflow.
 The hook rewrites only files whose formatted contents differ so unchanged source
 timestamps do not invalidate downstream build work. It configures the
@@ -660,6 +660,18 @@ only by the hook or editor. CMake also requires Include What You Use and its
 compilation-database driver built against that same Clang major version.
 Non-LLVM formatting tools such as Prettier remain requirements of the hook that
 invokes them rather than configuration prerequisites.
+
+ClangFormat owns C, C++, and Objective-C source files; CMakeFormat owns CMake
+listfiles; QMLFormat owns QML; and SQL Formatter owns SQL. Prettier owns every
+remaining file for which it can infer or has explicitly been assigned a parser.
+The root `.prettierignore` excludes the specialized formatter families so a
+future Prettier parser cannot create overlapping formatter authority. Both the
+CI and integrity hook invoke Prettier with `--ignore-unknown`: CI passes every
+tracked file, while the hook additionally passes untracked, non-ignored files so
+a newly created configuration file is formatted before it is committed. Assign
+an unusual structured configuration filename an explicit parser in
+`.prettierrc.json`; do not force an unsupported format through an unrelated
+parser merely to claim universal coverage.
 
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
 missing- and unused-include diagnostics govern implementation-file include sets.

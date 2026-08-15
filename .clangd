@@ -3,8 +3,7 @@ Diagnostics:
   UnusedIncludes: Strict
   MissingIncludes: Strict
   ClangTidy:
-    Remove: ['*']
-
+    Remove: ["*"]
 ---
 If:
   PathExclude: (program|test)/.*
@@ -13,4 +12,4 @@ CompileFlags:
   Remove: [-W*, -pedantic, /W*, /clang:-W*, /clang:-pedantic]
 
 Diagnostics:
-  Suppress: ['*']
+  Suppress: ["*"]

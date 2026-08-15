@@ -12,6 +12,30 @@
     },
     {
       "files": [
+        ".cmakelintrc"
+      ],
+      "options": {
+        "parser": "yaml"
+      }
+    },
+    {
+      "files": [
+        ".iwyu.imp"
+      ],
+      "options": {
+        "parser": "json"
+      }
+    },
+    {
+      "files": [
+        ".vscode/*.json"
+      ],
+      "options": {
+        "parser": "jsonc"
+      }
+    },
+    {
+      "files": [
         "*.md",
         "**/*.md",
         "*.markdown",

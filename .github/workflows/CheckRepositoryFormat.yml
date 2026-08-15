@@ -136,43 +136,6 @@ jobs:
           echo "Target CMake listfiles:"
           cat /tmp/cmake_files.txt
 
-      - name: Collect target Markdown files
-        id: markdown_files
-        env:
-          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mapfile -t CONFIG_FILES < <(
-            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              .prettierignore \
-              .prettierrc \
-              .prettierrc.json \
-              .prettierrc.yaml \
-              .prettierrc.yml \
-              prettier.config.js \
-              .github/workflows/CheckRepositoryFormat.yml
-          )
-
-          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
-            echo "Markdown check configuration changed; checking all Markdown files."
-            git ls-files '*.md' '*.markdown' > /tmp/markdown_files.txt
-          else
-            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              '*.md' '*.markdown' > /tmp/markdown_files.txt
-          fi
-
-          if [[ ! -s /tmp/markdown_files.txt ]]; then
-            echo "has_files=false" >> "$GITHUB_OUTPUT"
-            echo "No Markdown files changed."
-            exit 0
-          fi
-
-          echo "has_files=true" >> "$GITHUB_OUTPUT"
-          echo "Target Markdown files:"
-          cat /tmp/markdown_files.txt
-
       - name: Collect target QML files
         id: qml_files
         env:
@@ -236,48 +199,7 @@ jobs:
           echo "Target SQL files:"
           cat /tmp/sql_files.txt
 
-      - name: Collect target YAML files
-        id: yaml_files
-        env:
-          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mapfile -t CONFIG_FILES < <(
-            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              .prettierignore \
-              .prettierrc \
-              .prettierrc.json \
-              .prettierrc.yaml \
-              .prettierrc.yml \
-              prettier.config.js \
-              .github/workflows/CheckRepositoryFormat.yml
-          )
-
-          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
-            echo "YAML check configuration changed; checking all YAML files."
-            git ls-files '*.yaml' '*.yml' .clang-tidy > /tmp/yaml_files.txt
-          else
-            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              '*.yaml' '*.yml' .clang-tidy > /tmp/yaml_files.txt
-          fi
-
-          if [[ ! -s /tmp/yaml_files.txt ]]; then
-            echo "has_files=false" >> "$GITHUB_OUTPUT"
-            echo "No YAML files changed."
-            exit 0
-          fi
-
-          echo "has_files=true" >> "$GITHUB_OUTPUT"
-          echo "Target YAML files:"
-          cat /tmp/yaml_files.txt
-
       - name: Set up Node.js
-        if: >-
-          steps.markdown_files.outputs.has_files == 'true' ||
-          steps.sql_files.outputs.has_files == 'true' ||
-          steps.yaml_files.outputs.has_files == 'true'
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -349,14 +271,14 @@ jobs:
           mapfile -t FILES < /tmp/cmake_files.txt
           cmake-lint --suppress-decorations -c .cmakelintrc -- "${FILES[@]}"
 
-      - name: Check Markdown formatting
-        if: steps.markdown_files.outputs.has_files == 'true'
+      - name: Check Prettier formatting
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t FILES < /tmp/markdown_files.txt
+
+          mapfile -d '' -t FILES < <(git ls-files -z)
           npx --yes "prettier@${PRETTIER_VERSION}" --version
-          npx --yes "prettier@${PRETTIER_VERSION}" --check "${FILES[@]}"
+          npx --yes "prettier@${PRETTIER_VERSION}" --check --ignore-unknown "${FILES[@]}"
 
       - name: Cache Qt
         if: steps.qml_files.outputs.has_files == 'true'
@@ -460,12 +382,3 @@ jobs:
             echo "::error::Some files are not formatted. Run: sql-formatter --language duckdb --fix <file>..."
             exit 1
           fi
-
-      - name: Check YAML formatting
-        if: steps.yaml_files.outputs.has_files == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t FILES < /tmp/yaml_files.txt
-          npx --yes "prettier@${PRETTIER_VERSION}" --version
-          npx --yes "prettier@${PRETTIER_VERSION}" --check "${FILES[@]}"

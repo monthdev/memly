@@ -118,26 +118,17 @@ if [[ ${#FilePathArray[@]} -gt 0 ]]; then
     "$CMakeLintExecutable" --suppress-decorations -c .cmakelintrc -- "${FilePathArray[@]}" || Fail 'Memly CMake linting failed.'
 fi
 
-CollectExistingFiles Markdown '*.md' '*.markdown'
-if [[ ${#FilePathArray[@]} -gt 0 ]]; then
-    if [[ "$FormatMode" == write ]]; then
-        "$PrettierExecutable" --write --log-level warn "${FilePathArray[@]}" || Fail 'Memly Markdown formatting failed.'
-    else
-        "$PrettierExecutable" --check "${FilePathArray[@]}" || Fail 'Memly Markdown formatting failed.'
-    fi
-fi
-
 CollectExistingFiles QML '*.qml'
 FormatFileArrayWithOutput QML "$QmlFormatExecutable" --settings .qmlformat.ini
 
 CollectExistingFiles SQL '*.sql'
 FormatFileArrayWithOutput SQL "$SqlFormatterExecutable" --language duckdb
 
-CollectExistingFiles YAML '*.yaml' '*.yml' '.clang-tidy'
+CollectExistingFiles Prettier
 if [[ ${#FilePathArray[@]} -gt 0 ]]; then
     if [[ "$FormatMode" == write ]]; then
-        "$PrettierExecutable" --write --log-level warn "${FilePathArray[@]}" || Fail 'Memly YAML formatting failed.'
+        "$PrettierExecutable" --write --ignore-unknown --log-level warn "${FilePathArray[@]}" || Fail 'Memly Prettier formatting failed.'
     else
-        "$PrettierExecutable" --check "${FilePathArray[@]}" || Fail 'Memly YAML formatting failed.'
+        "$PrettierExecutable" --check --ignore-unknown "${FilePathArray[@]}" || Fail 'Memly Prettier formatting failed.'
     fi
 fi

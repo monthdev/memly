@@ -1,0 +1,17 @@
+*.c
+*.cc
+*.cpp
+*.cxx
+*.h
+*.hh
+*.hpp
+*.hxx
+*.m
+*.mm
+
+CMakeLists.txt
+*.cmake
+*.cmake.in
+
+*.qml
+*.sql
