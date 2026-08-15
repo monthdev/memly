@@ -5,6 +5,8 @@
   "cmake.useCMakePresets": "always",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "files.associations": {
+    ".clang-tidy": "yaml",
+    ".cmakelintrc": "yaml",
     ".iwyu.imp": "json",
   },
   "clangd.arguments": [
@@ -27,10 +29,7 @@
         "${workspaceFolder}",
         "${file}",
       ],
-      "successExitCodes": [
-        0,
-        1
-      ],
+      "successExitCodes": [0, 1],
       "timeout": 120000,
       "parser": {
         "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)(?:\\s+\\[(?<code>[^\\]]+)\\])?$",
@@ -48,10 +47,7 @@
         "${workspaceFolder}/.iwyu.imp",
         "${file}",
       ],
-      "successExitCodes": [
-        0,
-        1
-      ],
+      "successExitCodes": [0, 1],
       "timeout": 120000,
       "parser": {
         "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)$",
@@ -70,10 +66,7 @@
         "--",
         "${file}",
       ],
-      "successExitCodes": [
-        0,
-        1
-      ],
+      "successExitCodes": [0, 1],
       "parser": {
         "pattern": "^(?:.*?):(?<line>\\d+)(?:,(?<col>\\d+))?:\\s+\\[(?<code>[A-Z]\\d{4})\\]\\s+(?<message>.*)$",
         "flags": "gm",
@@ -84,13 +77,8 @@
       "kind": "write",
       "command": "cmake-format",
       "cwd": "${workspaceFolder}",
-      "args": [
-        "-i",
-        "${file}"
-      ],
-      "successExitCodes": [
-        0
-      ],
+      "args": ["-i", "${file}"],
+      "successExitCodes": [0],
       "timeout": 120000,
     },
     "qmlformat": {
@@ -103,9 +91,7 @@
         "--inplace",
         "${file}",
       ],
-      "successExitCodes": [
-        0
-      ],
+      "successExitCodes": [0],
       "timeout": 120000,
     },
   },
@@ -113,116 +99,89 @@
     {
       "name": "C and C++ Sources",
       "match": {
-        "languages": [
-          "c",
-          "cpp"
-        ],
-        "files": [
-          "program/**/*.{c,cc,cpp,cxx}",
-          "test/**/*.{c,cc,cpp,cxx}"
-        ],
+        "languages": ["c", "cpp"],
+        "files": ["program/**/*.{c,cc,cpp,cxx}", "test/**/*.{c,cc,cpp,cxx}"],
       },
       "onOpen": {
         "strategy": "sequence",
-        "tools": [
-          "clang-tidy"
-        ],
+        "tools": ["clang-tidy"],
       },
       "manual": {
         "strategy": "sequence",
-        "tools": [
-          "clang-tidy"
-        ],
+        "tools": ["clang-tidy"],
       },
     },
     {
       "name": "C and C++ Headers",
       "match": {
-        "languages": [
-          "c",
-          "cpp"
-        ],
-        "files": [
-          "program/**/*.{h,hh,hpp,hxx}",
-          "test/**/*.{h,hh,hpp,hxx}"
-        ],
+        "languages": ["c", "cpp"],
+        "files": ["program/**/*.{h,hh,hpp,hxx}", "test/**/*.{h,hh,hpp,hxx}"],
       },
       "onOpen": {
         "strategy": "sequence",
-        "tools": [
-          "include-what-you-use",
-          "clang-tidy"
-        ],
+        "tools": ["include-what-you-use", "clang-tidy"],
       },
       "manual": {
         "strategy": "sequence",
-        "tools": [
-          "include-what-you-use",
-          "clang-tidy"
-        ],
+        "tools": ["include-what-you-use", "clang-tidy"],
       },
     },
     {
       "name": "CMake",
       "match": {
-        "languages": [
-          "cmake"
-        ],
-        "files": [
-          "CMakeLists.txt",
-          "*.cmake",
-          "*.cmake.in"
-        ],
+        "languages": ["cmake"],
+        "files": ["CMakeLists.txt", "*.cmake", "*.cmake.in"],
       },
       "onOpen": {
         "strategy": "sequence",
-        "tools": [
-          "cmake-lint"
-        ],
+        "tools": ["cmake-lint"],
       },
       "onSave": {
         "strategy": "sequence",
-        "tools": [
-          "cmake-format"
-        ],
+        "tools": ["cmake-format"],
       },
       "manual": {
         "strategy": "sequence",
-        "tools": [
-          "cmake-format",
-          "cmake-lint"
-        ],
+        "tools": ["cmake-format", "cmake-lint"],
       },
     },
     {
       "name": "QML",
       "match": {
-        "languages": [
-          "qml"
-        ],
-        "files": [
-          "program/**/*.qml"
-        ],
+        "languages": ["qml"],
+        "files": ["program/**/*.qml"],
       },
       "onSave": {
         "strategy": "sequence",
-        "tools": [
-          "qmlformat"
-        ],
+        "tools": ["qmlformat"],
       },
       "manual": {
         "strategy": "sequence",
-        "tools": [
-          "qmlformat"
-        ],
+        "tools": ["qmlformat"],
       },
     },
   ],
   "[cmake]": {
     "editor.formatOnSave": false,
   },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+  },
   "[qml]": {
     "editor.defaultFormatter": "theqtcompany.qt-qml",
     "editor.formatOnSave": false,
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
 }

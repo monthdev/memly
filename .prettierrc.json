@@ -1,9 +1,7 @@
 {
   "overrides": [
     {
-      "files": [
-        ".clang-tidy"
-      ],
+      "files": [".clang-tidy"],
       "options": {
         "parser": "yaml",
         "printWidth": 160,
@@ -11,36 +9,25 @@
       }
     },
     {
-      "files": [
-        ".cmakelintrc"
-      ],
+      "files": [".cmakelintrc"],
       "options": {
         "parser": "yaml"
       }
     },
     {
-      "files": [
-        ".iwyu.imp"
-      ],
+      "files": [".iwyu.imp"],
       "options": {
         "parser": "json"
       }
     },
     {
-      "files": [
-        ".vscode/*.json"
-      ],
+      "files": [".vscode/*.json"],
       "options": {
         "parser": "jsonc"
       }
     },
     {
-      "files": [
-        "*.md",
-        "**/*.md",
-        "*.markdown",
-        "**/*.markdown"
-      ],
+      "files": ["*.md", "**/*.md", "*.markdown", "**/*.markdown"],
       "options": {
         "printWidth": 80,
         "proseWrap": "always"

@@ -1,10 +1,5 @@
 [
   {
-    "symbol": [
-      "icu",
-      "private",
-      "<unicode/unistr.h>",
-      "public"
-    ]
+    "symbol": ["icu", "private", "<unicode/unistr.h>", "public"]
   }
 ]

@@ -673,6 +673,10 @@ an unusual structured configuration filename an explicit parser in
 `.prettierrc.json`; do not force an unsupported format through an unrelated
 parser merely to claim universal coverage.
 
+Workspace settings assign Prettier as the default formatter for JSON, JSONC,
+YAML, and Markdown so editor saves preserve the same formatting that CI and the
+integrity hook enforce.
+
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
 missing- and unused-include diagnostics govern implementation-file include sets.
 Include What You Use governs header include and forward-declaration decisions.
