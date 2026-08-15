@@ -1,9 +1,12 @@
 {
   "cmake.configureOnOpen": true,
   "cmake.configureOnEdit": true,
+  "cmake.saveBeforeBuild": true,
   "cmake.sourceDirectory": "${workspaceFolder}",
   "cmake.useCMakePresets": "always",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
   "files.associations": {
     ".clang-tidy": "yaml",
     ".cmakelintrc": "yaml",
@@ -13,17 +16,13 @@
     "--enable-config",
     "--compile-commands-dir=${workspaceFolder}",
   ],
+  "SQL-Formatter-VSCode.dialect": "duckdb",
+  "SQL-Formatter-VSCode.ignoreTabSettings": true,
+  "SQL-Formatter-VSCode.tabSizeOverride": 2,
+  "SQL-Formatter-VSCode.insertSpacesOverride": true,
   "qt-qml.qmlls.useNoCMakeCalls": true,
   "lintRunner.respectGitignore": true,
   "lintRunner.tools": {
-    "clang-format": {
-      "kind": "write",
-      "command": "clang-format",
-      "cwd": "${workspaceFolder}",
-      "args": ["-i", "-style=file", "${file}"],
-      "successExitCodes": [0],
-      "timeout": 120000,
-    },
     "clang-tidy": {
       "kind": "diagnostic",
       "command": "clang-tidy",
@@ -51,7 +50,7 @@
       "cwd": "${workspaceFolder}",
       "args": [
         "${workspaceFolder}/tool/run_include_what_you_use.py",
-        "${workspaceFolder}/build/macos-debug/compile_commands.json",
+        "${workspaceFolder}/compile_commands.json",
         "${workspaceFolder}/.iwyu.imp",
         "${file}",
       ],
@@ -97,27 +96,6 @@
       "successExitCodes": [0],
       "timeout": 120000,
     },
-    "qmlformat": {
-      "kind": "write",
-      "command": "qmlformat",
-      "cwd": "${workspaceFolder}",
-      "args": [
-        "--settings",
-        "${workspaceFolder}/.qmlformat.ini",
-        "--inplace",
-        "${file}",
-      ],
-      "successExitCodes": [0],
-      "timeout": 120000,
-    },
-    "sql-formatter": {
-      "kind": "write",
-      "command": "sql-formatter",
-      "cwd": "${workspaceFolder}",
-      "args": ["--language", "duckdb", "--fix", "${file}"],
-      "successExitCodes": [0],
-      "timeout": 120000,
-    },
   },
   "lintRunner.targets": [
     {
@@ -133,13 +111,9 @@
         "strategy": "sequence",
         "tools": ["clang-tidy"],
       },
-      "onSave": {
-        "strategy": "sequence",
-        "tools": ["clang-format"],
-      },
       "manual": {
         "strategy": "sequence",
-        "tools": ["clang-format", "clang-tidy"],
+        "tools": ["clang-tidy"],
       },
     },
     {
@@ -152,13 +126,9 @@
         "strategy": "sequence",
         "tools": ["include-what-you-use", "clang-tidy"],
       },
-      "onSave": {
-        "strategy": "sequence",
-        "tools": ["clang-format"],
-      },
       "manual": {
         "strategy": "sequence",
-        "tools": ["clang-format", "include-what-you-use", "clang-tidy"],
+        "tools": ["include-what-you-use", "clang-tidy"],
       },
     },
     {
@@ -201,45 +171,17 @@
         "tools": ["prettier"],
       },
     },
-    {
-      "name": "QML",
-      "match": {
-        "languages": ["qml"],
-        "files": ["program/**/*.qml"],
-      },
-      "onSave": {
-        "strategy": "sequence",
-        "tools": ["qmlformat"],
-      },
-      "manual": {
-        "strategy": "sequence",
-        "tools": ["qmlformat"],
-      },
-    },
-    {
-      "name": "SQL",
-      "match": {
-        "languages": ["sql"],
-        "files": ["program/**/*.sql"],
-      },
-      "onSave": {
-        "strategy": "sequence",
-        "tools": ["sql-formatter"],
-      },
-      "manual": {
-        "strategy": "sequence",
-        "tools": ["sql-formatter"],
-      },
-    },
   ],
   "[c]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.formatOnSave": true,
   },
   "[cmake]": {
     "editor.formatOnSave": false,
   },
   "[cpp]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.formatOnSave": true,
   },
   "[github-actions-workflow]": {
     "editor.formatOnSave": false,
@@ -254,16 +196,20 @@
     "editor.formatOnSave": false,
   },
   "[objective-c]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.formatOnSave": true,
   },
   "[objective-cpp]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.formatOnSave": true,
   },
   "[qml]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "theqtcompany.qt-qml",
+    "editor.formatOnSave": true,
   },
   "[sql]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
+    "editor.formatOnSave": true,
   },
   "[yaml]": {
     "editor.formatOnSave": false,

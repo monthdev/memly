@@ -21,7 +21,7 @@ namespace Memly::Database {
 class [[nodiscard]] QueryResultDecoder final {
 private:
     std::unique_ptr<duckdb::QueryResult> m_QueryResult;
-    const std::source_location& m_SourceLocation;
+    const std::source_location& m_SourceLocation; // TODO: this can be forwarded?
 
 public:
     explicit QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&&, const std::source_location&) noexcept;

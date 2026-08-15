@@ -673,14 +673,40 @@ an unusual structured configuration filename an explicit parser in
 `.prettierrc.json`; do not force an unsupported format through an unrelated
 parser merely to claim universal coverage.
 
-Lint Runner is the sole editor adapter for Memly's per-file formatters and CLI
-linters. Its write tools invoke ClangFormat, CMakeFormat, QMLFormat, SQL
-Formatter, and Prettier directly on save; VS Code's native format-on-save
-pipeline remains disabled for their language modes. Keep language and project
-extensions such as clangd, CMake Tools, and Qt QML for the persistent editor
-services that a CLI runner cannot provide. Formatter-only extensions listed in
-`.vscode/extensions.json` as unwanted recommendations conflict with this model
-and should be disabled for the workspace.
+VS Code's native format-on-save pipeline owns frequently edited program text:
+clangd formats C, C++, and Objective-C; the Qt QML extension and `qmlls` format
+QML; and the official SQL Formatter extension formats DuckDB SQL. These
+providers return edits through VS Code's awaited save transaction rather than
+rewriting an already saved file. Do not duplicate these formatters with Lint
+Runner write tools or competing formatter extensions.
+
+Lint Runner remains the editor adapter for CLI diagnostics and for formatting
+CMake and Prettier-owned configuration and documentation files. Its write tools
+intentionally run after every save of those infrequently edited files, including
+automatic and extension-initiated saves. Keep language and project extensions
+such as clangd, CMake Tools, and Qt QML for persistent editor services that a
+CLI runner cannot provide.
+
+Memly auto-saves after one second of inactivity and retains CMake Tools'
+save-before-build behavior so compilation cannot silently consume stale editor
+buffers. VS Code deliberately skips native format-on-save participants for an
+automatic save; formatting therefore occurs when an explicit Save or Save All
+operation saves a dirty document, without interrupting delayed auto-save. A
+document already made clean by automatic save remains unformatted until it is
+edited and explicitly saved or the repository integrity hook runs. This
+manual-only native behavior applies to C, C++, Objective-C, QML, and SQL; Lint
+Runner formats its CMake and Prettier-owned files after automatic save. When
+CMake Tools saves a dirty buffer before a build, VS Code awaits the native
+formatter before the save and build continue. The integrity hook remains the
+final formatting authority for every file family.
+
+CMake Tools copies the active configure preset's `compile_commands.json` to the
+repository root after configuration. Editor-side clangd, Clang-Tidy, and Include
+What You Use all consume that root mirror; do not hard-code an editor tool to
+one preset's build directory. CMake's mandatory build-time lint gates continue
+to consume the compilation database in their own `${CMAKE_BINARY_DIR}`. A fresh
+or clean workspace must complete CMake configuration before editor C++
+diagnostics can use the target-specific compilation context.
 
 Keep one root `.clang-tidy` policy. `misc-include-cleaner` and clangd's strict
 missing- and unused-include diagnostics govern implementation-file include sets.
