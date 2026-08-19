@@ -31,6 +31,7 @@
         "--experimental-custom-checks",
         "--quiet",
         "--config-file=${workspaceFolder}/.clang-tidy",
+        "--checks=-*,custom-memly-*",
         "--header-filter=^$",
         "-p",
         "${workspaceFolder}",
@@ -99,13 +100,10 @@
   },
   "lintRunner.targets": [
     {
-      "name": "C and C++ Sources",
+      "name": "C++ Sources",
       "match": {
-        "languages": ["c", "cpp", "objective-c", "objective-cpp"],
-        "files": [
-          "program/**/*.{c,cc,cpp,cxx,m,mm}",
-          "test/**/*.{c,cc,cpp,cxx,m,mm}",
-        ],
+        "languages": ["cpp"],
+        "files": ["program/**/*.cpp", "test/**/*.cpp"],
       },
       "onOpen": {
         "strategy": "sequence",
@@ -117,18 +115,18 @@
       },
     },
     {
-      "name": "C and C++ Headers",
+      "name": "C++ Headers",
       "match": {
-        "languages": ["c", "cpp", "objective-c", "objective-cpp"],
-        "files": ["program/**/*.{h,hh,hpp,hxx}", "test/**/*.{h,hh,hpp,hxx}"],
+        "languages": ["cpp"],
+        "files": ["program/**/*.hpp", "test/**/*.hpp"],
       },
       "onOpen": {
         "strategy": "sequence",
-        "tools": ["include-what-you-use", "clang-tidy"],
+        "tools": ["clang-tidy", "include-what-you-use"],
       },
       "manual": {
         "strategy": "sequence",
-        "tools": ["include-what-you-use", "clang-tidy"],
+        "tools": ["clang-tidy", "include-what-you-use"],
       },
     },
     {
@@ -172,10 +170,6 @@
       },
     },
   ],
-  "[c]": {
-    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-    "editor.formatOnSave": true,
-  },
   "[cmake]": {
     "editor.formatOnSave": false,
   },
@@ -194,14 +188,6 @@
   },
   "[markdown]": {
     "editor.formatOnSave": false,
-  },
-  "[objective-c]": {
-    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-    "editor.formatOnSave": true,
-  },
-  "[objective-cpp]": {
-    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-    "editor.formatOnSave": true,
   },
   "[qml]": {
     "editor.defaultFormatter": "theqtcompany.qt-qml",

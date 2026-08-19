@@ -66,8 +66,10 @@ void DeckRepository::RenameDeck(const std::string& DeckId, const std::string& Ne
 }
 
 void DeckRepository::DeleteDeck(const std::string& DeckId) {
-    static_cast<void>(this->m_DeleteDeckCardReviewsPreparedStatement.Execute().WithParameters(DeckId));
-    static_cast<void>(this->m_DeleteDeckCardsPreparedStatement.Execute().WithParameters(DeckId));
+    static_cast<void>(this->m_DeleteDeckCardReviewsPreparedStatement.Execute().WithParameters(DeckId).DecodedTo<MutatedId>().AssertRowCount(
+        Database::QueryResultRowCountRange::ZeroOrMore()));
+    static_cast<void>(this->m_DeleteDeckCardsPreparedStatement.Execute().WithParameters(DeckId).DecodedTo<MutatedId>().AssertRowCount(
+        Database::QueryResultRowCountRange::ZeroOrMore()));
     static_cast<void>(this->m_DeleteDeckPreparedStatement.Execute().WithParameters(DeckId).DecodedTo<MutatedId>().AssertRowCount(
         Database::QueryResultRowCountRange::AtLeast(std::size_t{ 1 })));
 }

@@ -15,8 +15,8 @@ ApplicationRuntime::ApplicationRuntime(const std::string& DatabaseFilePath)
                                                                                             // , m_LibraryInvalidationCoordinator{
                                                                                             // m_LibraryInvalidationChannel,
                                                                                             // m_LibraryRepository }
-    , m_DeckRepository{ m_DatabaseRuntime } // , m_ReviewSessionRepository{ m_DatabaseRuntime }
-    , m_DeckService{ m_DeckRepository } {
+    , m_DeckRepository{ this->m_DatabaseRuntime } // , m_ReviewSessionRepository{ m_DatabaseRuntime }
+    , m_DeckService{ this->m_DeckRepository } {
     // Reintroduce ReviewSessionService after the application transaction boundary is defined.
 }
 

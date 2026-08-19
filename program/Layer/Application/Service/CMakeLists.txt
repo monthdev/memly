@@ -7,6 +7,6 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_application_service
-  PUBLIC memly_application_domain memly_application_index_cache memly_infrastructure_repository
-  PRIVATE memly_infrastructure_database
+  PUBLIC memly_application_index_cache
+  PRIVATE memly_application_domain memly_infrastructure_repository
 )

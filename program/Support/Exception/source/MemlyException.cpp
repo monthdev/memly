@@ -11,11 +11,14 @@
 #include <source_location>
 #include <span>
 #include <string_view>
+
+#if not defined(NDEBUG)
 #include <system_error>
+#endif
 
 namespace Memly::Exception {
 
-MemlyException::MemlyException(const std::initializer_list<std::string_view>& ErrorMessageInitializerList, const std::source_location& SourceLocation) noexcept
+MemlyException::MemlyException(const std::initializer_list<std::string_view> ErrorMessageInitializerList, const std::source_location SourceLocation) noexcept
     : std::exception{}
     , m_ErrorMessageArray{}
     , m_ErrorMessageSize{} {
@@ -27,7 +30,7 @@ MemlyException::MemlyException(const std::initializer_list<std::string_view>& Er
 }
 
 void MemlyException::ConstructErrorMessage(const std::initializer_list<std::string_view> ErrorMessageInitializerList,
-                                           const std::source_location& SourceLocation) noexcept {
+                                           const std::source_location SourceLocation) noexcept {
     this->AppendErrorMessage("Exception thrown in ");
     this->AppendErrorMessage(SourceLocation.file_name());
     this->AppendErrorMessage(", ");

@@ -10,8 +10,8 @@ import subprocess
 import sys
 
 
-HEADER_SUFFIXES = (".h", ".hh", ".hpp", ".hxx")
-TRANSLATION_UNIT_SUFFIXES = (".cc", ".cpp", ".cxx")
+HEADER_SUFFIXES = (".hpp",)
+TRANSLATION_UNIT_SUFFIXES = (".cpp",)
 DIAGNOSTIC_PATTERN = re.compile(r"^(.*?):[0-9]+:[0-9]+:\s")
 INCLUDE_DIAGNOSTIC_PATTERN = re.compile(r"^.*?:[0-9]+:[0-9]+:\s+(?:error|warning):\s+(?:add|superfluous)\s")
 

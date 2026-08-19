@@ -26,7 +26,9 @@ public:
     [[nodiscard]] static auto AtMost(std::size_t) noexcept -> QueryResultRowCountRange;
     [[nodiscard]] static auto Between(std::size_t, std::size_t) noexcept -> QueryResultRowCountRange;
 
+#if not defined(NDEBUG)
     void AssertContains(std::size_t) const noexcept;
+#endif
 };
 
 }

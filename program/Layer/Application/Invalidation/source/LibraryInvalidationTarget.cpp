@@ -1,8 +1,11 @@
 #include "Memly/Invalidation/LibraryInvalidationTarget.hpp"
 
-#include <bit>
 #include <cassert>
 #include <utility>
+
+#if not defined(NDEBUG)
+#include <bit>
+#endif
 
 namespace Memly::Invalidation {
 

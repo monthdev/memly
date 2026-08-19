@@ -14,7 +14,7 @@
 
 namespace Memly::Database {
 
-QueryResultDecoder::QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&& QueryResult, const std::source_location& SourceLocation) noexcept
+QueryResultDecoder::QueryResultDecoder(std::unique_ptr<duckdb::QueryResult>&& QueryResult, const std::source_location SourceLocation) noexcept
     : m_QueryResult{ std::move(QueryResult) }
     , m_SourceLocation{ SourceLocation } {
 }

@@ -51,7 +51,7 @@ namespace {
 
 [[nodiscard]] auto u_CountResultRows(Database::DatabaseRuntime& DatabaseRuntime,
                                      duckdb::QueryResult& QueryResult,
-                                     const std::source_location& SourceLocation = std::source_location::current()) -> std::size_t {
+                                     const std::source_location SourceLocation = std::source_location::current()) -> std::size_t {
     std::size_t ResultRowCount{ 0 };
     while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ DatabaseRuntime.FetchNextDataChunk(QueryResult, SourceLocation) }) {
         ResultRowCount += DataChunk->size();
@@ -260,7 +260,7 @@ namespace {
 
 [[nodiscard]] auto u_TryReadSingleStringResult(Database::DatabaseRuntime& DatabaseRuntime,
                                                duckdb::QueryResult& QueryResult,
-                                               const std::source_location& SourceLocation = std::source_location::current()) -> std::optional<std::string> {
+                                               const std::source_location SourceLocation = std::source_location::current()) -> std::optional<std::string> {
     std::optional<std::string> ResultOptional{};
     std::size_t ResultRowCount{ 0 };
     while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ DatabaseRuntime.FetchNextDataChunk(QueryResult, SourceLocation) }) {

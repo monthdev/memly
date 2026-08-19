@@ -3,7 +3,8 @@ Diagnostics:
   UnusedIncludes: Strict
   MissingIncludes: Strict
   ClangTidy:
-    Remove: ["*"]
+    Remove: ["custom-memly-*"]
+    FastCheckFilter: None
 ---
 If:
   PathExclude: (program|test)/.*

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.4)
-project(memly LANGUAGES C CXX)
+project(memly LANGUAGES CXX)
 
 set(MEMLY_LLVM_MAJOR_VERSION 22)
 
@@ -11,30 +11,15 @@ if(NOT CMAKE_SYSTEM_NAME MATCHES "^(Darwin|Linux|Windows)$")
   message(FATAL_ERROR "Memly currently supports desktop builds targeting macOS, Linux, or Windows")
 endif()
 
-foreach(MEMLY_COMPILER_LANGUAGE IN ITEMS C CXX)
-  set(MEMLY_COMPILER_ID_VARIABLE "CMAKE_${MEMLY_COMPILER_LANGUAGE}_COMPILER_ID")
-  set(MEMLY_COMPILER_VERSION_VARIABLE "CMAKE_${MEMLY_COMPILER_LANGUAGE}_COMPILER_VERSION")
-  if(NOT "${${MEMLY_COMPILER_ID_VARIABLE}}" STREQUAL "Clang")
-    message(
-      FATAL_ERROR
-        "Memly desktop builds require upstream LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x "
-        "for ${MEMLY_COMPILER_LANGUAGE}; "
-        "configured compiler is ${${MEMLY_COMPILER_ID_VARIABLE}} ${${MEMLY_COMPILER_VERSION_VARIABLE}}"
-    )
-  endif()
-  string(REGEX MATCH "^[0-9]+" MEMLY_COMPILER_MAJOR_VERSION "${${MEMLY_COMPILER_VERSION_VARIABLE}}")
-  if(NOT MEMLY_COMPILER_MAJOR_VERSION STREQUAL "${MEMLY_LLVM_MAJOR_VERSION}")
-    message(
-      FATAL_ERROR
-        "Memly desktop builds require LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x for ${MEMLY_COMPILER_LANGUAGE}; "
-        "configured version is ${${MEMLY_COMPILER_VERSION_VARIABLE}}"
-    )
-  endif()
-endforeach()
-
-if(NOT CMAKE_C_COMPILER_VERSION VERSION_EQUAL CMAKE_CXX_COMPILER_VERSION)
-  message(FATAL_ERROR "Memly requires matching LLVM C and C++ compilers; configured versions are "
-                      "${CMAKE_C_COMPILER_VERSION} and ${CMAKE_CXX_COMPILER_VERSION}"
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  message(FATAL_ERROR "Memly desktop builds require upstream LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x; "
+                      "configured compiler is ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
+  )
+endif()
+string(REGEX MATCH "^[0-9]+" MEMLY_COMPILER_MAJOR_VERSION "${CMAKE_CXX_COMPILER_VERSION}")
+if(NOT MEMLY_COMPILER_MAJOR_VERSION STREQUAL "${MEMLY_LLVM_MAJOR_VERSION}")
+  message(FATAL_ERROR "Memly desktop builds require LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x; "
+                      "configured version is ${CMAKE_CXX_COMPILER_VERSION}"
   )
 endif()
 
@@ -43,15 +28,27 @@ if(WIN32)
 else()
   set(MEMLY_REQUIRED_CLANG_FRONTEND_VARIANT GNU)
 endif()
-foreach(MEMLY_COMPILER_LANGUAGE IN ITEMS C CXX)
-  set(MEMLY_COMPILER_FRONTEND_VARIANT_VARIABLE "CMAKE_${MEMLY_COMPILER_LANGUAGE}_COMPILER_FRONTEND_VARIANT")
-  if(NOT "${${MEMLY_COMPILER_FRONTEND_VARIANT_VARIABLE}}" STREQUAL "${MEMLY_REQUIRED_CLANG_FRONTEND_VARIANT}")
-    message(
-      FATAL_ERROR "Memly requires Clang's ${MEMLY_REQUIRED_CLANG_FRONTEND_VARIANT} frontend on ${CMAKE_SYSTEM_NAME}; "
-                  "configured ${MEMLY_COMPILER_LANGUAGE} frontend is ${${MEMLY_COMPILER_FRONTEND_VARIANT_VARIABLE}}"
-    )
-  endif()
-endforeach()
+if(NOT CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "${MEMLY_REQUIRED_CLANG_FRONTEND_VARIANT}")
+  message(
+    FATAL_ERROR "Memly requires Clang's ${MEMLY_REQUIRED_CLANG_FRONTEND_VARIANT} frontend on ${CMAKE_SYSTEM_NAME}; "
+                "configured frontend is ${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}"
+  )
+endif()
+
+if(NOT CMAKE_CXX_COMPILER_LINKER_ID STREQUAL "LLD")
+  message(
+    FATAL_ERROR
+      "Memly desktop builds require LLVM LLD ${MEMLY_LLVM_MAJOR_VERSION}.x; "
+      "configured linker is ${CMAKE_CXX_COMPILER_LINKER_ID} ${CMAKE_CXX_COMPILER_LINKER_VERSION}. "
+      "Configure with CMAKE_LINKER_TYPE=LLD."
+  )
+endif()
+string(REGEX MATCH "^[0-9]+" MEMLY_LINKER_MAJOR_VERSION "${CMAKE_CXX_COMPILER_LINKER_VERSION}")
+if(NOT MEMLY_LINKER_MAJOR_VERSION STREQUAL "${MEMLY_LLVM_MAJOR_VERSION}")
+  message(FATAL_ERROR "Memly desktop builds require LLVM LLD ${MEMLY_LLVM_MAJOR_VERSION}.x; "
+                      "configured version is ${CMAKE_CXX_COMPILER_LINKER_VERSION}"
+  )
+endif()
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -62,19 +59,24 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(QT_QML_GENERATE_QMLLS_INI ON)
 
-include(CTest)
 include(FetchContent)
 
 if(NOT CMAKE_GENERATOR MATCHES "Ninja")
   message(FATAL_ERROR "Memly requires a Ninja generator for its mandatory full-tree Clang-Tidy gate")
 endif()
 
+set(CMAKE_CXX_COMPILE_OPTIONS_IPO "-flto=full")
+include(CheckIPOSupported)
+check_ipo_supported(LANGUAGES CXX)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+  add_link_options("$<$<CONFIG:Release>:/opt:lldlto=3>" "$<$<CONFIG:Release>:/opt:lldltocgo=3>")
+else()
+  add_link_options("$<$<CONFIG:Release>:LINKER:--lto-O3>" "$<$<CONFIG:Release>:LINKER:--lto-CGO3>")
+endif()
+
 cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH MEMLY_LLVM_BINARY_DIRECTORY)
 cmake_path(GET MEMLY_LLVM_BINARY_DIRECTORY PARENT_PATH MEMLY_LLVM_INSTALL_DIRECTORY)
-cmake_path(GET CMAKE_C_COMPILER PARENT_PATH MEMLY_LLVM_C_BINARY_DIRECTORY)
-if(NOT MEMLY_LLVM_C_BINARY_DIRECTORY STREQUAL MEMLY_LLVM_BINARY_DIRECTORY)
-  message(FATAL_ERROR "Memly requires clang and clang++ from the same LLVM installation")
-endif()
 
 # Finds a tool in the configured LLVM installation and verifies its major version.
 function(memly_require_llvm_tool MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE MEMLY_LLVM_TOOL_NAME)
@@ -149,6 +151,20 @@ find_program(
 )
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
+file(GLOB_RECURSE MEMLY_AUTHORED_FILE_PATHS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/*"
+     "${CMAKE_SOURCE_DIR}/test/*"
+)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/tool/verify_source_extensions.py")
+execute_process(
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tool/verify_source_extensions.py" "${CMAKE_SOURCE_DIR}"
+  RESULT_VARIABLE MEMLY_SOURCE_EXTENSION_VERIFICATION_RESULT
+  ERROR_VARIABLE MEMLY_SOURCE_EXTENSION_VERIFICATION_ERROR
+  ERROR_STRIP_TRAILING_WHITESPACE
+)
+if(NOT MEMLY_SOURCE_EXTENSION_VERIFICATION_RESULT EQUAL 0)
+  message(FATAL_ERROR "${MEMLY_SOURCE_EXTENSION_VERIFICATION_ERROR}")
+endif()
+
 if(WIN32)
   set(MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-driver.cmd")
   file(GENERATE OUTPUT "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
@@ -221,7 +237,7 @@ endif()
 
 set(MEMLY_QT_MIN_VERSION 6.11)
 
-find_package(Qt6 ${MEMLY_QT_MIN_VERSION} REQUIRED COMPONENTS Core Network Qml Quick)
+find_package(Qt6 ${MEMLY_QT_MIN_VERSION} REQUIRED COMPONENTS Core Qml Quick)
 find_package(ICU REQUIRED COMPONENTS uc i18n)
 qt_standard_project_setup(REQUIRES ${MEMLY_QT_MIN_VERSION})
 
@@ -274,23 +290,7 @@ FetchContent_Declare(
   URL_HASH "SHA256=${DUCKDB_SHA}"
   DOWNLOAD_NO_PROGRESS TRUE
 )
-if(DEFINED FETCHCONTENT_BASE_DIR)
-  set(_duckdb_fetchcontent_base_dir "${FETCHCONTENT_BASE_DIR}")
-else()
-  set(_duckdb_fetchcontent_base_dir "${CMAKE_BINARY_DIR}/_deps")
-endif()
-
-set(_duckdb_fetchcontent_source_dir "${_duckdb_fetchcontent_base_dir}/libduckdb-src")
-set(_duckdb_needs_download FALSE)
-if(NOT EXISTS "${_duckdb_fetchcontent_source_dir}")
-  set(_duckdb_needs_download TRUE)
-  message(STATUS "Fetching DuckDB ${DUCKDB_VERSION} from ${DUCKDB_URL}")
-endif()
-
 FetchContent_MakeAvailable(libduckdb)
-if(_duckdb_needs_download)
-  message(STATUS "Downloaded DuckDB ${DUCKDB_VERSION} to ${libduckdb_SOURCE_DIR}")
-endif()
 
 if(APPLE)
   set(_duckdb_lib_name "libduckdb.dylib")
@@ -320,15 +320,15 @@ endif()
 
 set(_duckdb_wrapper_dir "${CMAKE_BINARY_DIR}/duckdb_wrapper")
 file(MAKE_DIRECTORY "${_duckdb_wrapper_dir}")
-file(WRITE "${_duckdb_wrapper_dir}/duckdb.hpp" "#pragma GCC system_header\n#include \"${_duckdb_inc}/duckdb.hpp\"\n")
+file(GENERATE OUTPUT "${_duckdb_wrapper_dir}/duckdb.hpp"
+     CONTENT "#pragma GCC system_header\n#include \"${_duckdb_inc}/duckdb.hpp\"\n" NEWLINE_STYLE UNIX
+)
 
-add_library(duckdb SHARED IMPORTED GLOBAL)
+add_library(duckdb SHARED IMPORTED)
 set_target_properties(
   duckdb
   PROPERTIES IMPORTED_LOCATION "${_duckdb_lib}" INTERFACE_INCLUDE_DIRECTORIES "${_duckdb_inc}"
 )
-
-get_filename_component(_duckdb_libdir "${_duckdb_lib}" DIRECTORY)
 
 add_library(memly_asan INTERFACE)
 target_compile_options(
@@ -342,6 +342,21 @@ target_link_options(
 # Adds a static component and registers its complete C++ surface with the global lint and verification gates.
 function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCLUDE_DIRECTORY)
   cmake_parse_arguments(PARSE_ARGV 2 MEMLY_COMPONENT "" "" "HEADERS;PRIVATE_HEADERS;SOURCES")
+
+  foreach(MEMLY_COMPONENT_HEADER IN LISTS MEMLY_COMPONENT_HEADERS MEMLY_COMPONENT_PRIVATE_HEADERS)
+    if(NOT MEMLY_COMPONENT_HEADER MATCHES "[.]hpp$")
+      message(FATAL_ERROR "Memly target ${MEMLY_COMPONENT_TARGET} classifies a non-.hpp file as a header: "
+                          "${MEMLY_COMPONENT_HEADER}"
+      )
+    endif()
+  endforeach()
+  foreach(MEMLY_COMPONENT_SOURCE IN LISTS MEMLY_COMPONENT_SOURCES)
+    if(NOT MEMLY_COMPONENT_SOURCE MATCHES "[.]cpp$")
+      message(FATAL_ERROR "Memly target ${MEMLY_COMPONENT_TARGET} classifies a non-.cpp file as a source: "
+                          "${MEMLY_COMPONENT_SOURCE}"
+      )
+    endif()
+  endforeach()
 
   add_library("${MEMLY_COMPONENT_TARGET}" STATIC)
   target_sources(
@@ -369,37 +384,33 @@ function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCL
   set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF VERIFY_INTERFACE_HEADER_SETS ON)
   set_property(GLOBAL APPEND PROPERTY MEMLY_COMPONENT_TARGETS "${MEMLY_COMPONENT_TARGET}")
   set_property(
-    GLOBAL APPEND PROPERTY MEMLY_CXX_SOURCE_FILES ${MEMLY_COMPONENT_HEADERS} ${MEMLY_COMPONENT_PRIVATE_HEADERS}
+    GLOBAL APPEND PROPERTY MEMLY_REGISTERED_CXX_FILES ${MEMLY_COMPONENT_HEADERS} ${MEMLY_COMPONENT_PRIVATE_HEADERS}
                            ${MEMLY_COMPONENT_SOURCES}
   )
 endfunction()
 
 add_subdirectory(program)
 
-if(BUILD_TESTING)
-  add_custom_target(memly-test COMMENT "Memly tests are not currently implemented")
-endif()
-
-get_property(MEMLY_CXX_SOURCE_FILES GLOBAL PROPERTY MEMLY_CXX_SOURCE_FILES)
+get_property(MEMLY_REGISTERED_CXX_FILES GLOBAL PROPERTY MEMLY_REGISTERED_CXX_FILES)
 file(
   GLOB_RECURSE
-  MEMLY_PROGRAM_HEADERS
+  MEMLY_AUTHORED_CXX_FILES
   CONFIGURE_DEPENDS
-  "${CMAKE_SOURCE_DIR}/program/*.h"
-  "${CMAKE_SOURCE_DIR}/program/*.hh"
+  "${CMAKE_SOURCE_DIR}/program/*.cpp"
   "${CMAKE_SOURCE_DIR}/program/*.hpp"
-  "${CMAKE_SOURCE_DIR}/program/*.hxx"
+  "${CMAKE_SOURCE_DIR}/test/*.cpp"
+  "${CMAKE_SOURCE_DIR}/test/*.hpp"
 )
-foreach(MEMLY_PROGRAM_HEADER IN LISTS MEMLY_PROGRAM_HEADERS)
-  if(NOT MEMLY_PROGRAM_HEADER IN_LIST MEMLY_CXX_SOURCE_FILES)
-    message(FATAL_ERROR "Memly header is not assigned to a target: ${MEMLY_PROGRAM_HEADER}")
+foreach(MEMLY_AUTHORED_CXX_FILE IN LISTS MEMLY_AUTHORED_CXX_FILES)
+  if(NOT MEMLY_AUTHORED_CXX_FILE IN_LIST MEMLY_REGISTERED_CXX_FILES)
+    message(FATAL_ERROR "Memly C++ file is not assigned to a target: ${MEMLY_AUTHORED_CXX_FILE}")
   endif()
 endforeach()
 
-set(MEMLY_CXX_TRANSLATION_UNIT_FILES ${MEMLY_CXX_SOURCE_FILES})
-list(FILTER MEMLY_CXX_TRANSLATION_UNIT_FILES INCLUDE REGEX "\\.(cc|cpp|cxx)$")
-set(MEMLY_CXX_HEADER_FILES ${MEMLY_CXX_SOURCE_FILES})
-list(FILTER MEMLY_CXX_HEADER_FILES INCLUDE REGEX "\\.(h|hh|hpp|hxx)$")
+set(MEMLY_CXX_TRANSLATION_UNIT_FILES ${MEMLY_REGISTERED_CXX_FILES})
+list(FILTER MEMLY_CXX_TRANSLATION_UNIT_FILES INCLUDE REGEX "[.]cpp$")
+set(MEMLY_CXX_HEADER_FILES ${MEMLY_REGISTERED_CXX_FILES})
+list(FILTER MEMLY_CXX_HEADER_FILES INCLUDE REGEX "[.]hpp$")
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
   set(MEMLY_CLANG_WARNING_OPTIONS
@@ -494,7 +505,7 @@ add_custom_command(
   COMMAND
     "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -clang-tidy-binary
     "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
-    "^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet -hide-progress "^${CMAKE_SOURCE_DIR}/(program|test)/.*\\.cpp$"
+    "^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet -hide-progress "^${CMAKE_SOURCE_DIR}/(program|test)/.*[.]cpp$"
   COMMAND "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -config-file
           "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter "^$" -quiet ${MEMLY_CXX_HEADER_FILES}
   COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_CLANG_TIDY_STAMP}"

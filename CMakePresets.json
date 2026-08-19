@@ -16,6 +16,7 @@
         "rhs": "Darwin"
       },
       "cacheVariables": {
+        "CMAKE_LINKER_TYPE": "LLD",
         "CMAKE_OSX_SYSROOT": "macosx"
       }
     },

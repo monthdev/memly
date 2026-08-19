@@ -14,7 +14,7 @@ add_subdirectory(CompositionRoot)
 
 set(MEMLY_EXECUTABLE_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 
-set_property(GLOBAL APPEND PROPERTY MEMLY_CXX_SOURCE_FILES ${MEMLY_EXECUTABLE_SOURCE_FILES})
+set_property(GLOBAL APPEND PROPERTY MEMLY_REGISTERED_CXX_FILES ${MEMLY_EXECUTABLE_SOURCE_FILES})
 
 qt_add_executable(memly MANUAL_FINALIZATION ${MEMLY_EXECUTABLE_SOURCE_FILES})
 
@@ -28,11 +28,6 @@ target_link_libraries(
           memly_support_exception
           memly_support_qt_app
           memly_asan
-)
-
-set_target_properties(
-  memly
-  PROPERTIES BUILD_RPATH "${_duckdb_libdir}"
 )
 
 qt_finalize_executable(memly)

@@ -5,7 +5,3 @@ memly_add_component_library(
   memly_application_invalidation "${CMAKE_CURRENT_SOURCE_DIR}/include" HEADERS ${MEMLY_INVALIDATION_HEADERS} SOURCES
   ${MEMLY_INVALIDATION_SOURCES}
 )
-target_link_libraries(
-  memly_application_invalidation
-  PRIVATE memly_support_exception
-)

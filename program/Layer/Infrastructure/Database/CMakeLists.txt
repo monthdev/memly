@@ -20,18 +20,11 @@ memly_add_component_library(
   ${MEMLY_DATABASE_SOURCES}
   ${MEMLY_DATABASE_SQL_ACCESSOR_SOURCES}
 )
-target_include_directories(
-  memly_infrastructure_database BEFORE PUBLIC "${_duckdb_wrapper_dir}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source"
-)
-target_include_directories(memly_infrastructure_database SYSTEM PUBLIC "${_duckdb_inc}")
+target_include_directories(memly_infrastructure_database BEFORE PUBLIC "${_duckdb_wrapper_dir}")
 target_link_libraries(
   memly_infrastructure_database
   PUBLIC duckdb memly_support_exception
   PRIVATE memly_support_qt_app
-)
-set_target_properties(
-  memly_infrastructure_database
-  PROPERTIES BUILD_RPATH "${_duckdb_libdir}"
 )
 qt_add_resources(
   memly_infrastructure_database

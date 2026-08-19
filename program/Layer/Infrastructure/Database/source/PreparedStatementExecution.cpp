@@ -11,7 +11,7 @@
 
 namespace Memly::Database {
 
-PreparedStatementExecution::PreparedStatementExecution(duckdb::PreparedStatement& DuckDbPreparedStatement, const std::source_location& SourceLocation) noexcept
+PreparedStatementExecution::PreparedStatementExecution(duckdb::PreparedStatement& DuckDbPreparedStatement, const std::source_location SourceLocation) noexcept
     : m_DuckDbPreparedStatement{ DuckDbPreparedStatement }
     , m_SourceLocation{ SourceLocation } {
 }

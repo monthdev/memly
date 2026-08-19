@@ -15,22 +15,6 @@ file(GLOB MEMLY_REPOSITORY_DECK_SELECT_SQL CONFIGURE_DEPENDS
 file(GLOB MEMLY_REPOSITORY_DECK_UPDATE_SQL CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/source/_Sql/Deck/Update/*.sql"
 )
-file(GLOB MEMLY_REPOSITORY_LIBRARY_SELECT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/source/_Sql/Library/Select/*.sql"
-)
-file(GLOB MEMLY_REPOSITORY_REVIEW_SESSION_DELETE_SQL CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/source/_Sql/ReviewSession/Delete/*.sql"
-)
-file(GLOB MEMLY_REPOSITORY_REVIEW_SESSION_INSERT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/source/_Sql/ReviewSession/Insert/*.sql"
-)
-file(GLOB MEMLY_REPOSITORY_REVIEW_SESSION_SELECT_SQL CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/source/_Sql/ReviewSession/Select/*.sql"
-)
-file(GLOB MEMLY_REPOSITORY_REVIEW_SESSION_UPDATE_SQL CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/source/_Sql/ReviewSession/Update/*.sql"
-)
-
 memly_add_component_library(
   memly_infrastructure_repository
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -43,11 +27,10 @@ memly_add_component_library(
   ${MEMLY_REPOSITORY_SOURCES}
   ${MEMLY_REPOSITORY_SQL_ACCESSOR_SOURCES}
 )
-target_include_directories(memly_infrastructure_repository BEFORE PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source")
 target_link_libraries(
   memly_infrastructure_repository
-  PUBLIC memly_application_domain memly_infrastructure_database
-  PRIVATE memly_support_exception memly_support_qt_app
+  PUBLIC memly_infrastructure_database
+  PRIVATE memly_support_qt_app
 )
 qt_add_resources(
   memly_infrastructure_repository
@@ -57,8 +40,8 @@ qt_add_resources(
   BASE
   "${CMAKE_CURRENT_SOURCE_DIR}/source/_Sql/Deck"
   FILES
+  ${MEMLY_REPOSITORY_DECK_DELETE_SQL}
+  ${MEMLY_REPOSITORY_DECK_INSERT_SQL}
   ${MEMLY_REPOSITORY_DECK_SELECT_SQL}
   ${MEMLY_REPOSITORY_DECK_UPDATE_SQL}
-  ${MEMLY_REPOSITORY_DECK_INSERT_SQL}
-  ${MEMLY_REPOSITORY_DECK_DELETE_SQL}
 )

@@ -2,14 +2,17 @@
 
 #include <duckdb.hpp>
 
+#if not defined(NDEBUG)
 #include <algorithm>
+#include <ranges>
+#endif
+
 #include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <initializer_list>
-#include <ranges>
 #include <string>
 #include <string_view>
 #include <utility>

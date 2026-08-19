@@ -7,6 +7,6 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_application_domain
-  PUBLIC ICU::i18n ICU::uc
-  PRIVATE memly_support_exception
+  PUBLIC ICU::uc
+  PRIVATE ICU::i18n memly_support_exception
 )

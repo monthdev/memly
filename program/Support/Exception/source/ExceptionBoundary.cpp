@@ -53,7 +53,7 @@ void LogException(const std::string_view ExceptionMessage) noexcept {
         ExceptionLogFile.open(QtApp::ExceptionLogFilePath());
         ExceptionLogFile.write(ExceptionMessage.data(), static_cast<std::streamsize>(ExceptionMessage.size()));
     } catch (const std::exception& CaughtException) { u_WriteToStdErr(CaughtException.what()); } catch (...) {
-        u_WriteToStdErr("Failed to write exception log file");
+        u_WriteToStdErr("Exception log file write failed");
     }
 }
 

@@ -12,10 +12,10 @@ namespace Memly::Database {
 class [[nodiscard]] PreparedStatementExecution final {
 private:
     duckdb::PreparedStatement& m_DuckDbPreparedStatement;
-    const std::source_location& m_SourceLocation;
+    std::source_location m_SourceLocation;
 
 public:
-    explicit PreparedStatementExecution(duckdb::PreparedStatement&, const std::source_location&) noexcept;
+    explicit PreparedStatementExecution(duckdb::PreparedStatement&, std::source_location) noexcept;
 
     explicit PreparedStatementExecution(const PreparedStatementExecution&) = delete;
     auto operator=(const PreparedStatementExecution&) -> PreparedStatementExecution& = delete;

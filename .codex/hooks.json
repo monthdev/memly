@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && sh .codex/hooks/verify-project-integrity.sh",
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && bash .codex/hooks/verify-project-integrity.sh",
             "statusMessage": "Verifying Memly project integrity"
           }
         ]

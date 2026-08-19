@@ -34,8 +34,10 @@ QueryResultRowCountRange::QueryResultRowCountRange(const std::size_t MinimumRowC
     return QueryResultRowCountRange{ MinimumRowCount, MaximumRowCount };
 }
 
+#if not defined(NDEBUG)
 void QueryResultRowCountRange::AssertContains(const std::size_t RowCount) const noexcept {
     assert(RowCount >= this->m_MinimumRowCount and RowCount <= this->m_MaximumRowCount);
 }
+#endif
 
 }

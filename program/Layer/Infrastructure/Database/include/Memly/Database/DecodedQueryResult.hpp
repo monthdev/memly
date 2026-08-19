@@ -26,8 +26,10 @@ public:
 
     ~DecodedQueryResult() noexcept = default;
 
-    [[nodiscard]] auto AssertRowCount([[maybe_unused]] const QueryResultRowCountRange& ExpectedQueryResultRowCountRange) && -> std::vector<QueryResultRowType> {
+    [[nodiscard]] auto AssertRowCount([[maybe_unused]] const QueryResultRowCountRange ExpectedQueryResultRowCountRange) && -> std::vector<QueryResultRowType> {
+#if not defined(NDEBUG)
         ExpectedQueryResultRowCountRange.AssertContains(this->m_QueryResultRowVector.size());
+#endif
         return std::vector<QueryResultRowType>{ std::move(this->m_QueryResultRowVector) };
     }
 };

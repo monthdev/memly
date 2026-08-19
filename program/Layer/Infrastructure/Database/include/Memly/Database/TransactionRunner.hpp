@@ -32,7 +32,7 @@ public:
 
     template <typename LambdaType>
         requires std::invocable<LambdaType&&>
-    [[nodiscard]] auto TransactionWrapper(LambdaType&& Lambda, const std::source_location& SourceLocation = std::source_location::current())
+    [[nodiscard]] auto TransactionWrapper(LambdaType&& Lambda, const std::source_location SourceLocation = std::source_location::current())
         -> std::invoke_result_t<LambdaType&&> {
         this->m_DatabaseConnection.BeginTransaction();
         try {

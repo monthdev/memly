@@ -25,7 +25,7 @@ public:
 
     ~DatabaseRuntime() noexcept = default;
 
-    [[nodiscard]] auto PrepareStatement(const std::string&, const std::source_location& = std::source_location::current()) -> PreparedStatement;
+    [[nodiscard]] auto PrepareStatement(const std::string&, std::source_location = std::source_location::current()) -> PreparedStatement;
 };
 
 }

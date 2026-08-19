@@ -14,7 +14,7 @@ PreparedStatement::PreparedStatement(std::unique_ptr<duckdb::PreparedStatement>&
     : m_DuckDbPreparedStatement{ std::move(DuckDbPreparedStatement) } {
 }
 
-[[nodiscard]] auto PreparedStatement::Execute(const std::source_location& SourceLocation) noexcept -> PreparedStatementExecution {
+[[nodiscard]] auto PreparedStatement::Execute(const std::source_location SourceLocation) noexcept -> PreparedStatementExecution {
     return PreparedStatementExecution{ *this->m_DuckDbPreparedStatement, SourceLocation };
 }
 

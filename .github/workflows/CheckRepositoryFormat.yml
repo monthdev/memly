@@ -32,6 +32,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Enforce source extensions
+        shell: bash
+        run: python3 tool/verify_source_extensions.py "$GITHUB_WORKSPACE"
+
       - name: Determine comparison base
         id: comparison
         env:
@@ -52,7 +56,7 @@ jobs:
 
           echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
 
-      - name: Collect target C/C++ files
+      - name: Collect target C++ files
         id: cxx_files
         env:
           BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
@@ -61,16 +65,10 @@ jobs:
           set -euo pipefail
 
           CXX_PATHS=(
-            ':(glob)**/*.c'
-            ':(glob)**/*.cc'
-            ':(glob)**/*.cpp'
-            ':(glob)**/*.cxx'
-            ':(glob)**/*.h'
-            ':(glob)**/*.hh'
-            ':(glob)**/*.hpp'
-            ':(glob)**/*.hxx'
-            ':(glob)**/*.m'
-            ':(glob)**/*.mm'
+            ':(glob)program/**/*.cpp'
+            ':(glob)program/**/*.hpp'
+            ':(glob)test/**/*.cpp'
+            ':(glob)test/**/*.hpp'
           )
           mapfile -t CONFIG_FILES < <(
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
@@ -79,7 +77,7 @@ jobs:
           )
 
           if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
-            echo "ClangFormat check configuration changed; checking all C/C++ files."
+            echo "ClangFormat check configuration changed; checking all C++ files."
             git ls-files "${CXX_PATHS[@]}" > /tmp/clang_format_files.txt
           else
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
@@ -88,12 +86,12 @@ jobs:
 
           if [[ ! -s /tmp/clang_format_files.txt ]]; then
             echo "has_files=false" >> "$GITHUB_OUTPUT"
-            echo "No C/C++ files changed."
+            echo "No C++ files changed."
             exit 0
           fi
 
           echo "has_files=true" >> "$GITHUB_OUTPUT"
-          echo "Target C/C++ files:"
+          echo "Target C++ files:"
           cat /tmp/clang_format_files.txt
 
       - name: Collect target CMake listfiles
