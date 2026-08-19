@@ -70,8 +70,16 @@ include(CheckIPOSupported)
 check_ipo_supported(LANGUAGES CXX)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+  add_compile_options(
+    "$<$<CONFIG:Release>:/clang:-fvisibility=hidden>" "$<$<CONFIG:Release>:/clang:-fvisibility-inlines-hidden>"
+    "$<$<CONFIG:Release>:/clang:-fwhole-program-vtables>" "$<$<CONFIG:Release>:/clang:-fvirtual-function-elimination>"
+  )
   add_link_options("$<$<CONFIG:Release>:/opt:lldlto=3>" "$<$<CONFIG:Release>:/opt:lldltocgo=3>")
 else()
+  add_compile_options(
+    "$<$<CONFIG:Release>:-fvisibility=hidden>" "$<$<CONFIG:Release>:-fvisibility-inlines-hidden>"
+    "$<$<CONFIG:Release>:-fwhole-program-vtables>" "$<$<CONFIG:Release>:-fvirtual-function-elimination>"
+  )
   add_link_options("$<$<CONFIG:Release>:LINKER:--lto-O3>" "$<$<CONFIG:Release>:LINKER:--lto-CGO3>")
 endif()
 
