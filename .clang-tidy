@@ -70,7 +70,7 @@ Checks: |
   custom-memly-nodiscard-callable,
   custom-memly-nodiscard-enum,
   custom-memly-nodiscard-returned-record,
-  custom-memly-no-stateful-defaulted-default-constructor,
+  custom-memly-no-direct-field-defaulted-default-constructor,
   custom-memly-no-two-statement-pass-through-variable,
   custom-memly-optional-value-suffix,
   custom-memly-owning-string-parameter-by-reference,
@@ -171,18 +171,19 @@ CustomChecks:
   - Name: memly-header-required-constructor-definition-in-class
     Query: >-
       match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()),
-      unless(isExpansionInSystemHeader()), anyOf( isConstexpr(), hasParent(functionTemplateDecl()), ofClass(cxxRecordDecl(anyOf(isStruct(),
-      hasAncestor(classTemplateDecl()), hasAncestor(classTemplatePartialSpecializationDecl())))) ), unless( anyOf( hasParent(cxxRecordDecl()),
+      unless(isExpansionInSystemHeader()), anyOf( isConstexpr(), hasParent(functionTemplateDecl()), ofClass(cxxRecordDecl(anyOf(
+      hasAncestor(classTemplateDecl()), hasAncestor(classTemplatePartialSpecializationDecl()) ))), allOf( isDefaulted(), isDefaultConstructor(),
+      ofClass(cxxRecordDecl(unless(has(fieldDecl())))) ) ), unless( anyOf( hasParent(cxxRecordDecl()),
       hasParent(functionTemplateDecl(hasParent(cxxRecordDecl()))) ) ), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
-        Message: data-struct, constexpr, and template-dependent constructor definitions must appear inside their class or struct declaration
+        Message: eligible defaulted, constexpr, and template-dependent constructor definitions must appear inside their class or struct declaration
         Level: Warning
   - Name: memly-runtime-constructor-definition-in-implementation-file
     Query: >-
       match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isCopyConstructor()), unless(isMoveConstructor()),
-      unless(isConstexpr()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), unless(hasParent(functionTemplateDecl())),
-      unless(ofClass(cxxRecordDecl(isStruct()))), unless( ofClass( cxxRecordDecl( anyOf( hasAncestor(classTemplateDecl()),
+      unless(isDefaulted()), unless(isConstexpr()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
+      unless(hasParent(functionTemplateDecl())), unless( ofClass( cxxRecordDecl( anyOf( hasAncestor(classTemplateDecl()),
       hasAncestor(classTemplatePartialSpecializationDecl()) ) ) ) ), anyOf( hasParent(cxxRecordDecl()), unless(isExpansionInFileMatching("[.]cpp$")) ),
       isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
     Diagnostic:
@@ -470,14 +471,13 @@ CustomChecks:
       - BindName: result_type
         Message: record types returned by value must be declared [[nodiscard]]
         Level: Warning
-  - Name: memly-no-stateful-defaulted-default-constructor
+  - Name: memly-no-direct-field-defaulted-default-constructor
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isDefaulted(),
-      isDefaultConstructor(), ofClass( cxxRecordDecl( anyOf( has(fieldDecl()), hasDirectBase(cxxBaseSpecifier()) ) ) ),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      isDefaultConstructor(), ofClass(cxxRecordDecl(has(fieldDecl()))), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
-        Message: a default constructor with direct bases or non-static data members must use an explicit initializer list instead of = default
+        Message: a default constructor with non-static data members must use an explicit initializer list instead of = default
         Level: Warning
   - Name: memly-no-two-statement-pass-through-variable
     Query: >-

@@ -24,25 +24,29 @@ making it file-private solely because it does not use instance state.
 
 Every class and struct declares an ordinary constructor
 (`custom-memly-declared-ordinary-constructor`). Reserve `struct` for data
-records; define its constructors in-class and declare non-deleted ones
-`noexcept` (`custom-memly-data-struct-constructor-noexcept`).
+records and declare its non-deleted constructors `noexcept`
+(`custom-memly-data-struct-constructor-noexcept`).
 
-Define a non-template, non-`constexpr`, non-`consteval`, non-deleted class
-constructor in the corresponding `.cpp`, including when defaulted
+Define a non-template, non-`constexpr`, non-`consteval`, non-deleted constructor
+with implementation behavior in the corresponding `.cpp`, whether it belongs to
+a class or struct
 (`custom-memly-runtime-constructor-definition-in-implementation-file`). Define a
 constructor template, class-template constructor, and `constexpr` or `consteval`
 constructor in-class
-(`custom-memly-header-required-constructor-definition-in-class`). Define a
-deleted constructor on its first in-class declaration.
+(`custom-memly-header-required-constructor-definition-in-class`). Define an
+ordinary default constructor as `= default` on its first in-class declaration
+when the type has no direct fields and every base is intentionally
+default-constructed. Define a deleted constructor on its first in-class
+declaration.
 
 Every non-deleted, non-defaulted constructor initializes every direct base,
 field, and applicable virtual base
 (`custom-memly-complete-constructor-initializer-list`) with braces
 (`custom-memly-braced-constructor-initializer`). Do not use default member
 initializers (`custom-memly-no-default-member-initializer`) or delegation
-(`custom-memly-no-delegating-constructor`). Default a default constructor only
-for a type without direct bases or fields
-(`custom-memly-no-stateful-defaulted-default-constructor`).
+(`custom-memly-no-delegating-constructor`). Do not default a default constructor
+for a type with direct fields
+(`custom-memly-no-direct-field-defaulted-default-constructor`).
 
 Brace-initialize named variables and lambda init-captures
 (`custom-memly-braced-variable-initialization`). Do not name a local solely to
@@ -86,10 +90,11 @@ before its first declaration-site use. Put an implementation-only nested type
 last. Constructors follow fields under their intended access; other declarations
 follow constructors.
 
-Headers define only struct constructors, templates, `constexpr` or `consteval`
-constructors, deleted ordinary constructors, and defaulted or deleted special
-members. Define every ordinary non-template method and free function in its
-corresponding `.cpp` (`custom-memly-no-header-function-definition`).
+Headers define only eligible defaulted ordinary constructors, templates,
+`constexpr` or `consteval` constructors, deleted ordinary constructors, and
+defaulted or deleted special members. Define every other ordinary non-template
+method and free function in its corresponding `.cpp`
+(`custom-memly-no-header-function-definition`).
 
 Qualify current-object fields and methods with `this->`, including in
 constructor-initializer expressions and `this`-capturing lambdas. Leave

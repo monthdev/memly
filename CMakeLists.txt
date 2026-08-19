@@ -347,7 +347,8 @@ target_link_options(
   memly_asan INTERFACE $<$<CONFIG:Debug>:-fsanitize=address>
 )
 
-# Adds a static component and registers its complete C++ surface with the global lint and verification gates.
+# Adds a static or header-only component and registers its complete C++ surface with the global lint and verification
+# gates.
 function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCLUDE_DIRECTORY)
   cmake_parse_arguments(PARSE_ARGV 2 MEMLY_COMPONENT "" "" "HEADERS;PRIVATE_HEADERS;SOURCES")
 
@@ -366,30 +367,43 @@ function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCL
     endif()
   endforeach()
 
-  add_library("${MEMLY_COMPONENT_TARGET}" STATIC)
-  target_sources(
-    "${MEMLY_COMPONENT_TARGET}" PRIVATE ${MEMLY_COMPONENT_SOURCES}
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${MEMLY_COMPONENT_INCLUDE_DIRECTORY}" FILES ${MEMLY_COMPONENT_HEADERS}
-  )
-  if(MEMLY_COMPONENT_PRIVATE_HEADERS)
+  if(MEMLY_COMPONENT_SOURCES)
+    add_library("${MEMLY_COMPONENT_TARGET}" STATIC)
     target_sources(
-      "${MEMLY_COMPONENT_TARGET}"
-      PRIVATE FILE_SET
-              memly_private_headers
-              TYPE
-              HEADERS
-              BASE_DIRS
-              "${CMAKE_CURRENT_SOURCE_DIR}/source"
-              FILES
-              ${MEMLY_COMPONENT_PRIVATE_HEADERS}
+      "${MEMLY_COMPONENT_TARGET}" PRIVATE ${MEMLY_COMPONENT_SOURCES}
+      PUBLIC FILE_SET HEADERS BASE_DIRS "${MEMLY_COMPONENT_INCLUDE_DIRECTORY}" FILES ${MEMLY_COMPONENT_HEADERS}
     )
-    set_target_properties(
-      "${MEMLY_COMPONENT_TARGET}" PROPERTIES VERIFY_PRIVATE_HEADER_SETS ON PRIVATE_HEADER_SETS_TO_VERIFY
-                                                                           memly_private_headers
+    if(MEMLY_COMPONENT_PRIVATE_HEADERS)
+      target_sources(
+        "${MEMLY_COMPONENT_TARGET}"
+        PRIVATE FILE_SET
+                memly_private_headers
+                TYPE
+                HEADERS
+                BASE_DIRS
+                "${CMAKE_CURRENT_SOURCE_DIR}/source"
+                FILES
+                ${MEMLY_COMPONENT_PRIVATE_HEADERS}
+      )
+      set_target_properties(
+        "${MEMLY_COMPONENT_TARGET}" PROPERTIES VERIFY_PRIVATE_HEADER_SETS ON PRIVATE_HEADER_SETS_TO_VERIFY
+                                                                             memly_private_headers
+      )
+    endif()
+    target_link_libraries("${MEMLY_COMPONENT_TARGET}" PRIVATE memly_asan)
+    set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF VERIFY_INTERFACE_HEADER_SETS ON)
+  else()
+    if(MEMLY_COMPONENT_PRIVATE_HEADERS)
+      message(FATAL_ERROR "Header-only Memly target ${MEMLY_COMPONENT_TARGET} cannot own private headers")
+    endif()
+    add_library("${MEMLY_COMPONENT_TARGET}" INTERFACE)
+    target_sources(
+      "${MEMLY_COMPONENT_TARGET}" INTERFACE FILE_SET HEADERS BASE_DIRS "${MEMLY_COMPONENT_INCLUDE_DIRECTORY}" FILES
+                                            ${MEMLY_COMPONENT_HEADERS}
     )
+    target_link_libraries("${MEMLY_COMPONENT_TARGET}" INTERFACE memly_asan)
+    set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF VERIFY_INTERFACE_HEADER_SETS ON)
   endif()
-  target_link_libraries("${MEMLY_COMPONENT_TARGET}" PRIVATE memly_asan)
-  set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF VERIFY_INTERFACE_HEADER_SETS ON)
   set_property(GLOBAL APPEND PROPERTY MEMLY_COMPONENT_TARGETS "${MEMLY_COMPONENT_TARGET}")
   set_property(
     GLOBAL APPEND PROPERTY MEMLY_REGISTERED_CXX_FILES ${MEMLY_COMPONENT_HEADERS} ${MEMLY_COMPONENT_PRIVATE_HEADERS}
@@ -464,6 +478,7 @@ endforeach()
 
 get_property(MEMLY_COMPONENT_TARGETS GLOBAL PROPERTY MEMLY_COMPONENT_TARGETS)
 foreach(MEMLY_COMPONENT_TARGET IN LISTS MEMLY_COMPONENT_TARGETS)
+  get_target_property(MEMLY_COMPONENT_TARGET_TYPE "${MEMLY_COMPONENT_TARGET}" TYPE)
   string(CONCAT MEMLY_INTERFACE_HEADER_VERIFICATION_CONDITION "$<AND:" "$<COMPILE_LANG_AND_ID:CXX,Clang>,"
                 "$<STREQUAL:$<TARGET_PROPERTY:NAME>,${MEMLY_COMPONENT_TARGET}_verify_interface_header_sets>>"
   )
@@ -475,10 +490,12 @@ foreach(MEMLY_COMPONENT_TARGET IN LISTS MEMLY_COMPONENT_TARGETS)
       "${MEMLY_COMPONENT_TARGET}"
       INTERFACE "$<${MEMLY_INTERFACE_HEADER_VERIFICATION_CONDITION}:${MEMLY_CLANG_WARNING_OPTION}>"
     )
-    target_compile_options(
-      "${MEMLY_COMPONENT_TARGET}"
-      PRIVATE "$<${MEMLY_PRIVATE_HEADER_VERIFICATION_CONDITION}:${MEMLY_CLANG_WARNING_OPTION}>"
-    )
+    if(NOT MEMLY_COMPONENT_TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+      target_compile_options(
+        "${MEMLY_COMPONENT_TARGET}"
+        PRIVATE "$<${MEMLY_PRIVATE_HEADER_VERIFICATION_CONDITION}:${MEMLY_CLANG_WARNING_OPTION}>"
+      )
+    endif()
   endforeach()
 endforeach()
 

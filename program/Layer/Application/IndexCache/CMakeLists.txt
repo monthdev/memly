@@ -7,5 +7,5 @@ memly_add_component_library(
 )
 target_link_libraries(
   memly_application_index_cache
-  PUBLIC memly_application_domain
+  INTERFACE memly_application_domain
 )
