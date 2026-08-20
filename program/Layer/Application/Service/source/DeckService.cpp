@@ -1,15 +1,14 @@
-#include "Memly/Service/DeckService.hpp"
+module;
 
 #include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "Memly/Domain/DeckConstraint.hpp"
-#include "Memly/Domain/DeckForestSnapshotNode.hpp"
-#include "Memly/IndexCache/DeckForestSnapshotIndexCache.hpp"
-#include "Memly/Repository/DeckRepository.hpp"
-#include "Memly/Repository/DeckSnapshotRecord.hpp"
+module Memly.Service;
+
+import Memly.Domain;
+import Memly.Repository;
 
 namespace Memly::Service {
 

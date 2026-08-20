@@ -1,3 +1,5 @@
+module Memly.Controller;
+
 // Temporarily disabled during deck page controller refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
 #if 0

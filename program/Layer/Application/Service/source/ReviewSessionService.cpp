@@ -1,3 +1,5 @@
+module Memly.Service;
+
 // Temporarily disabled during review session control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
 #if 0

@@ -1,4 +1,4 @@
-#include "Memly/Database/PreparedStatementExecution.hpp"
+module;
 
 #include <duckdb.hpp>
 
@@ -6,8 +6,9 @@
 #include <source_location>
 #include <utility>
 
-#include "Memly/Database/QueryResultDecoder.hpp"
-#include "_ThrowOnDatabaseError.hpp"
+module Memly.Database;
+
+import :ThrowOnDatabaseError;
 
 namespace Memly::Database {
 

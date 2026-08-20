@@ -1,8 +1,11 @@
-#include "_DeckSql.hpp"
+module;
 
 #include <string>
 
-#include "Memly/QtApp/QtAppResourceBytes.hpp"
+module Memly.Repository;
+
+import :DeckSql;
+import Memly.QtApp;
 
 namespace Memly::Repository {
 

@@ -1,8 +1,10 @@
-#include "Memly/Database/QueryResultRowCountRange.hpp"
+module;
 
 #include <cassert>
 #include <cstddef>
 #include <limits>
+
+module Memly.Database;
 
 namespace Memly::Database {
 

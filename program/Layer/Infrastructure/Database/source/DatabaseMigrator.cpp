@@ -1,4 +1,4 @@
-#include "Memly/Database/DatabaseMigrator.hpp"
+module;
 
 #include <duckdb.hpp>
 
@@ -18,11 +18,11 @@
 #include <utility>
 #include <vector>
 
-#include "Memly/Database/DatabaseRuntime.hpp"
-#include "Memly/Database/TransactionRunner.hpp"
-#include "Memly/Exception/MemlyException.hpp"
-#include "_Sql/_MigrationSql.hpp"
-#include "_ThrowOnDatabaseError.hpp"
+module Memly.Database;
+
+import :MigrationSql;
+import :ThrowOnDatabaseError;
+import Memly.Exception;
 
 namespace Memly::Database {
 

@@ -1,4 +1,4 @@
-#include "Memly/Database/QueryResultDecoder.hpp"
+module;
 
 #include <duckdb.hpp>
 
@@ -10,7 +10,9 @@
 #include <type_traits>
 #include <utility>
 
-#include "Memly/Exception/MemlyException.hpp"
+module Memly.Database;
+
+import Memly.Exception;
 
 namespace Memly::Database {
 

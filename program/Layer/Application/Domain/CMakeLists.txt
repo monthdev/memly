@@ -1,12 +1,10 @@
-file(GLOB MEMLY_DOMAIN_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/Memly/Domain/*.hpp")
+file(GLOB MEMLY_DOMAIN_MODULE_INTERFACES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/export/*.cppm")
 file(GLOB MEMLY_DOMAIN_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
-memly_add_component_library(
-  memly_application_domain "${CMAKE_CURRENT_SOURCE_DIR}/include" HEADERS ${MEMLY_DOMAIN_HEADERS} SOURCES
-  ${MEMLY_DOMAIN_SOURCES}
+memly_add_component_module(
+  memly_application_domain Memly.Domain INTERFACES ${MEMLY_DOMAIN_MODULE_INTERFACES} SOURCES ${MEMLY_DOMAIN_SOURCES}
 )
 target_link_libraries(
   memly_application_domain
-  PUBLIC ICU::uc
-  PRIVATE ICU::i18n memly_support_exception
+  PRIVATE ICU::i18n ICU::uc memly_support_exception
 )

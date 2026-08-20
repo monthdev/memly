@@ -29,6 +29,7 @@ Checks: |
   readability-*,
   -readability-named-parameter,
   -readability-redundant-casting,
+  -readability-redundant-declaration,
   -readability-redundant-member-init,
   -readability-redundant-typename,
   -readability-use-concise-preprocessor-directives,
@@ -39,7 +40,7 @@ Checks: |
   custom-memly-data-struct-constructor-noexcept,
   custom-memly-defaulted-or-deleted-copy-move-operation,
   custom-memly-defaulted-or-deleted-destructor-definition,
-  custom-memly-header-required-constructor-definition-in-class,
+  custom-memly-interface-required-constructor-definition-in-class,
   custom-memly-runtime-constructor-definition-in-implementation-file,
   custom-memly-conversion-operator,
   custom-memly-declared-ordinary-constructor,
@@ -56,7 +57,7 @@ Checks: |
   custom-memly-no-delegating-constructor,
   custom-memly-no-deduced-variable-type,
   custom-memly-no-global-prefix,
-  custom-memly-no-header-function-definition,
+  custom-memly-no-module-interface-function-definition,
   custom-memly-no-magic-integer-in-assertion,
   custom-memly-no-magic-integer-in-constant-declaration-type,
   custom-memly-no-negative-magic-integer,
@@ -92,6 +93,8 @@ CheckOptions:
   - { key: bugprone-unused-local-non-trivial-variable.IncludeTypes, value: ".*" }
   - { key: cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues, value: "1" }
   - { key: cppcoreguidelines-avoid-magic-numbers.IgnoredFloatingPointValues, value: "" }
+  - { key: misc-include-cleaner.MissingIncludes, value: "false" }
+  - { key: misc-include-cleaner.UnusedIncludes, value: "true" }
   - { key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic, value: "true" }
   - { key: readability-identifier-naming.ClassConstantPrefix, value: "s_" }
   - { key: readability-identifier-naming.ClassConstexprPrefix, value: "s_" }
@@ -168,7 +171,7 @@ CustomChecks:
       - BindName: destructor
         Message: destructor definitions must be explicitly defaulted or deleted
         Level: Warning
-  - Name: memly-header-required-constructor-definition-in-class
+  - Name: memly-interface-required-constructor-definition-in-class
     Query: >-
       match cxxConstructorDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()),
       unless(isExpansionInSystemHeader()), anyOf( isConstexpr(), hasParent(functionTemplateDecl()), ofClass(cxxRecordDecl(anyOf(
@@ -310,15 +313,15 @@ CustomChecks:
       - BindName: variable
         Message: deduced variable types require a narrow documented exception
         Level: Warning
-  - Name: memly-no-header-function-definition
+  - Name: memly-no-module-interface-function-definition
     Query: >-
       match functionDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isTemplateInstantiation()),
       unless(isExpansionInSystemHeader()), unless(cxxConstructorDecl()), unless( cxxMethodDecl( ofClass( cxxRecordDecl(isLambda()) ) ) ),
       unless(hasAncestor(functionTemplateDecl())), unless(hasAncestor(classTemplateDecl())), unless(hasAncestor(classTemplatePartialSpecializationDecl())),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\].*[.](h|hh|hpp|hxx)$") ).bind("function")
+      isExpansionInFileMatching("[/\\\\](program|test)[/\\\\].*[.]cppm$") ).bind("function")
     Diagnostic:
       - BindName: function
-        Message: ordinary non-template function definitions must remain in source files
+        Message: ordinary non-template function definitions must remain in .cpp implementation units
         Level: Warning
   - Name: memly-no-magic-integer-in-assertion
     Query: >-
@@ -387,7 +390,7 @@ CustomChecks:
       ).bind("type_declaration")
     Diagnostic:
       - BindName: type_declaration
-        Message: type declarations must appear in .hpp files
+        Message: type declarations must appear in .cppm module interface units
         Level: Warning
   - Name: memly-no-global-prefix
     Query: >-
@@ -578,7 +581,7 @@ CustomChecks:
     Query: >-
       match namedDecl( anyOf( functionDecl(unless(cxxMethodDecl())), cxxRecordDecl(), enumDecl(), typedefNameDecl(), functionTemplateDecl(),
       classTemplateDecl(), typeAliasTemplateDecl(), conceptDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](hpp|cpp)$"), hasParent(namespaceDecl(unless(isAnonymous()))),
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](cppm|cpp)$"), hasParent(namespaceDecl(unless(isAnonymous()))),
       hasAncestor(namespaceDecl(matchesName("^::Memly(::|$)"))), unless(matchesName("(^|::)i_[^:]*$") ) ).bind("declaration")
     Diagnostic:
       - BindName: declaration
@@ -590,7 +593,7 @@ CustomChecks:
       isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("(^|::)i_[^:]*$"), unless(hasParent(functionTemplateDecl())),
       unless(hasParent(classTemplateDecl())), unless(hasParent(typeAliasTemplateDecl())), unless( allOf( anyOf( functionDecl(unless(cxxMethodDecl())),
       cxxRecordDecl(), enumDecl(), typedefNameDecl(), functionTemplateDecl(), classTemplateDecl(), typeAliasTemplateDecl(), conceptDecl() ),
-      isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](hpp|cpp)$"), hasParent(namespaceDecl(unless(isAnonymous()))),
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](cppm|cpp)$"), hasParent(namespaceDecl(unless(isAnonymous()))),
       hasAncestor(namespaceDecl(matchesName("^::Memly(::|$)"))) ) ) ).bind("declaration")
     Diagnostic:
       - BindName: declaration

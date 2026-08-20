@@ -1,3 +1,5 @@
+module Memly.Invalidation;
+
 // Temporarily disabled during library invalidation control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
 #if 0

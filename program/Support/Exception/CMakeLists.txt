@@ -1,8 +1,8 @@
-file(GLOB MEMLY_EXCEPTION_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/Memly/Exception/*.hpp")
+file(GLOB MEMLY_EXCEPTION_MODULE_INTERFACES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/export/*.cppm")
 file(GLOB MEMLY_EXCEPTION_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
-memly_add_component_library(
-  memly_support_exception "${CMAKE_CURRENT_SOURCE_DIR}/include" HEADERS ${MEMLY_EXCEPTION_HEADERS} SOURCES
+memly_add_component_module(
+  memly_support_exception Memly.Exception INTERFACES ${MEMLY_EXCEPTION_MODULE_INTERFACES} SOURCES
   ${MEMLY_EXCEPTION_SOURCES}
 )
 target_link_libraries(

@@ -1,8 +1,10 @@
-#include "Memly/Domain/DeckConstraint.hpp"
+module;
 
 #include <cassert>
 #include <cstddef>
 #include <string>
+
+module Memly.Domain;
 
 namespace Memly::Domain {
 

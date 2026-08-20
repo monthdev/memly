@@ -4,7 +4,7 @@ import pathlib
 import sys
 
 
-ALLOWED_SOURCE_SUFFIXES = frozenset((".cpp", ".hpp"))
+ALLOWED_SOURCE_SUFFIXES = frozenset((".cpp", ".cppm"))
 C_AND_CPP_SOURCE_SUFFIXES = frozenset(
     (
         ".c",
@@ -59,8 +59,8 @@ def main() -> int:
         return 0
 
     print(
-        "Memly-authored C++ headers must use .hpp and translation units must use .cpp; "
-        "C, Objective-C, Objective-C++, module, and alternate C++ source extensions are disallowed:",
+        "Memly-authored module interfaces must use .cppm and implementation units must use .cpp; "
+        "C, Objective-C, Objective-C++, headers, and alternate C++ source extensions are disallowed:",
         file=sys.stderr,
     )
     for invalid_source_path in invalid_source_paths:

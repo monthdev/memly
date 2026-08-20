@@ -130,33 +130,11 @@ find_program(
   HINTS "${MEMLY_LLVM_BINARY_DIRECTORY}" "${MEMLY_LLVM_INSTALL_DIRECTORY}/share/clang"
   NO_DEFAULT_PATH REQUIRED
 )
+set(MEMLY_CLANG_TIDY_JOBS 6 CACHE STRING "Maximum concurrent full-tree Clang-Tidy processes")
+if(NOT MEMLY_CLANG_TIDY_JOBS MATCHES "^[1-6]$")
+  message(FATAL_ERROR "MEMLY_CLANG_TIDY_JOBS must be an integer from 1 through 6")
+endif()
 
-find_program(MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE NAMES include-what-you-use REQUIRED)
-execute_process(
-  COMMAND "${MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE}" --version
-  RESULT_VARIABLE MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_RESULT
-  OUTPUT_VARIABLE MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_OUTPUT
-  ERROR_VARIABLE MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_ERROR
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-if(NOT MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_RESULT EQUAL 0)
-  message(FATAL_ERROR "Unable to read Include What You Use version: ${MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_ERROR}")
-endif()
-string(REGEX MATCH "clang version ([0-9]+)" MEMLY_INCLUDE_WHAT_YOU_USE_CLANG_VERSION_MATCH
-             "${MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_OUTPUT}"
-)
-if(NOT MEMLY_INCLUDE_WHAT_YOU_USE_CLANG_VERSION_MATCH OR NOT CMAKE_MATCH_1 STREQUAL "${MEMLY_LLVM_MAJOR_VERSION}")
-  message(FATAL_ERROR "Memly requires Include What You Use built against LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x; "
-                      "found ${MEMLY_INCLUDE_WHAT_YOU_USE_VERSION_OUTPUT}"
-  )
-endif()
-cmake_path(GET MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE PARENT_PATH MEMLY_INCLUDE_WHAT_YOU_USE_BINARY_DIRECTORY)
-find_program(
-  MEMLY_INCLUDE_WHAT_YOU_USE_DRIVER_EXECUTABLE
-  NAMES iwyu_tool.py
-  HINTS "${MEMLY_INCLUDE_WHAT_YOU_USE_BINARY_DIRECTORY}"
-  NO_DEFAULT_PATH REQUIRED
-)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 file(GLOB_RECURSE MEMLY_AUTHORED_FILE_PATHS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/*"
@@ -178,58 +156,12 @@ if(WIN32)
   file(GENERATE OUTPUT "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
        CONTENT "@echo off\r\n\"${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}\" --experimental-custom-checks %*\r\n"
   )
-
-  set(MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-header-driver.cmd")
-  string(
-    CONCAT MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_CONTENT
-           "@echo off\r\n"
-           "setlocal\r\n"
-           "set \"MemlyClangTidyOutputFile=%TEMP%\\memly-clang-tidy-%RANDOM%-%RANDOM%.txt\"\r\n"
-           "call \"${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}\" %* 2>\"%MemlyClangTidyOutputFile%\"\r\n"
-           "set \"MemlyClangTidyResult=%ERRORLEVEL%\"\r\n"
-           "findstr /V /R /C:\"^\\[[0-9][0-9]*/[0-9][0-9]*\\] Processing file \" "
-           "\"%MemlyClangTidyOutputFile%\" 1>&2\r\n"
-           "del /Q \"%MemlyClangTidyOutputFile%\"\r\n"
-           "exit /B %MemlyClangTidyResult%\r\n"
-  )
-  file(GENERATE OUTPUT "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}"
-       CONTENT "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_CONTENT}"
-  )
 else()
   set(MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-driver")
   file(
     GENERATE
     OUTPUT "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
     CONTENT "#!/bin/sh\nexec \"${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}\" --experimental-custom-checks \"$@\"\n"
-            FILE_PERMISSIONS
-            OWNER_READ
-            OWNER_WRITE
-            OWNER_EXECUTE
-            GROUP_READ
-            GROUP_EXECUTE
-            WORLD_READ
-            WORLD_EXECUTE
-            NEWLINE_STYLE
-            UNIX
-  )
-
-  set(MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-header-driver")
-  string(
-    CONCAT MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_CONTENT
-           "#!/bin/sh\n"
-           "ClangTidyOutputFile=\"\$(mktemp \"\${TMPDIR:-/tmp}/memly-clang-tidy-header-output.XXXXXX\")\" || exit 2\n"
-           "trap 'rm -f \"\$ClangTidyOutputFile\"' EXIT HUP INT TERM\n"
-           "\"${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}\" \"\$@\" 2>\"\$ClangTidyOutputFile\"\n"
-           "ClangTidyResult=\$?\n"
-           "if ! sed '/^\\[[0-9][0-9]*\\\/[0-9][0-9]*\\] Processing file /d' \"\$ClangTidyOutputFile\" >&2; then\n"
-           "  exit 2\n"
-           "fi\n"
-           "exit \"\$ClangTidyResult\"\n"
-  )
-  file(
-    GENERATE
-    OUTPUT "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}"
-    CONTENT "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_CONTENT}"
             FILE_PERMISSIONS
             OWNER_READ
             OWNER_WRITE
@@ -326,6 +258,8 @@ if(NOT EXISTS "${_duckdb_inc}/duckdb.hpp")
   message(FATAL_ERROR "duckdb.hpp not found in ${libduckdb_SOURCE_DIR}")
 endif()
 
+message(STATUS "Found DuckDB: ${_duckdb_lib} (found version \"${DUCKDB_VERSION}\")")
+
 set(_duckdb_wrapper_dir "${CMAKE_BINARY_DIR}/duckdb_wrapper")
 file(MAKE_DIRECTORY "${_duckdb_wrapper_dir}")
 file(GENERATE OUTPUT "${_duckdb_wrapper_dir}/duckdb.hpp"
@@ -347,15 +281,17 @@ target_link_options(
   memly_asan INTERFACE $<$<CONFIG:Debug>:-fsanitize=address>
 )
 
-# Adds a static or header-only component and registers its complete C++ surface with the global lint and verification
-# gates.
-function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCLUDE_DIRECTORY)
-  cmake_parse_arguments(PARSE_ARGV 2 MEMLY_COMPONENT "" "" "HEADERS;PRIVATE_HEADERS;SOURCES")
+# Adds one named-module component and registers its complete authored C++ surface with the global lint gates.
+function(memly_add_component_module MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_MODULE_NAME)
+  cmake_parse_arguments(PARSE_ARGV 2 MEMLY_COMPONENT "" "" "INTERFACES;PRIVATE_INTERFACES;SOURCES")
 
-  foreach(MEMLY_COMPONENT_HEADER IN LISTS MEMLY_COMPONENT_HEADERS MEMLY_COMPONENT_PRIVATE_HEADERS)
-    if(NOT MEMLY_COMPONENT_HEADER MATCHES "[.]hpp$")
-      message(FATAL_ERROR "Memly target ${MEMLY_COMPONENT_TARGET} classifies a non-.hpp file as a header: "
-                          "${MEMLY_COMPONENT_HEADER}"
+  if(NOT MEMLY_COMPONENT_INTERFACES)
+    message(FATAL_ERROR "Memly module target ${MEMLY_COMPONENT_TARGET} has no exported interface units")
+  endif()
+  foreach(MEMLY_COMPONENT_INTERFACE IN LISTS MEMLY_COMPONENT_INTERFACES MEMLY_COMPONENT_PRIVATE_INTERFACES)
+    if(NOT MEMLY_COMPONENT_INTERFACE MATCHES "[.]cppm$")
+      message(FATAL_ERROR "Memly target ${MEMLY_COMPONENT_TARGET} classifies a non-.cppm file as a module interface: "
+                          "${MEMLY_COMPONENT_INTERFACE}"
       )
     endif()
   endforeach()
@@ -367,47 +303,58 @@ function(memly_add_component_library MEMLY_COMPONENT_TARGET MEMLY_COMPONENT_INCL
     endif()
   endforeach()
 
-  if(MEMLY_COMPONENT_SOURCES)
-    add_library("${MEMLY_COMPONENT_TARGET}" STATIC)
-    target_sources(
-      "${MEMLY_COMPONENT_TARGET}" PRIVATE ${MEMLY_COMPONENT_SOURCES}
-      PUBLIC FILE_SET HEADERS BASE_DIRS "${MEMLY_COMPONENT_INCLUDE_DIRECTORY}" FILES ${MEMLY_COMPONENT_HEADERS}
+  set(MEMLY_COMPONENT_PRIMARY_INTERFACE_COUNT 0)
+  foreach(MEMLY_COMPONENT_INTERFACE IN LISTS MEMLY_COMPONENT_INTERFACES)
+    file(READ "${MEMLY_COMPONENT_INTERFACE}" MEMLY_COMPONENT_INTERFACE_CONTENT)
+    string(FIND "${MEMLY_COMPONENT_INTERFACE_CONTENT}" "export module ${MEMLY_COMPONENT_MODULE_NAME}"
+                MEMLY_MODULE_DECLARATION_INDEX
     )
-    if(MEMLY_COMPONENT_PRIVATE_HEADERS)
-      target_sources(
-        "${MEMLY_COMPONENT_TARGET}"
-        PRIVATE FILE_SET
-                memly_private_headers
-                TYPE
-                HEADERS
-                BASE_DIRS
-                "${CMAKE_CURRENT_SOURCE_DIR}/source"
-                FILES
-                ${MEMLY_COMPONENT_PRIVATE_HEADERS}
-      )
-      set_target_properties(
-        "${MEMLY_COMPONENT_TARGET}" PROPERTIES VERIFY_PRIVATE_HEADER_SETS ON PRIVATE_HEADER_SETS_TO_VERIFY
-                                                                             memly_private_headers
+    if(MEMLY_MODULE_DECLARATION_INDEX EQUAL -1)
+      message(FATAL_ERROR "Memly target ${MEMLY_COMPONENT_TARGET} has an exported interface outside its named module: "
+                          "${MEMLY_COMPONENT_INTERFACE}"
       )
     endif()
-    target_link_libraries("${MEMLY_COMPONENT_TARGET}" PRIVATE memly_asan)
-    set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF VERIFY_INTERFACE_HEADER_SETS ON)
-  else()
-    if(MEMLY_COMPONENT_PRIVATE_HEADERS)
-      message(FATAL_ERROR "Header-only Memly target ${MEMLY_COMPONENT_TARGET} cannot own private headers")
-    endif()
-    add_library("${MEMLY_COMPONENT_TARGET}" INTERFACE)
-    target_sources(
-      "${MEMLY_COMPONENT_TARGET}" INTERFACE FILE_SET HEADERS BASE_DIRS "${MEMLY_COMPONENT_INCLUDE_DIRECTORY}" FILES
-                                            ${MEMLY_COMPONENT_HEADERS}
+    string(FIND "${MEMLY_COMPONENT_INTERFACE_CONTENT}" "export module ${MEMLY_COMPONENT_MODULE_NAME};"
+                MEMLY_PRIMARY_DECLARATION_INDEX
     )
-    target_link_libraries("${MEMLY_COMPONENT_TARGET}" INTERFACE memly_asan)
-    set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF VERIFY_INTERFACE_HEADER_SETS ON)
+    if(NOT MEMLY_PRIMARY_DECLARATION_INDEX EQUAL -1)
+      math(EXPR MEMLY_COMPONENT_PRIMARY_INTERFACE_COUNT "${MEMLY_COMPONENT_PRIMARY_INTERFACE_COUNT} + 1")
+    endif()
+  endforeach()
+  if(NOT MEMLY_COMPONENT_PRIMARY_INTERFACE_COUNT EQUAL 1)
+    message(FATAL_ERROR "Memly target ${MEMLY_COMPONENT_TARGET} must declare exactly one primary interface for "
+                        "${MEMLY_COMPONENT_MODULE_NAME}"
+    )
   endif()
+  foreach(MEMLY_COMPONENT_PRIVATE_INTERFACE IN LISTS MEMLY_COMPONENT_PRIVATE_INTERFACES)
+    file(READ "${MEMLY_COMPONENT_PRIVATE_INTERFACE}" MEMLY_COMPONENT_PRIVATE_INTERFACE_CONTENT)
+    string(FIND "${MEMLY_COMPONENT_PRIVATE_INTERFACE_CONTENT}" "module ${MEMLY_COMPONENT_MODULE_NAME}:"
+                MEMLY_PRIVATE_MODULE_DECLARATION_INDEX
+    )
+    if(MEMLY_PRIVATE_MODULE_DECLARATION_INDEX EQUAL -1)
+      message(FATAL_ERROR "Memly target ${MEMLY_COMPONENT_TARGET} has a private interface outside its named module: "
+                          "${MEMLY_COMPONENT_PRIVATE_INTERFACE}"
+      )
+    endif()
+  endforeach()
+
+  add_library("${MEMLY_COMPONENT_TARGET}" STATIC)
+  target_sources(
+    "${MEMLY_COMPONENT_TARGET}" PUBLIC FILE_SET CXX_MODULES FILES ${MEMLY_COMPONENT_INTERFACES}
+    PRIVATE ${MEMLY_COMPONENT_SOURCES}
+  )
+  if(MEMLY_COMPONENT_PRIVATE_INTERFACES)
+    target_sources(
+      "${MEMLY_COMPONENT_TARGET}" PRIVATE FILE_SET memly_private_modules TYPE CXX_MODULES FILES
+                                          ${MEMLY_COMPONENT_PRIVATE_INTERFACES}
+    )
+  endif()
+  target_link_libraries("${MEMLY_COMPONENT_TARGET}" PRIVATE memly_asan)
+  set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF CXX_SCAN_FOR_MODULES ON)
   set_property(GLOBAL APPEND PROPERTY MEMLY_COMPONENT_TARGETS "${MEMLY_COMPONENT_TARGET}")
   set_property(
-    GLOBAL APPEND PROPERTY MEMLY_REGISTERED_CXX_FILES ${MEMLY_COMPONENT_HEADERS} ${MEMLY_COMPONENT_PRIVATE_HEADERS}
-                           ${MEMLY_COMPONENT_SOURCES}
+    GLOBAL APPEND PROPERTY MEMLY_REGISTERED_CXX_FILES ${MEMLY_COMPONENT_INTERFACES}
+                           ${MEMLY_COMPONENT_PRIVATE_INTERFACES} ${MEMLY_COMPONENT_SOURCES}
   )
 endfunction()
 
@@ -419,9 +366,9 @@ file(
   MEMLY_AUTHORED_CXX_FILES
   CONFIGURE_DEPENDS
   "${CMAKE_SOURCE_DIR}/program/*.cpp"
-  "${CMAKE_SOURCE_DIR}/program/*.hpp"
+  "${CMAKE_SOURCE_DIR}/program/*.cppm"
   "${CMAKE_SOURCE_DIR}/test/*.cpp"
-  "${CMAKE_SOURCE_DIR}/test/*.hpp"
+  "${CMAKE_SOURCE_DIR}/test/*.cppm"
 )
 foreach(MEMLY_AUTHORED_CXX_FILE IN LISTS MEMLY_AUTHORED_CXX_FILES)
   if(NOT MEMLY_AUTHORED_CXX_FILE IN_LIST MEMLY_REGISTERED_CXX_FILES)
@@ -431,8 +378,8 @@ endforeach()
 
 set(MEMLY_CXX_TRANSLATION_UNIT_FILES ${MEMLY_REGISTERED_CXX_FILES})
 list(FILTER MEMLY_CXX_TRANSLATION_UNIT_FILES INCLUDE REGEX "[.]cpp$")
-set(MEMLY_CXX_HEADER_FILES ${MEMLY_REGISTERED_CXX_FILES})
-list(FILTER MEMLY_CXX_HEADER_FILES INCLUDE REGEX "[.]hpp$")
+set(MEMLY_CXX_MODULE_INTERFACE_FILES ${MEMLY_REGISTERED_CXX_FILES})
+list(FILTER MEMLY_CXX_MODULE_INTERFACE_FILES INCLUDE REGEX "[.]cppm$")
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
   set(MEMLY_CLANG_WARNING_OPTIONS
@@ -471,91 +418,33 @@ else()
 endif()
 foreach(MEMLY_CLANG_WARNING_OPTION IN LISTS MEMLY_CLANG_WARNING_OPTIONS)
   set_property(
-    SOURCE ${MEMLY_CXX_TRANSLATION_UNIT_FILES} APPEND
+    SOURCE ${MEMLY_CXX_TRANSLATION_UNIT_FILES} ${MEMLY_CXX_MODULE_INTERFACE_FILES} APPEND
     PROPERTY COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CXX,Clang>:${MEMLY_CLANG_WARNING_OPTION}>"
   )
 endforeach()
 
 get_property(MEMLY_COMPONENT_TARGETS GLOBAL PROPERTY MEMLY_COMPONENT_TARGETS)
-foreach(MEMLY_COMPONENT_TARGET IN LISTS MEMLY_COMPONENT_TARGETS)
-  get_target_property(MEMLY_COMPONENT_TARGET_TYPE "${MEMLY_COMPONENT_TARGET}" TYPE)
-  string(CONCAT MEMLY_INTERFACE_HEADER_VERIFICATION_CONDITION "$<AND:" "$<COMPILE_LANG_AND_ID:CXX,Clang>,"
-                "$<STREQUAL:$<TARGET_PROPERTY:NAME>,${MEMLY_COMPONENT_TARGET}_verify_interface_header_sets>>"
-  )
-  string(CONCAT MEMLY_PRIVATE_HEADER_VERIFICATION_CONDITION "$<AND:" "$<COMPILE_LANG_AND_ID:CXX,Clang>,"
-                "$<STREQUAL:$<TARGET_PROPERTY:NAME>,${MEMLY_COMPONENT_TARGET}_verify_private_header_sets>>"
-  )
-  foreach(MEMLY_CLANG_WARNING_OPTION IN LISTS MEMLY_CLANG_WARNING_OPTIONS)
-    target_compile_options(
-      "${MEMLY_COMPONENT_TARGET}"
-      INTERFACE "$<${MEMLY_INTERFACE_HEADER_VERIFICATION_CONDITION}:${MEMLY_CLANG_WARNING_OPTION}>"
-    )
-    if(NOT MEMLY_COMPONENT_TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
-      target_compile_options(
-        "${MEMLY_COMPONENT_TARGET}"
-        PRIVATE "$<${MEMLY_PRIVATE_HEADER_VERIFICATION_CONDITION}:${MEMLY_CLANG_WARNING_OPTION}>"
-      )
-    endif()
-  endforeach()
-endforeach()
-
-set(MEMLY_INCLUDE_WHAT_YOU_USE_STAMP "${CMAKE_BINARY_DIR}/.memly-include-what-you-use.stamp")
-add_custom_command(
-  OUTPUT "${MEMLY_INCLUDE_WHAT_YOU_USE_STAMP}"
-  COMMAND
-    "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tool/run_include_what_you_use.py"
-    "${CMAKE_BINARY_DIR}/compile_commands.json" "${CMAKE_SOURCE_DIR}/.iwyu.imp" --output-format clang
-    --include-what-you-use-driver "${MEMLY_INCLUDE_WHAT_YOU_USE_DRIVER_EXECUTABLE}" --include-what-you-use-executable
-    "${MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE}" --project-root "${CMAKE_SOURCE_DIR}"
-  COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_INCLUDE_WHAT_YOU_USE_STAMP}"
-  DEPENDS "${CMAKE_SOURCE_DIR}/.iwyu.imp"
-          "${CMAKE_SOURCE_DIR}/tool/run_include_what_you_use.py"
-          "${CMAKE_BINARY_DIR}/compile_commands.json"
-          "${MEMLY_INCLUDE_WHAT_YOU_USE_DRIVER_EXECUTABLE}"
-          "${MEMLY_INCLUDE_WHAT_YOU_USE_EXECUTABLE}"
-          ${MEMLY_CXX_TRANSLATION_UNIT_FILES}
-          ${MEMLY_CXX_HEADER_FILES}
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-  COMMENT "Run the mandatory implementation-associated header Include What You Use gate before compilation"
-  VERBATIM
-)
-add_custom_target(
-  memly-include-what-you-use DEPENDS "${MEMLY_INCLUDE_WHAT_YOU_USE_STAMP}"
-  COMMENT "Run the mandatory implementation-associated header Include What You Use gate"
-)
 
 set(MEMLY_CLANG_TIDY_STAMP "${CMAKE_BINARY_DIR}/.memly-clang-tidy.stamp")
 add_custom_command(
   OUTPUT "${MEMLY_CLANG_TIDY_STAMP}"
   COMMAND
-    "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -clang-tidy-binary
+    "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}" -j "${MEMLY_CLANG_TIDY_JOBS}" -p "${CMAKE_BINARY_DIR}" -clang-tidy-binary
     "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
-    "^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet -hide-progress "^${CMAKE_SOURCE_DIR}/(program|test)/.*[.]cpp$"
-  COMMAND "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}" -p "${CMAKE_BINARY_DIR}" -config-file
-          "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter "^$" -quiet ${MEMLY_CXX_HEADER_FILES}
+    "^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet -hide-progress "^${CMAKE_SOURCE_DIR}/(program|test)/.*[.](cpp|cppm)$"
   COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_CLANG_TIDY_STAMP}"
   DEPENDS "${CMAKE_SOURCE_DIR}/.clang-tidy"
           "${CMAKE_BINARY_DIR}/compile_commands.json"
           "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}"
-          "${MEMLY_LLVM_CLANG_TIDY_HEADER_WRAPPER_EXECUTABLE}"
           "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}"
           "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}"
           ${MEMLY_CXX_TRANSLATION_UNIT_FILES}
-          ${MEMLY_CXX_HEADER_FILES}
+          ${MEMLY_CXX_MODULE_INTERFACE_FILES}
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-  COMMENT "Run the mandatory full-tree Clang-Tidy gate before compilation"
+  COMMENT "Run the mandatory BMI-aware full-tree Clang-Tidy gate"
   VERBATIM
 )
 add_custom_target(
-  memly-clang-tidy DEPENDS "${MEMLY_CLANG_TIDY_STAMP}" COMMENT "Run the mandatory full-tree Clang-Tidy gate"
+  memly-clang-tidy ALL DEPENDS "${MEMLY_CLANG_TIDY_STAMP}" COMMENT "Run the mandatory full-tree Clang-Tidy gate"
 )
-add_dependencies(memly-clang-tidy memly-include-what-you-use)
-
-foreach(MEMLY_COMPONENT_TARGET IN LISTS MEMLY_COMPONENT_TARGETS)
-  add_dependencies("${MEMLY_COMPONENT_TARGET}" memly-clang-tidy)
-endforeach()
-add_dependencies(memly_qml memly-clang-tidy)
-add_dependencies(memly memly-clang-tidy)
-
-add_custom_target(memly-header-verification DEPENDS all_verify_header_sets COMMENT "Compile every header independently")
-add_dependencies(memly memly-header-verification)
+add_dependencies(memly-clang-tidy ${MEMLY_COMPONENT_TARGETS} memly)

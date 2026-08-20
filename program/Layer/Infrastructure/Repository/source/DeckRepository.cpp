@@ -1,15 +1,14 @@
-#include "Memly/Repository/DeckRepository.hpp"
+module;
 
 #include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
 
-#include "Memly/Database/DatabaseRuntime.hpp"
-#include "Memly/Database/QueryResultRowCountRange.hpp"
-#include "Memly/Repository/DeckSnapshotRecord.hpp"
-#include "Memly/Repository/MutatedId.hpp"
-#include "_Sql/_DeckSql.hpp"
+module Memly.Repository;
+
+import :DeckSql;
+import Memly.Database;
 
 namespace Memly::Repository {
 

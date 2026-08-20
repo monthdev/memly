@@ -1,7 +1,9 @@
-#include "Memly/Domain/HumanText.hpp"
+module;
 
 #include <string>
 #include <utility>
+
+module Memly.Domain;
 
 namespace Memly::Domain {
 

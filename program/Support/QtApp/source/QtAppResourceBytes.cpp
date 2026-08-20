@@ -1,4 +1,4 @@
-#include "Memly/QtApp/QtAppResourceBytes.hpp"
+module;
 
 #include <qbytearray.h>
 #include <qresource.h>
@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cstddef>
 #include <string>
+
+module Memly.QtApp;
 
 namespace Memly::QtApp {
 [[nodiscard]] auto ReadQtAppResourceBytes(const char* const QtResourcePath) -> std::string {

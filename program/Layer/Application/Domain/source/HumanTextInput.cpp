@@ -1,4 +1,4 @@
-#include "Memly/Domain/HumanTextInput.hpp"
+module;
 
 #include <unicode/brkiter.h>
 #include <unicode/errorcode.h>
@@ -14,7 +14,9 @@
 #include <string_view>
 #include <utility>
 
-#include "Memly/Exception/MemlyException.hpp"
+module Memly.Domain;
+
+import Memly.Exception;
 
 namespace Memly::Domain {
 

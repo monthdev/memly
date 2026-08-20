@@ -1,9 +1,11 @@
-#include "Memly/Domain/DeckForestSnapshotNode.hpp"
+module;
 
 #include <cstdint>
 #include <optional>
 #include <string>
 #include <utility>
+
+module Memly.Domain;
 
 namespace Memly::Domain {
 

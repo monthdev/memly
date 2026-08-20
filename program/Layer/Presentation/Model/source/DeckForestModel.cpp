@@ -1,3 +1,5 @@
+module Memly.Model;
+
 // Temporarily disabled during deck forest model refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
 #if 0

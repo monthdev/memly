@@ -1,6 +1,8 @@
-#include "Memly/Database/TransactionRunner.hpp"
+module;
 
 #include <duckdb.hpp>
+
+module Memly.Database;
 
 namespace Memly::Database {
 

@@ -1,8 +1,10 @@
-#include "Memly/Domain/LanguageTranslator.hpp"
+module;
 
 #include <array>
 #include <cstddef>
 #include <utility>
+
+module Memly.Domain;
 
 namespace Memly::Domain {
 

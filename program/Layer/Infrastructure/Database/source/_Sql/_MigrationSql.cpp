@@ -1,8 +1,11 @@
-#include "_MigrationSql.hpp"
+module;
 
 #include <string>
 
-#include "Memly/QtApp/QtAppResourceBytes.hpp"
+module Memly.Database;
+
+import :MigrationSql;
+import Memly.QtApp;
 
 namespace Memly::Database {
 

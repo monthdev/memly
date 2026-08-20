@@ -112,7 +112,7 @@ SqlFormatterExecutable="$RequiredExecutablePath"
 PythonExecutable="$(command -v python3)" || Fail 'Memly source-extension verification requires python3 on PATH.'
 "$PythonExecutable" tool/verify_source_extensions.py "$(git rev-parse --show-toplevel)" || Fail 'Memly source-extension verification failed.'
 
-CollectExistingFiles C++ ':(glob)program/**/*.cpp' ':(glob)program/**/*.hpp' ':(glob)test/**/*.cpp' ':(glob)test/**/*.hpp'
+CollectExistingFiles C++ ':(glob)program/**/*.cpp' ':(glob)program/**/*.cppm' ':(glob)test/**/*.cpp' ':(glob)test/**/*.cppm'
 FormatFileArrayWithOutput C++ "$ClangFormatExecutable" -style=file
 
 CollectExistingFiles CMake 'CMakeLists.txt' ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(glob)**/*.cmake.in'

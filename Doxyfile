@@ -11,7 +11,7 @@ GENERATE_TREEVIEW = YES
 INPUT = README.md documentation/agents/AGENTS_CODING_GUIDE.md program
 USE_MDFILE_AS_MAINPAGE = README.md
 RECURSIVE = YES
-FILE_PATTERNS = *.cpp *.hpp *.dox *.md
+FILE_PATTERNS = *.cpp *.cppm *.dox *.md
 
 EXTRACT_ALL = NO
 EXTRACT_PRIVATE = YES

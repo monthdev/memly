@@ -1,11 +1,13 @@
-#include "Memly/Repository/DeckSnapshotRecord.hpp"
+module;
 
 #include <cstdint>
 #include <optional>
 #include <string>
 #include <utility>
 
-#include "Memly/Database/DecodableQueryResultRowMixin.hpp"
+module Memly.Repository;
+
+import Memly.Database;
 
 namespace Memly::Repository {
 

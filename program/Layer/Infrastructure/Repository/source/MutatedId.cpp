@@ -1,9 +1,11 @@
-#include "Memly/Repository/MutatedId.hpp"
+module;
 
 #include <string>
 #include <utility>
 
-#include "Memly/Database/DecodableQueryResultRowMixin.hpp"
+module Memly.Repository;
+
+import Memly.Database;
 
 namespace Memly::Repository {
 

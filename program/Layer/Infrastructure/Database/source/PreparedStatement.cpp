@@ -1,4 +1,4 @@
-#include "Memly/Database/PreparedStatement.hpp"
+module;
 
 #include <duckdb.hpp>
 
@@ -6,7 +6,7 @@
 #include <source_location>
 #include <utility>
 
-#include "Memly/Database/PreparedStatementExecution.hpp"
+module Memly.Database;
 
 namespace Memly::Database {
 

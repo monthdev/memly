@@ -1,7 +1,7 @@
 ---
 Diagnostics:
   UnusedIncludes: Strict
-  MissingIncludes: Strict
+  MissingIncludes: None
   ClangTidy:
     Remove: ["custom-memly-*"]
     FastCheckFilter: None

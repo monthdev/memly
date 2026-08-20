@@ -48,7 +48,7 @@ if [ ! -f "$BuildDirectory/build.ninja" ] || [ "$PresetFingerprint" != "$Configu
 fi
 
 if ! cmake --build --preset macos-debug-local >&2; then
-    printf '%s\n' 'Memly integrity build failed. Diagnose and repair it before completing the patch.' >&2
+    printf '%s\n' 'Memly integrity build or mandatory lint analysis failed. Diagnose and repair it before completing the patch.' >&2
     exit 2
 fi
 

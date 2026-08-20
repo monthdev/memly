@@ -1,4 +1,4 @@
-#include "Memly/Exception/MemlyException.hpp"
+module;
 
 #include <algorithm>
 #include <array>
@@ -15,6 +15,8 @@
 #if not defined(NDEBUG)
 #include <system_error>
 #endif
+
+module Memly.Exception;
 
 namespace Memly::Exception {
 

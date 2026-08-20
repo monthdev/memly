@@ -1,4 +1,4 @@
-#include "Memly/Exception/ExceptionBoundary.hpp"
+module;
 
 #include <cstddef>
 #include <exception>
@@ -17,7 +17,9 @@
 #include <unistd.h>
 #endif
 
-#include "Memly/QtApp/QtAppStoragePath.hpp"
+module Memly.Exception;
+
+import Memly.QtApp;
 
 namespace Memly::Exception {
 namespace {

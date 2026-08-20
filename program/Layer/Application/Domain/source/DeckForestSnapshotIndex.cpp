@@ -1,4 +1,4 @@
-#include "Memly/Domain/DeckForestSnapshotIndex.hpp"
+module;
 
 #include <algorithm>
 #include <cassert>
@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-#include "Memly/Domain/DeckForestSnapshotNode.hpp"
+module Memly.Domain;
 
 namespace Memly::Domain {
 

@@ -1,4 +1,4 @@
-#include "Memly/Invalidation/LibraryInvalidationTarget.hpp"
+module;
 
 #include <cassert>
 #include <utility>
@@ -6,6 +6,8 @@
 #if not defined(NDEBUG)
 #include <bit>
 #endif
+
+module Memly.Invalidation;
 
 namespace Memly::Invalidation {
 

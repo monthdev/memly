@@ -1,11 +1,13 @@
 /// \file
 /// \brief Defines construction of the owned application runtime object graph.
 
-#include "Memly/CompositionRoot/ApplicationRuntime.hpp"
+module;
 
 #include <string>
 
-#include "Memly/Database/DatabaseMigrator.hpp"
+module Memly.CompositionRoot;
+
+import Memly.Database;
 
 namespace Memly::CompositionRoot {
 

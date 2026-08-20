@@ -1,10 +1,12 @@
-#include "Memly/QtApp/QtAppStoragePath.hpp"
+module;
 
 #include <qdir.h>
 #include <qstandardpaths.h>
 #include <qstring.h>
 
 #include <string>
+
+module Memly.QtApp;
 
 namespace Memly::QtApp {
 namespace {

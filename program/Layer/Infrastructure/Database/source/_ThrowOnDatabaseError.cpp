@@ -1,4 +1,4 @@
-#include "_ThrowOnDatabaseError.hpp"
+module;
 
 #include <duckdb.hpp>
 
@@ -6,7 +6,10 @@
 #include <source_location>
 #include <string_view>
 
-#include "Memly/Exception/MemlyException.hpp"
+module Memly.Database;
+
+import :ThrowOnDatabaseError;
+import Memly.Exception;
 
 namespace Memly::Database {
 

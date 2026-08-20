@@ -10,7 +10,7 @@
   "files.associations": {
     ".clang-tidy": "yaml",
     ".cmakelintrc": "yaml",
-    ".iwyu.imp": "json",
+    "*.cppm": "cpp",
   },
   "clangd.arguments": [
     "--enable-config",
@@ -31,7 +31,7 @@
         "--experimental-custom-checks",
         "--quiet",
         "--config-file=${workspaceFolder}/.clang-tidy",
-        "--checks=-*,custom-memly-*",
+        "--checks=-*,custom-memly-*,misc-include-cleaner",
         "--header-filter=^$",
         "-p",
         "${workspaceFolder}",
@@ -41,24 +41,6 @@
       "timeout": 120000,
       "parser": {
         "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)(?:\\s+\\[(?<code>[^\\]]+)\\])?$",
-        "flags": "gm",
-        "defaultSeverity": "warning",
-      },
-    },
-    "include-what-you-use": {
-      "kind": "diagnostic",
-      "command": "python3",
-      "cwd": "${workspaceFolder}",
-      "args": [
-        "${workspaceFolder}/tool/run_include_what_you_use.py",
-        "${workspaceFolder}/compile_commands.json",
-        "${workspaceFolder}/.iwyu.imp",
-        "${file}",
-      ],
-      "successExitCodes": [0, 1],
-      "timeout": 120000,
-      "parser": {
-        "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)$",
         "flags": "gm",
         "defaultSeverity": "warning",
       },
@@ -100,7 +82,7 @@
   },
   "lintRunner.targets": [
     {
-      "name": "C++ Sources",
+      "name": "C++ Implementation Units",
       "match": {
         "languages": ["cpp"],
         "files": ["program/**/*.cpp", "test/**/*.cpp"],
@@ -115,18 +97,18 @@
       },
     },
     {
-      "name": "C++ Headers",
+      "name": "C++ Module Interfaces",
       "match": {
         "languages": ["cpp"],
-        "files": ["program/**/*.hpp", "test/**/*.hpp"],
+        "files": ["program/**/*.cppm", "test/**/*.cppm"],
       },
       "onOpen": {
         "strategy": "sequence",
-        "tools": ["clang-tidy", "include-what-you-use"],
+        "tools": ["clang-tidy"],
       },
       "manual": {
         "strategy": "sequence",
-        "tools": ["clang-tidy", "include-what-you-use"],
+        "tools": ["clang-tidy"],
       },
     },
     {
