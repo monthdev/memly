@@ -267,9 +267,10 @@ On the 16 GiB macOS development machine, six concurrent workers caused severe
 memory-pressure slowdown in the uncurated check set. Deep translation units that
 took roughly 15 seconds in an isolated warm probe took approximately 153 through
 160 seconds each while six deep workers overlapped. Two workers also regressed
-the complete profiled gate by 67.425 seconds relative to three. The fresh-build
-default is therefore three workers; one through six remain selectable for
-controlled comparison through `MEMLY_CLANG_TIDY_JOBS`.
+the complete profiled gate by 67.425 seconds relative to three. The project now
+defaults to four workers while accepting any positive integer through
+`MEMLY_CLANG_TIDY_JOBS`; no project ceiling prevents controlled comparisons on
+other machines.
 
 Do not infer throughput from worker count alone. Compare the complete gate wall
 time at each process count because resident BMI closures can make additional

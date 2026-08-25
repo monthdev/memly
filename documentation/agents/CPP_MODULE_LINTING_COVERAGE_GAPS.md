@@ -98,9 +98,10 @@ IWYU is neither invoked by CMake nor exposed through Lint Runner on this branch.
 Each Clang-Tidy process can load a large transitive PCM closure. An unbounded
 full-tree run attempted to use all ten logical CPUs on a 16 GiB development
 machine and exhausted memory. `MEMLY_CLANG_TIDY_JOBS` controls the Ninja lint
-pool and the opt-in profiler, with a supported range of one through six
-concurrent processes. The same setting applies when the gate is invoked
-explicitly or as part of the default build.
+pool and the opt-in profiler. It defaults to four and accepts any positive
+integer so the developer can tune concurrency for the current machine. Ninja's
+overall worker limit still constrains the build path; the profiler uses the
+configured value directly.
 
 Before exact named modules, the editor's reduced `custom-memly-*` and
 unused-physical-header check set took 8.14 seconds for an exported service

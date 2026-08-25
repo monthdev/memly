@@ -130,9 +130,9 @@ find_program(
   HINTS "${MEMLY_LLVM_BINARY_DIRECTORY}" "${MEMLY_LLVM_INSTALL_DIRECTORY}/share/clang"
   NO_DEFAULT_PATH REQUIRED
 )
-set(MEMLY_CLANG_TIDY_JOBS 3 CACHE STRING "Maximum concurrent Clang-Tidy processes")
-if(NOT MEMLY_CLANG_TIDY_JOBS MATCHES "^[1-6]$")
-  message(FATAL_ERROR "MEMLY_CLANG_TIDY_JOBS must be an integer from 1 through 6")
+set(MEMLY_CLANG_TIDY_JOBS 4 CACHE STRING "Maximum concurrent Clang-Tidy processes")
+if(NOT MEMLY_CLANG_TIDY_JOBS MATCHES "^[1-9][0-9]*$")
+  message(FATAL_ERROR "MEMLY_CLANG_TIDY_JOBS must be a positive integer")
 endif()
 set_property(GLOBAL APPEND PROPERTY JOB_POOLS "memly_clang_tidy=${MEMLY_CLANG_TIDY_JOBS}")
 
