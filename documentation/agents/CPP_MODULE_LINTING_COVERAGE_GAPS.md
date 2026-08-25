@@ -58,13 +58,13 @@ The module branch changes these lint- and source-policy files:
 
 - `.clang-tidy` disables module-incompatible missing-include and redundant
   declaration diagnostics, retains unused physical-header diagnostics, and
-  updates custom checks for `.cppm` interfaces and `source/Internal/` modules.
+  updates custom checks for `.cppm` interfaces and `module/Internal/` modules.
 - `.clangd` disables module-incompatible missing-include diagnostics while
   retaining strict unused physical-header diagnostics.
 - `CMakeLists.txt` replaces the header-era IWYU and independent-header gates
   with the BMI-aware `memly-clang-tidy` target. Each static component target
-  publishes its `export/` module file set and privately owns its
-  `source/Internal/` module file set. Exported-interface imports form public
+  publishes its direct `module/` interface file set and privately owns its
+  `module/Internal/` interface file set. Exported-interface imports form public
   component edges; implementation-only imports form explicitly declared private
   edges. Each static component exposes only its public link interface, while the
   executable explicitly supplies the complete static-link closure. CMake rejects

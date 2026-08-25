@@ -346,15 +346,16 @@ function(memly_get_module_interface_metadata MEMLY_MODULE_NAME_OUTPUT MEMLY_MODU
 
   string(REPLACE "\\" "/" MEMLY_MODULE_INTERFACE_PATH "${MEMLY_MODULE_INTERFACE}")
   cmake_path(GET MEMLY_MODULE_INTERFACE_PATH STEM MEMLY_MODULE_INTERFACE_STEM)
-  if(MEMLY_MODULE_INTERFACE_PATH MATCHES "/export/[^/]+[.]cppm$")
+  if(MEMLY_MODULE_INTERFACE_PATH MATCHES "/module/[^/]+[.]cppm$")
     set(MEMLY_MODULE_VISIBILITY PUBLIC)
     set(MEMLY_EXPECTED_MODULE_NAME "${MEMLY_MODULE_PREFIX}.${MEMLY_MODULE_INTERFACE_STEM}")
-  elseif(MEMLY_MODULE_INTERFACE_PATH MATCHES "/source/Internal/(.+/)?[^/]+[.]cppm$")
+  elseif(MEMLY_MODULE_INTERFACE_PATH MATCHES "/module/Internal/_[^/]+[.]cppm$")
     set(MEMLY_MODULE_VISIBILITY PRIVATE)
-    set(MEMLY_EXPECTED_MODULE_NAME "${MEMLY_MODULE_PREFIX}.Internal.${MEMLY_MODULE_INTERFACE_STEM}")
+    string(REGEX REPLACE "^_" "" MEMLY_INTERNAL_MODULE_INTERFACE_STEM "${MEMLY_MODULE_INTERFACE_STEM}")
+    set(MEMLY_EXPECTED_MODULE_NAME "${MEMLY_MODULE_PREFIX}.Internal.${MEMLY_INTERNAL_MODULE_INTERFACE_STEM}")
   else()
-    message(FATAL_ERROR "Memly module interfaces must be stored directly under export/ or below source/Internal/: "
-                        "${MEMLY_MODULE_INTERFACE}"
+    message(FATAL_ERROR "Memly module interfaces must be stored directly under module/ or use an _ filename prefix "
+                        "directly under module/Internal/: ${MEMLY_MODULE_INTERFACE}"
     )
   endif()
 
@@ -431,13 +432,13 @@ function(memly_validate_module_implementation MEMLY_COMPONENT_TARGET MEMLY_MODUL
   endif()
   string(REPLACE "\\" "/" MEMLY_MODULE_SOURCE_PATH "${MEMLY_MODULE_SOURCE}")
   if(MEMLY_MODULE_VISIBILITY STREQUAL "PRIVATE")
-    if(NOT MEMLY_MODULE_SOURCE_PATH MATCHES "/source/Internal/")
-      message(FATAL_ERROR "Internal module implementations must be stored below source/Internal/: "
-                          "${MEMLY_MODULE_SOURCE}"
+    if(NOT MEMLY_MODULE_SOURCE_PATH MATCHES "/module/Internal/_[^/]+[.]cpp$")
+      message(FATAL_ERROR "Internal module implementations must use an _ filename prefix directly under "
+                          "module/Internal/: ${MEMLY_MODULE_SOURCE}"
       )
     endif()
-  elseif(NOT MEMLY_MODULE_SOURCE_PATH MATCHES "/source/[^/]+[.]cpp$")
-    message(FATAL_ERROR "Exported module implementations must be stored directly under source/: "
+  elseif(NOT MEMLY_MODULE_SOURCE_PATH MATCHES "/module/[^/]+[.]cpp$")
+    message(FATAL_ERROR "Public module implementation units must be stored directly under module/: "
                         "${MEMLY_MODULE_SOURCE}"
     )
   endif()
@@ -599,9 +600,11 @@ function(memly_collect_imported_module_interface_closure MEMLY_OUTPUT_VARIABLE M
   set(${MEMLY_OUTPUT_VARIABLE} ${MEMLY_IMPORTED_MODULE_INTERFACES} PARENT_SCOPE)
 endfunction()
 
-# Adds one static component target with distinct exported and internal BMI file sets.
+# Adds one static component target with distinct public and internal module-interface file sets.
 function(memly_add_component MEMLY_COMPONENT_TARGET MEMLY_MODULE_PREFIX)
-  cmake_parse_arguments(PARSE_ARGV 2 MEMLY_COMPONENT "" "" "PUBLIC_MODULES;PRIVATE_MODULES;SOURCES")
+  cmake_parse_arguments(
+    PARSE_ARGV 2 MEMLY_COMPONENT "" "" "PUBLIC_MODULE_INTERFACES;INTERNAL_MODULE_INTERFACES;SOURCES"
+  )
   if(MEMLY_COMPONENT_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "Unexpected arguments for Memly component ${MEMLY_COMPONENT_TARGET}: "
                         "${MEMLY_COMPONENT_UNPARSED_ARGUMENTS}"
@@ -610,26 +613,28 @@ function(memly_add_component MEMLY_COMPONENT_TARGET MEMLY_MODULE_PREFIX)
   if(TARGET "${MEMLY_COMPONENT_TARGET}")
     message(FATAL_ERROR "Memly component target ${MEMLY_COMPONENT_TARGET} is provided more than once")
   endif()
-  if(NOT MEMLY_COMPONENT_PUBLIC_MODULES)
+  if(NOT MEMLY_COMPONENT_PUBLIC_MODULE_INTERFACES)
     message(FATAL_ERROR "Memly component ${MEMLY_COMPONENT_TARGET} must export at least one named module")
   endif()
 
   add_library("${MEMLY_COMPONENT_TARGET}" STATIC)
   target_sources(
-    "${MEMLY_COMPONENT_TARGET}" PUBLIC FILE_SET memly_exported_modules TYPE CXX_MODULES FILES
-                                       ${MEMLY_COMPONENT_PUBLIC_MODULES}
+    "${MEMLY_COMPONENT_TARGET}" PUBLIC FILE_SET memly_public_module_interfaces TYPE CXX_MODULES FILES
+                                       ${MEMLY_COMPONENT_PUBLIC_MODULE_INTERFACES}
   )
-  if(MEMLY_COMPONENT_PRIVATE_MODULES)
+  if(MEMLY_COMPONENT_INTERNAL_MODULE_INTERFACES)
     target_sources(
-      "${MEMLY_COMPONENT_TARGET}" PRIVATE FILE_SET memly_internal_modules TYPE CXX_MODULES FILES
-                                          ${MEMLY_COMPONENT_PRIVATE_MODULES}
+      "${MEMLY_COMPONENT_TARGET}" PRIVATE FILE_SET memly_internal_module_interfaces TYPE CXX_MODULES FILES
+                                          ${MEMLY_COMPONENT_INTERNAL_MODULE_INTERFACES}
     )
   endif()
   if(MEMLY_COMPONENT_SOURCES)
     target_sources("${MEMLY_COMPONENT_TARGET}" PRIVATE ${MEMLY_COMPONENT_SOURCES})
   endif()
 
-  foreach(MEMLY_MODULE_INTERFACE IN LISTS MEMLY_COMPONENT_PUBLIC_MODULES MEMLY_COMPONENT_PRIVATE_MODULES)
+  foreach(MEMLY_MODULE_INTERFACE IN LISTS MEMLY_COMPONENT_PUBLIC_MODULE_INTERFACES
+                                          MEMLY_COMPONENT_INTERNAL_MODULE_INTERFACES
+  )
     memly_get_module_interface_metadata(
       MEMLY_MODULE_NAME MEMLY_MODULE_VISIBILITY "${MEMLY_MODULE_PREFIX}" "${MEMLY_MODULE_INTERFACE}"
     )
@@ -637,13 +642,15 @@ function(memly_add_component MEMLY_COMPONENT_TARGET MEMLY_MODULE_PREFIX)
     if(MEMLY_MODULE_NAME IN_LIST MEMLY_MODULE_NAMES)
       message(FATAL_ERROR "Memly named module ${MEMLY_MODULE_NAME} is provided more than once")
     endif()
-    if(MEMLY_MODULE_INTERFACE IN_LIST MEMLY_COMPONENT_PUBLIC_MODULES AND NOT MEMLY_MODULE_VISIBILITY STREQUAL "PUBLIC")
+    if(MEMLY_MODULE_INTERFACE IN_LIST MEMLY_COMPONENT_PUBLIC_MODULE_INTERFACES AND NOT MEMLY_MODULE_VISIBILITY STREQUAL
+                                                                                   "PUBLIC"
+    )
       message(FATAL_ERROR "Internal module ${MEMLY_MODULE_NAME} was registered as a public component module")
     endif()
-    if(MEMLY_MODULE_INTERFACE IN_LIST MEMLY_COMPONENT_PRIVATE_MODULES AND NOT MEMLY_MODULE_VISIBILITY STREQUAL
-                                                                          "PRIVATE"
+    if(MEMLY_MODULE_INTERFACE IN_LIST MEMLY_COMPONENT_INTERNAL_MODULE_INTERFACES AND NOT MEMLY_MODULE_VISIBILITY
+                                                                                     STREQUAL "PRIVATE"
     )
-      message(FATAL_ERROR "Exported module ${MEMLY_MODULE_NAME} was registered as a private component module")
+      message(FATAL_ERROR "Public module ${MEMLY_MODULE_NAME} was registered as an internal component module")
     endif()
     set_property(GLOBAL APPEND PROPERTY MEMLY_MODULE_NAMES "${MEMLY_MODULE_NAME}")
     set_property(GLOBAL APPEND PROPERTY MEMLY_MODULE_PROVIDER_TARGETS "${MEMLY_COMPONENT_TARGET}")
@@ -654,20 +661,22 @@ function(memly_add_component MEMLY_COMPONENT_TARGET MEMLY_MODULE_PREFIX)
     memly_validate_module_implementation("${MEMLY_COMPONENT_TARGET}" "${MEMLY_MODULE_SOURCE}")
   endforeach()
 
-  set(MEMLY_COMPONENT_AUTHORED_CXX_FILES ${MEMLY_COMPONENT_PUBLIC_MODULES} ${MEMLY_COMPONENT_PRIVATE_MODULES}
-                                         ${MEMLY_COMPONENT_SOURCES}
+  set(MEMLY_COMPONENT_AUTHORED_CXX_FILES ${MEMLY_COMPONENT_PUBLIC_MODULE_INTERFACES}
+                                         ${MEMLY_COMPONENT_INTERNAL_MODULE_INTERFACES} ${MEMLY_COMPONENT_SOURCES}
   )
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${MEMLY_COMPONENT_AUTHORED_CXX_FILES})
   set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF CXX_SCAN_FOR_MODULES ON)
   memly_configure_authored_cxx_files("${MEMLY_COMPONENT_TARGET}" ${MEMLY_COMPONENT_AUTHORED_CXX_FILES})
   set_property(TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_CLANG_TIDY_FILES ${MEMLY_COMPONENT_AUTHORED_CXX_FILES})
   set_property(
-    TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_PUBLIC_MODULE_INTERFACES ${MEMLY_COMPONENT_PUBLIC_MODULES}
+    TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_PUBLIC_MODULE_INTERFACES
+                                                ${MEMLY_COMPONENT_PUBLIC_MODULE_INTERFACES}
   )
   set_property(
-    TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_PRIVATE_MODULE_INTERFACES ${MEMLY_COMPONENT_PRIVATE_MODULES}
+    TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_INTERNAL_MODULE_INTERFACES
+                                                ${MEMLY_COMPONENT_INTERNAL_MODULE_INTERFACES}
   )
-  set_property(TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_MODULE_IMPLEMENTATION_FILES ${MEMLY_COMPONENT_SOURCES})
+  set_property(TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_MODULE_IMPLEMENTATION_UNITS ${MEMLY_COMPONENT_SOURCES})
   set_property(GLOBAL APPEND PROPERTY MEMLY_COMPONENT_TARGETS "${MEMLY_COMPONENT_TARGET}")
 endfunction()
 
@@ -759,14 +768,14 @@ function(memly_validate_component_import_graph)
       MEMLY_PUBLIC_MODULE_INTERFACES TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_PUBLIC_MODULE_INTERFACES
     )
     get_property(
-      MEMLY_PRIVATE_MODULE_INTERFACES TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_PRIVATE_MODULE_INTERFACES
+      MEMLY_INTERNAL_MODULE_INTERFACES TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_INTERNAL_MODULE_INTERFACES
     )
     get_property(
-      MEMLY_MODULE_IMPLEMENTATION_FILES TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_MODULE_IMPLEMENTATION_FILES
+      MEMLY_MODULE_IMPLEMENTATION_UNITS TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_MODULE_IMPLEMENTATION_UNITS
     )
 
-    foreach(MEMLY_IMPORTER_FILE IN LISTS MEMLY_PUBLIC_MODULE_INTERFACES MEMLY_PRIVATE_MODULE_INTERFACES
-                                         MEMLY_MODULE_IMPLEMENTATION_FILES
+    foreach(MEMLY_IMPORTER_FILE IN LISTS MEMLY_PUBLIC_MODULE_INTERFACES MEMLY_INTERNAL_MODULE_INTERFACES
+                                         MEMLY_MODULE_IMPLEMENTATION_UNITS
     )
       if(MEMLY_IMPORTER_FILE IN_LIST MEMLY_PUBLIC_MODULE_INTERFACES)
         set(MEMLY_IMPORTER_VISIBILITY PUBLIC)

@@ -622,20 +622,20 @@ CustomChecks:
     Query: >-
       match namedDecl( anyOf( functionDecl(unless(cxxMethodDecl())), cxxRecordDecl(), enumDecl(), typedefNameDecl(), functionTemplateDecl(),
       classTemplateDecl(), typeAliasTemplateDecl(), conceptDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]source[/\\\\]Internal[/\\\\]"), hasParent(namespaceDecl(unless(isAnonymous()))),
+      isExpansionInFileMatching("[/\\\\]module[/\\\\]Internal[/\\\\]"), hasParent(namespaceDecl(unless(isAnonymous()))),
       hasAncestor(namespaceDecl(matchesName("^::Memly(::|$)"))), unless(hasAncestor(namespaceDecl(matchesName("^::Memly::[A-Za-z0-9_]+::Internal(::|$)"))))
       ).bind("declaration")
     Diagnostic:
       - BindName: declaration
-        Message: namespace-scope types and free functions declared below source/Internal must belong to the component's Internal namespace
+        Message: namespace-scope types and free functions declared below module/Internal must belong to the component's Internal namespace
         Level: Warning
   - Name: memly-internal-namespace-reserved
     Query: >-
       match namespaceDecl( unless(isAnonymous()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
-      matchesName("(^|::)Internal$"), unless(isExpansionInFileMatching("[/\\\\]source[/\\\\]Internal[/\\\\]")) ).bind("namespace")
+      matchesName("(^|::)Internal$"), unless(isExpansionInFileMatching("[/\\\\]module[/\\\\]Internal[/\\\\]")) ).bind("namespace")
     Diagnostic:
       - BindName: namespace
-        Message: the Internal namespace is reserved for target-private modules stored below source/Internal
+        Message: the Internal namespace is reserved for target-private modules stored below module/Internal
         Level: Warning
   - Name: memly-type-template-parameter-name
     Query: >-

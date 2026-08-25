@@ -268,19 +268,21 @@ a semantic getter only for a domain property.
 ## Namespaces and File-Private Code
 
 A Memly-owned definition's namespace mirrors its owning component. Architectural
-folders, `export`, and `source` add no namespace component. A target-private
-module stored below `source/Internal/` adds `Internal` after the component
-namespace; lower organizational folders add nothing. Keep namespace-scope
-declarations in those files in that `Internal` namespace and reserve it for that
-location (`custom-memly-internal-declaration-namespace`,
+folders and `module` add no namespace component. A target-private module stored
+below `module/Internal/` adds `Internal` after the component namespace; lower
+organizational folders add nothing. Keep namespace-scope declarations in those
+files in that `Internal` namespace and reserve it for that location
+(`custom-memly-internal-declaration-namespace`,
 `custom-memly-internal-namespace-reserved`). Nest unnamed helpers inside the
 matching `Memly` namespace (`custom-memly-unnamed-namespace-nesting`).
 
 Spell each interface's exact named module as its component namespace path with
 `::` replaced by `.`, followed by the interface file stem. For example,
 `DatabaseRuntime.cppm` in `Memly::Database` declares
-`Memly.Database.DatabaseRuntime`; `MigrationSql.cppm` below `source/Internal/`
-declares `Memly.Database.Internal.MigrationSql`. Do not carry other physical
+`Memly.Database.DatabaseRuntime`; `_MigrationSql.cppm` below `module/Internal/`
+declares `Memly.Database.Internal.MigrationSql`. Prefix every owner-only module
+interface and corresponding implementation filename with `_`; the physical
+marker does not enter the named module. Do not carry other physical
 architectural or organizational folders into the module name
 (`memly_get_module_interface_metadata()`,
 `memly_validate_module_implementation()`).
@@ -341,12 +343,13 @@ headers (`tool/verify_deprecated_c_headers.py`).
 Give each CMake glob variable one folder; do not recurse or combine patterns.
 Order globs and target sources by source-tree order.
 
-Store exported module interfaces under `export/`, target-private module
-interfaces under `source/Internal/`, and implementation units, SQL, and other
-target-private inputs under `source/`. Use only `.cppm` for Memly-authored
-module interfaces and `.cpp` for implementation units. Do not add textual C++
-headers, C, Objective-C, Objective-C++, or alternate C++ source extensions under
-`program/` or `test/` (`memly_get_module_interface_metadata()`,
+Collocate each externally importable module interface and its corresponding
+implementation unit directly under `module/`. Store owner-only module pairs and
+target-private inputs under `module/Internal/`; SQL belongs below
+`module/Internal/Sql/`. Use only `.cppm` for Memly-authored module interfaces
+and `.cpp` for implementation units. Do not add textual C++ headers, C,
+Objective-C, Objective-C++, or alternate C++ source extensions under `program/`
+or `test/` (`memly_get_module_interface_metadata()`,
 `memly_validate_module_implementation()`, `tool/verify_source_extensions.py`).
 
 Declare a target's globs, include roots, resources, and direct dependencies
@@ -357,12 +360,13 @@ dependencies through `memly_add_component()` and
 `memly_link_component_dependencies()`.
 
 Map every named module owned by one component to one static component target.
-Put exported interfaces in its public `CXX_MODULES` file set and `Internal`
-interfaces in its private `CXX_MODULES` file set. Do not add primary routing
-modules, re-export umbrellas, or module partitions. Only implementation units in
-the owning component may import an `Internal` module; an exported interface may
-not import one. CMake's module file-set visibility enforces this owner-only
-boundary (`memly_add_component()`, `memly_validate_component_import_graph()`).
+Put public module interfaces in its public `CXX_MODULES` file set and internal
+module interfaces in its private `CXX_MODULES` file set. Do not add primary
+routing modules, re-export umbrellas, or module partitions. Only implementation
+units in the owning component may import an `Internal` module; a public
+interface may not import one. CMake's module file-set visibility enforces this
+owner-only boundary (`memly_add_component()`,
+`memly_validate_component_import_graph()`).
 
 Place physical third-party and standard-library includes in the global module
 fragment, then declare the module before imports. Import Memly dependencies; do
@@ -371,7 +375,7 @@ module declared by its corresponding interface and explicitly imports every
 other Memly module it uses.
 
 Declare component target relationships explicitly rather than deriving target
-edges from imports. Use `PUBLIC` when an exported interface imports the
+edges from imports. Use `PUBLIC` when a public module interface imports the
 dependency and `PRIVATE` for an implementation-only import. Curate each static
 component's outward link interface to its public dependencies so private
 dependency BMIs do not reach indirect consumers, and explicitly link the
