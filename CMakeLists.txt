@@ -137,10 +137,11 @@ endif()
 set_property(GLOBAL APPEND PROPERTY JOB_POOLS "memly_clang_tidy=${MEMLY_CLANG_TIDY_JOBS}")
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(MEMLY_CMAKE_TOOL_DIRECTORY "${CMAKE_SOURCE_DIR}/tool/cmake")
 
 # Runs a lint/build source verifier during configuration and tracks changes to its implementation.
 function(memly_run_source_verifier MEMLY_VERIFIER_FILE_NAME)
-  set(MEMLY_VERIFIER_PATH "${CMAKE_SOURCE_DIR}/tool/${MEMLY_VERIFIER_FILE_NAME}")
+  set(MEMLY_VERIFIER_PATH "${MEMLY_CMAKE_TOOL_DIRECTORY}/${MEMLY_VERIFIER_FILE_NAME}")
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${MEMLY_VERIFIER_PATH}")
   execute_process(
     COMMAND "${Python3_EXECUTABLE}" "${MEMLY_VERIFIER_PATH}" "${CMAKE_SOURCE_DIR}"
@@ -884,7 +885,7 @@ endfunction()
 
 set(MEMLY_BUILD_TIMING_FILE "${CMAKE_BINARY_DIR}/build-start-time.txt")
 set(MEMLY_CLANG_TIDY_TIMING_FILE "${CMAKE_BINARY_DIR}/clang-tidy-start-time.txt")
-set(MEMLY_TIMING_SCRIPT "${CMAKE_SOURCE_DIR}/tool/report_elapsed_time.cmake")
+set(MEMLY_TIMING_SCRIPT "${MEMLY_CMAKE_TOOL_DIRECTORY}/report_elapsed_time.cmake")
 add_custom_target(
   memly-build-timing-start
   COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Start "-DMEMLY_TIMING_FILE=${MEMLY_BUILD_TIMING_FILE}" -P
@@ -914,6 +915,7 @@ foreach(MEMLY_AUTHORED_CXX_FILE IN LISTS MEMLY_AUTHORED_CXX_FILES)
 endforeach()
 
 set(MEMLY_DEPRECATED_C_HEADER_STAMP_DIRECTORY "${CMAKE_BINARY_DIR}/deprecated-c-header-stamps")
+set(MEMLY_DEPRECATED_C_HEADER_VERIFIER "${MEMLY_CMAKE_TOOL_DIRECTORY}/verify_deprecated_c_headers.py")
 file(MAKE_DIRECTORY "${MEMLY_DEPRECATED_C_HEADER_STAMP_DIRECTORY}")
 set(MEMLY_DEPRECATED_C_HEADER_STAMPS)
 foreach(MEMLY_AUTHORED_CXX_FILE IN LISTS MEMLY_AUTHORED_CXX_FILES)
@@ -927,10 +929,10 @@ foreach(MEMLY_AUTHORED_CXX_FILE IN LISTS MEMLY_AUTHORED_CXX_FILES)
   )
   add_custom_command(
     OUTPUT "${MEMLY_DEPRECATED_C_HEADER_STAMP}"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tool/verify_deprecated_c_headers.py" "${CMAKE_SOURCE_DIR}"
+    COMMAND "${Python3_EXECUTABLE}" "${MEMLY_DEPRECATED_C_HEADER_VERIFIER}" "${CMAKE_SOURCE_DIR}"
             "${MEMLY_AUTHORED_CXX_FILE}"
     COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_DEPRECATED_C_HEADER_STAMP}"
-    DEPENDS "${MEMLY_AUTHORED_CXX_FILE}" "${CMAKE_SOURCE_DIR}/tool/verify_deprecated_c_headers.py"
+    DEPENDS "${MEMLY_AUTHORED_CXX_FILE}" "${MEMLY_DEPRECATED_C_HEADER_VERIFIER}"
     COMMENT "Check deprecated C headers ${MEMLY_AUTHORED_CXX_RELATIVE_FILE}"
     VERBATIM
   )
@@ -1042,7 +1044,7 @@ add_custom_target(
   memly-clang-tidy-profile
   COMMAND
     "${CMAKE_COMMAND}" -E env PYTHONUNBUFFERED=1 "${Python3_EXECUTABLE}"
-    "${CMAKE_SOURCE_DIR}/tool/run_and_capture_output.py" "${MEMLY_CLANG_TIDY_PROFILE_REPORT}" --source-root
+    "${MEMLY_CMAKE_TOOL_DIRECTORY}/run_and_capture_output.py" "${MEMLY_CLANG_TIDY_PROFILE_REPORT}" --source-root
     "${CMAKE_SOURCE_DIR}" --config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" --compilation-database
     "${MEMLY_CLANG_TIDY_COMPILATION_DATABASE}" --tool "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}" --metadata
     "CMake version: ${CMAKE_VERSION}" --metadata "CMake generator: ${CMAKE_GENERATOR}" --metadata

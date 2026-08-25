@@ -8,10 +8,10 @@ each applicable `custom-memly-*` check by name and each applicable verifier
 under `tool/` by its repository-relative path. Cite each applicable custom CMake
 enforcement by its narrowest `memly_*()` helper or validator name. Never name or
 enumerate a built-in Clang-Tidy check, check family, or compiler warning flag
-(`tool/verify_agent_coding_guide.py`). Do not duplicate source or configuration,
-including implementation inventories, current control flow, tool versions, or
-formatter, editor, and CI behavior. Prune superseded prose with the rule or
-enforcement change.
+(`tool/hook/verify_agent_coding_guide.py`). Do not duplicate source or
+configuration, including implementation inventories, current control flow, tool
+versions, or formatter, editor, and CI behavior. Prune superseded prose with the
+rule or enforcement change.
 
 ## Runtime Composition and Services
 
@@ -336,7 +336,7 @@ Use `#if defined(Macro)` and `#if not defined(Macro)`, not `#ifdef` and
 Name an included header literally on one physical directive; do not hide it
 behind a macro or line splice. Include C standard-library facilities through
 their C++ headers; do not include deprecated or redundant C compatibility
-headers (`tool/verify_deprecated_c_headers.py`).
+headers (`tool/cmake/verify_deprecated_c_headers.py`).
 
 ## Source and CMake Organization
 
@@ -350,7 +350,8 @@ target-private inputs under `module/Internal/`; SQL belongs below
 and `.cpp` for implementation units. Do not add textual C++ headers, C,
 Objective-C, Objective-C++, or alternate C++ source extensions under `program/`
 or `test/` (`memly_get_module_interface_metadata()`,
-`memly_validate_module_implementation()`, `tool/verify_source_extensions.py`).
+`memly_validate_module_implementation()`,
+`tool/cmake/verify_source_extensions.py`).
 
 Declare a target's globs, include roots, resources, and direct dependencies
 beside its source tree. Do not add a forwarding-only architectural

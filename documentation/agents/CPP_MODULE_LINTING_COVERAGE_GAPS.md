@@ -87,8 +87,9 @@ The module branch changes these lint- and source-policy files:
 - `.codex/hooks/check_repository_format.sh`,
   `.github/workflows/CheckRepositoryFormat.yml`, and `.prettierignore` replace
   authored `.hpp` formatting coverage with `.cppm` coverage.
-- `tool/verify_source_extensions.py`, invoked by CMake, replaces the authored
-  header/source extension policy with the `.cppm` and `.cpp` module policy.
+- `tool/cmake/verify_source_extensions.py`, invoked by CMake, replaces the
+  authored header/source extension policy with the `.cppm` and `.cpp` module
+  policy.
 
 The module branch deletes `.iwyu.imp` and `tool/run_include_what_you_use.py`.
 IWYU is neither invoked by CMake nor exposed through Lint Runner on this branch.
