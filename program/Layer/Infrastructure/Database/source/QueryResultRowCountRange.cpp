@@ -4,7 +4,7 @@ module;
 #include <cstddef>
 #include <limits>
 
-module Memly.Database;
+module Memly.Database.QueryResultRowCountRange;
 
 namespace Memly::Database {
 

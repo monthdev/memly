@@ -1,4 +1,4 @@
-export module Memly.Bridge:DeckPageControllerBridge;
+export module Memly.Bridge.DeckPageControllerBridge;
 
 // Temporarily disabled during deck page controller bridge refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -8,10 +8,10 @@ export module Memly.Bridge:DeckPageControllerBridge;
 #include <qstring.h>
 #include <qtypes.h>
 
-import :DeckForestProxyModel;
-import Memly.Invalidation;
-import Memly.Service;
-import Memly.Controller;
+import Memly.Bridge.DeckForestProxyModel;
+import Memly.Controller.DeckPageController;
+import Memly.Invalidation.LibraryInvalidationChannel;
+import Memly.Service.DeckService;
 
 export namespace Memly::Bridge {
 

@@ -3,10 +3,10 @@ module;
 #include <utility>
 #include <vector>
 
-export module Memly.Database:DecodedQueryResult;
+export module Memly.Database.DecodedQueryResult;
 
-import :DecodableQueryResultRowMixin;
-import :QueryResultRowCountRange;
+import Memly.Database.DecodableQueryResultRowMixin;
+import Memly.Database.QueryResultRowCountRange;
 
 export namespace Memly::Database {
 

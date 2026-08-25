@@ -1,1 +1,1 @@
-export module Memly.Domain:Fsrs7Scheduler;
+export module Memly.Domain.Fsrs7Scheduler;

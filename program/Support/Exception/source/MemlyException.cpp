@@ -16,7 +16,7 @@ module;
 #include <system_error>
 #endif
 
-module Memly.Exception;
+module Memly.Exception.MemlyException;
 
 namespace Memly::Exception {
 

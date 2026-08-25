@@ -1,0 +1,24 @@
+name: Check Agents Documentation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check_agents_documentation:
+    name: Check Agents Documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check agents coding guide
+        shell: bash
+        run: bash .codex/hooks/check_agents_documentation.sh

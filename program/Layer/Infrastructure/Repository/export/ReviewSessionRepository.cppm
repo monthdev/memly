@@ -1,4 +1,4 @@
-export module Memly.Repository:ReviewSessionRepository;
+export module Memly.Repository.ReviewSessionRepository;
 
 // Temporarily disabled during review session control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -8,8 +8,11 @@ export module Memly.Repository:ReviewSessionRepository;
 #include <string>
 #include <vector>
 
-import Memly.Domain;
-import Memly.Database;
+import Memly.Database.DatabaseRuntime;
+import Memly.Database.PreparedStatement;
+import Memly.Domain.RecoverableReviewSessionMutationError;
+import Memly.Domain.ReviewSessionDeckSelection;
+import Memly.Domain.ReviewSessionListRow;
 
 export namespace Memly::Repository {
 

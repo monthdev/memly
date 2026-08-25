@@ -10,7 +10,9 @@ module;
 #include <utility>
 #include <vector>
 
-module Memly.Domain;
+module Memly.Domain.DeckForestSnapshotIndex;
+
+import Memly.Domain.DeckForestSnapshotNode;
 
 namespace Memly::Domain {
 

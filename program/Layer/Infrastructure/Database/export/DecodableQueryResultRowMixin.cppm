@@ -3,7 +3,7 @@ module;
 #include <concepts>
 #include <tuple>
 
-export module Memly.Database:DecodableQueryResultRowMixin;
+export module Memly.Database.DecodableQueryResultRowMixin;
 
 export namespace Memly::Database {
 

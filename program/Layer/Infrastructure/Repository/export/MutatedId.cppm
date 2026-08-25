@@ -2,9 +2,9 @@ module;
 
 #include <string>
 
-export module Memly.Repository:MutatedId;
+export module Memly.Repository.MutatedId;
 
-import Memly.Database;
+import Memly.Database.DecodableQueryResultRowMixin;
 
 export namespace Memly::Repository {
 

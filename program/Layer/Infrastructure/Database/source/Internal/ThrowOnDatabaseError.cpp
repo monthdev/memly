@@ -6,20 +6,19 @@ module;
 #include <source_location>
 #include <string_view>
 
-module Memly.Database;
+module Memly.Database.Internal.ThrowOnDatabaseError;
 
-import :ThrowOnDatabaseError;
-import Memly.Exception;
+import Memly.Exception.MemlyException;
 
-namespace Memly::Database {
+namespace Memly::Database::Internal {
 
-void i_ThrowOnPreparedStatementError(duckdb::PreparedStatement& PreparedStatement, const std::source_location SourceLocation) {
+void ThrowOnPreparedStatementError(duckdb::PreparedStatement& PreparedStatement, const std::source_location SourceLocation) {
     if (PreparedStatement.HasError()) {
         throw Exception::MemlyException{ std::initializer_list<std::string_view>{ PreparedStatement.GetError() }, SourceLocation };
     }
 }
 
-void i_ThrowOnQueryResultError(duckdb::QueryResult& QueryResult, const std::source_location SourceLocation) {
+void ThrowOnQueryResultError(duckdb::QueryResult& QueryResult, const std::source_location SourceLocation) {
     if (QueryResult.HasError()) {
         throw Exception::MemlyException{ std::initializer_list<std::string_view>{ QueryResult.GetError() }, SourceLocation };
     }

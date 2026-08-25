@@ -15,6 +15,9 @@
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
       },
+      "environment": {
+        "NINJA_STATUS": "[%f/%t | %es elapsed | %r active] "
+      },
       "cacheVariables": {
         "CMAKE_LINKER_TYPE": "LLD",
         "CMAKE_OSX_SYSROOT": "macosx"

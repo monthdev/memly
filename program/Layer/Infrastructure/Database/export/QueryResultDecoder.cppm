@@ -13,10 +13,10 @@ module;
 #include <utility>
 #include <vector>
 
-export module Memly.Database:QueryResultDecoder;
+export module Memly.Database.QueryResultDecoder;
 
-import :DecodableQueryResultRowMixin;
-import :DecodedQueryResult;
+import Memly.Database.DecodableQueryResultRowMixin;
+import Memly.Database.DecodedQueryResult;
 
 export namespace Memly::Database {
 

@@ -7,7 +7,7 @@ module;
 #include <source_location>
 #include <string_view>
 
-export module Memly.Exception:MemlyException;
+export module Memly.Exception.MemlyException;
 
 export namespace Memly::Exception {
 class [[nodiscard]] MemlyException final : public std::exception {

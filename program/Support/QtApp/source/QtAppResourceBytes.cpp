@@ -8,7 +8,7 @@ module;
 #include <cstddef>
 #include <string>
 
-module Memly.QtApp;
+module Memly.QtApp.QtAppResourceBytes;
 
 namespace Memly::QtApp {
 [[nodiscard]] auto ReadQtAppResourceBytes(const char* const QtResourcePath) -> std::string {

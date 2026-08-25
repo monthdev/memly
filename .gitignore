@@ -42,8 +42,9 @@ compile_commands.json
 !.codex/hooks.json
 !.codex/hooks/
 .codex/hooks/*
-!.codex/hooks/enforce-formatting.sh
-!.codex/hooks/verify-project-integrity.sh
+!.codex/hooks/check_agents_documentation.sh
+!.codex/hooks/check_repository_format.sh
+!.codex/hooks/lint_build_test_project.sh
 !.vscode/
 .vscode/*
 !.vscode/extensions.json

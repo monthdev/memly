@@ -3,9 +3,9 @@ module;
 #include <string>
 #include <utility>
 
-module Memly.Repository;
+module Memly.Repository.MutatedId;
 
-import Memly.Database;
+import Memly.Database.DecodableQueryResultRowMixin;
 
 namespace Memly::Repository {
 

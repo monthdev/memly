@@ -5,7 +5,7 @@ module;
 #include <cstddef>
 #include <string>
 
-export module Memly.Domain:HumanTextInput;
+export module Memly.Domain.HumanTextInput;
 
 export namespace Memly::Domain {
 

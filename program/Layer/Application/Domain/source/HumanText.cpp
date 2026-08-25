@@ -3,7 +3,7 @@ module;
 #include <string>
 #include <utility>
 
-module Memly.Domain;
+module Memly.Domain.HumanText;
 
 namespace Memly::Domain {
 

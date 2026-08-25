@@ -1,5 +1,6 @@
 {
   "recommendations": [
+    "esbenp.prettier-vscode",
     "llvm-vs-code-extensions.vscode-clangd",
     "ms-vscode.cmake-tools",
     "ReneSaarsoo.sql-formatter-vsc",
@@ -7,7 +8,6 @@
     "vix.lint-runner",
   ],
   "unwantedRecommendations": [
-    "esbenp.prettier-vscode",
     "inferrinizzard.prettier-sql-vscode",
     "xaver.clang-format",
   ],

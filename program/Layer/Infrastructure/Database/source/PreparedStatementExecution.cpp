@@ -6,9 +6,10 @@ module;
 #include <source_location>
 #include <utility>
 
-module Memly.Database;
+module Memly.Database.PreparedStatementExecution;
 
-import :ThrowOnDatabaseError;
+import Memly.Database.QueryResultDecoder;
+import Memly.Database.Internal.ThrowOnDatabaseError;
 
 namespace Memly::Database {
 
@@ -24,7 +25,7 @@ PreparedStatementExecution::PreparedStatementExecution(duckdb::PreparedStatement
 // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 [[nodiscard]] auto PreparedStatementExecution::Execute(duckdb::vector<duckdb::Value>&& DuckDbValueVector) -> QueryResultDecoder {
     std::unique_ptr<duckdb::QueryResult> QueryResult{ this->m_DuckDbPreparedStatement.Execute(DuckDbValueVector, true) };
-    i_ThrowOnQueryResultError(*QueryResult, this->m_SourceLocation);
+    Internal::ThrowOnQueryResultError(*QueryResult, this->m_SourceLocation);
     return QueryResultDecoder{ std::move(QueryResult), this->m_SourceLocation };
 }
 

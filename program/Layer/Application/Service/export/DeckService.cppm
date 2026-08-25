@@ -3,10 +3,10 @@ module;
 #include <cstdint>
 #include <string>
 
-export module Memly.Service:DeckService;
+export module Memly.Service.DeckService;
 
-import Memly.IndexCache;
-import Memly.Repository;
+import Memly.IndexCache.DeckForestSnapshotIndexCache;
+import Memly.Repository.DeckRepository;
 
 export namespace Memly::Service {
 

@@ -1,4 +1,4 @@
-export module Memly.Domain:TextToSpeech;
+export module Memly.Domain.TextToSpeech;
 
 // #include <QFile>
 // #include <QJsonArray>

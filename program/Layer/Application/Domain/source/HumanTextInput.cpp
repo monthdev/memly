@@ -14,9 +14,9 @@ module;
 #include <string_view>
 #include <utility>
 
-module Memly.Domain;
+module Memly.Domain.HumanTextInput;
 
-import Memly.Exception;
+import Memly.Exception.MemlyException;
 
 namespace Memly::Domain {
 

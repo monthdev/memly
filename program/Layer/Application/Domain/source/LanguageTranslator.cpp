@@ -4,7 +4,7 @@ module;
 #include <cstddef>
 #include <utility>
 
-module Memly.Domain;
+module Memly.Domain.LanguageTranslator;
 
 namespace Memly::Domain {
 

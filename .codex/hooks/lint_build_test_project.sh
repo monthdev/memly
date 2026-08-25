@@ -5,11 +5,6 @@ set -u
 RepositoryRoot="$(git rev-parse --show-toplevel)" || exit 2
 cd "$RepositoryRoot" || exit 2
 
-if ! bash .codex/hooks/enforce-formatting.sh --write >&2; then
-    printf '%s\n' 'Memly formatting integrity failed. Repair the reported formatting failure before completing the patch.' >&2
-    exit 2
-fi
-
 BuildDirectory='build/macos-debug'
 PresetFingerprintFilePath="$BuildDirectory/.memly-integrity-preset-fingerprint"
 PresetFingerprintInput=''

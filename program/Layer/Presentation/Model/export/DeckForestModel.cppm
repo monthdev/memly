@@ -1,4 +1,4 @@
-export module Memly.Model:DeckForestModel;
+export module Memly.Model.DeckForestModel;
 
 // Temporarily disabled during deck forest model refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -12,7 +12,7 @@ export module Memly.Model:DeckForestModel;
 #include <utility>
 #include <vector>
 
-import Memly.Domain;
+import Memly.Domain.DeckForestSnapshotNode;
 
 export namespace Memly::Model {
 

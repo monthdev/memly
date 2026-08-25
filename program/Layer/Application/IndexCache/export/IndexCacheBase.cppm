@@ -3,7 +3,7 @@ module;
 #include <memory>
 #include <utility>
 
-export module Memly.IndexCache:IndexCacheBase;
+export module Memly.IndexCache.IndexCacheBase;
 
 export namespace Memly::IndexCache {
 

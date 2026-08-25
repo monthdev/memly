@@ -1,4 +1,4 @@
-module Memly.Repository;
+module Memly.Repository.ReviewSessionRepository;
 
 // Temporarily disabled during review session control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -25,28 +25,33 @@ module Memly.Repository;
 #include "Memly/Domain/ReviewSessionDeckSelection.hpp"
 #include "Memly/Domain/ReviewSessionListRow.hpp"
 #include "Memly/Exception/MemlyException.hpp"
-#include "_Sql/_ReviewSessionSql.hpp"
 
 namespace Memly::Repository {
 
 ReviewSessionRepository::ReviewSessionRepository(Database::DatabaseRuntime& DatabaseRuntime)
     : m_DatabaseRuntime{ DatabaseRuntime }
-    , m_SelectReviewSessionListRowsPreparedStatement{ DatabaseRuntime.PrepareStatement(i_SelectReviewSessionListRowsSql()) }
-    , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{ DatabaseRuntime.PrepareStatement(i_SelectDefaultReviewSessionIdByRootDeckIdSql()) }
+    , m_SelectReviewSessionListRowsPreparedStatement{ DatabaseRuntime.PrepareStatement(Internal::SelectReviewSessionListRowsSql()) }
+    , m_SelectDefaultReviewSessionIdByRootDeckIdPreparedStatement{
+        DatabaseRuntime.PrepareStatement(Internal::SelectDefaultReviewSessionIdByRootDeckIdSql())
+    }
     , m_SelectReviewSessionIdByReviewSessionDefinitionKeyPreparedStatement{
-        DatabaseRuntime.PrepareStatement(i_SelectReviewSessionIdByReviewSessionDefinitionKeySql())
+        DatabaseRuntime.PrepareStatement(Internal::SelectReviewSessionIdByReviewSessionDefinitionKeySql())
     }
-    , m_InsertCustomReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(i_InsertCustomReviewSessionSql()) }
-    , m_InsertDefaultReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(i_InsertDefaultReviewSessionSql()) }
-    , m_InsertCustomReviewSessionDeckSelectionPreparedStatement{ DatabaseRuntime.PrepareStatement(i_InsertCustomReviewSessionDeckSelectionSql()) }
-    , m_UpdateReviewSessionNamePreparedStatement{ DatabaseRuntime.PrepareStatement(i_UpdateReviewSessionNameSql()) }
-    , m_UpdateReviewSessionToDefaultPreparedStatement{ DatabaseRuntime.PrepareStatement(i_UpdateReviewSessionToDefaultSql()) }
-    , m_UpdateReviewSessionToCustomPreparedStatement{ DatabaseRuntime.PrepareStatement(i_UpdateReviewSessionToCustomSql()) }
+    , m_InsertCustomReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Internal::InsertCustomReviewSessionSql()) }
+    , m_InsertDefaultReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Internal::InsertDefaultReviewSessionSql()) }
+    , m_InsertCustomReviewSessionDeckSelectionPreparedStatement{
+        DatabaseRuntime.PrepareStatement(Internal::InsertCustomReviewSessionDeckSelectionSql())
+    }
+    , m_UpdateReviewSessionNamePreparedStatement{ DatabaseRuntime.PrepareStatement(Internal::UpdateReviewSessionNameSql()) }
+    , m_UpdateReviewSessionToDefaultPreparedStatement{ DatabaseRuntime.PrepareStatement(Internal::UpdateReviewSessionToDefaultSql()) }
+    , m_UpdateReviewSessionToCustomPreparedStatement{ DatabaseRuntime.PrepareStatement(Internal::UpdateReviewSessionToCustomSql()) }
     , m_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochPreparedStatement{
-        DatabaseRuntime.PrepareStatement(i_UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql())
+        DatabaseRuntime.PrepareStatement(Internal::UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql())
     }
-    , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{ DatabaseRuntime.PrepareStatement(i_DeleteCustomReviewSessionDeckSelectionsSql()) }
-    , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(i_DeleteReviewSessionSql()) } {
+    , m_DeleteCustomReviewSessionDeckSelectionsPreparedStatement{
+        DatabaseRuntime.PrepareStatement(Internal::DeleteCustomReviewSessionDeckSelectionsSql())
+    }
+    , m_DeleteReviewSessionPreparedStatement{ DatabaseRuntime.PrepareStatement(Internal::DeleteReviewSessionSql()) } {
 }
 
 namespace {

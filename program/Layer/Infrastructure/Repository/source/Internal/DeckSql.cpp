@@ -2,46 +2,45 @@ module;
 
 #include <string>
 
-module Memly.Repository;
+module Memly.Repository.Internal.DeckSql;
 
-import :DeckSql;
-import Memly.QtApp;
+import Memly.QtApp.QtAppResourceBytes;
 
-namespace Memly::Repository {
+namespace Memly::Repository::Internal {
 
-[[nodiscard]] auto i_SelectDeckSnapshotRecordsSql() -> std::string {
+[[nodiscard]] auto SelectDeckSnapshotRecordsSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Select/SelectDeckSnapshotRecords.sql") };
 }
 
-[[nodiscard]] auto i_InsertRootDeckSql() -> std::string {
+[[nodiscard]] auto InsertRootDeckSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Insert/InsertRootDeck.sql") };
 }
 
-[[nodiscard]] auto i_InsertChildDeckSql() -> std::string {
+[[nodiscard]] auto InsertChildDeckSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Insert/InsertChildDeck.sql") };
 }
 
-[[nodiscard]] auto i_UpdateDeckParentToRootSql() -> std::string {
+[[nodiscard]] auto UpdateDeckParentToRootSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/UpdateDeckParentToRoot.sql") };
 }
 
-[[nodiscard]] auto i_UpdateDeckParentSql() -> std::string {
+[[nodiscard]] auto UpdateDeckParentSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/UpdateDeckParent.sql") };
 }
 
-[[nodiscard]] auto i_UpdateDeckNameSql() -> std::string {
+[[nodiscard]] auto UpdateDeckNameSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Update/UpdateDeckName.sql") };
 }
 
-[[nodiscard]] auto i_DeleteDeckCardReviewsSql() -> std::string {
+[[nodiscard]] auto DeleteDeckCardReviewsSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Delete/DeleteDeckCardReviews.sql") };
 }
 
-[[nodiscard]] auto i_DeleteDeckCardsSql() -> std::string {
+[[nodiscard]] auto DeleteDeckCardsSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Delete/DeleteDeckCards.sql") };
 }
 
-[[nodiscard]] auto i_DeleteDeckSql() -> std::string {
+[[nodiscard]] auto DeleteDeckSql() -> std::string {
     return std::string{ QtApp::ReadQtAppResourceBytes(":/Sql/Deck/Delete/DeleteDeck.sql") };
 }
 }

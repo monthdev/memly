@@ -1,11 +1,7 @@
-file(GLOB MEMLY_MODEL_MODULE_INTERFACES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/export/*.cppm")
-file(GLOB MEMLY_MODEL_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
+file(GLOB MEMLY_MODEL_EXPORTED_MODULES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/export/*.cppm")
+file(GLOB MEMLY_MODEL_IMPLEMENTATION_UNITS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
-memly_add_component_module(
-  memly_presentation_model Memly.Model INTERFACES ${MEMLY_MODEL_MODULE_INTERFACES} SOURCES ${MEMLY_MODEL_SOURCES}
+memly_add_component(
+  Memly.Model Memly.Model PUBLIC_MODULES ${MEMLY_MODEL_EXPORTED_MODULES} SOURCES ${MEMLY_MODEL_IMPLEMENTATION_UNITS}
 )
-target_link_libraries(
-  memly_presentation_model
-  PUBLIC Qt6::Core memly_application_domain
-  PRIVATE memly_support_exception
-)
+memly_link_component_dependencies(Memly.Model PUBLIC Qt6::Core)

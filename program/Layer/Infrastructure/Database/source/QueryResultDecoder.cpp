@@ -10,9 +10,9 @@ module;
 #include <type_traits>
 #include <utility>
 
-module Memly.Database;
+module Memly.Database.QueryResultDecoder;
 
-import Memly.Exception;
+import Memly.Exception.MemlyException;
 
 namespace Memly::Database {
 

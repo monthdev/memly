@@ -1,4 +1,4 @@
-export module Memly.Controller:DeckPageController;
+export module Memly.Controller.DeckPageController;
 
 // Temporarily disabled during deck page controller refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -10,9 +10,9 @@ export module Memly.Controller:DeckPageController;
 #include <optional>
 #include <string>
 
-import Memly.Invalidation;
-import Memly.Service;
-import Memly.Model;
+import Memly.Invalidation.LibraryInvalidationChannel;
+import Memly.Model.DeckForestModel;
+import Memly.Service.DeckService;
 
 export namespace Memly::Controller {
 

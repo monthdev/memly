@@ -1,12 +1,8 @@
-file(GLOB MEMLY_SERVICE_MODULE_INTERFACES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/export/*.cppm")
-file(GLOB MEMLY_SERVICE_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
+file(GLOB MEMLY_SERVICE_EXPORTED_MODULES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/export/*.cppm")
+file(GLOB MEMLY_SERVICE_IMPLEMENTATION_UNITS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
-memly_add_component_module(
-  memly_application_service Memly.Service INTERFACES ${MEMLY_SERVICE_MODULE_INTERFACES} SOURCES
-  ${MEMLY_SERVICE_SOURCES}
+memly_add_component(
+  Memly.Service Memly.Service PUBLIC_MODULES ${MEMLY_SERVICE_EXPORTED_MODULES} SOURCES
+  ${MEMLY_SERVICE_IMPLEMENTATION_UNITS}
 )
-target_link_libraries(
-  memly_application_service
-  PUBLIC memly_application_index_cache memly_infrastructure_repository
-  PRIVATE memly_application_domain
-)
+memly_link_component_dependencies(Memly.Service PUBLIC Memly.IndexCache Memly.Repository PRIVATE Memly.Domain)

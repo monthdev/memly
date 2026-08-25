@@ -5,9 +5,9 @@ module;
 
 #include <string>
 
-module Memly.CompositionRoot;
+module Memly.CompositionRoot.ApplicationRuntime;
 
-import Memly.Database;
+import Memly.Database.DatabaseMigrator;
 
 namespace Memly::CompositionRoot {
 

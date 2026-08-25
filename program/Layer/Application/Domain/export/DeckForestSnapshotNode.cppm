@@ -4,7 +4,7 @@ module;
 #include <optional>
 #include <string>
 
-export module Memly.Domain:DeckForestSnapshotNode;
+export module Memly.Domain.DeckForestSnapshotNode;
 
 export namespace Memly::Domain {
 

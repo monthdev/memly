@@ -9,9 +9,9 @@
 
 #include <cstdlib>
 
-import Memly.CompositionRoot;
-import Memly.Exception;
-import Memly.QtApp;
+import Memly.CompositionRoot.ApplicationRuntime;
+import Memly.Exception.ExceptionBoundary;
+import Memly.QtApp.QtAppStoragePath;
 
 auto main(int argc, char** argv) noexcept -> int {
     return int{ Memly::Exception::TryCatchWrapper([&]() -> int {

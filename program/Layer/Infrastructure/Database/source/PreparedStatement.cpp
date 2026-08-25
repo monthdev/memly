@@ -6,7 +6,9 @@ module;
 #include <source_location>
 #include <utility>
 
-module Memly.Database;
+module Memly.Database.PreparedStatement;
+
+import Memly.Database.PreparedStatementExecution;
 
 namespace Memly::Database {
 

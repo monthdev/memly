@@ -3,7 +3,7 @@ module;
 #include <concepts>
 #include <cstdint>
 
-export module Memly.Invalidation:LibraryInvalidationTarget;
+export module Memly.Invalidation.LibraryInvalidationTarget;
 
 export namespace Memly::Invalidation {
 

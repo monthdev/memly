@@ -4,10 +4,11 @@ module;
 #include <string>
 #include <vector>
 
-export module Memly.Repository:DeckRepository;
+export module Memly.Repository.DeckRepository;
 
-import Memly.Database;
-import :DeckSnapshotRecord;
+import Memly.Database.DatabaseRuntime;
+import Memly.Database.PreparedStatement;
+import Memly.Repository.DeckSnapshotRecord;
 
 export namespace Memly::Repository {
 

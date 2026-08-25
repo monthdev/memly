@@ -1,4 +1,4 @@
-module Memly.Repository;
+module Memly.Repository.LibraryRepository;
 
 // Temporarily disabled during library invalidation control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -13,14 +13,13 @@ module Memly.Repository;
 #include <optional>
 
 #include "Memly/Database/DatabaseRuntime.hpp"
-#include "_Sql/_LibrarySql.hpp"
 
 namespace Memly::Repository {
 
 LibraryRepository::LibraryRepository(Database::DatabaseRuntime& DatabaseRuntime)
     : m_DatabaseRuntime{ DatabaseRuntime }
     , m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
-        DatabaseRuntime.PrepareStatement(i_SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
+        DatabaseRuntime.PrepareStatement(Internal::SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
     } {
 }
 

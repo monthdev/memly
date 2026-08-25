@@ -1,1 +1,1 @@
-export module Memly.Domain:Fsrs7Optimizer;
+export module Memly.Domain.Fsrs7Optimizer;

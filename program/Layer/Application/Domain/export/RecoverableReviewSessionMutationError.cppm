@@ -1,4 +1,4 @@
-export module Memly.Domain:RecoverableReviewSessionMutationError;
+export module Memly.Domain.RecoverableReviewSessionMutationError;
 
 // Temporarily disabled during review session control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)

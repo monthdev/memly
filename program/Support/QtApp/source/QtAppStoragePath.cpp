@@ -6,7 +6,7 @@ module;
 
 #include <string>
 
-module Memly.QtApp;
+module Memly.QtApp.QtAppStoragePath;
 
 namespace Memly::QtApp {
 namespace {

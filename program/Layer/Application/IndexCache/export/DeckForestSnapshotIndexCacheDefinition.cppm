@@ -2,10 +2,11 @@ module;
 
 #include <vector>
 
-export module Memly.IndexCache:DeckForestSnapshotIndexCacheDefinition;
+export module Memly.IndexCache.DeckForestSnapshotIndexCacheDefinition;
 
-import Memly.Domain;
-import :IndexCacheDefinition;
+import Memly.Domain.DeckForestSnapshotIndex;
+import Memly.Domain.DeckForestSnapshotNode;
+import Memly.IndexCache.IndexCacheDefinition;
 
 export namespace Memly::IndexCache {
 

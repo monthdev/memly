@@ -1,4 +1,4 @@
-export module Memly.Domain:ReviewSessionDeckSelection;
+export module Memly.Domain.ReviewSessionDeckSelection;
 
 // Temporarily disabled during review session control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)

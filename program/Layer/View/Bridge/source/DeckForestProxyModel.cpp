@@ -1,4 +1,4 @@
-module Memly.Bridge;
+module Memly.Bridge.DeckForestProxyModel;
 
 // Temporarily disabled during deck forest proxy model refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)

@@ -1,7 +1,7 @@
-export module Memly.IndexCache:DeckForestSnapshotIndexCache;
+export module Memly.IndexCache.DeckForestSnapshotIndexCache;
 
-import :DeckForestSnapshotIndexCacheDefinition;
-import :IndexCacheBase;
+import Memly.IndexCache.DeckForestSnapshotIndexCacheDefinition;
+import Memly.IndexCache.IndexCacheBase;
 
 export namespace Memly::IndexCache {
 

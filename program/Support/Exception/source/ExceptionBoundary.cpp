@@ -17,9 +17,9 @@ module;
 #include <unistd.h>
 #endif
 
-module Memly.Exception;
+module Memly.Exception.ExceptionBoundary;
 
-import Memly.QtApp;
+import Memly.QtApp.QtAppStoragePath;
 
 namespace Memly::Exception {
 namespace {

@@ -11,9 +11,9 @@ module;
 #include <type_traits>
 #include <utility>
 
-export module Memly.Database:TransactionRunner;
+export module Memly.Database.TransactionRunner;
 
-import Memly.Exception;
+import Memly.Exception.MemlyException;
 
 export namespace Memly::Database {
 

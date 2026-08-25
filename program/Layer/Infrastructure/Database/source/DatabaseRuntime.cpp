@@ -7,9 +7,10 @@ module;
 #include <string>
 #include <utility>
 
-module Memly.Database;
+module Memly.Database.DatabaseRuntime;
 
-import :ThrowOnDatabaseError;
+import Memly.Database.PreparedStatement;
+import Memly.Database.Internal.ThrowOnDatabaseError;
 
 namespace Memly::Database {
 
@@ -20,7 +21,7 @@ DatabaseRuntime::DatabaseRuntime(duckdb::DatabaseInstance& DatabaseInstance, duc
 
 [[nodiscard]] auto DatabaseRuntime::PrepareStatement(const std::string& Sql, const std::source_location SourceLocation) -> PreparedStatement {
     std::unique_ptr<duckdb::PreparedStatement> DuckDbPreparedStatement{ this->m_DatabaseConnection.Prepare(Sql) };
-    i_ThrowOnPreparedStatementError(*DuckDbPreparedStatement, SourceLocation);
+    Internal::ThrowOnPreparedStatementError(*DuckDbPreparedStatement, SourceLocation);
     return PreparedStatement{ std::move(DuckDbPreparedStatement) };
 }
 

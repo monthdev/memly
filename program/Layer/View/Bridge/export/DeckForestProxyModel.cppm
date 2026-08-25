@@ -1,4 +1,4 @@
-export module Memly.Bridge:DeckForestProxyModel;
+export module Memly.Bridge.DeckForestProxyModel;
 
 // Temporarily disabled during deck forest proxy model refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -10,7 +10,7 @@ export module Memly.Bridge:DeckForestProxyModel;
 #include <qqmlintegration.h>
 #include <qvariant.h>
 
-import Memly.Model;
+import Memly.Model.DeckForestModel;
 
 export namespace Memly::Bridge {
 

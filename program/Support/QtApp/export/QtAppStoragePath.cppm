@@ -2,7 +2,7 @@ module;
 
 #include <string>
 
-export module Memly.QtApp:QtAppStoragePath;
+export module Memly.QtApp.QtAppStoragePath;
 
 export namespace Memly::QtApp {
 [[nodiscard]] auto AudioDirectoryPath() -> std::string;

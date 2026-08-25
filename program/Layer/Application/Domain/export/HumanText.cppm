@@ -2,7 +2,7 @@ module;
 
 #include <string>
 
-export module Memly.Domain:HumanText;
+export module Memly.Domain.HumanText;
 
 export namespace Memly::Domain {
 

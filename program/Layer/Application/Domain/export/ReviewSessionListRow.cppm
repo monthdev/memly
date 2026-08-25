@@ -1,4 +1,4 @@
-export module Memly.Domain:ReviewSessionListRow;
+export module Memly.Domain.ReviewSessionListRow;
 
 // Temporarily disabled during review session control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)

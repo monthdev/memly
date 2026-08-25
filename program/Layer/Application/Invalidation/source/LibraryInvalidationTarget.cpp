@@ -7,7 +7,7 @@ module;
 #include <bit>
 #endif
 
-module Memly.Invalidation;
+module Memly.Invalidation.LibraryInvalidationTarget;
 
 namespace Memly::Invalidation {
 

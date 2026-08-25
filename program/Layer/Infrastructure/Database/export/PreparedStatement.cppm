@@ -5,9 +5,9 @@ module;
 #include <memory>
 #include <source_location>
 
-export module Memly.Database:PreparedStatement;
+export module Memly.Database.PreparedStatement;
 
-import :PreparedStatementExecution;
+import Memly.Database.PreparedStatementExecution;
 
 export namespace Memly::Database {
 

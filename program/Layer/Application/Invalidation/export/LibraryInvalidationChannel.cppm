@@ -1,4 +1,4 @@
-export module Memly.Invalidation:LibraryInvalidationChannel;
+export module Memly.Invalidation.LibraryInvalidationChannel;
 
 // Temporarily disabled during library invalidation control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -12,7 +12,7 @@ export module Memly.Invalidation:LibraryInvalidationChannel;
 #include <type_traits>
 #include <utility>
 
-import :LibraryInvalidationTarget;
+import Memly.Invalidation.LibraryInvalidationTarget;
 
 export namespace Memly::Invalidation {
 

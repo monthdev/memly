@@ -2,7 +2,7 @@ module;
 
 #include <cstddef>
 
-export module Memly.Database:QueryResultRowCountRange;
+export module Memly.Database.QueryResultRowCountRange;
 
 export namespace Memly::Database {
 

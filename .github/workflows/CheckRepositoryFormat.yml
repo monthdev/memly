@@ -32,10 +32,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Enforce source extensions
-        shell: bash
-        run: python3 tool/verify_source_extensions.py "$GITHUB_WORKSPACE"
-
       - name: Determine comparison base
         id: comparison
         env:

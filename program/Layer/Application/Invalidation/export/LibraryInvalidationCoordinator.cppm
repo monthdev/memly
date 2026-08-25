@@ -1,4 +1,4 @@
-export module Memly.Invalidation:LibraryInvalidationCoordinator;
+export module Memly.Invalidation.LibraryInvalidationCoordinator;
 
 // Temporarily disabled during library invalidation control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -7,9 +7,9 @@ export module Memly.Invalidation:LibraryInvalidationCoordinator;
 #include <qtimer.h>
 #include <qtmetamacros.h>
 
-import :LibraryInvalidationChannel;
-import :LibraryInvalidationTarget;
-import Memly.Repository;
+import Memly.Invalidation.LibraryInvalidationChannel;
+import Memly.Invalidation.LibraryInvalidationTarget;
+import Memly.Repository.LibraryRepository;
 
 export namespace Memly::Invalidation {
 

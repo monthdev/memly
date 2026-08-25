@@ -5,7 +5,7 @@ module;
 #include <string>
 #include <utility>
 
-module Memly.Domain;
+module Memly.Domain.DeckForestSnapshotNode;
 
 namespace Memly::Domain {
 

@@ -7,9 +7,9 @@ module;
 #include <unordered_map>
 #include <vector>
 
-export module Memly.Domain:DeckForestSnapshotIndex;
+export module Memly.Domain.DeckForestSnapshotIndex;
 
-import :DeckForestSnapshotNode;
+import Memly.Domain.DeckForestSnapshotNode;
 
 export namespace Memly::Domain {
 

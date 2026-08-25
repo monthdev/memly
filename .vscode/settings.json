@@ -1,6 +1,6 @@
 {
   "cmake.configureOnOpen": true,
-  "cmake.configureOnEdit": true,
+  "cmake.configureOnEdit": false,
   "cmake.saveBeforeBuild": true,
   "cmake.sourceDirectory": "${workspaceFolder}",
   "cmake.useCMakePresets": "always",
@@ -22,6 +22,8 @@
   "SQL-Formatter-VSCode.insertSpacesOverride": true,
   "qt-qml.qmlls.useNoCMakeCalls": true,
   "lintRunner.respectGitignore": true,
+  "prettier.requireConfig": true,
+  "prettier.resolveGlobalModules": true,
   "lintRunner.tools": {
     "clang-tidy": {
       "kind": "diagnostic",
@@ -68,14 +70,6 @@
       "command": "cmake-format",
       "cwd": "${workspaceFolder}",
       "args": ["-i", "${file}"],
-      "successExitCodes": [0],
-      "timeout": 120000,
-    },
-    "prettier": {
-      "kind": "write",
-      "command": "prettier",
-      "cwd": "${workspaceFolder}",
-      "args": ["--write", "--ignore-unknown", "--log-level", "warn", "${file}"],
       "successExitCodes": [0],
       "timeout": 120000,
     },
@@ -130,27 +124,6 @@
         "tools": ["cmake-format", "cmake-lint"],
       },
     },
-    {
-      "name": "Prettier",
-      "match": {
-        "languages": [
-          "github-actions-workflow",
-          "json",
-          "jsonc",
-          "markdown",
-          "yaml",
-        ],
-        "files": ["**/*"],
-      },
-      "onSave": {
-        "strategy": "sequence",
-        "tools": ["prettier"],
-      },
-      "manual": {
-        "strategy": "sequence",
-        "tools": ["prettier"],
-      },
-    },
   ],
   "[cmake]": {
     "editor.formatOnSave": false,
@@ -160,16 +133,20 @@
     "editor.formatOnSave": true,
   },
   "[github-actions-workflow]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
   "[json]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
   "[jsonc]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
   "[markdown]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
   "[qml]": {
     "editor.defaultFormatter": "theqtcompany.qt-qml",
@@ -180,6 +157,7 @@
     "editor.formatOnSave": true,
   },
   "[yaml]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
 }

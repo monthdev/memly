@@ -29,5 +29,5 @@ qt_add_qml_module(
 
 target_link_libraries(
   memly_qml
-  PRIVATE Qt6::Quick memly_view_bridge memly_asan
+  PRIVATE Qt6::Quick Memly.Bridge memly_asan
 )

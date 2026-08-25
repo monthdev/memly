@@ -4,7 +4,7 @@ module;
 #include <cstddef>
 #include <string>
 
-module Memly.Domain;
+module Memly.Domain.DeckConstraint;
 
 namespace Memly::Domain {
 

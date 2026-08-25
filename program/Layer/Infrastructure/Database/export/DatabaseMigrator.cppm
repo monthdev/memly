@@ -4,9 +4,9 @@ module;
 
 #include <string>
 
-export module Memly.Database:DatabaseMigrator;
+export module Memly.Database.DatabaseMigrator;
 
-import :DatabaseRuntime;
+import Memly.Database.DatabaseRuntime;
 
 export namespace Memly::Database {
 

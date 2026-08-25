@@ -4,9 +4,9 @@ module;
 #include <optional>
 #include <string>
 
-export module Memly.Repository:DeckSnapshotRecord;
+export module Memly.Repository.DeckSnapshotRecord;
 
-import Memly.Database;
+import Memly.Database.DecodableQueryResultRowMixin;
 
 export namespace Memly::Repository {
 

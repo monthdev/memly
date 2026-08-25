@@ -5,11 +5,11 @@ module;
 
 #include <string>
 
-export module Memly.CompositionRoot:ApplicationRuntime;
+export module Memly.CompositionRoot.ApplicationRuntime;
 
-import Memly.Service;
-import Memly.Database;
-import Memly.Repository;
+import Memly.Database.DatabaseRuntime;
+import Memly.Repository.DeckRepository;
+import Memly.Service.DeckService;
 
 export namespace Memly::CompositionRoot {
 

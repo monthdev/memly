@@ -3,11 +3,15 @@
 ## Maintaining This Guide
 
 Update this guide only for a stable, Memly-specific rule that requires agent
-judgment or has dedicated enforcement. State a manual rule normatively; cite a
-custom `.clang-tidy` check by name and a dedicated enforcement script by path.
-Do not duplicate source or configuration, including implementation inventories,
-current control flow, tool versions, or formatter, editor, and CI behavior.
-Prune superseded prose with the rule or enforcement change.
+judgment or has dedicated enforcement. State a manual rule normatively. Cite
+each applicable `custom-memly-*` check by name and each applicable verifier
+under `tool/` by its repository-relative path. Cite each applicable custom CMake
+enforcement by its narrowest `memly_*()` helper or validator name. Never name or
+enumerate a built-in Clang-Tidy check, check family, or compiler warning flag
+(`tool/verify_agent_coding_guide.py`). Do not duplicate source or configuration,
+including implementation inventories, current control flow, tool versions, or
+formatter, editor, and CI behavior. Prune superseded prose with the rule or
+enforcement change.
 
 ## Runtime Composition and Services
 
@@ -233,6 +237,12 @@ Do not declare global or namespace-scope variables
 (`custom-memly-no-namespace-variable`). The `g_` prefix is forbidden for every
 Memly-controlled identifier (`custom-memly-no-global-prefix`).
 
+Prefix non-static data members with `m_`
+(`custom-memly-non-static-data-member-prefix`). Prefix static data members and
+function-local variables with static or thread storage duration with `s_`
+(`custom-memly-static-variable-prefix`). End enum type names in `Enum`
+(`custom-memly-enum-type-suffix`).
+
 When representation matters, end a local, definition parameter, field, or
 private helper name in the complete unqualified type name. Add only a narrower
 semantic prefix; use the type name alone when it fully describes the value.
@@ -258,19 +268,22 @@ a semantic getter only for a domain property.
 ## Namespaces and File-Private Code
 
 A Memly-owned definition's namespace mirrors its owning component. Architectural
-folders, `export`, `source`, and private `_` folders add no namespace component.
-Nest unnamed helpers inside the matching `Memly` namespace
-(`custom-memly-unnamed-namespace-nesting`).
+folders, `export`, and `source` add no namespace component. A target-private
+module stored below `source/Internal/` adds `Internal` after the component
+namespace; lower organizational folders add nothing. Keep namespace-scope
+declarations in those files in that `Internal` namespace and reserve it for that
+location (`custom-memly-internal-declaration-namespace`,
+`custom-memly-internal-namespace-reserved`). Nest unnamed helpers inside the
+matching `Memly` namespace (`custom-memly-unnamed-namespace-nesting`).
 
-Spell a component's primary named module as its namespace path with `::`
-replaced by `.`, such as `Memly::Database` becoming `Memly.Database`. Do not
-carry physical architectural folders into the module name.
-
-A namespace-scope type, enum, alias, or free function in a target-private
-`_*.cppm/.cpp` pair uses `i_`, which is reserved for that boundary
-(`custom-memly-target-private-declaration-prefix`,
-`custom-memly-target-private-prefix-reserved`). Do not use `i_` merely because a
-class member is private.
+Spell each interface's exact named module as its component namespace path with
+`::` replaced by `.`, followed by the interface file stem. For example,
+`DatabaseRuntime.cppm` in `Memly::Database` declares
+`Memly.Database.DatabaseRuntime`; `MigrationSql.cppm` below `source/Internal/`
+declares `Memly.Database.Internal.MigrationSql`. Do not carry other physical
+architectural or organizational folders into the module name
+(`memly_get_module_interface_metadata()`,
+`memly_validate_module_implementation()`).
 
 Every declaration made directly in an unnamed namespace uses `u_`; members of an
 unnamed-namespace type retain ordinary member names
@@ -287,6 +300,8 @@ enclosing components and starting siblings at their nearest common namespace. Do
 not introduce a using or alias only to shorten it.
 
 ## Lambdas, Templates, and Type Spelling
+
+Do not use direct or indirect recursion.
 
 Do not name a lambda (`custom-memly-no-named-lambda`); pass or invoke it
 directly. Put reusable logic in a `u_` helper, or a private method when it needs
@@ -307,59 +322,75 @@ not use class template argument deduction for a named variable
 
 Do not use using declarations or directives
 (`custom-memly-no-using-declaration`). Alias only an associated type that a
-language or interface form cannot express directly. Spell `typename` on every
-dependent qualified type.
+language or interface form cannot express directly; declare it with `using`,
+never `typedef` (`custom-memly-no-typedef`). Spell `typename` on every dependent
+qualified type.
 
 ## Preprocessor Spelling
 
 Use `#if defined(Macro)` and `#if not defined(Macro)`, not `#ifdef` and
 `#ifndef`.
 
+Name an included header literally on one physical directive; do not hide it
+behind a macro or line splice. Include C standard-library facilities through
+their C++ headers; do not include deprecated or redundant C compatibility
+headers (`tool/verify_deprecated_c_headers.py`).
+
 ## Source and CMake Organization
 
 Give each CMake glob variable one folder; do not recurse or combine patterns.
 Order globs and target sources by source-tree order.
 
-Store exported module interfaces under `export/` and implementation units,
-private module interfaces, SQL, and other target-private inputs under `source/`.
-Use only `.cppm` for Memly-authored module interfaces and `.cpp` for
-implementation units. Do not add textual C++ headers, C, Objective-C,
-Objective-C++, or alternate C++ source extensions under `program/` or `test/`
-(`tool/verify_source_extensions.py`).
-
-Prefix both files in a target-private helper pair with `_`; do not carry that
-marker into C++ names.
+Store exported module interfaces under `export/`, target-private module
+interfaces under `source/Internal/`, and implementation units, SQL, and other
+target-private inputs under `source/`. Use only `.cppm` for Memly-authored
+module interfaces and `.cpp` for implementation units. Do not add textual C++
+headers, C, Objective-C, Objective-C++, or alternate C++ source extensions under
+`program/` or `test/` (`memly_get_module_interface_metadata()`,
+`memly_validate_module_implementation()`, `tool/verify_source_extensions.py`).
 
 Declare a target's globs, include roots, resources, and direct dependencies
 beside its source tree. Do not add a forwarding-only architectural
 `CMakeLists.txt`. Keep repository-wide policy at the root, add target
-directories from their nearest owner, and register components through the shared
-helper.
+directories from their nearest owner, and register modules and component
+dependencies through `memly_add_component()` and
+`memly_link_component_dependencies()`.
 
-Map one C++ component to one static target and one primary named module. Keep
-one exported partition per public type-oriented interface file and re-export
-those partitions from the primary interface. Put target-private declarations in
-private module partitions and never re-export them. Do not add layer umbrella
-targets.
+Map every named module owned by one component to one static component target.
+Put exported interfaces in its public `CXX_MODULES` file set and `Internal`
+interfaces in its private `CXX_MODULES` file set. Do not add primary routing
+modules, re-export umbrellas, or module partitions. Only implementation units in
+the owning component may import an `Internal` module; an exported interface may
+not import one. CMake's module file-set visibility enforces this owner-only
+boundary (`memly_add_component()`, `memly_validate_component_import_graph()`).
 
 Place physical third-party and standard-library includes in the global module
 fragment, then declare the module before imports. Import Memly dependencies; do
-not textually include Memly source. An implementation unit belongs to its
-component module and relies on explicit imports plus the module's primary
-interface.
+not textually include Memly source. An implementation unit belongs to the exact
+module declared by its corresponding interface and explicitly imports every
+other Memly module it uses.
 
-Express module relationships through target links: `PUBLIC` when an exported
-interface imports the dependency and `PRIVATE` for implementation-only imports.
-Keep a third-party dependency private unless clients must name its API directly.
-
-Classify public and private `.cppm` files in CMake `CXX_MODULES` file sets and
-ordinary `.cpp` files as sources.
+Declare component target relationships explicitly rather than deriving target
+edges from imports. Use `PUBLIC` when an exported interface imports the
+dependency and `PRIVATE` for an implementation-only import. Curate each static
+component's outward link interface to its public dependencies so private
+dependency BMIs do not reach indirect consumers, and explicitly link the
+complete static closure into the final executable. Every active cross-component
+Memly import requires a direct component edge, and every direct Memly component
+edge requires an active import. Make an edge `PUBLIC` exactly when an exported
+interface imports that component; otherwise make it `PRIVATE`. A transitively
+available BMI does not grant permission to import its module. Keep a third-party
+dependency private unless clients must name its API directly
+(`memly_link_component_dependencies()`,
+`memly_validate_component_import_graph()`,
+`memly_link_complete_component_closure()`).
 
 ## Enforcement and Suppressions
 
-Keep Memly lint enforcement in `.clang-tidy` YAML, including custom queries. Do
-not add a compiled extension or text-style linter solely for this guide; rules
-beyond YAML remain conventions.
+Keep C++ AST enforcement in `.clang-tidy` YAML, including custom queries. Use a
+dedicated repository verifier only for a non-AST source or documentation policy
+and cite it from the rule it enforces. Do not add a compiled Clang-Tidy
+extension or a general prose-style linter.
 
 All applicable configured gates must pass.
 

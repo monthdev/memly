@@ -2,7 +2,7 @@ module;
 
 #include <duckdb.hpp>
 
-module Memly.Database;
+module Memly.Database.TransactionRunner;
 
 namespace Memly::Database {
 

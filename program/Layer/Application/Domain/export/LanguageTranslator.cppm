@@ -5,7 +5,7 @@ module;
 #include <string_view>
 #include <utility>
 
-export module Memly.Domain:LanguageTranslator;
+export module Memly.Domain.LanguageTranslator;
 
 export namespace Memly::Domain {
 enum class [[nodiscard]] TargetLanguageEnum : std::uint8_t {

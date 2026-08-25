@@ -5,9 +5,9 @@ module;
 #include <source_location>
 #include <utility>
 
-export module Memly.Database:PreparedStatementExecution;
+export module Memly.Database.PreparedStatementExecution;
 
-import :QueryResultDecoder;
+import Memly.Database.QueryResultDecoder;
 
 export namespace Memly::Database {
 

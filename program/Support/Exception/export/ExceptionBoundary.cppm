@@ -8,7 +8,7 @@ module;
 #include <type_traits>
 #include <utility>
 
-export module Memly.Exception:ExceptionBoundary;
+export module Memly.Exception.ExceptionBoundary;
 
 export namespace Memly::Exception {
 void LogException(std::string_view) noexcept;

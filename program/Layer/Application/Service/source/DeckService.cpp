@@ -5,10 +5,13 @@ module;
 #include <utility>
 #include <vector>
 
-module Memly.Service;
+module Memly.Service.DeckService;
 
-import Memly.Domain;
-import Memly.Repository;
+import Memly.Domain.DeckConstraint;
+import Memly.Domain.DeckForestSnapshotNode;
+import Memly.IndexCache.DeckForestSnapshotIndexCache;
+import Memly.Repository.DeckRepository;
+import Memly.Repository.DeckSnapshotRecord;
 
 namespace Memly::Service {
 

@@ -5,21 +5,29 @@ Checks: |
   boost-*,
   bugprone-*,
   -bugprone-easily-swappable-parameters,
+  -bugprone-reserved-identifier,
   cert-*,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp,
   clang-analyzer-*,
-  clang-diagnostic-*,
   concurrency-*,
   cppcoreguidelines-*,
+  -cppcoreguidelines-macro-to-enum,
   -cppcoreguidelines-use-default-member-init,
   darwin-*,
   hicpp-*,
+  -hicpp-deprecated-headers,
   -hicpp-explicit-conversions,
+  -hicpp-function-size,
   -hicpp-named-parameter,
   -hicpp-use-auto,
   misc-*,
   modernize-*,
+  -modernize-deprecated-headers,
+  -modernize-macro-to-enum,
   -modernize-use-default-member-init,
   -modernize-use-auto,
+  -modernize-use-using,
   mpi-*,
   objc-*,
   openmp-*,
@@ -27,6 +35,8 @@ Checks: |
   portability-*,
   -portability-avoid-pragma-once,
   readability-*,
+  -readability-function-size,
+  -readability-identifier-naming,
   -readability-named-parameter,
   -readability-redundant-casting,
   -readability-redundant-declaration,
@@ -44,12 +54,15 @@ Checks: |
   custom-memly-runtime-constructor-definition-in-implementation-file,
   custom-memly-conversion-operator,
   custom-memly-declared-ordinary-constructor,
+  custom-memly-enum-type-suffix,
   custom-memly-expected-value-suffix,
   custom-memly-explicit-contextual-braced-default-argument,
   custom-memly-explicit-contextual-braced-expression,
   custom-memly-explicit-memly-exception-throw,
   custom-memly-explicit-rule-of-five,
   custom-memly-explicit-return-type-construction,
+  custom-memly-internal-declaration-namespace,
+  custom-memly-internal-namespace-reserved,
   custom-memly-no-class-template-argument-deduction,
   custom-memly-no-database-chain-proxy-field,
   custom-memly-no-database-chain-proxy-variable,
@@ -65,7 +78,9 @@ Checks: |
   custom-memly-no-named-lambda,
   custom-memly-no-named-declaration-parameter,
   custom-memly-no-namespace-variable,
+  custom-memly-non-static-data-member-prefix,
   custom-memly-no-type-declaration-in-implementation-file,
+  custom-memly-no-typedef,
   custom-memly-no-using-declaration,
   custom-memly-non-owning-range-view-parameter-by-value,
   custom-memly-nodiscard-callable,
@@ -78,10 +93,9 @@ Checks: |
   custom-memly-scalar-parameter-by-value,
   custom-memly-standard-container-value-suffix,
   custom-memly-source-location-parameter-by-value,
+  custom-memly-static-variable-prefix,
   custom-memly-string-view-definition-parameter-const,
   custom-memly-string-view-parameter-by-value,
-  custom-memly-target-private-declaration-prefix,
-  custom-memly-target-private-prefix-reserved,
   custom-memly-type-template-parameter-name,
   custom-memly-unnamed-namespace-declaration-prefix,
   custom-memly-unnamed-namespace-nesting,
@@ -93,17 +107,10 @@ CheckOptions:
   - { key: bugprone-unused-local-non-trivial-variable.IncludeTypes, value: ".*" }
   - { key: cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues, value: "1" }
   - { key: cppcoreguidelines-avoid-magic-numbers.IgnoredFloatingPointValues, value: "" }
+  - { key: cppcoreguidelines-macro-usage.AllowedRegexp, value: "" }
   - { key: misc-include-cleaner.MissingIncludes, value: "false" }
   - { key: misc-include-cleaner.UnusedIncludes, value: "true" }
   - { key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic, value: "true" }
-  - { key: readability-identifier-naming.ClassConstantPrefix, value: "s_" }
-  - { key: readability-identifier-naming.ClassConstexprPrefix, value: "s_" }
-  - { key: readability-identifier-naming.ClassMemberPrefix, value: "s_" }
-  - { key: readability-identifier-naming.EnumSuffix, value: "Enum" }
-  - { key: readability-identifier-naming.MemberPrefix, value: "m_" }
-  - { key: readability-identifier-naming.StaticConstantPrefix, value: "s_" }
-  - { key: readability-identifier-naming.StaticConstexprVariablePrefix, value: "s_" }
-  - { key: readability-identifier-naming.StaticVariablePrefix, value: "s_" }
   - { key: readability-magic-numbers.IgnoredIntegerValues, value: "1" }
   - { key: readability-magic-numbers.IgnoredFloatingPointValues, value: "" }
   - { key: readability-operators-representation.BinaryOperators, value: "and;and_eq;bitand;bitor;compl;not;not_eq;or;or_eq;xor;xor_eq" }
@@ -210,6 +217,15 @@ CustomChecks:
     Diagnostic:
       - BindName: record
         Message: Memly types must explicitly declare an ordinary constructor
+        Level: Warning
+  - Name: memly-enum-type-suffix
+    Query: >-
+      match enumDecl( unless(isImplicit()), unless( hasAncestor( functionDecl(isTemplateInstantiation()) ) ), unless( hasAncestor(
+      cxxRecordDecl(isTemplateInstantiation()) ) ), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("^::.+$"),
+      unless(matchesName("Enum$")) ).bind("enum")
+    Diagnostic:
+      - BindName: enum
+        Message: enum type names must end in Enum
         Level: Warning
   - Name: memly-expected-value-suffix
     Query: >-
@@ -383,6 +399,14 @@ CustomChecks:
       - BindName: variable
         Message: global and namespace-scope variables are disallowed
         Level: Warning
+  - Name: memly-non-static-data-member-prefix
+    Query: >-
+      match fieldDecl( unless(isImplicit()), unless( hasAncestor( cxxRecordDecl(isTemplateInstantiation()) ) ), isExpansionInMainFile(),
+      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("^::.+$"), unless(matchesName("(^|::)m_[^:]*$")) ).bind("field")
+    Diagnostic:
+      - BindName: field
+        Message: non-static data members must use the m_ prefix
+        Level: Warning
   - Name: memly-no-type-declaration-in-implementation-file
     Query: >-
       match decl( anyOf( cxxRecordDecl( unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()) ), enumDecl( unless(isImplicit()) ),
@@ -391,6 +415,14 @@ CustomChecks:
     Diagnostic:
       - BindName: type_declaration
         Message: type declarations must appear in .cppm module interface units
+        Level: Warning
+  - Name: memly-no-typedef
+    Query: >-
+      match typedefDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInMainFile(),
+      isExpansionInFileMatching("[/\\\\](program|test)[/\\\\]") ).bind("typedef")
+    Diagnostic:
+      - BindName: typedef
+        Message: typedef declarations are disallowed; declare an allowed type alias with using
         Level: Warning
   - Name: memly-no-global-prefix
     Query: >-
@@ -516,9 +548,9 @@ CustomChecks:
         Level: Warning
   - Name: memly-scalar-parameter-by-value
     Query: >-
-      match parmVarDecl( unless(hasAncestor(functionDecl(isTemplateInstantiation()))), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( anyOf(builtinType(),
-      enumType()) ) ) ) ) ) ).bind("parameter")
+      match parmVarDecl( isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      unless(hasAncestor(functionDecl(isTemplateInstantiation()))), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( anyOf(builtinType(),
+      enumType(), pointerType(), memberPointerType()) ) ) ) ) ) ).bind("parameter")
     Diagnostic:
       - BindName: parameter
         Message: scalar parameters must be passed by value
@@ -558,6 +590,15 @@ CustomChecks:
       - BindName: parameter
         Message: std::source_location parameters must be passed by value
         Level: Warning
+  - Name: memly-static-variable-prefix
+    Query: >-
+      match varDecl( unless(isImplicit()), unless( hasAncestor( functionDecl(isTemplateInstantiation()) ) ), unless( hasAncestor(
+      cxxRecordDecl(isTemplateInstantiation()) ) ), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( isStaticLocal(), allOf(
+      isStaticStorageClass(), hasDeclContext(cxxRecordDecl()) ) ), unless(matchesName("(^|::)s_[^:]*$")) ).bind("variable")
+    Diagnostic:
+      - BindName: variable
+        Message: static data members and function-local variables with static or thread storage duration must use the s_ prefix
+        Level: Warning
   - Name: memly-string-view-definition-parameter-const
     Query: >-
       match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasAncestor( functionDecl(isDefinition()) ),
@@ -577,27 +618,24 @@ CustomChecks:
       - BindName: parameter
         Message: std::string_view parameters must be passed by value
         Level: Warning
-  - Name: memly-target-private-declaration-prefix
+  - Name: memly-internal-declaration-namespace
     Query: >-
       match namedDecl( anyOf( functionDecl(unless(cxxMethodDecl())), cxxRecordDecl(), enumDecl(), typedefNameDecl(), functionTemplateDecl(),
       classTemplateDecl(), typeAliasTemplateDecl(), conceptDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](cppm|cpp)$"), hasParent(namespaceDecl(unless(isAnonymous()))),
-      hasAncestor(namespaceDecl(matchesName("^::Memly(::|$)"))), unless(matchesName("(^|::)i_[^:]*$") ) ).bind("declaration")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]Internal[/\\\\]"), hasParent(namespaceDecl(unless(isAnonymous()))),
+      hasAncestor(namespaceDecl(matchesName("^::Memly(::|$)"))), unless(hasAncestor(namespaceDecl(matchesName("^::Memly::[A-Za-z0-9_]+::Internal(::|$)"))))
+      ).bind("declaration")
     Diagnostic:
       - BindName: declaration
-        Message: namespace-scope types and free functions declared in target-private helper files must use the i_ prefix
+        Message: namespace-scope types and free functions declared below source/Internal must belong to the component's Internal namespace
         Level: Warning
-  - Name: memly-target-private-prefix-reserved
+  - Name: memly-internal-namespace-reserved
     Query: >-
-      match namedDecl( unless(isImplicit()), unless(cxxConstructorDecl()), unless(cxxDestructorDecl()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("(^|::)i_[^:]*$"), unless(hasParent(functionTemplateDecl())),
-      unless(hasParent(classTemplateDecl())), unless(hasParent(typeAliasTemplateDecl())), unless( allOf( anyOf( functionDecl(unless(cxxMethodDecl())),
-      cxxRecordDecl(), enumDecl(), typedefNameDecl(), functionTemplateDecl(), classTemplateDecl(), typeAliasTemplateDecl(), conceptDecl() ),
-      isExpansionInFileMatching("[/\\\\]source[/\\\\]([A-Za-z0-9_]+[/\\\\])*_[A-Za-z0-9_]+[.](cppm|cpp)$"), hasParent(namespaceDecl(unless(isAnonymous()))),
-      hasAncestor(namespaceDecl(matchesName("^::Memly(::|$)"))) ) ) ).bind("declaration")
+      match namespaceDecl( unless(isAnonymous()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      matchesName("(^|::)Internal$"), unless(isExpansionInFileMatching("[/\\\\]source[/\\\\]Internal[/\\\\]")) ).bind("namespace")
     Diagnostic:
-      - BindName: declaration
-        Message: the i_ prefix is reserved for namespace-scope types and free functions declared in target-private helper files
+      - BindName: namespace
+        Message: the Internal namespace is reserved for target-private modules stored below source/Internal
         Level: Warning
   - Name: memly-type-template-parameter-name
     Query: >-
@@ -609,8 +647,8 @@ CustomChecks:
         Level: Warning
   - Name: memly-unnamed-namespace-declaration-prefix
     Query: >-
-      match namedDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
-      hasParent(namespaceDecl(isAnonymous())), unless(matchesName("::u_[^:]*$")) ).bind("declaration")
+      match namespaceDecl( isAnonymous(), unless(isExpansionInSystemHeader()), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      forEach( namedDecl( unless(isImplicit()), unless(matchesName("(^|::)u_[^:]*$")) ).bind("declaration") ) )
     Diagnostic:
       - BindName: declaration
         Message: declarations made directly in an unnamed namespace must use the u_ prefix

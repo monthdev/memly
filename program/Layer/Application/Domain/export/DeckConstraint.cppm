@@ -2,7 +2,7 @@ module;
 
 #include <string>
 
-export module Memly.Domain:DeckConstraint;
+export module Memly.Domain.DeckConstraint;
 
 export namespace Memly::Domain {
 

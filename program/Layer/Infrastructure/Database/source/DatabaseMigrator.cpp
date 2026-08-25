@@ -18,11 +18,13 @@ module;
 #include <utility>
 #include <vector>
 
-module Memly.Database;
+module Memly.Database.DatabaseMigrator;
 
-import :MigrationSql;
-import :ThrowOnDatabaseError;
-import Memly.Exception;
+import Memly.Database.DatabaseRuntime;
+import Memly.Database.Internal.MigrationSql;
+import Memly.Database.Internal.ThrowOnDatabaseError;
+import Memly.Database.TransactionRunner;
+import Memly.Exception.MemlyException;
 
 namespace Memly::Database {
 
@@ -33,10 +35,10 @@ DatabaseMigrator::DatabaseMigrator(const std::string& DatabaseFilePath)
 
 [[nodiscard]] auto DatabaseMigrator::ApplyMigrations() && -> DatabaseRuntime {
     TransactionRunner{ this->m_DatabaseConnection }.TransactionWrapper([this]() -> void {
-        i_ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(i_CreateMigrationsLogSql()));
+        Internal::ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(Internal::CreateMigrationsLogSql()));
         duckdb::unique_ptr<duckdb::MaterializedQueryResult> AppliedMigrationVersionsMaterializedQueryResult{ this->m_DatabaseConnection.Query(
-            i_SelectAppliedMigrationVersionsSql()) };
-        i_ThrowOnQueryResultError(*AppliedMigrationVersionsMaterializedQueryResult);
+            Internal::SelectAppliedMigrationVersionsSql()) };
+        Internal::ThrowOnQueryResultError(*AppliedMigrationVersionsMaterializedQueryResult);
         std::vector<std::size_t> AppliedMigrationVersionVector{};
         // NOLINTNEXTLINE(custom-memly-no-deduced-variable-type)
         for (const auto& QueryResultRow : *AppliedMigrationVersionsMaterializedQueryResult) {
@@ -45,18 +47,20 @@ DatabaseMigrator::DatabaseMigrator(const std::string& DatabaseFilePath)
         const std::size_t AppliedMigrationCount{ AppliedMigrationVersionVector.size() };
         assert(std::ranges::equal(AppliedMigrationVersionVector, std::views::iota(std::size_t{ 1 }, AppliedMigrationCount + std::size_t{ 1 })));
         constexpr std::size_t MigrationSqlFunctionCount{ 2 };
-        const std::array<std::string (*)(), MigrationSqlFunctionCount> MigrationSqlFunctionArray{ &i_M01_CreateSchemaSql, &i_M02_SeedTableDefaultsSql };
+        const std::array<std::string (*)(), MigrationSqlFunctionCount> MigrationSqlFunctionArray{ &Internal::M01CreateSchemaSql,
+                                                                                                  &Internal::M02SeedTableDefaultsSql };
         const std::size_t AvailableMigrationCount{ MigrationSqlFunctionArray.size() };
         if (AppliedMigrationCount > AvailableMigrationCount) {
             throw Exception::MemlyException{ std::initializer_list<std::string_view>{ "Applied migration count exceeds available migration count" } };
         }
         if (AppliedMigrationCount < AvailableMigrationCount) {
             duckdb::unique_ptr<duckdb::PreparedStatement> InsertMigrationLogEntryPreparedStatement{ this->m_DatabaseConnection.Prepare(
-                i_InsertMigrationLogEntrySql()) };
-            i_ThrowOnPreparedStatementError(*InsertMigrationLogEntryPreparedStatement);
+                Internal::InsertMigrationLogEntrySql()) };
+            Internal::ThrowOnPreparedStatementError(*InsertMigrationLogEntryPreparedStatement);
             for (std::size_t MigrationIndex{ AppliedMigrationCount }; MigrationIndex < AvailableMigrationCount; ++MigrationIndex) {
-                i_ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(std::invoke(MigrationSqlFunctionArray.at(MigrationIndex))));
-                i_ThrowOnQueryResultError(*InsertMigrationLogEntryPreparedStatement->Execute(static_cast<std::uint32_t>(MigrationIndex + std::size_t{ 1 })));
+                Internal::ThrowOnQueryResultError(*this->m_DatabaseConnection.Query(std::invoke(MigrationSqlFunctionArray.at(MigrationIndex))));
+                Internal::ThrowOnQueryResultError(
+                    *InsertMigrationLogEntryPreparedStatement->Execute(static_cast<std::uint32_t>(MigrationIndex + std::size_t{ 1 })));
             }
         }
     });

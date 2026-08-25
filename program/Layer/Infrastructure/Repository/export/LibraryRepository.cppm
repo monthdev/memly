@@ -1,4 +1,4 @@
-export module Memly.Repository:LibraryRepository;
+export module Memly.Repository.LibraryRepository;
 
 // Temporarily disabled during library invalidation control path refactor.
 // NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if)
@@ -6,7 +6,8 @@ export module Memly.Repository:LibraryRepository;
 #include <cstdint>
 #include <optional>
 
-import Memly.Database;
+import Memly.Database.DatabaseRuntime;
+import Memly.Database.PreparedStatement;
 
 export namespace Memly::Repository {
 
