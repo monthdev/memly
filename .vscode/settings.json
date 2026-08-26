@@ -9,7 +9,7 @@
   "files.associations": {
     ".clang-tidy": "yaml",
     ".cmakelintrc": "yaml",
-    "*.mpp": "cpp",
+    "*.cppm": "cpp",
   },
   "clangd.arguments": [
     "--enable-config",
@@ -93,7 +93,7 @@
       "name": "C++ Module Interfaces",
       "match": {
         "languages": ["cpp"],
-        "files": ["source/**/*.mpp", "test/**/*.mpp"],
+        "files": ["source/**/*.cppm", "test/**/*.cppm"],
       },
       "onOpen": {
         "strategy": "sequence",

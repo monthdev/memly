@@ -7,7 +7,7 @@ architecture and the header architecture at `main` revision
 ## Retained Coverage
 
 - Clang compiler diagnostics, including `-Weverything`, `-pedantic`, and
-  `-Werror`, cover every authored `.mpp` and `.cpp`.
+  `-Werror`, cover every authored `.cppm` and `.cpp`.
 - The configured Clang-Tidy checks and `custom-memly-*` YAML checks cover every
   authored exact named-module interface and implementation unit after the
   required BMIs exist.
@@ -58,7 +58,7 @@ The module branch changes these lint- and source-policy files:
 
 - `.clang-tidy` disables module-incompatible missing-include and redundant
   declaration diagnostics, retains unused physical-header diagnostics, and
-  updates custom checks for `.mpp` interfaces and `module/Internal/` modules.
+  updates custom checks for `.cppm` interfaces and `module/Internal/` modules.
 - `.clangd` disables module-incompatible missing-include diagnostics while
   retaining strict unused physical-header diagnostics.
 - `CMakeLists.txt` replaces the header-era IWYU and independent-header gates
@@ -75,7 +75,7 @@ The module branch changes these lint- and source-policy files:
   interface stamp follows only its recursive imported-interface closure. A
   content-stable compilation-database snapshot avoids nonsemantic full-gate
   invalidation.
-- `.vscode/settings.json` recognizes `.mpp`, removes IWYU, and runs the reduced
+- `.vscode/settings.json` recognizes `.cppm`, removes IWYU, and runs the reduced
   editor Clang-Tidy set separately for module interfaces and implementation
   units against the root compilation database that CMake Tools refreshes from
   the active configure preset. Native extensions own supported editor
@@ -86,9 +86,9 @@ The module branch changes these lint- and source-policy files:
   importer module map.
 - `.codex/hooks/check_repository_format.sh`,
   `.github/workflows/CheckRepositoryFormat.yml`, and `.prettierignore` replace
-  authored `.hpp` formatting coverage with `.mpp` coverage.
+  authored `.hpp` formatting coverage with `.cppm` coverage.
 - `tool/cmake/verify_source_extensions.py`, invoked by CMake, replaces the
-  authored header/source extension policy with the `.mpp` and `.cpp` module
+  authored header/source extension policy with the `.cppm` and `.cpp` module
   policy.
 
 The module branch deletes `.iwyu.imp` and `tool/run_include_what_you_use.py`.

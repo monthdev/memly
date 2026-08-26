@@ -21,7 +21,7 @@ from urllib.request import url2pathname
 
 _CMAKE_CLANGD_VARIABLE = "MEMLY_LLVM_CLANGD_EXECUTABLE"
 _CMAKE_CLANG_TIDY_VARIABLE = "MEMLY_LLVM_CLANG_TIDY_EXECUTABLE"
-_CXX_SOURCE_SUFFIXES = frozenset((".cpp", ".mpp"))
+_CXX_SOURCE_SUFFIXES = frozenset((".cpp", ".cppm"))
 _DIAGNOSTIC_PATTERN = re.compile(
     r"^(.*?):(\d+):(\d+):\s+(warning|error|fatal error|note):\s+(.*?)(?:\s+\[([^\]]+)\])?\s*$"
 )
