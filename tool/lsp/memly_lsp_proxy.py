@@ -21,7 +21,7 @@ from urllib.request import url2pathname
 
 _CMAKE_CLANGD_VARIABLE = "MEMLY_LLVM_CLANGD_EXECUTABLE"
 _CMAKE_CLANG_TIDY_VARIABLE = "MEMLY_LLVM_CLANG_TIDY_EXECUTABLE"
-_CXX_SOURCE_SUFFIXES = frozenset((".cpp", ".cppm"))
+_CXX_SOURCE_SUFFIXES = frozenset((".cpp", ".mpp"))
 _DIAGNOSTIC_PATTERN = re.compile(
     r"^(.*?):(\d+):(\d+):\s+(warning|error|fatal error|note):\s+(.*?)(?:\s+\[([^\]]+)\])?\s*$"
 )
@@ -225,7 +225,7 @@ class _ClangdProxy:
             relative_path = source_path.relative_to(self._project_root)
         except ValueError:
             return False
-        return bool(relative_path.parts) and relative_path.parts[0] in ("program", "test")
+        return bool(relative_path.parts) and relative_path.parts[0] in ("source", "test")
 
     def _schedule_lint(self, text_document: dict[str, Any]) -> None:
         uri = text_document.get("uri")

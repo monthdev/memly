@@ -119,7 +119,7 @@ CustomChecks:
   - Name: memly-always-explicit-constructor
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: constructor must be declared explicit
@@ -127,7 +127,7 @@ CustomChecks:
   - Name: memly-braced-constructor-initializer
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isDelegatingConstructor()),
-      unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), forEachConstructorInitializer(
+      unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), forEachConstructorInitializer(
       cxxCtorInitializer( isWritten(), unless( withInitializer( ignoringImplicit( anyOf( initListExpr(), cxxConstructExpr(isListInitialization()) ) ) ) )
       ).bind("initializer") ) )
     Diagnostic:
@@ -138,7 +138,7 @@ CustomChecks:
     Query: >-
       match varDecl( isDefinition(), unless(parmVarDecl()), unless(isImplicit()), unless(isExceptionVariable()), unless(isExpansionInSystemHeader()), unless(
       hasParent( declStmt( hasParent(cxxForRangeStmt()) ) ) ), unless( hasInitializer( ignoringImplicit( anyOf( initListExpr(),
-      cxxConstructExpr(isListInitialization()) ) ) ) ), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("variable")
+      cxxConstructExpr(isListInitialization()) ) ) ) ), isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: named variable definitions must use brace initialization
@@ -147,7 +147,7 @@ CustomChecks:
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isDelegatingConstructor()),
       unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), hasAnyConstructorInitializer( unless(isWritten()) ),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: constructor must explicitly initialize every direct base and non-static data member
@@ -155,7 +155,7 @@ CustomChecks:
   - Name: memly-data-struct-constructor-noexcept
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()), unless(isNoThrow()),
-      unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl( isStruct(), matchesName("^::Memly::") ) ), isExpansionInFileMatching("[/\\\\]program[/\\\\]")
+      unless(isExpansionInSystemHeader()), ofClass( cxxRecordDecl( isStruct(), matchesName("^::Memly::") ) ), isExpansionInFileMatching("[/\\\\]source[/\\\\]")
       ).bind("constructor")
     Diagnostic:
       - BindName: constructor
@@ -164,7 +164,7 @@ CustomChecks:
   - Name: memly-defaulted-or-deleted-copy-move-operation
     Query: >-
       match cxxMethodDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( cxxConstructorDecl( anyOf(isCopyConstructor(), isMoveConstructor()) ),
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( cxxConstructorDecl( anyOf(isCopyConstructor(), isMoveConstructor()) ),
       isCopyAssignmentOperator(), isMoveAssignmentOperator() ), unless(anyOf(isDefaulted(), isDeleted())) ).bind("special_member")
     Diagnostic:
       - BindName: special_member
@@ -173,7 +173,7 @@ CustomChecks:
   - Name: memly-defaulted-or-deleted-destructor-definition
     Query: >-
       match cxxDestructorDecl( isDefinition(), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless(anyOf(isDefaulted(), isDeleted())) ).bind("destructor")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), unless(anyOf(isDefaulted(), isDeleted())) ).bind("destructor")
     Diagnostic:
       - BindName: destructor
         Message: destructor definitions must be explicitly defaulted or deleted
@@ -184,7 +184,7 @@ CustomChecks:
       unless(isExpansionInSystemHeader()), anyOf( isConstexpr(), hasParent(functionTemplateDecl()), ofClass(cxxRecordDecl(anyOf(
       hasAncestor(classTemplateDecl()), hasAncestor(classTemplatePartialSpecializationDecl()) ))), allOf( isDefaulted(), isDefaultConstructor(),
       ofClass(cxxRecordDecl(unless(has(fieldDecl())))) ) ), unless( anyOf( hasParent(cxxRecordDecl()),
-      hasParent(functionTemplateDecl(hasParent(cxxRecordDecl()))) ) ), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      hasParent(functionTemplateDecl(hasParent(cxxRecordDecl()))) ) ), isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: eligible defaulted, constexpr, and template-dependent constructor definitions must appear inside their class or struct declaration
@@ -195,7 +195,7 @@ CustomChecks:
       unless(isDefaulted()), unless(isConstexpr()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
       unless(hasParent(functionTemplateDecl())), unless( ofClass( cxxRecordDecl( anyOf( hasAncestor(classTemplateDecl()),
       hasAncestor(classTemplatePartialSpecializationDecl()) ) ) ) ), anyOf( hasParent(cxxRecordDecl()), unless(isExpansionInFileMatching("[.]cpp$")) ),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: non-template non-constexpr constructor definitions must appear in a .cpp implementation file
@@ -221,7 +221,7 @@ CustomChecks:
   - Name: memly-enum-type-suffix
     Query: >-
       match enumDecl( unless(isImplicit()), unless( hasAncestor( functionDecl(isTemplateInstantiation()) ) ), unless( hasAncestor(
-      cxxRecordDecl(isTemplateInstantiation()) ) ), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("^::.+$"),
+      cxxRecordDecl(isTemplateInstantiation()) ) ), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), matchesName("^::.+$"),
       unless(matchesName("Enum$")) ).bind("enum")
     Diagnostic:
       - BindName: enum
@@ -231,7 +231,7 @@ CustomChecks:
     Query: >-
       match declaratorDecl( anyOf( varDecl( unless(parmVarDecl()) ), parmVarDecl( matchesName("^::.+$"), unless(matchesName("anonymous")), hasAncestor(
       functionDecl( hasBody(stmt()) ) ) ), fieldDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
       classTemplateSpecializationDecl( hasName("::std::expected") ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType(
       recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::expected") ) ) ) ) ) ) ) ) ), unless(matchesName("Expected$"))
       ).bind("value")
@@ -243,14 +243,14 @@ CustomChecks:
     Query: >-
       match parmVarDecl( hasDefaultArgument(), unless(isExpansionInSystemHeader()), hasInitializer( ignoringImplicit( expr( anyOf( cxxConstructExpr(
       isListInitialization(), unless(cxxTemporaryObjectExpr()) ), initListExpr( unless(hasAncestor(cxxFunctionalCastExpr())) ), cxxStdInitializerListExpr(
-      unless(hasAncestor(cxxFunctionalCastExpr())) ) ) ).bind("initializer") ) ), isExpansionInFileMatching("[/\\\\]program[/\\\\]") )
+      unless(hasAncestor(cxxFunctionalCastExpr())) ) ) ).bind("initializer") ) ), isExpansionInFileMatching("[/\\\\]source[/\\\\]") )
     Diagnostic:
       - BindName: initializer
         Message: a braced default argument must explicitly spell its constructed type
         Level: Warning
   - Name: memly-explicit-contextual-braced-expression
     Query: >-
-      match stmt( isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( callExpr( unless(isExpansionInSystemHeader()), forEachArgumentWithParam(
+      match stmt( isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( callExpr( unless(isExpansionInSystemHeader()), forEachArgumentWithParam(
       ignoringImplicit( expr( anyOf( cxxConstructExpr( isListInitialization(), unless(cxxTemporaryObjectExpr()) ), initListExpr(
       unless(hasAncestor(cxxFunctionalCastExpr())) ), cxxStdInitializerListExpr( unless(hasAncestor(cxxFunctionalCastExpr())) ) ) ).bind("initializer") ),
       parmVarDecl() ) ), returnStmt( unless(isExpansionInSystemHeader()), hasReturnValue( ignoringImplicit( expr( anyOf( cxxConstructExpr(
@@ -265,7 +265,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-explicit-memly-exception-throw
     Query: >-
-      match cxxThrowExpr( has(expr()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless( has( expr( hasType(
+      match cxxThrowExpr( has(expr()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), unless( has( expr( hasType(
       qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasName("::Memly::Exception::MemlyException") ) ) ) ) ) ) ) ) )
       ).bind("throw_expression")
     Diagnostic:
@@ -275,7 +275,7 @@ CustomChecks:
   - Name: memly-explicit-rule-of-five
     Query: >-
       match cxxRecordDecl( isDefinition(), unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless( allOf( has(cxxConstructorDecl(unless(isImplicit()), isCopyConstructor())),
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), unless( allOf( has(cxxConstructorDecl(unless(isImplicit()), isCopyConstructor())),
       has(cxxMethodDecl(unless(isImplicit()), isCopyAssignmentOperator())), has(cxxConstructorDecl(unless(isImplicit()), isMoveConstructor())),
       has(cxxMethodDecl(unless(isImplicit()), isMoveAssignmentOperator())), has(cxxDestructorDecl(unless(isImplicit()))) ) ) ).bind("record")
     Diagnostic:
@@ -284,7 +284,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-explicit-return-type-construction
     Query: >-
-      match returnStmt( hasReturnValue(expr()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasAncestor(
+      match returnStmt( hasReturnValue(expr()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), hasAncestor(
       functionDecl( unless(isTemplateInstantiation()), unless(returns(voidType())), unless(returns(referenceType())), unless(returns(pointerType())), returns(
       qualType( hasCanonicalType( qualType().bind("return_type") ) ) ) ) ), unless( allOf( hasAncestor( functionDecl( hasAncestor(functionTemplateDecl()) ) ),
       hasReturnValue( ignoringImplicit( callExpr( callee( unresolvedLookupExpr( hasAnyDeclaration( namedDecl(hasName("::std::invoke")) ) ) ), hasArgument( 0,
@@ -299,7 +299,7 @@ CustomChecks:
   - Name: memly-no-class-template-argument-deduction
     Query: >-
       match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isInitCapture()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasType(deducedTemplateSpecializationType()) ).bind("variable")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), hasType(deducedTemplateSpecializationType()) ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: named variable declarations must explicitly specify every class template argument
@@ -307,7 +307,7 @@ CustomChecks:
   - Name: memly-no-default-member-initializer
     Query: >-
       match fieldDecl( hasInClassInitializer(anything()), unless(isImplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("field")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("field")
     Diagnostic:
       - BindName: field
         Message: default member initializers are disallowed; initialize this member in each constructor initializer list
@@ -315,7 +315,7 @@ CustomChecks:
   - Name: memly-no-delegating-constructor
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isDelegatingConstructor(),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: delegating constructors are disallowed
@@ -323,7 +323,7 @@ CustomChecks:
   - Name: memly-no-deduced-variable-type
     Query: >-
       match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isInitCapture()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType(autoType()), hasType( referenceType( pointee(autoType()) ) ), hasType( pointerType(
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType(autoType()), hasType( referenceType( pointee(autoType()) ) ), hasType( pointerType(
       pointee(autoType()) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
@@ -334,7 +334,7 @@ CustomChecks:
       match functionDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isTemplateInstantiation()),
       unless(isExpansionInSystemHeader()), unless(cxxConstructorDecl()), unless( cxxMethodDecl( ofClass( cxxRecordDecl(isLambda()) ) ) ),
       unless(hasAncestor(functionTemplateDecl())), unless(hasAncestor(classTemplateDecl())), unless(hasAncestor(classTemplatePartialSpecializationDecl())),
-      isExpansionInFileMatching("[/\\\\](program|test)[/\\\\].*[.]cppm$") ).bind("function")
+      isExpansionInFileMatching("[/\\\\](source|test)[/\\\\].*[.]mpp$") ).bind("function")
     Diagnostic:
       - BindName: function
         Message: ordinary non-template function definitions must remain in .cpp implementation units
@@ -342,7 +342,7 @@ CustomChecks:
   - Name: memly-no-magic-integer-in-assertion
     Query: >-
       match integerLiteral( isExpandedFromMacro("assert"), unless(equals(0)), unless(equals(1)), unless(isExpandedFromMacro("__LINE__")),
-      unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("integer_literal")
+      unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("integer_literal")
     Diagnostic:
       - BindName: integer_literal
         Message: integer literals in assertions must be zero, positive one, or a named constant
@@ -350,7 +350,7 @@ CustomChecks:
   - Name: memly-no-magic-integer-in-constant-declaration-type
     Query: >-
       match integerLiteral( allOf( integerLiteral( unless(anyOf(equals(0), equals(1))), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("integer_literal"), hasAncestor( anyOf( varDecl( unless(parmVarDecl()), unless(isImplicit()),
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("integer_literal"), hasAncestor( anyOf( varDecl( unless(parmVarDecl()), unless(isImplicit()),
       hasType(isConstQualified()), unless( hasInitializer( hasDescendant( expr(equalsBoundNode("integer_literal")) ) ) ) ), fieldDecl( unless(isImplicit()),
       hasType(isConstQualified()), unless( hasInClassInitializer( hasDescendant( expr(equalsBoundNode("integer_literal")) ) ) ) ) ) ) ) )
     Diagnostic:
@@ -361,7 +361,7 @@ CustomChecks:
     Query: >-
       match unaryOperator( hasOperatorName("-"), hasUnaryOperand( ignoringParenImpCasts( integerLiteral( anyOf( equals(0), equals(1) ) ) ) ), unless(
       hasAncestor( varDecl( hasType(isConstQualified()) ) ) ), unless(hasAncestor(enumConstantDecl())), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("negative_integer_literal")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("negative_integer_literal")
     Diagnostic:
       - BindName: negative_integer_literal
         Message: negative integer literals must be introduced through a named constant
@@ -369,15 +369,15 @@ CustomChecks:
   - Name: memly-no-zero-floating-point-magic-number
     Query: >-
       match floatLiteral( equals(0.0), unless( hasAncestor( varDecl( hasType(isConstQualified()) ) ) ), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("zero_floating_point_literal")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("zero_floating_point_literal")
     Diagnostic:
       - BindName: zero_floating_point_literal
         Message: floating-point literals must be introduced through a named constant
         Level: Warning
   - Name: memly-no-named-lambda
     Query: >-
-      match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
-      anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(isLambda()) ) ) ) ) ), hasType( referenceType( pointee(
+      match varDecl( unless(parmVarDecl()), unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf(
+      hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(isLambda()) ) ) ) ) ), hasType( referenceType( pointee(
       qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(isLambda()) ) ) ) ) ) ) ) ) ).bind("variable")
     Diagnostic:
       - BindName: variable
@@ -386,7 +386,7 @@ CustomChecks:
   - Name: memly-no-named-declaration-parameter
     Query: >-
       match functionDecl( unless(hasBody(stmt())), unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasAnyParameter( parmVarDecl( matchesName("^::.+$") ).bind("parameter") ) )
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), hasAnyParameter( parmVarDecl( matchesName("^::.+$") ).bind("parameter") ) )
     Diagnostic:
       - BindName: parameter
         Message: parameters must be unnamed in function declarations
@@ -394,7 +394,7 @@ CustomChecks:
   - Name: memly-no-namespace-variable
     Query: >-
       match varDecl( unless(isImplicit()), unless(parmVarDecl()), unless(isExpansionInSystemHeader()), hasDeclContext( anyOf( namespaceDecl(),
-      translationUnitDecl() ) ), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("variable")
+      translationUnitDecl() ) ), isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("variable")
     Diagnostic:
       - BindName: variable
         Message: global and namespace-scope variables are disallowed
@@ -402,7 +402,7 @@ CustomChecks:
   - Name: memly-non-static-data-member-prefix
     Query: >-
       match fieldDecl( unless(isImplicit()), unless( hasAncestor( cxxRecordDecl(isTemplateInstantiation()) ) ), isExpansionInMainFile(),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("^::.+$"), unless(matchesName("(^|::)m_[^:]*$")) ).bind("field")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), matchesName("^::.+$"), unless(matchesName("(^|::)m_[^:]*$")) ).bind("field")
     Diagnostic:
       - BindName: field
         Message: non-static data members must use the m_ prefix
@@ -410,16 +410,16 @@ CustomChecks:
   - Name: memly-no-type-declaration-in-implementation-file
     Query: >-
       match decl( anyOf( cxxRecordDecl( unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()) ), enumDecl( unless(isImplicit()) ),
-      typedefNameDecl( unless(isImplicit()) ) ), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\](program|test)[/\\\\].*[.]cpp$")
+      typedefNameDecl( unless(isImplicit()) ) ), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\](source|test)[/\\\\].*[.]cpp$")
       ).bind("type_declaration")
     Diagnostic:
       - BindName: type_declaration
-        Message: type declarations must appear in .cppm module interface units
+        Message: type declarations must appear in .mpp module interface units
         Level: Warning
   - Name: memly-no-typedef
     Query: >-
       match typedefDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInMainFile(),
-      isExpansionInFileMatching("[/\\\\](program|test)[/\\\\]") ).bind("typedef")
+      isExpansionInFileMatching("[/\\\\](source|test)[/\\\\]") ).bind("typedef")
     Diagnostic:
       - BindName: typedef
         Message: typedef declarations are disallowed; declare an allowed type alias with using
@@ -427,14 +427,14 @@ CustomChecks:
   - Name: memly-no-global-prefix
     Query: >-
       match namedDecl( unless(isImplicit()), unless(cxxConstructorDecl()), unless(cxxDestructorDecl()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("(^|::)g_[^:]*$") ).bind("declaration")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), matchesName("(^|::)g_[^:]*$") ).bind("declaration")
     Diagnostic:
       - BindName: declaration
         Message: the g_ prefix is forbidden for every Memly identifier
         Level: Warning
   - Name: memly-no-database-chain-proxy-field
     Query: >-
-      match fieldDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType(
+      match fieldDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType( qualType(
       hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution",
       "::Memly::Database::QueryResultDecoder", "::Memly::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType(
       hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution",
@@ -449,8 +449,8 @@ CustomChecks:
     Query: >-
       match varDecl( unless(isImplicit()), unless(hasAncestor(functionDecl(isImplicit()))), unless( parmVarDecl( hasAncestor( cxxMethodDecl( anyOf(
       cxxConstructorDecl(anyOf(isCopyConstructor(), isMoveConstructor())), isCopyAssignmentOperator(), isMoveAssignmentOperator() ) ) ) ) ),
-      unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType(
-      recordType( hasDeclaration( cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution", "::Memly::Database::QueryResultDecoder",
+      unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType(
+      hasDeclaration( cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution", "::Memly::Database::QueryResultDecoder",
       "::Memly::Database::DecodedQueryResult" ) ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
       cxxRecordDecl( hasAnyName( "::Memly::Database::PreparedStatementExecution", "::Memly::Database::QueryResultDecoder",
       "::Memly::Database::DecodedQueryResult" ) ) ) ) ) ) ) ) ), hasType( pointerType( pointee( qualType( hasUnqualifiedDesugaredType( recordType(
@@ -463,14 +463,14 @@ CustomChecks:
   - Name: memly-no-using-declaration
     Query: >-
       match decl( anyOf( usingDecl(), usingDirectiveDecl(), usingEnumDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("using")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("using")
     Diagnostic:
       - BindName: using
         Message: using-declarations and using-directives are disallowed
         Level: Warning
   - Name: memly-non-owning-range-view-parameter-by-value
     Query: >-
-      match parmVarDecl(unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      match parmVarDecl(unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"),
       anyOf(hasType(referenceType(pointee(qualType(hasUnqualifiedDesugaredType(recordType(hasDeclaration(classTemplateSpecializationDecl(
       hasAnyName("::std::initializer_list", "::std::span"))))))))), hasType(pointerType(pointee(qualType(hasUnqualifiedDesugaredType(
       recordType(hasDeclaration(classTemplateSpecializationDecl(hasAnyName("::std::initializer_list", "::std::span"))))))))))).bind("parameter")
@@ -483,7 +483,7 @@ CustomChecks:
       match functionDecl( unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
       unless(isExpandedFromMacro("Q_OBJECT")), unless(isMain()), unless(cxxConstructorDecl()), unless(cxxDestructorDecl()), unless( cxxMethodDecl( ofClass(
       cxxRecordDecl(isLambda()) ) ) ), unless(returns(voidType())), unless(hasAttr("attr::NoReturn")), unless(hasAttr("attr::WarnUnusedResult")),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("callable")
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("callable")
     Diagnostic:
       - BindName: callable
         Message: non-void callables must be declared [[nodiscard]]
@@ -491,7 +491,7 @@ CustomChecks:
   - Name: memly-nodiscard-enum
     Query: >-
       match enumDecl( isDefinition(), unless(isImplicit()), unless(isExpansionInSystemHeader()), matchesName("^::Memly::"),
-      unless(hasAttr("attr::WarnUnusedResult")), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("enum")
+      unless(hasAttr("attr::WarnUnusedResult")), isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("enum")
     Diagnostic:
       - BindName: enum
         Message: enum types must be declared [[nodiscard]]
@@ -499,7 +499,7 @@ CustomChecks:
   - Name: memly-nodiscard-returned-record
     Query: >-
       match functionDecl( unless(isImplicit()), unless(isDeleted()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), returns( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), returns( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl(
       unless(isImplicit()), unless(isLambda()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), matchesName("^::Memly::"),
       unless(hasAttr("attr::WarnUnusedResult")) ).bind("result_type") ) ) ) ) ) )
     Diagnostic:
@@ -509,7 +509,7 @@ CustomChecks:
   - Name: memly-no-direct-field-defaulted-default-constructor
     Query: >-
       match cxxConstructorDecl( unless(isImplicit()), unless(isTemplateInstantiation()), unless(isExpansionInSystemHeader()), isDefaulted(),
-      isDefaultConstructor(), ofClass(cxxRecordDecl(has(fieldDecl()))), isExpansionInFileMatching("[/\\\\]program[/\\\\]") ).bind("constructor")
+      isDefaultConstructor(), ofClass(cxxRecordDecl(has(fieldDecl()))), isExpansionInFileMatching("[/\\\\]source[/\\\\]") ).bind("constructor")
     Diagnostic:
       - BindName: constructor
         Message: a default constructor with non-static data members must use an explicit initializer list instead of = default
@@ -517,7 +517,7 @@ CustomChecks:
   - Name: memly-no-two-statement-pass-through-variable
     Query: >-
       match compoundStmt( statementCountIs(2), hasAnySubstatement( declStmt( hasSingleDecl( varDecl( isDefinition(), unless(isImplicit()),
-      hasAutomaticStorageDuration(), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasInitializer(expr())
+      hasAutomaticStorageDuration(), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), hasInitializer(expr())
       ).bind("variable") ) ) ), hasAnySubstatement( returnStmt( hasReturnValue( ignoringParenImpCasts( callExpr( unless(cxxOperatorCallExpr()),
       argumentCountIs(1), hasArgument( 0, ignoringParenImpCasts( declRefExpr( to( varDecl( equalsBoundNode("variable") ) ) ) ) ) ) ) ) ) ) )
     Diagnostic:
@@ -528,7 +528,7 @@ CustomChecks:
     Query: >-
       match declaratorDecl( anyOf( varDecl( unless(parmVarDecl()) ), parmVarDecl( matchesName("^::.+$"), unless(matchesName("anonymous")), hasAncestor(
       functionDecl( hasBody(stmt()) ) ) ), fieldDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
       classTemplateSpecializationDecl( hasName("::std::optional") ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType(
       recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::optional") ) ) ) ) ) ) ) ) ), unless(matchesName("Optional$"))
       ).bind("value")
@@ -538,7 +538,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-owning-string-parameter-by-reference
     Query: >-
-      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType(
+      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType( qualType(
       hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::basic_string") ) ) ) ) ) ), hasType(
       pointerType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::basic_string") )
       ) ) ) ) ) ) ) ) ).bind("parameter")
@@ -548,7 +548,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-scalar-parameter-by-value
     Query: >-
-      match parmVarDecl( isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      match parmVarDecl( isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]source[/\\\\]"),
       unless(hasAncestor(functionDecl(isTemplateInstantiation()))), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( anyOf(builtinType(),
       enumType(), pointerType(), memberPointerType()) ) ) ) ) ) ).bind("parameter")
     Diagnostic:
@@ -559,7 +559,7 @@ CustomChecks:
     Query: >-
       match declaratorDecl( anyOf( varDecl( unless(parmVarDecl()) ), parmVarDecl( matchesName("^::.+$"), unless(matchesName("anonymous")), hasAncestor(
       functionDecl( hasBody(stmt()) ) ) ), fieldDecl() ), unless(isImplicit()), unless( hasAncestor( functionDecl(isTemplateInstantiation()) ) ), unless(
-      hasAncestor( cxxRecordDecl(isTemplateInstantiation()) ) ), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf(
+      hasAncestor( cxxRecordDecl(isTemplateInstantiation()) ) ), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf(
       allOf( anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::vector") ) ) )
       ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl(
       hasName("::std::vector") ) ) ) ) ) ) ) ) ), unless(matchesName("Vector$")) ), allOf( anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType(
@@ -582,7 +582,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-source-location-parameter-by-value
     Query: >-
-      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( referenceType( pointee(
+      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType( referenceType( pointee(
       qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasName("::std::source_location") ) ) ) ) ) ) ) ), hasType( pointerType(
       pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( cxxRecordDecl( hasName("::std::source_location") ) ) ) ) ) ) ) ) )
       ).bind("parameter")
@@ -593,7 +593,7 @@ CustomChecks:
   - Name: memly-static-variable-prefix
     Query: >-
       match varDecl( unless(isImplicit()), unless( hasAncestor( functionDecl(isTemplateInstantiation()) ) ), unless( hasAncestor(
-      cxxRecordDecl(isTemplateInstantiation()) ) ), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( isStaticLocal(), allOf(
+      cxxRecordDecl(isTemplateInstantiation()) ) ), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( isStaticLocal(), allOf(
       isStaticStorageClass(), hasDeclContext(cxxRecordDecl()) ) ), unless(matchesName("(^|::)s_[^:]*$")) ).bind("variable")
     Diagnostic:
       - BindName: variable
@@ -601,7 +601,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-string-view-definition-parameter-const
     Query: >-
-      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), hasAncestor( functionDecl(isDefinition()) ),
+      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), hasAncestor( functionDecl(isDefinition()) ),
       hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::basic_string_view") ) ) ) ),
       unless(isConstQualified()) ) ) ).bind("parameter")
     Diagnostic:
@@ -610,7 +610,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-string-view-parameter-by-value
     Query: >-
-      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( referenceType( pointee(
+      match parmVarDecl( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType( referenceType( pointee(
       qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::basic_string_view") ) ) ) ) ) ) ) ),
       hasType( pointerType( pointee( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration( classTemplateSpecializationDecl(
       hasName("::std::basic_string_view") ) ) ) ) ) ) ) ) ) ).bind("parameter")
@@ -631,7 +631,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-internal-namespace-reserved
     Query: >-
-      match namespaceDecl( unless(isAnonymous()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      match namespaceDecl( unless(isAnonymous()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"),
       matchesName("(^|::)Internal$"), unless(isExpansionInFileMatching("[/\\\\]module[/\\\\]Internal[/\\\\]")) ).bind("namespace")
     Diagnostic:
       - BindName: namespace
@@ -639,7 +639,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-type-template-parameter-name
     Query: >-
-      match templateTypeParmDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      match templateTypeParmDecl( unless(isImplicit()), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"),
       unless(matchesName("Type$")) ).bind("parameter")
     Diagnostic:
       - BindName: parameter
@@ -647,7 +647,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-unnamed-namespace-declaration-prefix
     Query: >-
-      match namespaceDecl( isAnonymous(), unless(isExpansionInSystemHeader()), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]program[/\\\\]"),
+      match namespaceDecl( isAnonymous(), unless(isExpansionInSystemHeader()), isExpansionInMainFile(), isExpansionInFileMatching("[/\\\\]source[/\\\\]"),
       forEach( namedDecl( unless(isImplicit()), unless(matchesName("(^|::)u_[^:]*$")) ).bind("declaration") ) )
     Diagnostic:
       - BindName: declaration
@@ -655,7 +655,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-unnamed-namespace-nesting
     Query: >-
-      match namespaceDecl( isAnonymous(), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), unless( hasAncestor(
+      match namespaceDecl( isAnonymous(), unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), unless( hasAncestor(
       namespaceDecl( matchesName("^::Memly(::|$)") ) ) ) ).bind("namespace")
     Diagnostic:
       - BindName: namespace
@@ -664,7 +664,7 @@ CustomChecks:
   - Name: memly-unnamed-namespace-prefix-reserved
     Query: >-
       match namedDecl( unless(isImplicit()), unless(cxxConstructorDecl()), unless(cxxDestructorDecl()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), matchesName("(^|::)u_[^:]*$"), unless(hasParent(functionTemplateDecl())),
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), matchesName("(^|::)u_[^:]*$"), unless(hasParent(functionTemplateDecl())),
       unless(hasParent(classTemplateDecl())), unless(hasParent(typeAliasTemplateDecl())), unless(hasParent(namespaceDecl(isAnonymous()))) ).bind("declaration")
     Diagnostic:
       - BindName: declaration
@@ -672,7 +672,7 @@ CustomChecks:
         Level: Warning
   - Name: memly-use-std-invoke
     Query: >-
-      match callExpr( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( allOf( unless(cxxOperatorCallExpr()),
+      match callExpr( unless(isExpansionInSystemHeader()), isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( allOf( unless(cxxOperatorCallExpr()),
       unless(callee(functionDecl())), callee( expr( hasType(pointerType()) ) ) ), allOf( unless(cxxOperatorCallExpr()), callee( expr( allOf(
       isInstantiationDependent(), ignoringParenImpCasts( anyOf( declRefExpr( to(varDecl()) ), declRefExpr( to(nonTypeTemplateParmDecl()) ), memberExpr(
       member(fieldDecl()) ) ) ) ) ) ) ), cxxMemberCallExpr( callee( expr( ignoringParenImpCasts( binaryOperator( hasAnyOperatorName(".*", "->*") ) ) ) ) ),
@@ -687,7 +687,7 @@ CustomChecks:
     Query: >-
       match declaratorDecl( anyOf( varDecl( unless(parmVarDecl()) ), parmVarDecl( matchesName("^::.+$"), unless(matchesName("anonymous")), hasAncestor(
       functionDecl( hasBody(stmt()) ) ) ), fieldDecl() ), unless(isImplicit()), unless(isExpansionInSystemHeader()),
-      isExpansionInFileMatching("[/\\\\]program[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
+      isExpansionInFileMatching("[/\\\\]source[/\\\\]"), anyOf( hasType( qualType( hasUnqualifiedDesugaredType( recordType( hasDeclaration(
       classTemplateSpecializationDecl( hasName("::std::variant") ) ) ) ) ) ), hasType( referenceType( pointee( qualType( hasUnqualifiedDesugaredType(
       recordType( hasDeclaration( classTemplateSpecializationDecl( hasName("::std::variant") ) ) ) ) ) ) ) ) ), unless(matchesName("Variant$")) ).bind("value")
     Diagnostic:

@@ -188,7 +188,7 @@ function(memly_run_source_verifier MEMLY_VERIFIER_FILE_NAME)
 endfunction()
 
 # Makes authored-file additions, removals, and renames rerun the source-extension verifier.
-file(GLOB_RECURSE MEMLY_SOURCE_POLICY_CHANGE_TRACKING_PATHS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/program/*"
+file(GLOB_RECURSE MEMLY_SOURCE_POLICY_CHANGE_TRACKING_PATHS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/source/*"
      "${CMAKE_SOURCE_DIR}/test/*"
 )
 memly_run_source_verifier(verify_source_extensions.py)
@@ -399,16 +399,16 @@ endfunction()
 function(memly_get_module_interface_metadata MEMLY_MODULE_NAME_OUTPUT MEMLY_MODULE_VISIBILITY_OUTPUT
          MEMLY_MODULE_PREFIX MEMLY_MODULE_INTERFACE
 )
-  if(NOT MEMLY_MODULE_INTERFACE MATCHES "[.]cppm$")
-    message(FATAL_ERROR "Memly module interface must use .cppm: ${MEMLY_MODULE_INTERFACE}")
+  if(NOT MEMLY_MODULE_INTERFACE MATCHES "[.]mpp$")
+    message(FATAL_ERROR "Memly module interface must use .mpp: ${MEMLY_MODULE_INTERFACE}")
   endif()
 
   string(REPLACE "\\" "/" MEMLY_MODULE_INTERFACE_PATH "${MEMLY_MODULE_INTERFACE}")
   cmake_path(GET MEMLY_MODULE_INTERFACE_PATH STEM MEMLY_MODULE_INTERFACE_STEM)
-  if(MEMLY_MODULE_INTERFACE_PATH MATCHES "/module/[^/]+[.]cppm$")
+  if(MEMLY_MODULE_INTERFACE_PATH MATCHES "/module/[^/]+[.]mpp$")
     set(MEMLY_MODULE_VISIBILITY PUBLIC)
     set(MEMLY_EXPECTED_MODULE_NAME "${MEMLY_MODULE_PREFIX}.${MEMLY_MODULE_INTERFACE_STEM}")
-  elseif(MEMLY_MODULE_INTERFACE_PATH MATCHES "/module/Internal/_[^/]+[.]cppm$")
+  elseif(MEMLY_MODULE_INTERFACE_PATH MATCHES "/module/Internal/_[^/]+[.]mpp$")
     set(MEMLY_MODULE_VISIBILITY PRIVATE)
     string(REGEX REPLACE "^_" "" MEMLY_INTERNAL_MODULE_INTERFACE_STEM "${MEMLY_MODULE_INTERFACE_STEM}")
     set(MEMLY_EXPECTED_MODULE_NAME "${MEMLY_MODULE_PREFIX}.Internal.${MEMLY_INTERNAL_MODULE_INTERFACE_STEM}")
@@ -953,7 +953,7 @@ add_custom_target(
   VERBATIM
 )
 
-add_subdirectory(program)
+add_subdirectory(source)
 memly_validate_component_import_graph()
 
 get_property(MEMLY_REGISTERED_CXX_FILES GLOBAL PROPERTY MEMLY_REGISTERED_CXX_FILES)
@@ -961,10 +961,10 @@ file(
   GLOB_RECURSE
   MEMLY_AUTHORED_CXX_FILES
   CONFIGURE_DEPENDS
-  "${CMAKE_SOURCE_DIR}/program/*.cpp"
-  "${CMAKE_SOURCE_DIR}/program/*.cppm"
+  "${CMAKE_SOURCE_DIR}/source/*.cpp"
+  "${CMAKE_SOURCE_DIR}/source/*.mpp"
   "${CMAKE_SOURCE_DIR}/test/*.cpp"
-  "${CMAKE_SOURCE_DIR}/test/*.cppm"
+  "${CMAKE_SOURCE_DIR}/test/*.mpp"
 )
 foreach(MEMLY_AUTHORED_CXX_FILE IN LISTS MEMLY_AUTHORED_CXX_FILES)
   if(NOT MEMLY_AUTHORED_CXX_FILE IN_LIST MEMLY_REGISTERED_CXX_FILES)
@@ -1062,7 +1062,7 @@ foreach(MEMLY_CLANG_TIDY_TARGET IN LISTS MEMLY_CLANG_TIDY_TARGETS)
       OUTPUT "${MEMLY_CLANG_TIDY_FILE_STAMP}"
       COMMAND
         "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -p "${MEMLY_CLANG_TIDY_COMPILATION_DATABASE_DIRECTORY}"
-        "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy" "--header-filter=^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet
+        "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy" "--header-filter=^${CMAKE_SOURCE_DIR}/(source|test)/" -quiet
         "${MEMLY_CLANG_TIDY_FILE}"
       COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_CLANG_TIDY_FILE_STAMP}"
       DEPENDS "${MEMLY_CLANG_TIDY_FILE}"
@@ -1115,7 +1115,7 @@ add_custom_target(
     ${MEMLY_CLANG_TIDY_PROFILE_INPUT_ARGUMENTS} -- "${CMAKE_COMMAND}" -E time "${MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE}"
     -j "${MEMLY_CLANG_TIDY_JOBS}" -p "${MEMLY_CLANG_TIDY_COMPILATION_DATABASE_DIRECTORY}" -clang-tidy-binary
     "${MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE}" -config-file "${CMAKE_SOURCE_DIR}/.clang-tidy" -header-filter
-    "^${CMAKE_SOURCE_DIR}/(program|test)/" -quiet -enable-check-profile ${MEMLY_CLANG_TIDY_PROFILE_FILES}
+    "^${CMAKE_SOURCE_DIR}/(source|test)/" -quiet -enable-check-profile ${MEMLY_CLANG_TIDY_PROFILE_FILES}
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMENT "Profile the effective full-tree Clang-Tidy check set"
   USES_TERMINAL VERBATIM

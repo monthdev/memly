@@ -9,7 +9,7 @@
   "files.associations": {
     ".clang-tidy": "yaml",
     ".cmakelintrc": "yaml",
-    "*.cppm": "cpp",
+    "*.mpp": "cpp",
   },
   "clangd.arguments": [
     "--enable-config",
@@ -78,7 +78,7 @@
       "name": "C++ Implementation Units",
       "match": {
         "languages": ["cpp"],
-        "files": ["program/**/*.cpp", "test/**/*.cpp"],
+        "files": ["source/**/*.cpp", "test/**/*.cpp"],
       },
       "onOpen": {
         "strategy": "sequence",
@@ -93,7 +93,7 @@
       "name": "C++ Module Interfaces",
       "match": {
         "languages": ["cpp"],
-        "files": ["program/**/*.cppm", "test/**/*.cppm"],
+        "files": ["source/**/*.mpp", "test/**/*.mpp"],
       },
       "onOpen": {
         "strategy": "sequence",

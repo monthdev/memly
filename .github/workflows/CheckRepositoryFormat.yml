@@ -61,10 +61,10 @@ jobs:
           set -euo pipefail
 
           CXX_PATHS=(
-            ':(glob)program/**/*.cpp'
-            ':(glob)program/**/*.cppm'
+            ':(glob)source/**/*.cpp'
+            ':(glob)source/**/*.mpp'
             ':(glob)test/**/*.cpp'
-            ':(glob)test/**/*.cppm'
+            ':(glob)test/**/*.mpp'
           )
           mapfile -t CONFIG_FILES < <(
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \

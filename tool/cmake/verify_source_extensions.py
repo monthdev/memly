@@ -4,7 +4,7 @@ import pathlib
 import sys
 
 
-ALLOWED_SOURCE_SUFFIXES = frozenset((".cpp", ".cppm"))
+ALLOWED_SOURCE_SUFFIXES = frozenset((".cpp", ".mpp"))
 C_AND_CPP_SOURCE_SUFFIXES = frozenset(
     (
         ".c",
@@ -37,7 +37,7 @@ C_AND_CPP_SOURCE_SUFFIXES = frozenset(
         ".txx",
     )
 )
-MEMLY_SOURCE_DIRECTORY_NAMES = ("program", "test")
+MEMLY_SOURCE_DIRECTORY_NAMES = ("source", "test")
 
 
 def main() -> int:
@@ -59,7 +59,7 @@ def main() -> int:
         return 0
 
     print(
-        "Memly-authored module interfaces must use .cppm and implementation units must use .cpp; "
+        "Memly-authored module interfaces must use .mpp and implementation units must use .cpp; "
         "C, Objective-C, Objective-C++, headers, and alternate C++ source extensions are disallowed:",
         file=sys.stderr,
     )

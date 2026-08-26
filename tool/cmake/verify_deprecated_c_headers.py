@@ -5,7 +5,7 @@ import re
 import sys
 
 
-CPP_SOURCE_SUFFIXES = frozenset((".cpp", ".cppm"))
+CPP_SOURCE_SUFFIXES = frozenset((".cpp", ".mpp"))
 DEPRECATED_C_HEADER_REPLACEMENTS = {
     "assert.h": "cassert",
     "complex.h": "complex",
@@ -32,7 +32,7 @@ DEPRECATED_C_HEADER_REPLACEMENTS = {
     "wctype.h": "cwctype",
 }
 REDUNDANT_C_HEADERS = frozenset(("iso646.h", "stdalign.h", "stdbool.h"))
-MEMLY_SOURCE_DIRECTORY_NAMES = ("program", "test")
+MEMLY_SOURCE_DIRECTORY_NAMES = ("source", "test")
 PREPROCESSOR_DIRECTIVE_START_PATTERN = re.compile(r"^[ \t]*#")
 INCLUDE_DIRECTIVE_PATTERN = re.compile(r"^[ \t]*#[ \t]*include\b(?P<operand>.*)$")
 HEADER_LITERAL_PATTERN = re.compile(

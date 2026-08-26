@@ -7,7 +7,7 @@ Diagnostics:
     FastCheckFilter: None
 ---
 If:
-  PathExclude: (program|test)/.*
+  PathExclude: (source|test)/.*
 
 CompileFlags:
   Remove: [-W*, -pedantic, /W*, /clang:-W*, /clang:-pedantic]
