@@ -278,8 +278,8 @@ matching `Memly` namespace (`custom-memly-unnamed-namespace-nesting`).
 
 Spell each interface's exact named module as its component namespace path with
 `::` replaced by `.`, followed by the interface file stem. For example,
-`DatabaseRuntime.mpp` in `Memly::Database` declares
-`Memly.Database.DatabaseRuntime`; `_MigrationSql.mpp` below `module/Internal/`
+`DatabaseRuntime.cppm` in `Memly::Database` declares
+`Memly.Database.DatabaseRuntime`; `_MigrationSql.cppm` below `module/Internal/`
 declares `Memly.Database.Internal.MigrationSql`. Prefix every owner-only module
 interface and corresponding implementation filename with `_`; the physical
 marker does not enter the named module. Do not carry other physical
@@ -292,7 +292,7 @@ unnamed-namespace type retain ordinary member names
 (`custom-memly-unnamed-namespace-declaration-prefix`). Reserve `u_` for that
 scope (`custom-memly-unnamed-namespace-prefix-reserved`).
 
-Declare every class, struct, union, enum, typedef, and type alias in a `.mpp`,
+Declare every class, struct, union, enum, typedef, and type alias in a `.cppm`,
 including target-private and PImpl definitions
 (`custom-memly-no-type-declaration-in-implementation-file`). Place each unnamed
 block before its earliest consumer; split blocks when first consumers differ.
@@ -346,10 +346,10 @@ Order globs and target sources by source-tree order.
 Collocate each externally importable module interface and its corresponding
 implementation unit directly under `module/`. Store owner-only module pairs and
 target-private inputs under `module/Internal/`; SQL belongs below
-`module/Internal/Sql/`. Use only `.mpp` for Memly-authored module interfaces and
-`.cpp` for implementation units. Do not add textual C++ headers, C, Objective-C,
-Objective-C++, or alternate C++ source extensions under `source/` or `test/`
-(`memly_get_module_interface_metadata()`,
+`module/Internal/Sql/`. Use only `.cppm` for Memly-authored module interfaces
+and `.cpp` for implementation units. Do not add textual C++ headers, C,
+Objective-C, Objective-C++, or alternate C++ source extensions under `source/`
+or `test/` (`memly_get_module_interface_metadata()`,
 `memly_validate_module_implementation()`,
 `tool/cmake/verify_source_extensions.py`).
 

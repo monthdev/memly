@@ -5,7 +5,7 @@ import re
 import sys
 
 
-CPP_SOURCE_SUFFIXES = frozenset((".cpp", ".mpp"))
+CPP_SOURCE_SUFFIXES = frozenset((".cpp", ".cppm"))
 DEPRECATED_C_HEADER_REPLACEMENTS = {
     "assert.h": "cassert",
     "complex.h": "complex",

@@ -8,7 +8,7 @@ set and process count.
 ## Baseline Scope
 
 The mandatory gate analyzes every implementation unit and every exported or
-private exact named-module interface. Each `.mpp` owns its declarations; the
+private exact named-module interface. Each `.cppm` owns its declarations; the
 project has no primary routing interfaces or module partitions.
 
 The gate creates one stamp per lint input for scheduling and progress. A stamp
@@ -28,14 +28,14 @@ The 2026-08-22 exact-module conversion retained the same 89 declaration-bearing
 lint inputs while removing the umbrella-induced BMI closure. Representative
 module-map entries changed as follows:
 
-| Input                    | Umbrella and partitions | Exact named modules |
-| ------------------------ | ----------------------: | ------------------: |
-| `DeckService.cpp`        |                      41 |                  17 |
-| `DeckService.mpp`        |                      37 |                  15 |
-| `DatabaseRuntime.cpp`    |                      14 |                   8 |
-| `DatabaseRuntime.mpp`    |                       6 |                   6 |
-| `ApplicationRuntime.mpp` |                      41 |                  16 |
-| `main.cpp`               |                      46 |                  19 |
+| Input                     | Umbrella and partitions | Exact named modules |
+| ------------------------- | ----------------------: | ------------------: |
+| `DeckService.cpp`         |                      41 |                  17 |
+| `DeckService.cppm`        |                      37 |                  15 |
+| `DatabaseRuntime.cpp`     |                      14 |                   8 |
+| `DatabaseRuntime.cppm`    |                       6 |                   6 |
+| `ApplicationRuntime.cppm` |                      41 |                  16 |
+| `main.cpp`                |                      46 |                  19 |
 
 This measures semantic fanout, not resident memory. It establishes that leaf
 analysis no longer receives every sibling BMI merely because it imports one
@@ -188,7 +188,7 @@ outliers. A main-file custom AST check rejects every Memly-authored `typedef`
 while ignoring declarations originating in imported third-party headers. It does
 not reject `using` type aliases or code that names or instantiates an alias; the
 replaced check never governed those uses. A linear repository verifier checks a
-selected authored `.cpp` or `.mpp` for the complete deprecated and redundant C
+selected authored `.cpp` or `.cppm` for the complete deprecated and redundant C
 compatibility-header set. CMake assigns each eligible file its own mandatory
 incremental build stamp, so a source edit reruns the verifier only for that
 file. The verifier rejects macro-expanded and line-spliced include operands

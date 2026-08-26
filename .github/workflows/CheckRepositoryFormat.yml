@@ -62,9 +62,9 @@ jobs:
 
           CXX_PATHS=(
             ':(glob)source/**/*.cpp'
-            ':(glob)source/**/*.mpp'
+            ':(glob)source/**/*.cppm'
             ':(glob)test/**/*.cpp'
-            ':(glob)test/**/*.mpp'
+            ':(glob)test/**/*.cppm'
           )
           mapfile -t CONFIG_FILES < <(
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \

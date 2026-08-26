@@ -334,7 +334,7 @@ CustomChecks:
       match functionDecl( isDefinition(), unless(isImplicit()), unless(isDeleted()), unless(isDefaulted()), unless(isTemplateInstantiation()),
       unless(isExpansionInSystemHeader()), unless(cxxConstructorDecl()), unless( cxxMethodDecl( ofClass( cxxRecordDecl(isLambda()) ) ) ),
       unless(hasAncestor(functionTemplateDecl())), unless(hasAncestor(classTemplateDecl())), unless(hasAncestor(classTemplatePartialSpecializationDecl())),
-      isExpansionInFileMatching("[/\\\\](source|test)[/\\\\].*[.]mpp$") ).bind("function")
+      isExpansionInFileMatching("[/\\\\](source|test)[/\\\\].*[.]cppm$") ).bind("function")
     Diagnostic:
       - BindName: function
         Message: ordinary non-template function definitions must remain in .cpp implementation units
@@ -414,7 +414,7 @@ CustomChecks:
       ).bind("type_declaration")
     Diagnostic:
       - BindName: type_declaration
-        Message: type declarations must appear in .mpp module interface units
+        Message: type declarations must appear in .cppm module interface units
         Level: Warning
   - Name: memly-no-typedef
     Query: >-

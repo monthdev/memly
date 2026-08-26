@@ -109,7 +109,7 @@ QmlFormatExecutable="$RequiredExecutablePath"
 RequireExecutable sql-formatter 15.8.2 --version 15.8.2
 SqlFormatterExecutable="$RequiredExecutablePath"
 
-CollectExistingFiles C++ ':(glob)source/**/*.cpp' ':(glob)source/**/*.mpp' ':(glob)test/**/*.cpp' ':(glob)test/**/*.mpp'
+CollectExistingFiles C++ ':(glob)source/**/*.cpp' ':(glob)source/**/*.cppm' ':(glob)test/**/*.cpp' ':(glob)test/**/*.cppm'
 FormatFileArrayWithOutput C++ "$ClangFormatExecutable" -style=file
 
 CollectExistingFiles CMake 'CMakeLists.txt' ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(glob)**/*.cmake.in'
