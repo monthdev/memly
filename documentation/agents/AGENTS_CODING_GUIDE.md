@@ -360,6 +360,10 @@ directories from their nearest owner, and register modules and component
 dependencies through `memly_add_component()` and
 `memly_link_component_dependencies()`.
 
+Treat an explicitly configured `ICU_ROOT` as authoritative. Every discovered ICU
+include directory and library must resolve below that root
+(`memly_validate_explicit_icu_root()`).
+
 Map every named module owned by one component to one static component target.
 Put public module interfaces in its public `CXX_MODULES` file set and internal
 module interfaces in its private `CXX_MODULES` file set. Do not add primary

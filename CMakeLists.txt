@@ -186,8 +186,33 @@ endif()
 
 set(MEMLY_QT_MIN_VERSION 6.11)
 
+# Ensures an explicitly selected ICU installation supplies every discovered header and library.
+function(memly_validate_explicit_icu_root)
+  if(NOT ICU_ROOT)
+    return()
+  endif()
+
+  get_filename_component(MEMLY_ICU_ROOT_REAL_PATH "${ICU_ROOT}" REALPATH)
+  set(MEMLY_ICU_DISCOVERED_PATHS ${ICU_INCLUDE_DIRS} ${ICU_LIBRARIES})
+  list(FILTER MEMLY_ICU_DISCOVERED_PATHS EXCLUDE REGEX "^(debug|general|optimized)$")
+  list(REMOVE_DUPLICATES MEMLY_ICU_DISCOVERED_PATHS)
+  foreach(MEMLY_ICU_DISCOVERED_PATH IN LISTS MEMLY_ICU_DISCOVERED_PATHS)
+    get_filename_component(MEMLY_ICU_DISCOVERED_REAL_PATH "${MEMLY_ICU_DISCOVERED_PATH}" REALPATH)
+    cmake_path(
+      IS_PREFIX MEMLY_ICU_ROOT_REAL_PATH "${MEMLY_ICU_DISCOVERED_REAL_PATH}" NORMALIZE
+      MEMLY_ICU_DISCOVERED_PATH_IS_WITHIN_ROOT
+    )
+    if(NOT MEMLY_ICU_DISCOVERED_PATH_IS_WITHIN_ROOT)
+      message(FATAL_ERROR "ICU discovery resolved ${MEMLY_ICU_DISCOVERED_REAL_PATH} outside explicit ICU_ROOT "
+                          "${MEMLY_ICU_ROOT_REAL_PATH}"
+      )
+    endif()
+  endforeach()
+endfunction()
+
 find_package(Qt6 ${MEMLY_QT_MIN_VERSION} REQUIRED COMPONENTS Core Qml Quick)
 find_package(ICU REQUIRED COMPONENTS uc i18n)
+memly_validate_explicit_icu_root()
 qt_standard_project_setup(REQUIRES ${MEMLY_QT_MIN_VERSION})
 
 find_package(Doxygen QUIET)
