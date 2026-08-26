@@ -1,6 +1,7 @@
 *.c
 *.cc
 *.cpp
+*.mpp
 *.cxx
 *.h
 *.hh

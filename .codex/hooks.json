@@ -1,13 +1,13 @@
 {
-  "description": "Format and lint the repository and require a successful integrity build before Codex completes a turn.",
+  "description": "Require repository formatting, agents-documentation policy, and lint/build/test integrity before Codex completes a turn.",
   "hooks": {
     "Stop": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel)\" && bash .codex/hooks/verify-project-integrity.sh",
-            "statusMessage": "Verifying Memly project integrity"
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && bash .codex/hooks/check_repository_format.sh --write && bash .codex/hooks/check_agents_documentation.sh && bash .codex/hooks/lint_build_test_project.sh",
+            "statusMessage": "Checking Memly formatting, agents documentation, and project integrity"
           }
         ]
       }

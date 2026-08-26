@@ -1,16 +1,15 @@
 {
   "cmake.configureOnOpen": true,
-  "cmake.configureOnEdit": true,
+  "cmake.configureOnEdit": false,
   "cmake.saveBeforeBuild": true,
   "cmake.sourceDirectory": "${workspaceFolder}",
   "cmake.useCMakePresets": "always",
-  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 1000,
   "files.associations": {
     ".clang-tidy": "yaml",
     ".cmakelintrc": "yaml",
-    ".iwyu.imp": "json",
+    "*.mpp": "cpp",
   },
   "clangd.arguments": [
     "--enable-config",
@@ -22,6 +21,8 @@
   "SQL-Formatter-VSCode.insertSpacesOverride": true,
   "qt-qml.qmlls.useNoCMakeCalls": true,
   "lintRunner.respectGitignore": true,
+  "prettier.requireConfig": true,
+  "prettier.resolveGlobalModules": true,
   "lintRunner.tools": {
     "clang-tidy": {
       "kind": "diagnostic",
@@ -31,7 +32,7 @@
         "--experimental-custom-checks",
         "--quiet",
         "--config-file=${workspaceFolder}/.clang-tidy",
-        "--checks=-*,custom-memly-*",
+        "--checks=-*,custom-memly-*,misc-include-cleaner",
         "--header-filter=^$",
         "-p",
         "${workspaceFolder}",
@@ -41,24 +42,6 @@
       "timeout": 120000,
       "parser": {
         "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)(?:\\s+\\[(?<code>[^\\]]+)\\])?$",
-        "flags": "gm",
-        "defaultSeverity": "warning",
-      },
-    },
-    "include-what-you-use": {
-      "kind": "diagnostic",
-      "command": "python3",
-      "cwd": "${workspaceFolder}",
-      "args": [
-        "${workspaceFolder}/tool/run_include_what_you_use.py",
-        "${workspaceFolder}/compile_commands.json",
-        "${workspaceFolder}/.iwyu.imp",
-        "${file}",
-      ],
-      "successExitCodes": [0, 1],
-      "timeout": 120000,
-      "parser": {
-        "pattern": "^.*?:(?<line>\\d+):(?<col>\\d+):\\s+(?<severity>warning|error|fatal|note)(?: error)?:\\s+(?<message>.*?)$",
         "flags": "gm",
         "defaultSeverity": "warning",
       },
@@ -89,21 +72,13 @@
       "successExitCodes": [0],
       "timeout": 120000,
     },
-    "prettier": {
-      "kind": "write",
-      "command": "prettier",
-      "cwd": "${workspaceFolder}",
-      "args": ["--write", "--ignore-unknown", "--log-level", "warn", "${file}"],
-      "successExitCodes": [0],
-      "timeout": 120000,
-    },
   },
   "lintRunner.targets": [
     {
-      "name": "C++ Sources",
+      "name": "C++ Implementation Units",
       "match": {
         "languages": ["cpp"],
-        "files": ["program/**/*.cpp", "test/**/*.cpp"],
+        "files": ["source/**/*.cpp", "test/**/*.cpp"],
       },
       "onOpen": {
         "strategy": "sequence",
@@ -115,18 +90,18 @@
       },
     },
     {
-      "name": "C++ Headers",
+      "name": "C++ Module Interfaces",
       "match": {
         "languages": ["cpp"],
-        "files": ["program/**/*.hpp", "test/**/*.hpp"],
+        "files": ["source/**/*.mpp", "test/**/*.mpp"],
       },
       "onOpen": {
         "strategy": "sequence",
-        "tools": ["clang-tidy", "include-what-you-use"],
+        "tools": ["clang-tidy"],
       },
       "manual": {
         "strategy": "sequence",
-        "tools": ["clang-tidy", "include-what-you-use"],
+        "tools": ["clang-tidy"],
       },
     },
     {
@@ -148,27 +123,6 @@
         "tools": ["cmake-format", "cmake-lint"],
       },
     },
-    {
-      "name": "Prettier",
-      "match": {
-        "languages": [
-          "github-actions-workflow",
-          "json",
-          "jsonc",
-          "markdown",
-          "yaml",
-        ],
-        "files": ["**/*"],
-      },
-      "onSave": {
-        "strategy": "sequence",
-        "tools": ["prettier"],
-      },
-      "manual": {
-        "strategy": "sequence",
-        "tools": ["prettier"],
-      },
-    },
   ],
   "[cmake]": {
     "editor.formatOnSave": false,
@@ -178,16 +132,20 @@
     "editor.formatOnSave": true,
   },
   "[github-actions-workflow]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
   "[json]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
   "[jsonc]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
   "[markdown]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
   "[qml]": {
     "editor.defaultFormatter": "theqtcompany.qt-qml",
@@ -198,6 +156,7 @@
     "editor.formatOnSave": true,
   },
   "[yaml]": {
-    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
   },
 }

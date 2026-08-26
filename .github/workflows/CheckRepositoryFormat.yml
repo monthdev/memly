@@ -32,10 +32,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Enforce source extensions
-        shell: bash
-        run: python3 tool/verify_source_extensions.py "$GITHUB_WORKSPACE"
-
       - name: Determine comparison base
         id: comparison
         env:
@@ -65,10 +61,10 @@ jobs:
           set -euo pipefail
 
           CXX_PATHS=(
-            ':(glob)program/**/*.cpp'
-            ':(glob)program/**/*.hpp'
+            ':(glob)source/**/*.cpp'
+            ':(glob)source/**/*.mpp'
             ':(glob)test/**/*.cpp'
-            ':(glob)test/**/*.hpp'
+            ':(glob)test/**/*.mpp'
           )
           mapfile -t CONFIG_FILES < <(
             git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
