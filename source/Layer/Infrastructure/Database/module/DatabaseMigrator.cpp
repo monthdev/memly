@@ -21,10 +21,11 @@ module;
 module Memly.Database.DatabaseMigrator;
 
 import Memly.Database.DatabaseRuntime;
-import Memly.Database.Internal.MigrationSql;
-import Memly.Database.Internal.ThrowOnDatabaseError;
 import Memly.Database.TransactionRunner;
 import Memly.Exception.MemlyException;
+
+import Memly.Database.Internal.MigrationSql;
+import Memly.Database.Internal.ThrowOnDatabaseError;
 
 namespace Memly::Database {
 

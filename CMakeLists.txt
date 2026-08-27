@@ -171,27 +171,106 @@ set_property(GLOBAL APPEND PROPERTY JOB_POOLS "memly_clang_tidy=${MEMLY_CLANG_TI
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 set(MEMLY_CMAKE_TOOL_DIRECTORY "${CMAKE_SOURCE_DIR}/tool/cmake")
+set(MEMLY_DEPRECATED_C_HEADER_VERIFIER "${MEMLY_CMAKE_TOOL_DIRECTORY}/verify_deprecated_c_headers.py")
+set(MEMLY_TIMING_SCRIPT "${MEMLY_CMAKE_TOOL_DIRECTORY}/report_elapsed_time.cmake")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${MEMLY_DEPRECATED_C_HEADER_VERIFIER}")
+include("${MEMLY_TIMING_SCRIPT}")
 
-# Runs a lint/build source verifier during configuration and tracks changes to its implementation.
-function(memly_run_source_verifier MEMLY_VERIFIER_FILE_NAME)
-  set(MEMLY_VERIFIER_PATH "${MEMLY_CMAKE_TOOL_DIRECTORY}/${MEMLY_VERIFIER_FILE_NAME}")
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${MEMLY_VERIFIER_PATH}")
-  execute_process(
-    COMMAND "${Python3_EXECUTABLE}" "${MEMLY_VERIFIER_PATH}" "${CMAKE_SOURCE_DIR}"
-    RESULT_VARIABLE MEMLY_VERIFIER_RESULT
-    ERROR_VARIABLE MEMLY_VERIFIER_ERROR
-    ERROR_STRIP_TRAILING_WHITESPACE
-  )
-  if(NOT MEMLY_VERIFIER_RESULT EQUAL 0)
-    message(FATAL_ERROR "${MEMLY_VERIFIER_ERROR}")
+# Adds one configure-time policy check's duration to the reported aggregate.
+function(memly_accumulate_configuration_check_time MEMLY_CHECK_START_MICROSECONDS)
+  memly_get_time_microseconds(MEMLY_CHECK_END_MICROSECONDS)
+  math(EXPR MEMLY_CHECK_ELAPSED_MICROSECONDS "${MEMLY_CHECK_END_MICROSECONDS} - ${MEMLY_CHECK_START_MICROSECONDS}")
+  get_property(MEMLY_CONFIGURATION_CHECK_MICROSECONDS GLOBAL PROPERTY MEMLY_CONFIGURATION_CHECK_MICROSECONDS)
+  if(NOT MEMLY_CONFIGURATION_CHECK_MICROSECONDS)
+    set(MEMLY_CONFIGURATION_CHECK_MICROSECONDS 0)
   endif()
+  math(EXPR MEMLY_CONFIGURATION_CHECK_MICROSECONDS
+       "${MEMLY_CONFIGURATION_CHECK_MICROSECONDS} + ${MEMLY_CHECK_ELAPSED_MICROSECONDS}"
+  )
+  set_property(GLOBAL PROPERTY MEMLY_CONFIGURATION_CHECK_MICROSECONDS "${MEMLY_CONFIGURATION_CHECK_MICROSECONDS}")
 endfunction()
 
-# Makes authored-file additions, removals, and renames rerun the source-extension verifier.
-file(GLOB_RECURSE MEMLY_SOURCE_POLICY_CHANGE_TRACKING_PATHS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/source/*"
-     "${CMAKE_SOURCE_DIR}/test/*"
-)
-memly_run_source_verifier(verify_source_extensions.py)
+# Rejects nonliteral includes and deprecated or redundant C compatibility headers.
+function(memly_verify_header_includes)
+  memly_get_time_microseconds(MEMLY_HEADER_INCLUDE_CHECK_START_MICROSECONDS)
+  execute_process(
+    COMMAND "${Python3_EXECUTABLE}" "${MEMLY_DEPRECATED_C_HEADER_VERIFIER}" "${CMAKE_SOURCE_DIR}" ${ARGN}
+    RESULT_VARIABLE MEMLY_HEADER_INCLUDE_VERIFICATION_RESULT
+    ERROR_VARIABLE MEMLY_HEADER_INCLUDE_VERIFICATION_ERROR
+    ERROR_STRIP_TRAILING_WHITESPACE
+  )
+  if(NOT MEMLY_HEADER_INCLUDE_VERIFICATION_RESULT EQUAL 0)
+    message(FATAL_ERROR "${MEMLY_HEADER_INCLUDE_VERIFICATION_ERROR}")
+  endif()
+  memly_accumulate_configuration_check_time("${MEMLY_HEADER_INCLUDE_CHECK_START_MICROSECONDS}")
+endfunction()
+
+# Rejects Memly-authored C, header, Objective-C, and alternate C++ source extensions.
+function(memly_verify_source_extensions)
+  memly_get_time_microseconds(MEMLY_SOURCE_EXTENSION_CHECK_START_MICROSECONDS)
+  set(MEMLY_ALLOWED_SOURCE_EXTENSIONS .cpp .cppm)
+  set(MEMLY_C_AND_CPP_SOURCE_EXTENSIONS
+      .c
+      .c++
+      .c++m
+      .cc
+      .ccm
+      .cp
+      .cpp
+      .cppm
+      .cu
+      .cuh
+      .cxx
+      .cxxm
+      .h
+      .h++
+      .hh
+      .hp
+      .hpp
+      .hxx
+      .ii
+      .inc
+      .inl
+      .ipp
+      .ixx
+      .m
+      .mm
+      .mpp
+      .tcc
+      .tpp
+      .txx
+  )
+  set(MEMLY_INVALID_SOURCE_PATHS)
+  foreach(MEMLY_SOURCE_PATH IN LISTS ARGN)
+    cmake_path(GET MEMLY_SOURCE_PATH EXTENSION LAST_ONLY MEMLY_SOURCE_EXTENSION)
+    string(TOLOWER "${MEMLY_SOURCE_EXTENSION}" MEMLY_LOWERCASE_SOURCE_EXTENSION)
+    if(MEMLY_LOWERCASE_SOURCE_EXTENSION IN_LIST MEMLY_C_AND_CPP_SOURCE_EXTENSIONS
+       AND NOT MEMLY_SOURCE_EXTENSION IN_LIST MEMLY_ALLOWED_SOURCE_EXTENSIONS
+    )
+      cmake_path(
+        RELATIVE_PATH MEMLY_SOURCE_PATH BASE_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE MEMLY_RELATIVE_SOURCE_PATH
+      )
+      list(APPEND MEMLY_INVALID_SOURCE_PATHS "${MEMLY_RELATIVE_SOURCE_PATH}")
+    endif()
+  endforeach()
+  if(MEMLY_INVALID_SOURCE_PATHS)
+    list(SORT MEMLY_INVALID_SOURCE_PATHS)
+    list(JOIN MEMLY_INVALID_SOURCE_PATHS "\n  " MEMLY_INVALID_SOURCE_PATH_LIST)
+    message(
+      FATAL_ERROR
+        "Memly-authored module interfaces must use .cppm and implementation units must use .cpp; C, headers, "
+        "Objective-C, Objective-C++, and alternate C++ source extensions are disallowed:\n  "
+        "${MEMLY_INVALID_SOURCE_PATH_LIST}"
+    )
+  endif()
+  memly_accumulate_configuration_check_time("${MEMLY_SOURCE_EXTENSION_CHECK_START_MICROSECONDS}")
+endfunction()
+
+# Makes authored-file additions, removals, and renames rerun the native source-policy checks.
+file(GLOB_RECURSE MEMLY_SOURCE_POLICY_PATHS CONFIGURE_DEPENDS LIST_DIRECTORIES false "${CMAKE_SOURCE_DIR}/source/*")
+file(GLOB_RECURSE MEMLY_TEST_POLICY_PATHS CONFIGURE_DEPENDS LIST_DIRECTORIES false "${CMAKE_SOURCE_DIR}/test/*")
+set(MEMLY_SOURCE_POLICY_CHANGE_TRACKING_PATHS ${MEMLY_SOURCE_POLICY_PATHS} ${MEMLY_TEST_POLICY_PATHS})
+memly_verify_source_extensions(${MEMLY_SOURCE_POLICY_CHANGE_TRACKING_PATHS})
 
 if(WIN32)
   set(MEMLY_LLVM_CLANG_TIDY_WRAPPER_EXECUTABLE "${CMAKE_BINARY_DIR}/memly-clang-tidy-driver.cmd")
@@ -391,6 +470,7 @@ function(memly_configure_authored_cxx_files MEMLY_TARGET)
       PROPERTY COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CXX,Clang>:${MEMLY_CLANG_WARNING_OPTION}>"
     )
   endforeach()
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${ARGN})
   set_property(GLOBAL APPEND PROPERTY MEMLY_REGISTERED_CXX_FILES ${ARGN})
   set_property(TARGET "${MEMLY_TARGET}" APPEND PROPERTY MEMLY_AUTHORED_CXX_FILES ${ARGN})
 endfunction()
@@ -418,17 +498,7 @@ function(memly_get_module_interface_metadata MEMLY_MODULE_NAME_OUTPUT MEMLY_MODU
     )
   endif()
 
-  file(STRINGS "${MEMLY_MODULE_INTERFACE}" MEMLY_MODULE_DECLARATION_LINES
-       REGEX "^[ \t]*export[ \t]+module[ \t]+Memly([.][A-Za-z_][A-Za-z0-9_]*)+[ \t]*;"
-  )
-  list(LENGTH MEMLY_MODULE_DECLARATION_LINES MEMLY_MODULE_DECLARATION_COUNT)
-  if(NOT MEMLY_MODULE_DECLARATION_COUNT EQUAL 1)
-    message(FATAL_ERROR "Memly module interface ${MEMLY_MODULE_INTERFACE} must declare exactly one named module")
-  endif()
-  list(GET MEMLY_MODULE_DECLARATION_LINES 0 MEMLY_MODULE_DECLARATION_LINE)
-  string(REGEX REPLACE "^[ \t]*export[ \t]+module[ \t]+([^ \t;]+)[ \t]*;.*$" "\\1" MEMLY_MODULE_NAME
-                       "${MEMLY_MODULE_DECLARATION_LINE}"
-  )
+  memly_validate_module_unit_structure(MEMLY_MODULE_NAME "${MEMLY_MODULE_INTERFACE}" INTERFACE)
   if(NOT MEMLY_MODULE_NAME STREQUAL MEMLY_EXPECTED_MODULE_NAME)
     message(FATAL_ERROR "Memly interface ${MEMLY_MODULE_INTERFACE} must declare ${MEMLY_EXPECTED_MODULE_NAME}, not "
                         "${MEMLY_MODULE_NAME}"
@@ -464,17 +534,7 @@ function(memly_validate_module_implementation MEMLY_COMPONENT_TARGET MEMLY_MODUL
   if(NOT MEMLY_MODULE_SOURCE MATCHES "[.]cpp$")
     message(FATAL_ERROR "Memly module implementation must use .cpp: ${MEMLY_MODULE_SOURCE}")
   endif()
-  file(STRINGS "${MEMLY_MODULE_SOURCE}" MEMLY_MODULE_DECLARATION_LINES
-       REGEX "^[ \t]*module[ \t]+Memly([.][A-Za-z_][A-Za-z0-9_]*)+[ \t]*;"
-  )
-  list(LENGTH MEMLY_MODULE_DECLARATION_LINES MEMLY_MODULE_DECLARATION_COUNT)
-  if(NOT MEMLY_MODULE_DECLARATION_COUNT EQUAL 1)
-    message(FATAL_ERROR "Memly implementation ${MEMLY_MODULE_SOURCE} must declare exactly one named module")
-  endif()
-  list(GET MEMLY_MODULE_DECLARATION_LINES 0 MEMLY_MODULE_DECLARATION_LINE)
-  string(REGEX REPLACE "^[ \t]*module[ \t]+([^ \t;]+)[ \t]*;.*$" "\\1" MEMLY_MODULE_NAME
-                       "${MEMLY_MODULE_DECLARATION_LINE}"
-  )
+  memly_validate_module_unit_structure(MEMLY_MODULE_NAME "${MEMLY_MODULE_SOURCE}" IMPLEMENTATION)
   memly_get_module_provider(MEMLY_PROVIDER_TARGET MEMLY_MODULE_VISIBILITY MEMLY_MODULE_INTERFACE "${MEMLY_MODULE_NAME}")
   if(NOT MEMLY_PROVIDER_TARGET STREQUAL MEMLY_COMPONENT_TARGET)
     message(FATAL_ERROR "Memly implementation ${MEMLY_MODULE_SOURCE} belongs to ${MEMLY_MODULE_NAME}, which is "
@@ -503,8 +563,8 @@ function(memly_validate_module_implementation MEMLY_COMPONENT_TARGET MEMLY_MODUL
   endif()
 endfunction()
 
-# Pushes one preprocessor condition onto a Memly import scan.
-function(memly_push_import_scan_condition MEMLY_CONDITION_STATE)
+# Pushes one preprocessor condition onto a Memly module scan.
+function(memly_push_module_scan_condition MEMLY_CONDITION_STATE)
   list(APPEND MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK "${MEMLY_PREPROCESSOR_BRANCH_ACTIVE}")
   list(APPEND MEMLY_PREPROCESSOR_CONDITION_STATE_STACK "${MEMLY_CONDITION_STATE}")
   if(MEMLY_CONDITION_STATE STREQUAL "ALWAYS_SKIPPED")
@@ -516,7 +576,7 @@ function(memly_push_import_scan_condition MEMLY_CONDITION_STATE)
 endfunction()
 
 # Selects an elif or else branch while conservatively scanning unknown conditions.
-function(memly_select_import_scan_alternative MEMLY_IMPORTER_FILE MEMLY_IMPORTER_LINE MEMLY_ALTERNATIVE_KIND)
+function(memly_select_module_scan_alternative MEMLY_IMPORTER_FILE MEMLY_IMPORTER_LINE MEMLY_ALTERNATIVE_KIND)
   list(LENGTH MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK MEMLY_PREPROCESSOR_NESTING_DEPTH)
   if(MEMLY_PREPROCESSOR_NESTING_DEPTH EQUAL 0)
     message(FATAL_ERROR "Unmatched #${MEMLY_ALTERNATIVE_KIND} in Memly source: ${MEMLY_IMPORTER_FILE}")
@@ -548,8 +608,8 @@ function(memly_select_import_scan_alternative MEMLY_IMPORTER_FILE MEMLY_IMPORTER
   set(MEMLY_PREPROCESSOR_BRANCH_ACTIVE "${MEMLY_BRANCH_ACTIVE}" PARENT_SCOPE)
 endfunction()
 
-# Pops one completed preprocessor condition from a Memly import scan.
-function(memly_pop_import_scan_condition MEMLY_IMPORTER_FILE)
+# Pops one completed preprocessor condition from a Memly module scan.
+function(memly_pop_module_scan_condition MEMLY_IMPORTER_FILE)
   list(LENGTH MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK MEMLY_PREPROCESSOR_NESTING_DEPTH)
   if(MEMLY_PREPROCESSOR_NESTING_DEPTH EQUAL 0)
     message(FATAL_ERROR "Unmatched #endif in Memly source: ${MEMLY_IMPORTER_FILE}")
@@ -561,44 +621,380 @@ function(memly_pop_import_scan_condition MEMLY_IMPORTER_FILE)
   set(MEMLY_PREPROCESSOR_BRANCH_ACTIVE "${MEMLY_PREPROCESSOR_BRANCH_ACTIVE}" PARENT_SCOPE)
 endfunction()
 
-# Reads the exact Memly named modules that can be active in one authored translation unit.
-function(memly_read_imported_module_names MEMLY_OUTPUT_VARIABLE MEMLY_IMPORTER_FILE)
-  file(STRINGS "${MEMLY_IMPORTER_FILE}" MEMLY_IMPORTER_LINES)
-  set(MEMLY_IMPORTED_MODULE_NAMES)
-  set(MEMLY_PREPROCESSOR_BRANCH_ACTIVE TRUE)
-  set(MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK)
-  set(MEMLY_PREPROCESSOR_CONDITION_STATE_STACK)
-  foreach(MEMLY_IMPORTER_LINE IN LISTS MEMLY_IMPORTER_LINES)
-    string(STRIP "${MEMLY_IMPORTER_LINE}" MEMLY_STRIPPED_IMPORTER_LINE)
-    if(MEMLY_STRIPPED_IMPORTER_LINE MATCHES "^#[ \t]*if[ \t]+0([ \t]|$)")
-      set(MEMLY_CONDITION_STATE "ALWAYS_SKIPPED")
-    elseif(MEMLY_STRIPPED_IMPORTER_LINE MATCHES "^#[ \t]*if[ \t]+1([ \t]|$)")
-      set(MEMLY_CONDITION_STATE "ALWAYS_TAKEN")
-    elseif(MEMLY_STRIPPED_IMPORTER_LINE MATCHES "^#[ \t]*(if|ifdef|ifndef)([ \t]|$)")
-      set(MEMLY_CONDITION_STATE "CONDITIONAL")
-    elseif(MEMLY_STRIPPED_IMPORTER_LINE MATCHES "^#[ \t]*elif([ \t]|$)")
-      memly_select_import_scan_alternative("${MEMLY_IMPORTER_FILE}" "${MEMLY_STRIPPED_IMPORTER_LINE}" elif)
-      continue()
-    elseif(MEMLY_STRIPPED_IMPORTER_LINE MATCHES "^#[ \t]*else([ \t]|$)")
-      memly_select_import_scan_alternative("${MEMLY_IMPORTER_FILE}" "${MEMLY_STRIPPED_IMPORTER_LINE}" else)
-      continue()
-    elseif(MEMLY_STRIPPED_IMPORTER_LINE MATCHES "^#[ \t]*endif([ \t]|$)")
-      memly_pop_import_scan_condition("${MEMLY_IMPORTER_FILE}")
-      continue()
-    elseif(MEMLY_PREPROCESSOR_BRANCH_ACTIVE AND MEMLY_STRIPPED_IMPORTER_LINE MATCHES
-                                                "^(export[ \t]+)?import[ \t]+(Memly[.][A-Za-z0-9_.]+)[ \t]*;"
-    )
-      list(APPEND MEMLY_IMPORTED_MODULE_NAMES "${CMAKE_MATCH_2}")
-      continue()
+# Removes comments while retaining whether a block comment continues onto the next source line.
+function(memly_strip_module_scan_comments MEMLY_LINE_OUTPUT MEMLY_BLOCK_COMMENT_OUTPUT MEMLY_SOURCE_LINE
+         MEMLY_BLOCK_COMMENT_ACTIVE
+)
+  set(MEMLY_STRUCTURAL_MODULE_LINE "${MEMLY_SOURCE_LINE}")
+  if(MEMLY_BLOCK_COMMENT_ACTIVE)
+    if(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "[*]/")
+      string(REGEX REPLACE "^.*[*]/" "" MEMLY_STRUCTURAL_MODULE_LINE "${MEMLY_STRUCTURAL_MODULE_LINE}")
+      set(MEMLY_BLOCK_COMMENT_ACTIVE FALSE)
     else()
+      set(MEMLY_STRUCTURAL_MODULE_LINE)
+    endif()
+  endif()
+  while(NOT MEMLY_BLOCK_COMMENT_ACTIVE AND MEMLY_STRUCTURAL_MODULE_LINE MATCHES "/[*]")
+    if(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "/[*].*[*]/")
+      string(REGEX REPLACE "/[*].*[*]/" "" MEMLY_STRUCTURAL_MODULE_LINE "${MEMLY_STRUCTURAL_MODULE_LINE}")
+    else()
+      string(REGEX REPLACE "/[*].*$" "" MEMLY_STRUCTURAL_MODULE_LINE "${MEMLY_STRUCTURAL_MODULE_LINE}")
+      set(MEMLY_BLOCK_COMMENT_ACTIVE TRUE)
+    endif()
+  endwhile()
+  string(REGEX REPLACE "//.*$" "" MEMLY_STRUCTURAL_MODULE_LINE "${MEMLY_STRUCTURAL_MODULE_LINE}")
+  string(STRIP "${MEMLY_STRUCTURAL_MODULE_LINE}" MEMLY_STRUCTURAL_MODULE_LINE)
+  set(${MEMLY_LINE_OUTPUT} "${MEMLY_STRUCTURAL_MODULE_LINE}" PARENT_SCOPE)
+  set(${MEMLY_BLOCK_COMMENT_OUTPUT} "${MEMLY_BLOCK_COMMENT_ACTIVE}" PARENT_SCOPE)
+endfunction()
+
+# Maps one authored source path to its configure-run import cache property.
+function(memly_get_module_import_cache_property MEMLY_OUTPUT_VARIABLE MEMLY_MODULE_FILE)
+  string(SHA256 MEMLY_MODULE_FILE_HASH "${MEMLY_MODULE_FILE}")
+  set(${MEMLY_OUTPUT_VARIABLE} "MEMLY_IMPORTED_MODULE_NAMES_${MEMLY_MODULE_FILE_HASH}" PARENT_SCOPE)
+endfunction()
+
+# Retains a completed active-import scan for reuse by graph and lint-invalidation checks.
+function(memly_cache_imported_module_names MEMLY_MODULE_FILE)
+  memly_get_module_import_cache_property(MEMLY_MODULE_IMPORT_CACHE_PROPERTY "${MEMLY_MODULE_FILE}")
+  set_property(GLOBAL PROPERTY "${MEMLY_MODULE_IMPORT_CACHE_PROPERTY}" ${ARGN})
+  set_property(GLOBAL PROPERTY "${MEMLY_MODULE_IMPORT_CACHE_PROPERTY}_INITIALIZED" TRUE)
+endfunction()
+
+# Consumes one preprocessor conditional line and updates the current active-branch state.
+function(memly_consume_module_scan_preprocessor_line MEMLY_LINE_CONSUMED_OUTPUT MEMLY_MODULE_FILE
+         MEMLY_STRUCTURAL_MODULE_LINE
+)
+  set(MEMLY_LINE_CONSUMED TRUE)
+  if(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^#[ \t]*if[ \t]+0([ \t]|$)")
+    memly_push_module_scan_condition(ALWAYS_SKIPPED)
+  elseif(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^#[ \t]*if[ \t]+1([ \t]|$)")
+    memly_push_module_scan_condition(ALWAYS_TAKEN)
+  elseif(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^#[ \t]*(if|ifdef|ifndef)([ \t]|$)")
+    memly_push_module_scan_condition(CONDITIONAL)
+  elseif(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^#[ \t]*elif([ \t]|$)")
+    memly_select_module_scan_alternative("${MEMLY_MODULE_FILE}" "${MEMLY_STRUCTURAL_MODULE_LINE}" elif)
+  elseif(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^#[ \t]*else([ \t]|$)")
+    memly_select_module_scan_alternative("${MEMLY_MODULE_FILE}" "${MEMLY_STRUCTURAL_MODULE_LINE}" else)
+  elseif(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^#[ \t]*endif([ \t]|$)")
+    memly_pop_module_scan_condition("${MEMLY_MODULE_FILE}")
+  else()
+    set(MEMLY_LINE_CONSUMED FALSE)
+  endif()
+  set(MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK "${MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK}" PARENT_SCOPE)
+  set(MEMLY_PREPROCESSOR_CONDITION_STATE_STACK "${MEMLY_PREPROCESSOR_CONDITION_STATE_STACK}" PARENT_SCOPE)
+  set(MEMLY_PREPROCESSOR_BRANCH_ACTIVE "${MEMLY_PREPROCESSOR_BRANCH_ACTIVE}" PARENT_SCOPE)
+  set(${MEMLY_LINE_CONSUMED_OUTPUT} "${MEMLY_LINE_CONSUMED}" PARENT_SCOPE)
+endfunction()
+
+# Consumes the global module fragment or one physical include from a module preamble.
+function(memly_consume_module_preamble_line MEMLY_LINE_CONSUMED_OUTPUT MEMLY_MODULE_FILE MEMLY_MODULE_LINE_NUMBER
+         MEMLY_STRUCTURAL_MODULE_LINE
+)
+  set(MEMLY_LINE_CONSUMED FALSE)
+  if(MEMLY_STRUCTURAL_MODULE_LINE STREQUAL "module;")
+    if(MEMLY_GLOBAL_MODULE_FRAGMENT_SEEN OR MEMLY_ACTIVE_INCLUDE_COUNT GREATER 0 OR MEMLY_NAMED_MODULE_DECLARATION_SEEN)
+      message(FATAL_ERROR "Global module fragment must be the first active declaration in ${MEMLY_MODULE_FILE}:"
+                          "${MEMLY_MODULE_LINE_NUMBER}"
+      )
+    endif()
+    set(MEMLY_GLOBAL_MODULE_FRAGMENT_SEEN TRUE)
+    set(MEMLY_LINE_CONSUMED TRUE)
+  elseif(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^#[ \t]*include([ \t]|$)")
+    if(MEMLY_NAMED_MODULE_DECLARATION_SEEN)
+      message(FATAL_ERROR "Active include must precede the named module declaration in ${MEMLY_MODULE_FILE}:"
+                          "${MEMLY_MODULE_LINE_NUMBER}"
+      )
+    endif()
+    if(NOT MEMLY_GLOBAL_MODULE_FRAGMENT_SEEN)
+      message(FATAL_ERROR "Active include requires a global module fragment in ${MEMLY_MODULE_FILE}:"
+                          "${MEMLY_MODULE_LINE_NUMBER}"
+      )
+    endif()
+    math(EXPR MEMLY_ACTIVE_INCLUDE_COUNT "${MEMLY_ACTIVE_INCLUDE_COUNT} + 1")
+    set(MEMLY_LINE_CONSUMED TRUE)
+  endif()
+  set(${MEMLY_LINE_CONSUMED_OUTPUT} "${MEMLY_LINE_CONSUMED}" PARENT_SCOPE)
+  set(MEMLY_GLOBAL_MODULE_FRAGMENT_SEEN "${MEMLY_GLOBAL_MODULE_FRAGMENT_SEEN}" PARENT_SCOPE)
+  set(MEMLY_ACTIVE_INCLUDE_COUNT "${MEMLY_ACTIVE_INCLUDE_COUNT}" PARENT_SCOPE)
+endfunction()
+
+# Consumes and validates the one exact named-module declaration owned by a module unit.
+function(memly_consume_named_module_declaration MEMLY_LINE_CONSUMED_OUTPUT MEMLY_MODULE_FILE MEMLY_MODULE_LINE_NUMBER
+         MEMLY_STRUCTURAL_MODULE_LINE MEMLY_MODULE_UNIT_KIND
+)
+  set(MEMLY_LINE_CONSUMED FALSE)
+  if(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^export[ \t]+module[ \t]+(Memly([.][A-Za-z_][A-Za-z0-9_]*)+)[ \t]*;$")
+    set(MEMLY_DECLARED_MODULE_KIND INTERFACE)
+    set(MEMLY_DECLARED_MODULE_NAME "${CMAKE_MATCH_1}")
+  elseif(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^module[ \t]+(Memly([.][A-Za-z_][A-Za-z0-9_]*)+)[ \t]*;$")
+    set(MEMLY_DECLARED_MODULE_KIND IMPLEMENTATION)
+    set(MEMLY_DECLARED_MODULE_NAME "${CMAKE_MATCH_1}")
+  elseif(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^(export[ \t]+)?module([ \t]|$)")
+    message(FATAL_ERROR "Unsupported active module declaration in ${MEMLY_MODULE_FILE}:"
+                        "${MEMLY_MODULE_LINE_NUMBER}: ${MEMLY_STRUCTURAL_MODULE_LINE}"
+    )
+  else()
+    set(${MEMLY_LINE_CONSUMED_OUTPUT} FALSE PARENT_SCOPE)
+    return()
+  endif()
+
+  if(MEMLY_NAMED_MODULE_DECLARATION_SEEN)
+    message(FATAL_ERROR "Memly module unit declares more than one active named module: ${MEMLY_MODULE_FILE}")
+  endif()
+  if(NOT MEMLY_DECLARED_MODULE_KIND STREQUAL MEMLY_MODULE_UNIT_KIND)
+    message(FATAL_ERROR "Memly ${MEMLY_MODULE_UNIT_KIND} unit has an ${MEMLY_DECLARED_MODULE_KIND} declaration: "
+                        "${MEMLY_MODULE_FILE}:${MEMLY_MODULE_LINE_NUMBER}"
+    )
+  endif()
+  if(MEMLY_GLOBAL_MODULE_FRAGMENT_SEEN AND MEMLY_ACTIVE_INCLUDE_COUNT EQUAL 0)
+    message(FATAL_ERROR "Global module fragment has no active includes in ${MEMLY_MODULE_FILE}")
+  endif()
+  set(${MEMLY_LINE_CONSUMED_OUTPUT} TRUE PARENT_SCOPE)
+  set(MEMLY_MODULE_NAME "${MEMLY_DECLARED_MODULE_NAME}" PARENT_SCOPE)
+  set(MEMLY_NAMED_MODULE_DECLARATION_SEEN TRUE PARENT_SCOPE)
+endfunction()
+
+# Enforces the depth-first, lexicographical order of one active module import.
+function(memly_validate_module_import_order MEMLY_MODULE_FILE MEMLY_MODULE_LINE_NUMBER MEMLY_IMPORTED_MODULE_NAME
+         MEMLY_IMPORTED_MODULE_DEPTH
+)
+  set(MEMLY_IMPORT_OUT_OF_ORDER FALSE)
+  if(MEMLY_PREVIOUS_IMPORTED_MODULE_NAME AND MEMLY_IMPORTED_MODULE_DEPTH LESS MEMLY_PREVIOUS_IMPORTED_MODULE_DEPTH)
+    set(MEMLY_IMPORT_OUT_OF_ORDER TRUE)
+  elseif(MEMLY_PREVIOUS_IMPORTED_MODULE_NAME AND MEMLY_IMPORTED_MODULE_DEPTH EQUAL MEMLY_PREVIOUS_IMPORTED_MODULE_DEPTH
+         AND MEMLY_IMPORTED_MODULE_NAME STRLESS MEMLY_PREVIOUS_IMPORTED_MODULE_NAME
+  )
+    set(MEMLY_IMPORT_OUT_OF_ORDER TRUE)
+  endif()
+  if(MEMLY_IMPORT_OUT_OF_ORDER)
+    message(
+      FATAL_ERROR
+        "Active imports must be ordered by dot-separated module path length, then lexicographically: "
+        "${MEMLY_IMPORTED_MODULE_NAME} must precede ${MEMLY_PREVIOUS_IMPORTED_MODULE_NAME} in "
+        "${MEMLY_MODULE_FILE}:${MEMLY_MODULE_LINE_NUMBER}"
+    )
+  endif()
+endfunction()
+
+# Enforces adjacency within an import-depth group and one blank line between groups.
+function(memly_validate_module_import_spacing MEMLY_MODULE_FILE MEMLY_MODULE_LINE_NUMBER MEMLY_IMPORTED_MODULE_DEPTH)
+  if(MEMLY_PREVIOUS_IMPORTED_MODULE_NAME)
+    if(MEMLY_IMPORTED_MODULE_DEPTH EQUAL MEMLY_PREVIOUS_IMPORTED_MODULE_DEPTH)
+      if(NOT MEMLY_BLANK_LINE_COUNT_SINCE_IMPORT EQUAL 0)
+        message(FATAL_ERROR "Active imports with the same dot-separated module path length must be adjacent: "
+                            "${MEMLY_MODULE_FILE}:${MEMLY_MODULE_LINE_NUMBER}"
+        )
+      endif()
+    elseif(NOT MEMLY_BLANK_LINE_COUNT_SINCE_IMPORT EQUAL 1)
+      message(
+        FATAL_ERROR
+          "Active import groups with different dot-separated module path lengths must be separated by exactly one "
+          "blank line: ${MEMLY_MODULE_FILE}:${MEMLY_MODULE_LINE_NUMBER}"
+      )
+    endif()
+  endif()
+endfunction()
+
+# Consumes and validates one exact, unique, non-reexporting module import.
+function(memly_consume_module_import_line MEMLY_LINE_CONSUMED_OUTPUT MEMLY_MODULE_FILE MEMLY_MODULE_LINE_NUMBER
+         MEMLY_STRUCTURAL_MODULE_LINE
+)
+  if(NOT MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^(export[ \t]+)?import([ \t]|$)")
+    set(${MEMLY_LINE_CONSUMED_OUTPUT} FALSE PARENT_SCOPE)
+    return()
+  endif()
+  if(NOT MEMLY_NAMED_MODULE_DECLARATION_SEEN)
+    message(FATAL_ERROR "Active import must follow the named module declaration in ${MEMLY_MODULE_FILE}:"
+                        "${MEMLY_MODULE_LINE_NUMBER}"
+    )
+  endif()
+  if(MEMLY_MODULE_BODY_STARTED)
+    message(FATAL_ERROR "Active imports must form one block immediately after the named module declaration in "
+                        "${MEMLY_MODULE_FILE}:${MEMLY_MODULE_LINE_NUMBER}"
+    )
+  endif()
+  if(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^import[ \t]+(Memly([.][A-Za-z_][A-Za-z0-9_]*)+)[ \t]*;$")
+    set(MEMLY_IMPORTED_MODULE_NAME "${CMAKE_MATCH_1}")
+  else()
+    message(FATAL_ERROR "Memly module units may only use non-reexporting exact named-module imports: "
+                        "${MEMLY_MODULE_FILE}:${MEMLY_MODULE_LINE_NUMBER}: ${MEMLY_STRUCTURAL_MODULE_LINE}"
+    )
+  endif()
+  if(MEMLY_IMPORTED_MODULE_NAME STREQUAL MEMLY_MODULE_NAME)
+    message(FATAL_ERROR "Memly module unit imports itself: ${MEMLY_MODULE_FILE}:${MEMLY_MODULE_LINE_NUMBER}")
+  endif()
+  if(MEMLY_IMPORTED_MODULE_NAME IN_LIST MEMLY_IMPORTED_MODULE_NAMES)
+    message(FATAL_ERROR "Duplicate active module import ${MEMLY_IMPORTED_MODULE_NAME}: "
+                        "${MEMLY_MODULE_FILE}:${MEMLY_MODULE_LINE_NUMBER}"
+    )
+  endif()
+
+  string(REPLACE "." ";" MEMLY_IMPORTED_MODULE_COMPONENTS "${MEMLY_IMPORTED_MODULE_NAME}")
+  list(LENGTH MEMLY_IMPORTED_MODULE_COMPONENTS MEMLY_IMPORTED_MODULE_DEPTH)
+  memly_validate_module_import_order(
+    "${MEMLY_MODULE_FILE}" "${MEMLY_MODULE_LINE_NUMBER}" "${MEMLY_IMPORTED_MODULE_NAME}"
+    "${MEMLY_IMPORTED_MODULE_DEPTH}"
+  )
+  memly_validate_module_import_spacing(
+    "${MEMLY_MODULE_FILE}" "${MEMLY_MODULE_LINE_NUMBER}" "${MEMLY_IMPORTED_MODULE_DEPTH}"
+  )
+
+  list(APPEND MEMLY_IMPORTED_MODULE_NAMES "${MEMLY_IMPORTED_MODULE_NAME}")
+  set(${MEMLY_LINE_CONSUMED_OUTPUT} TRUE PARENT_SCOPE)
+  set(MEMLY_IMPORTED_MODULE_NAMES "${MEMLY_IMPORTED_MODULE_NAMES}" PARENT_SCOPE)
+  set(MEMLY_PREVIOUS_IMPORTED_MODULE_NAME "${MEMLY_IMPORTED_MODULE_NAME}" PARENT_SCOPE)
+  set(MEMLY_PREVIOUS_IMPORTED_MODULE_DEPTH "${MEMLY_IMPORTED_MODULE_DEPTH}" PARENT_SCOPE)
+  set(MEMLY_BLANK_LINE_COUNT_SINCE_IMPORT 0 PARENT_SCOPE)
+endfunction()
+
+# Initializes the state shared by the active module-structure and import scans.
+function(memly_initialize_module_scan_state)
+  set(MEMLY_MODULE_NAME PARENT_SCOPE)
+  set(MEMLY_IMPORTED_MODULE_NAMES PARENT_SCOPE)
+  set(MEMLY_PREVIOUS_IMPORTED_MODULE_NAME PARENT_SCOPE)
+  set(MEMLY_PREVIOUS_IMPORTED_MODULE_DEPTH 0 PARENT_SCOPE)
+  set(MEMLY_BLANK_LINE_COUNT_SINCE_IMPORT 0 PARENT_SCOPE)
+  set(MEMLY_PREPROCESSOR_BRANCH_ACTIVE TRUE PARENT_SCOPE)
+  set(MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK PARENT_SCOPE)
+  set(MEMLY_PREPROCESSOR_CONDITION_STATE_STACK PARENT_SCOPE)
+  set(MEMLY_GLOBAL_MODULE_FRAGMENT_SEEN FALSE PARENT_SCOPE)
+  set(MEMLY_ACTIVE_INCLUDE_COUNT 0 PARENT_SCOPE)
+  set(MEMLY_NAMED_MODULE_DECLARATION_SEEN FALSE PARENT_SCOPE)
+  set(MEMLY_MODULE_BODY_STARTED FALSE PARENT_SCOPE)
+  set(MEMLY_BLOCK_COMMENT_ACTIVE FALSE PARENT_SCOPE)
+endfunction()
+
+# Counts a physical blank line after an active import.
+function(memly_consume_module_import_blank_line MEMLY_LINE_CONSUMED_OUTPUT MEMLY_PHYSICAL_MODULE_LINE)
+  if(NOT MEMLY_PHYSICAL_MODULE_LINE STREQUAL "")
+    set(${MEMLY_LINE_CONSUMED_OUTPUT} FALSE PARENT_SCOPE)
+    return()
+  endif()
+  if(MEMLY_PREVIOUS_IMPORTED_MODULE_NAME)
+    math(EXPR MEMLY_BLANK_LINE_COUNT_SINCE_IMPORT "${MEMLY_BLANK_LINE_COUNT_SINCE_IMPORT} + 1")
+    set(MEMLY_BLANK_LINE_COUNT_SINCE_IMPORT "${MEMLY_BLANK_LINE_COUNT_SINCE_IMPORT}" PARENT_SCOPE)
+  endif()
+  set(${MEMLY_LINE_CONSUMED_OUTPUT} TRUE PARENT_SCOPE)
+endfunction()
+
+# Rejects an unfinished scan and enforces the required declaration/global-fragment relationship.
+function(memly_finish_module_scan MEMLY_MODULE_FILE MEMLY_NAMED_MODULE_REQUIRED)
+  if(MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK)
+    message(FATAL_ERROR "Unterminated preprocessor conditional in Memly source: ${MEMLY_MODULE_FILE}")
+  endif()
+  if(MEMLY_BLOCK_COMMENT_ACTIVE)
+    message(FATAL_ERROR "Unterminated block comment in Memly source: ${MEMLY_MODULE_FILE}")
+  endif()
+  if(MEMLY_NAMED_MODULE_REQUIRED AND NOT MEMLY_NAMED_MODULE_DECLARATION_SEEN)
+    message(FATAL_ERROR "Memly module unit must declare exactly one active named module: ${MEMLY_MODULE_FILE}")
+  endif()
+  if(MEMLY_NAMED_MODULE_REQUIRED AND MEMLY_GLOBAL_MODULE_FRAGMENT_SEEN AND MEMLY_ACTIVE_INCLUDE_COUNT EQUAL 0)
+    message(FATAL_ERROR "Global module fragment has no active includes in ${MEMLY_MODULE_FILE}")
+  endif()
+endfunction()
+
+# Validates the active declaration, global fragment, and ordered import block of one named module unit.
+function(memly_validate_module_unit_structure MEMLY_MODULE_NAME_OUTPUT MEMLY_MODULE_FILE MEMLY_MODULE_UNIT_KIND)
+  memly_get_time_microseconds(MEMLY_MODULE_STRUCTURE_CHECK_START_MICROSECONDS)
+  if(NOT MEMLY_MODULE_UNIT_KIND STREQUAL "INTERFACE" AND NOT MEMLY_MODULE_UNIT_KIND STREQUAL "IMPLEMENTATION")
+    message(FATAL_ERROR "Unknown Memly module unit kind ${MEMLY_MODULE_UNIT_KIND}: ${MEMLY_MODULE_FILE}")
+  endif()
+
+  file(STRINGS "${MEMLY_MODULE_FILE}" MEMLY_MODULE_LINES)
+  memly_initialize_module_scan_state()
+  set(MEMLY_MODULE_LINE_NUMBER 0)
+
+  foreach(MEMLY_MODULE_LINE IN LISTS MEMLY_MODULE_LINES)
+    math(EXPR MEMLY_MODULE_LINE_NUMBER "${MEMLY_MODULE_LINE_NUMBER} + 1")
+    memly_strip_module_scan_comments(
+      MEMLY_STRUCTURAL_MODULE_LINE MEMLY_BLOCK_COMMENT_ACTIVE "${MEMLY_MODULE_LINE}" "${MEMLY_BLOCK_COMMENT_ACTIVE}"
+    )
+    memly_consume_module_scan_preprocessor_line(
+      MEMLY_LINE_CONSUMED "${MEMLY_MODULE_FILE}" "${MEMLY_STRUCTURAL_MODULE_LINE}"
+    )
+    if(MEMLY_LINE_CONSUMED OR NOT MEMLY_PREPROCESSOR_BRANCH_ACTIVE)
       continue()
     endif()
-    memly_push_import_scan_condition("${MEMLY_CONDITION_STATE}")
+    string(STRIP "${MEMLY_MODULE_LINE}" MEMLY_PHYSICAL_MODULE_LINE)
+    memly_consume_module_import_blank_line(MEMLY_LINE_CONSUMED "${MEMLY_PHYSICAL_MODULE_LINE}")
+    if(MEMLY_LINE_CONSUMED)
+      continue()
+    endif()
+    if(MEMLY_STRUCTURAL_MODULE_LINE STREQUAL "")
+      continue()
+    endif()
+
+    memly_consume_module_preamble_line(
+      MEMLY_LINE_CONSUMED "${MEMLY_MODULE_FILE}" "${MEMLY_MODULE_LINE_NUMBER}" "${MEMLY_STRUCTURAL_MODULE_LINE}"
+    )
+    if(MEMLY_LINE_CONSUMED)
+      continue()
+    endif()
+    memly_consume_named_module_declaration(
+      MEMLY_LINE_CONSUMED "${MEMLY_MODULE_FILE}" "${MEMLY_MODULE_LINE_NUMBER}" "${MEMLY_STRUCTURAL_MODULE_LINE}"
+      "${MEMLY_MODULE_UNIT_KIND}"
+    )
+    if(MEMLY_LINE_CONSUMED)
+      continue()
+    endif()
+    memly_consume_module_import_line(
+      MEMLY_LINE_CONSUMED "${MEMLY_MODULE_FILE}" "${MEMLY_MODULE_LINE_NUMBER}" "${MEMLY_STRUCTURAL_MODULE_LINE}"
+    )
+    if(MEMLY_LINE_CONSUMED)
+      continue()
+    endif()
+    if(NOT MEMLY_NAMED_MODULE_DECLARATION_SEEN)
+      message(FATAL_ERROR "Active declaration precedes the named module declaration in ${MEMLY_MODULE_FILE}:"
+                          "${MEMLY_MODULE_LINE_NUMBER}: ${MEMLY_STRUCTURAL_MODULE_LINE}"
+      )
+    endif()
+    set(MEMLY_MODULE_BODY_STARTED TRUE)
   endforeach()
-  if(MEMLY_PREPROCESSOR_PARENT_ACTIVE_STACK)
-    message(FATAL_ERROR "Unterminated preprocessor conditional in Memly source: ${MEMLY_IMPORTER_FILE}")
+
+  memly_finish_module_scan("${MEMLY_MODULE_FILE}" TRUE)
+  memly_cache_imported_module_names("${MEMLY_MODULE_FILE}" ${MEMLY_IMPORTED_MODULE_NAMES})
+  get_property(MEMLY_VALIDATED_MODULE_UNIT_COUNT GLOBAL PROPERTY MEMLY_VALIDATED_MODULE_UNIT_COUNT)
+  if(NOT MEMLY_VALIDATED_MODULE_UNIT_COUNT)
+    set(MEMLY_VALIDATED_MODULE_UNIT_COUNT 0)
   endif()
+  math(EXPR MEMLY_VALIDATED_MODULE_UNIT_COUNT "${MEMLY_VALIDATED_MODULE_UNIT_COUNT} + 1")
+  set_property(GLOBAL PROPERTY MEMLY_VALIDATED_MODULE_UNIT_COUNT "${MEMLY_VALIDATED_MODULE_UNIT_COUNT}")
+  memly_accumulate_configuration_check_time("${MEMLY_MODULE_STRUCTURE_CHECK_START_MICROSECONDS}")
+  set(${MEMLY_MODULE_NAME_OUTPUT} "${MEMLY_MODULE_NAME}" PARENT_SCOPE)
+endfunction()
+
+# Reads the exact Memly named modules that can be active in one authored translation unit.
+function(memly_read_imported_module_names MEMLY_OUTPUT_VARIABLE MEMLY_IMPORTER_FILE)
+  memly_get_module_import_cache_property(MEMLY_MODULE_IMPORT_CACHE_PROPERTY "${MEMLY_IMPORTER_FILE}")
+  get_property(
+    MEMLY_MODULE_IMPORT_CACHE_INITIALIZED GLOBAL PROPERTY "${MEMLY_MODULE_IMPORT_CACHE_PROPERTY}_INITIALIZED"
+  )
+  if(MEMLY_MODULE_IMPORT_CACHE_INITIALIZED)
+    get_property(MEMLY_CACHED_IMPORTED_MODULE_NAMES GLOBAL PROPERTY "${MEMLY_MODULE_IMPORT_CACHE_PROPERTY}")
+    set(${MEMLY_OUTPUT_VARIABLE} ${MEMLY_CACHED_IMPORTED_MODULE_NAMES} PARENT_SCOPE)
+    return()
+  endif()
+
+  file(STRINGS "${MEMLY_IMPORTER_FILE}" MEMLY_IMPORTER_LINES)
+  memly_initialize_module_scan_state()
+  foreach(MEMLY_IMPORTER_LINE IN LISTS MEMLY_IMPORTER_LINES)
+    memly_strip_module_scan_comments(
+      MEMLY_STRUCTURAL_MODULE_LINE MEMLY_BLOCK_COMMENT_ACTIVE "${MEMLY_IMPORTER_LINE}" "${MEMLY_BLOCK_COMMENT_ACTIVE}"
+    )
+    memly_consume_module_scan_preprocessor_line(
+      MEMLY_LINE_CONSUMED "${MEMLY_IMPORTER_FILE}" "${MEMLY_STRUCTURAL_MODULE_LINE}"
+    )
+    if(MEMLY_LINE_CONSUMED OR NOT MEMLY_PREPROCESSOR_BRANCH_ACTIVE)
+      continue()
+    endif()
+    if(MEMLY_STRUCTURAL_MODULE_LINE MATCHES "^(export[ \t]+)?import[ \t]+(Memly[.][A-Za-z0-9_.]+)[ \t]*;")
+      list(APPEND MEMLY_IMPORTED_MODULE_NAMES "${CMAKE_MATCH_2}")
+    endif()
+  endforeach()
+  memly_finish_module_scan("${MEMLY_IMPORTER_FILE}" FALSE)
   list(REMOVE_DUPLICATES MEMLY_IMPORTED_MODULE_NAMES)
+  memly_cache_imported_module_names("${MEMLY_IMPORTER_FILE}" ${MEMLY_IMPORTED_MODULE_NAMES})
   set(${MEMLY_OUTPUT_VARIABLE} ${MEMLY_IMPORTED_MODULE_NAMES} PARENT_SCOPE)
 endfunction()
 
@@ -723,7 +1119,6 @@ function(memly_add_component MEMLY_COMPONENT_TARGET MEMLY_MODULE_PREFIX)
   set(MEMLY_COMPONENT_AUTHORED_CXX_FILES ${MEMLY_COMPONENT_PUBLIC_MODULE_INTERFACES}
                                          ${MEMLY_COMPONENT_INTERNAL_MODULE_INTERFACES} ${MEMLY_COMPONENT_SOURCES}
   )
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${MEMLY_COMPONENT_AUTHORED_CXX_FILES})
   set_target_properties("${MEMLY_COMPONENT_TARGET}" PROPERTIES AUTOMOC OFF CXX_SCAN_FOR_MODULES ON)
   memly_configure_authored_cxx_files("${MEMLY_COMPONENT_TARGET}" ${MEMLY_COMPONENT_AUTHORED_CXX_FILES})
   set_property(TARGET "${MEMLY_COMPONENT_TARGET}" PROPERTY MEMLY_CLANG_TIDY_FILES ${MEMLY_COMPONENT_AUTHORED_CXX_FILES})
@@ -817,6 +1212,7 @@ endfunction()
 
 # Rejects Memly imports that exceed the importing component's explicitly declared direct target graph.
 function(memly_validate_component_import_graph)
+  memly_get_time_microseconds(MEMLY_COMPONENT_IMPORT_GRAPH_CHECK_START_MICROSECONDS)
   get_property(MEMLY_COMPONENT_TARGETS GLOBAL PROPERTY MEMLY_COMPONENT_TARGETS)
   foreach(MEMLY_COMPONENT_TARGET IN LISTS MEMLY_COMPONENT_TARGETS)
     set(MEMLY_IMPORTED_PROVIDER_TARGETS)
@@ -888,6 +1284,7 @@ function(memly_validate_component_import_graph)
     endforeach()
     memly_validate_component_dependency_usage("${MEMLY_COMPONENT_TARGET}")
   endforeach()
+  memly_accumulate_configuration_check_time("${MEMLY_COMPONENT_IMPORT_GRAPH_CHECK_START_MICROSECONDS}")
 endfunction()
 
 # Links every registered static component into the final consumer in an explicit caller-supplied order.
@@ -941,72 +1338,43 @@ function(memly_configure_duckdb_header MEMLY_COMPONENT_TARGET)
   target_include_directories("${MEMLY_COMPONENT_TARGET}" BEFORE PRIVATE "${_duckdb_wrapper_dir}")
 endfunction()
 
-set(MEMLY_BUILD_TIMING_FILE "${CMAKE_BINARY_DIR}/build-start-time.txt")
-set(MEMLY_CLANG_TIDY_TIMING_FILE "${CMAKE_BINARY_DIR}/clang-tidy-start-time.txt")
-set(MEMLY_TIMING_SCRIPT "${MEMLY_CMAKE_TOOL_DIRECTORY}/report_elapsed_time.cmake")
+set(MEMLY_SOURCE_BUILD_TIMING_FILE "${CMAKE_BINARY_DIR}/source-build-start-time.txt")
+set(MEMLY_SOURCE_CLANG_TIDY_TIMING_FILE "${CMAKE_BINARY_DIR}/source-clang-tidy-start-time.txt")
 add_custom_target(
-  memly-build-timing-start
-  COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Start "-DMEMLY_TIMING_FILE=${MEMLY_BUILD_TIMING_FILE}" -P
+  memly-source-build-timing-start
+  COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Start "-DMEMLY_TIMING_FILE=${MEMLY_SOURCE_BUILD_TIMING_FILE}" -P
           "${MEMLY_TIMING_SCRIPT}"
-  BYPRODUCTS "${MEMLY_BUILD_TIMING_FILE}"
-  COMMENT "Start the build timer"
+  BYPRODUCTS "${MEMLY_SOURCE_BUILD_TIMING_FILE}"
+  COMMENT "Start Memly source build timer"
   VERBATIM
 )
 
 add_subdirectory(source)
 memly_validate_component_import_graph()
 
+memly_get_time_microseconds(MEMLY_TARGET_ASSIGNMENT_CHECK_START_MICROSECONDS)
 get_property(MEMLY_REGISTERED_CXX_FILES GLOBAL PROPERTY MEMLY_REGISTERED_CXX_FILES)
-file(
-  GLOB_RECURSE
-  MEMLY_AUTHORED_CXX_FILES
-  CONFIGURE_DEPENDS
-  "${CMAKE_SOURCE_DIR}/source/*.cpp"
-  "${CMAKE_SOURCE_DIR}/source/*.cppm"
-  "${CMAKE_SOURCE_DIR}/test/*.cpp"
-  "${CMAKE_SOURCE_DIR}/test/*.cppm"
-)
+set(MEMLY_AUTHORED_CXX_FILES ${MEMLY_SOURCE_POLICY_CHANGE_TRACKING_PATHS})
+list(FILTER MEMLY_AUTHORED_CXX_FILES INCLUDE REGEX "[.]cppm?$")
 foreach(MEMLY_AUTHORED_CXX_FILE IN LISTS MEMLY_AUTHORED_CXX_FILES)
   if(NOT MEMLY_AUTHORED_CXX_FILE IN_LIST MEMLY_REGISTERED_CXX_FILES)
     message(FATAL_ERROR "Memly C++ file is not assigned to a target: ${MEMLY_AUTHORED_CXX_FILE}")
   endif()
 endforeach()
+memly_accumulate_configuration_check_time("${MEMLY_TARGET_ASSIGNMENT_CHECK_START_MICROSECONDS}")
+memly_verify_header_includes(${MEMLY_AUTHORED_CXX_FILES})
 
-set(MEMLY_DEPRECATED_C_HEADER_STAMP_DIRECTORY "${CMAKE_BINARY_DIR}/deprecated-c-header-stamps")
-set(MEMLY_DEPRECATED_C_HEADER_VERIFIER "${MEMLY_CMAKE_TOOL_DIRECTORY}/verify_deprecated_c_headers.py")
-file(MAKE_DIRECTORY "${MEMLY_DEPRECATED_C_HEADER_STAMP_DIRECTORY}")
-set(MEMLY_DEPRECATED_C_HEADER_STAMPS)
-foreach(MEMLY_AUTHORED_CXX_FILE IN LISTS MEMLY_AUTHORED_CXX_FILES)
-  cmake_path(
-    RELATIVE_PATH MEMLY_AUTHORED_CXX_FILE BASE_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE
-    MEMLY_AUTHORED_CXX_RELATIVE_FILE
-  )
-  string(SHA256 MEMLY_AUTHORED_CXX_FILE_HASH "${MEMLY_AUTHORED_CXX_RELATIVE_FILE}")
-  set(MEMLY_DEPRECATED_C_HEADER_STAMP
-      "${MEMLY_DEPRECATED_C_HEADER_STAMP_DIRECTORY}/${MEMLY_AUTHORED_CXX_FILE_HASH}.stamp"
-  )
-  add_custom_command(
-    OUTPUT "${MEMLY_DEPRECATED_C_HEADER_STAMP}"
-    COMMAND "${Python3_EXECUTABLE}" "${MEMLY_DEPRECATED_C_HEADER_VERIFIER}" "${CMAKE_SOURCE_DIR}"
-            "${MEMLY_AUTHORED_CXX_FILE}"
-    COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_DEPRECATED_C_HEADER_STAMP}"
-    DEPENDS "${MEMLY_AUTHORED_CXX_FILE}" "${MEMLY_DEPRECATED_C_HEADER_VERIFIER}"
-    COMMENT "Check deprecated C headers ${MEMLY_AUTHORED_CXX_RELATIVE_FILE}"
-    VERBATIM
-  )
-  list(APPEND MEMLY_DEPRECATED_C_HEADER_STAMPS "${MEMLY_DEPRECATED_C_HEADER_STAMP}")
-endforeach()
-add_custom_target(
-  memly-deprecated-c-header-verification ALL DEPENDS ${MEMLY_DEPRECATED_C_HEADER_STAMPS}
-  COMMENT "Check deprecated C headers"
-)
-add_dependencies(memly-build-timing-start memly-deprecated-c-header-verification)
+get_property(MEMLY_CONFIGURATION_CHECK_MICROSECONDS GLOBAL PROPERTY MEMLY_CONFIGURATION_CHECK_MICROSECONDS)
+get_property(MEMLY_VALIDATED_MODULE_UNIT_COUNT GLOBAL PROPERTY MEMLY_VALIDATED_MODULE_UNIT_COUNT)
+memly_format_elapsed_time(MEMLY_CONFIGURATION_CHECK_ELAPSED_TIME "${MEMLY_CONFIGURATION_CHECK_MICROSECONDS}")
+message(STATUS "Memly configuration checks (${MEMLY_VALIDATED_MODULE_UNIT_COUNT} module units)")
+message(STATUS "Elapsed time: ${MEMLY_CONFIGURATION_CHECK_ELAPSED_TIME}")
 
 get_property(MEMLY_COMPONENT_TARGETS GLOBAL PROPERTY MEMLY_COMPONENT_TARGETS)
-set(MEMLY_CLANG_TIDY_TARGETS ${MEMLY_COMPONENT_TARGETS} memly)
-set(MEMLY_TIMED_BUILD_TARGETS ${MEMLY_COMPONENT_TARGETS} memly_qml memly_qml_plugin memly)
-foreach(MEMLY_TIMED_BUILD_TARGET IN LISTS MEMLY_TIMED_BUILD_TARGETS)
-  add_dependencies("${MEMLY_TIMED_BUILD_TARGET}" memly-build-timing-start)
+set(MEMLY_SOURCE_CLANG_TIDY_TARGETS ${MEMLY_COMPONENT_TARGETS} memly)
+set(MEMLY_SOURCE_BUILD_TARGETS ${MEMLY_COMPONENT_TARGETS} memly_qml memly_qml_plugin memly)
+foreach(MEMLY_SOURCE_BUILD_TARGET IN LISTS MEMLY_SOURCE_BUILD_TARGETS)
+  add_dependencies("${MEMLY_SOURCE_BUILD_TARGET}" memly-source-build-timing-start)
 endforeach()
 set(MEMLY_CLANG_TIDY_COMPILATION_DATABASE_DIRECTORY "${CMAKE_BINARY_DIR}/clang-tidy-compilation-database")
 set(MEMLY_CLANG_TIDY_COMPILATION_DATABASE "${MEMLY_CLANG_TIDY_COMPILATION_DATABASE_DIRECTORY}/compile_commands.json")
@@ -1028,21 +1396,21 @@ add_custom_target(
 )
 
 add_custom_target(
-  memly-clang-tidy-build-ready
-  COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Report "-DMEMLY_TIMING_FILE=${MEMLY_BUILD_TIMING_FILE}"
-          -DMEMLY_TIMING_LABEL=Build -P "${MEMLY_TIMING_SCRIPT}"
-  COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Start "-DMEMLY_TIMING_FILE=${MEMLY_CLANG_TIDY_TIMING_FILE}" -P
+  memly-source-build-ready
+  COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Report "-DMEMLY_TIMING_FILE=${MEMLY_SOURCE_BUILD_TIMING_FILE}" -P
           "${MEMLY_TIMING_SCRIPT}"
-  BYPRODUCTS "${MEMLY_CLANG_TIDY_TIMING_FILE}"
-  COMMENT "Report the build duration and start the Clang-Tidy timer"
+  COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Start "-DMEMLY_TIMING_FILE=${MEMLY_SOURCE_CLANG_TIDY_TIMING_FILE}" -P
+          "${MEMLY_TIMING_SCRIPT}"
+  BYPRODUCTS "${MEMLY_SOURCE_CLANG_TIDY_TIMING_FILE}"
+  COMMENT "Memly source build"
   VERBATIM
 )
-add_dependencies(memly-clang-tidy-build-ready ${MEMLY_CLANG_TIDY_TARGETS})
+add_dependencies(memly-source-build-ready ${MEMLY_SOURCE_CLANG_TIDY_TARGETS})
 
 set(MEMLY_CLANG_TIDY_STAMPS)
 set(MEMLY_CLANG_TIDY_PROFILE_FILES)
-foreach(MEMLY_CLANG_TIDY_TARGET IN LISTS MEMLY_CLANG_TIDY_TARGETS)
-  get_property(MEMLY_TARGET_CLANG_TIDY_FILES TARGET "${MEMLY_CLANG_TIDY_TARGET}" PROPERTY MEMLY_CLANG_TIDY_FILES)
+foreach(MEMLY_SOURCE_CLANG_TIDY_TARGET IN LISTS MEMLY_SOURCE_CLANG_TIDY_TARGETS)
+  get_property(MEMLY_TARGET_CLANG_TIDY_FILES TARGET "${MEMLY_SOURCE_CLANG_TIDY_TARGET}" PROPERTY MEMLY_CLANG_TIDY_FILES)
   list(APPEND MEMLY_CLANG_TIDY_PROFILE_FILES ${MEMLY_TARGET_CLANG_TIDY_FILES})
   foreach(MEMLY_CLANG_TIDY_FILE IN LISTS MEMLY_TARGET_CLANG_TIDY_FILES)
     memly_collect_imported_module_interface_closure(
@@ -1056,7 +1424,7 @@ foreach(MEMLY_CLANG_TIDY_TARGET IN LISTS MEMLY_CLANG_TIDY_TARGETS)
     )
     string(SHA256 MEMLY_CLANG_TIDY_FILE_HASH "${MEMLY_CLANG_TIDY_RELATIVE_FILE}")
     set(MEMLY_CLANG_TIDY_FILE_STAMP
-        "${MEMLY_CLANG_TIDY_STAMP_DIRECTORY}/${MEMLY_CLANG_TIDY_TARGET}-${MEMLY_CLANG_TIDY_FILE_HASH}.stamp"
+        "${MEMLY_CLANG_TIDY_STAMP_DIRECTORY}/${MEMLY_SOURCE_CLANG_TIDY_TARGET}-${MEMLY_CLANG_TIDY_FILE_HASH}.stamp"
     )
     add_custom_command(
       OUTPUT "${MEMLY_CLANG_TIDY_FILE_STAMP}"
@@ -1067,7 +1435,7 @@ foreach(MEMLY_CLANG_TIDY_TARGET IN LISTS MEMLY_CLANG_TIDY_TARGETS)
       COMMAND "${CMAKE_COMMAND}" -E touch "${MEMLY_CLANG_TIDY_FILE_STAMP}"
       DEPENDS "${MEMLY_CLANG_TIDY_FILE}"
               ${MEMLY_CLANG_TIDY_INVALIDATION_DEPENDENCIES}
-              memly-clang-tidy-build-ready
+              memly-source-build-ready
               "${CMAKE_SOURCE_DIR}/.clang-tidy"
               "${MEMLY_CLANG_TIDY_COMPILATION_DATABASE}"
               "${MEMLY_LLVM_CLANG_TIDY_EXECUTABLE}"
@@ -1090,13 +1458,13 @@ foreach(MEMLY_CLANG_TIDY_PROFILE_FILE IN LISTS MEMLY_CLANG_TIDY_PROFILE_FILES)
 endforeach()
 add_custom_target(
   memly-clang-tidy ALL
-  COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Report "-DMEMLY_TIMING_FILE=${MEMLY_CLANG_TIDY_TIMING_FILE}"
-          -DMEMLY_TIMING_LABEL=Clang-Tidy -P "${MEMLY_TIMING_SCRIPT}"
+  COMMAND "${CMAKE_COMMAND}" -DMEMLY_TIMING_ACTION=Report "-DMEMLY_TIMING_FILE=${MEMLY_SOURCE_CLANG_TIDY_TIMING_FILE}"
+          -P "${MEMLY_TIMING_SCRIPT}"
   DEPENDS ${MEMLY_CLANG_TIDY_STAMPS}
-  COMMENT "Report the mandatory Clang-Tidy gate duration"
+  COMMENT "Memly source Clang-Tidy"
   VERBATIM
 )
-add_dependencies(memly-clang-tidy memly-clang-tidy-build-ready)
+add_dependencies(memly-clang-tidy memly-source-build-ready)
 
 add_custom_target(
   memly-clang-tidy-profile
@@ -1120,4 +1488,4 @@ add_custom_target(
   COMMENT "Profile the effective full-tree Clang-Tidy check set"
   USES_TERMINAL VERBATIM
 )
-add_dependencies(memly-clang-tidy-profile memly-clang-tidy-compilation-database ${MEMLY_CLANG_TIDY_TARGETS})
+add_dependencies(memly-clang-tidy-profile memly-clang-tidy-compilation-database ${MEMLY_SOURCE_CLANG_TIDY_TARGETS})

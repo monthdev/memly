@@ -10,6 +10,7 @@ module;
 module Memly.Database.DatabaseRuntime;
 
 import Memly.Database.PreparedStatement;
+
 import Memly.Database.Internal.ThrowOnDatabaseError;
 
 namespace Memly::Database {

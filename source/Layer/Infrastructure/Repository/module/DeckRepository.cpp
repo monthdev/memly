@@ -7,11 +7,12 @@ module;
 
 module Memly.Repository.DeckRepository;
 
-import Memly.Repository.Internal.DeckSql;
 import Memly.Database.DatabaseRuntime;
 import Memly.Database.QueryResultRowCountRange;
 import Memly.Repository.DeckSnapshotRecord;
 import Memly.Repository.MutatedId;
+
+import Memly.Repository.Internal.DeckSql;
 
 namespace Memly::Repository {
 

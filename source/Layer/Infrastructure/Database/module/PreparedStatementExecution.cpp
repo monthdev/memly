@@ -9,6 +9,7 @@ module;
 module Memly.Database.PreparedStatementExecution;
 
 import Memly.Database.QueryResultDecoder;
+
 import Memly.Database.Internal.ThrowOnDatabaseError;
 
 namespace Memly::Database {

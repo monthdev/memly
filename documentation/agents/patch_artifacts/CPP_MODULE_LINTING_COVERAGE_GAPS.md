@@ -8,6 +8,9 @@ architecture and the header architecture at `main` revision
 
 - Clang compiler diagnostics, including `-Weverything`, `-pedantic`, and
   `-Werror`, cover every authored `.cppm` and `.cpp`.
+- CMake runs the direct-include and deprecated-C-header verifier once over its
+  complete discovered `.cppm` and `.cpp` set during configuration. The verifier
+  is no longer scheduled as a per-file Ninja stage.
 - The configured Clang-Tidy checks and `custom-memly-*` YAML checks cover every
   authored exact named-module interface and implementation unit after the
   required BMIs exist.
@@ -87,9 +90,9 @@ The module branch changes these lint- and source-policy files:
 - `.codex/hooks/check_repository_format.sh`,
   `.github/workflows/CheckRepositoryFormat.yml`, and `.prettierignore` replace
   authored `.hpp` formatting coverage with `.cppm` coverage.
-- `tool/cmake/verify_source_extensions.py`, invoked by CMake, replaces the
-  authored header/source extension policy with the `.cppm` and `.cpp` module
-  policy.
+- `memly_verify_source_extensions()`, invoked during CMake configuration,
+  replaces the authored header/source extension policy with the `.cppm` and
+  `.cpp` module policy.
 
 The module branch deletes `.iwyu.imp` and `tool/run_include_what_you_use.py`.
 IWYU is neither invoked by CMake nor exposed through Lint Runner on this branch.

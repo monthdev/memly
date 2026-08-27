@@ -336,12 +336,14 @@ Use `#if defined(Macro)` and `#if not defined(Macro)`, not `#ifdef` and
 Name an included header literally on one physical directive; do not hide it
 behind a macro or line splice. Include C standard-library facilities through
 their C++ headers; do not include deprecated or redundant C compatibility
-headers (`tool/cmake/verify_deprecated_c_headers.py`).
+headers (`memly_verify_header_includes()`,
+`tool/cmake/verify_deprecated_c_headers.py`).
 
 ## Source and CMake Organization
 
-Give each CMake glob variable one folder; do not recurse or combine patterns.
-Order globs and target sources by source-tree order.
+Give each CMake glob variable one folder and do not combine patterns. Recurse
+only for repository-wide policy discovery. Order globs and target sources by
+source-tree order.
 
 Collocate each externally importable module interface and its corresponding
 implementation unit directly under `module/`. Store owner-only module pairs and
@@ -350,8 +352,7 @@ target-private inputs under `module/Internal/`; SQL belongs below
 and `.cpp` for implementation units. Do not add textual C++ headers, C,
 Objective-C, Objective-C++, or alternate C++ source extensions under `source/`
 or `test/` (`memly_get_module_interface_metadata()`,
-`memly_validate_module_implementation()`,
-`tool/cmake/verify_source_extensions.py`).
+`memly_validate_module_implementation()`, `memly_verify_source_extensions()`).
 
 Declare a target's globs, include roots, resources, and direct dependencies
 beside its source tree. Do not add a forwarding-only architectural
@@ -378,6 +379,16 @@ fragment, then declare the module before imports. Import Memly dependencies; do
 not textually include Memly source. An implementation unit belongs to the exact
 module declared by its corresponding interface and explicitly imports every
 other Memly module it uses.
+
+Give every active module unit one exact named-module declaration:
+`export module` in `.cppm`, and `module` in `.cpp`. Use a global module fragment
+exactly when the unit has active physical includes, all of which precede that
+declaration. Put exact non-reexporting Memly imports in one block immediately
+afterward; do not self-import, repeat imports, or use module partitions. Sort
+imports first by dot-separated component count and then lexicographically. Keep
+imports of one component count adjacent, and separate consecutive component
+counts with exactly one blank line. Provably inactive branches do not establish
+module structure (`memly_validate_module_unit_structure()`).
 
 Declare component target relationships explicitly rather than deriving target
 edges from imports. Use `PUBLIC` when a public module interface imports the
