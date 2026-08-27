@@ -5,7 +5,7 @@ import re
 import sys
 
 
-AGENT_CODING_GUIDE_PATH = pathlib.Path("documentation/agents/AGENTS_CODING_GUIDE.md")
+CODING_GUIDE_PATH = pathlib.Path("documentation/agents/CODING_GUIDE.md")
 BUILT_IN_CLANG_TIDY_CHECK_PATTERN = re.compile(
     r"\b(?:abseil|altera|android|boost|bugprone|cert|clang-analyzer|clang-diagnostic|concurrency|cppcoreguidelines|"
     r"darwin|fuchsia|google|hicpp|linuxkernel|llvm|llvmlibc|misc|modernize|mpi|objc|openmp|performance|portability|"
@@ -21,12 +21,12 @@ def source_position(source_text: str, character_offset: int) -> tuple[int, int]:
 
 def main() -> int:
     if len(sys.argv) != 2:
-        print("usage: verify_agent_coding_guide.py <repository-root>", file=sys.stderr)
+        print("usage: verify_coding_guide_document.py <repository-root>", file=sys.stderr)
         return 2
 
     repository_root_path = pathlib.Path(sys.argv[1]).resolve()
-    agent_coding_guide_path = repository_root_path / AGENT_CODING_GUIDE_PATH
-    source_text = agent_coding_guide_path.read_text(encoding="utf-8")
+    coding_guide_path = repository_root_path / CODING_GUIDE_PATH
+    source_text = coding_guide_path.read_text(encoding="utf-8")
     violation_matches = sorted(
         (
             match
@@ -38,9 +38,9 @@ def main() -> int:
     for violation_match in violation_matches:
         line_number, column_number = source_position(source_text, violation_match.start())
         print(
-            f"{AGENT_CODING_GUIDE_PATH}:{line_number}:{column_number}: error: "
+            f"{CODING_GUIDE_PATH}:{line_number}:{column_number}: error: "
             f"the coding guide must not enumerate built-in diagnostic '{violation_match.group()}' "
-            "[memly-agent-coding-guide-scope]",
+            "[memly-coding-guide-scope]",
             file=sys.stderr,
         )
 

@@ -1,9 +1,37 @@
-# Clang-Tidy Optimization
+# Clang-Tidy Optimization Findings
+
+This artifact follows the evidence policy in
+[`PATCH_ARTIFACTS_GUIDE.md`](../PATCH_ARTIFACTS_GUIDE.md).
 
 This note tracks evidence and decisions for curating Memly's Clang-Tidy gate. Do
 not change diagnostic coverage from timing intuition alone; profile the
 uncurated check set, change one enforcement category, and compare the same input
 set and process count.
+
+## Evidence and Authorities
+
+The current implementation is directly inspectable in:
+
+- [`.clang-tidy`](../../../.clang-tidy), which selects the active built-in and
+  `custom-memly-*` checks and defines the YAML custom matchers;
+- [`CMakeLists.txt`](../../../CMakeLists.txt), which defines the per-input lint
+  stamps, imported-interface invalidation closure, worker pool, content-stable
+  compilation database, mandatory gate, and opt-in profiler;
+- [`run_and_capture_output.py`](../../../tool/cmake/run_and_capture_output.py),
+  which records the profiler metadata, command output, and authoritative final
+  elapsed time; and
+- [`verify_header_includes.py`](../../../tool/cmake/verify_header_includes.py),
+  which owns the deprecated, redundant, macro-expanded, and line-spliced header
+  checks removed from Clang-Tidy.
+
+Upstream behavior cited by this artifact comes from
+[Clang-Tidy's profiling documentation](https://clang.llvm.org/extra/clang-tidy/Contributing.html#on-checks-profiling),
+[the recursion-check documentation](https://clang.llvm.org/extra/clang-tidy/checks/misc/no-recursion.html),
+[the LLVM 22.1.8 recursion-check implementation](https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-22.1.8/clang-tools-extra/clang-tidy/misc/NoRecursionCheck.cpp),
+and
+[CMake 4.4's C++ module documentation](https://cmake.org/cmake/help/v4.4/manual/cmake-cxxmodules.7.html).
+Exact source, configuration, and compilation-database hashes below identify the
+measured state more reliably than a prose label such as "before" or "after."
 
 ## Baseline Scope
 
@@ -73,6 +101,50 @@ output.
 Profiling instruments every check and is intentionally excluded from the
 mandatory build. Compare profiles produced with the same build type, compiler,
 BMIs, process count, and machine workload.
+
+## Latest Direct-Terminal Profile
+
+The 2026-08-27 direct-terminal profile is the fastest recorded complete command
+for the present Clang-Tidy check selection. It used LLVM Clang-Tidy 22.1.8, four
+workers, a Debug Ninja build on the 10-logical-processor, 16 GiB Apple Silicon
+development machine, and all 89 lint inputs from 120 compilation-database
+entries.
+
+| Measurement                         | Seconds |
+| ----------------------------------- | ------: |
+| Complete profiler command wall time | 46.8855 |
+| Attributed per-check aggregate CPU  | 80.7844 |
+| Attributed per-check aggregate wall | 87.2041 |
+
+The exact measured state was:
+
+- source snapshot
+  `c77a7567dd1c7dc9654678bfca7a7f492526c68c47442db1f1181f74a73d7483`;
+- Clang-Tidy configuration
+  `ce0469e8d2b235191b2a9fe34e425b3d70522138b476fd42d9d8e6a7d4fb0078`;
+- compilation database
+  `e9ab22c3379b538c7e1da5971cbc01d5260c9ab4662871e44d851ce756ed4445`; and
+- Git commit `d063a008464201791e5634c73c3e2984d6778738` with seven changed
+  worktree paths.
+
+Three checks accounted for approximately 95.0% of attributed CPU time:
+
+| Check                                    | CPU seconds | CPU share | Aggregate wall seconds |
+| ---------------------------------------- | ----------: | --------: | ---------------------: |
+| `misc-no-recursion`                      |     53.6079 |     66.4% |                56.6188 |
+| `cppcoreguidelines-pro-type-member-init` |     17.6793 |     21.9% |                19.7829 |
+| `readability-identifier-length`          |      5.4450 |      6.7% |                 6.4875 |
+
+The aggregate rows overlap because four Clang-Tidy processes execute
+concurrently: `misc-no-recursion` alone has more aggregate wall time than the
+complete command. The command wall time is therefore the performance authority;
+the rows identify investigation candidates rather than additive elapsed costs.
+
+This profile predates the Debug sanitizer change from ASan alone to combined
+ASan and fail-fast UBSan. That change alters compile commands and the
+compilation database, so the hashes above remain the exact authority for this
+result and a new direct-terminal profile is required before calling 46.8855
+seconds the post-sanitizer baseline.
 
 ## Uncurated Baseline
 
@@ -189,10 +261,11 @@ while ignoring declarations originating in imported third-party headers. It does
 not reject `using` type aliases or code that names or instantiates an alias; the
 replaced check never governed those uses. A linear repository verifier checks a
 selected authored `.cpp` or `.cppm` for the complete deprecated and redundant C
-compatibility-header set. CMake assigns each eligible file its own mandatory
-incremental build stamp, so a source edit reruns the verifier only for that
-file. The verifier rejects macro-expanded and line-spliced include operands
-rather than losing the preprocessor callback's coverage of those forms.
+compatibility-header set. `memly_verify_header_includes()` passes CMake's full
+discovered authored-source set to that verifier during configuration; the same
+source discovery triggers reconfiguration after the set or an input changes. The
+verifier rejects macro-expanded and line-spliced include operands rather than
+losing the preprocessor callback's coverage of those forms.
 
 A subsequent experiment compared three otherwise identical configurations. All
 five profiles used source snapshot
@@ -208,29 +281,59 @@ compilation database
 | `dc1eb085a39102baf268648a5ce58ae79ab7d41bdb88abab280edd698ed12d2a` | disabled           |       3 |         157.165 |
 | `dc1eb085a39102baf268648a5ce58ae79ab7d41bdb88abab280edd698ed12d2a` | disabled           |       4 |          178.23 |
 
-Direct Terminal measurements are authoritative for comparisons on this machine;
+### Fastest Recorded Profiles
+
+The fastest recorded direct-terminal profile is now **46.8855 seconds** with
+four workers; its complete environment, hashes, and leading check rows are
+recorded in [Latest Direct-Terminal Profile](#latest-direct-terminal-profile).
+
+The previous fastest direct-terminal profile was **92.0709 seconds** with four
+workers and configuration hash
+`3a9febccd60e020af52e097e47fb32ddc51d054fa55dab96660fc1fd66b83df7`. That is a
+historical exact configuration, not the current enforcement state: its
+scalar-parameter matcher covered arithmetic and enum references but not the
+pointer and member-pointer references covered now.
+
+The fastest recorded profile in the paired measurements after that scalar
+coverage was restored is **114.352 seconds** with four workers, recursion
+enabled, and configuration hash
+`e92a1f13fdbd349688f3952b60d94edb58fc58784cbef9ee3710e1300827fce2`. The source
+and compilation-database hashes for both measurements are stated immediately
+above the table. Later source, module-layout, and custom-check changes mean
+neither historical number is a controlled profile of the current tree.
+
+### Recursion Timing Observation
+
+Direct terminal measurements are authoritative for comparisons on this machine;
 Codex-spawned process durations are excluded because those processes run at a
 lower effective priority. In both measured worker-count pairs, recursion-enabled
 gates were faster. The four-worker disabled run also accumulated 121.6652
 seconds of system time compared with 31.3297 seconds for the preceding enabled
 run, so the effect is too large and too repeatable to dismiss as ordinary timing
-noise. Per-file completion totals show the same broad effect. At four workers,
-disabled recursion increased aggregate implementation-unit duration from 323.0
-to 543.9 seconds and module-interface duration from 106.0 to 161.2 seconds. At
-three workers, the corresponding ratios were only 1.28 and 1.16. The nonlinear
-penalty at higher concurrency further implicates a memory threshold rather than
-a local matcher cost.
+noise. The 46.8855-second profile strengthens rather than invalidates this
+observation: recursion analysis remained enabled and received 66.4% of
+attributed CPU while the complete run established a new record. Per-check cost
+therefore does not explain the counterintuitive end-to-end result. Per-file
+completion totals show the same broad effect. At four workers, disabled
+recursion increased aggregate implementation-unit duration from 323.0 to 543.9
+seconds and module-interface duration from 106.0 to 161.2 seconds. At three
+workers, the corresponding ratios were only 1.28 and 1.16. The nonlinear penalty
+at higher concurrency further implicates a memory threshold rather than a local
+matcher cost.
 
-LLVM 22 implements `misc-no-recursion` as one translation-unit matcher whose
-callback constructs a complete call graph and walks its strongly connected
-components. The LLVM 22 matcher driver invokes declaration match callbacks
-before recursively traversing the declaration's children. The recursion check
-therefore performs a real eager call-graph prepass at the translation-unit root,
-before the ordinary matcher traversal. A paired warm probe of `DeckService.cpp`
-found no isolated translation-unit speedup: recursion analysis added
-approximately 94 MiB of maximum resident memory, read approximately 12,000 more
-statements, and completed within 0.3 seconds of the disabled runs. Each isolated
-process used approximately 4 GiB on this 16 GiB machine.
+LLVM 22's
+[`NoRecursionCheck.cpp`](https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-22.1.8/clang-tools-extra/clang-tidy/misc/NoRecursionCheck.cpp)
+registers one translation-unit matcher whose callback constructs a complete call
+graph and walks its strongly connected components. The LLVM 22
+[`ASTMatchFinder.cpp`](https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-22.1.8/clang/lib/ASTMatchers/ASTMatchFinder.cpp)
+matcher traversal invokes declaration match callbacks before recursively
+traversing the declaration's children. The recursion check therefore performs a
+real eager call-graph prepass at the translation-unit root, before the ordinary
+matcher traversal. A paired warm probe of `DeckService.cpp` found no isolated
+translation-unit speedup: recursion analysis added approximately 94 MiB of
+maximum resident memory, read approximately 12,000 more statements, and
+completed within 0.3 seconds of the disabled runs. Each isolated process used
+approximately 4 GiB on this 16 GiB machine.
 
 The best current explanation is therefore a concurrency effect rather than
 cheaper per-process analysis. The eager prepass can deserialize or touch BMI and

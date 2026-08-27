@@ -19,6 +19,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Check agents coding guide
+      - name: Check meta guide structure
         shell: bash
-        run: python3 tool/agents_hook/verify_agent_coding_guide.py "$GITHUB_WORKSPACE"
+        run: python3 tool/agents_documentation/verify_meta_guide_structure.py "$GITHUB_WORKSPACE"
+
+      - name: Check coding guide document
+        shell: bash
+        run: python3 tool/agents_documentation/verify_coding_guide_document.py "$GITHUB_WORKSPACE"

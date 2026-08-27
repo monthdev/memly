@@ -1,17 +1,31 @@
-# Memly Agent Coding Guide
+# Memly Coding Guide
 
 ## Maintaining This Guide
 
-Update this guide only for a stable, Memly-specific rule that requires agent
-judgment or has dedicated enforcement. State a manual rule normatively. Cite
-each applicable `custom-memly-*` check by name and each applicable verifier
-under `tool/` by its repository-relative path. Cite each applicable custom CMake
-enforcement by its narrowest `memly_*()` helper or validator name. Never name or
-enumerate a built-in Clang-Tidy check, check family, or compiler warning flag
-(`tool/agents_hook/verify_agent_coding_guide.py`). Do not duplicate source or
-configuration, including implementation inventories, current control flow, tool
-versions, or formatter, editor, and CI behavior. Prune superseded prose with the
-rule or enforcement change.
+Follow [`META_GUIDE.md`](META_GUIDE.md) for the shared structure and routing
+requirements of every guide.
+
+Keep this guide scoped to stable rules for Memly project code files and tools
+whose direct purpose is enforcing those code rules. Put CMake-file rules and the
+maintenance of tools that CMake invokes, configures, or uses to validate
+generated build state in
+[`CMAKE_MAINTENANCE_GUIDE.md`](CMAKE_MAINTENANCE_GUIDE.md). Put investigation
+history, measurements, enforcement coverage changes and gaps, and other patch
+evidence in [`PATCH_ARTIFACTS_GUIDE.md`](PATCH_ARTIFACTS_GUIDE.md). Put optional
+local hook orchestration in
+[`HOOKS_RECOMMENDATION_GUIDE.md`](recommendation/HOOKS_RECOMMENDATION_GUIDE.md),
+and put editor diagnostic integration in
+[`LINTING_SETUP_RECOMMENDATION_GUIDE.md`](recommendation/LINTING_SETUP_RECOMMENDATION_GUIDE.md).
+
+Update this guide only for a Memly-specific rule that requires agent judgment or
+has dedicated enforcement. State a manual rule normatively. Cite each applicable
+`custom-memly-*` check by name and each applicable verifier under `tool/` by its
+repository-relative path. Never name or enumerate a built-in Clang-Tidy check,
+check family, or compiler warning flag
+(`tool/agents_documentation/verify_coding_guide_document.py`). Do not duplicate
+project source, implementation inventories, current control flow, tool versions,
+or formatter, editor, and CI behavior. Prune superseded prose with the rule or
+enforcement change.
 
 ## Runtime Composition and Services
 
@@ -337,13 +351,9 @@ Name an included header literally on one physical directive; do not hide it
 behind a macro or line splice. Include C standard-library facilities through
 their C++ headers; do not include deprecated or redundant C compatibility
 headers (`memly_verify_header_includes()`,
-`tool/cmake/verify_deprecated_c_headers.py`).
+`tool/cmake/verify_header_includes.py`).
 
-## Source and CMake Organization
-
-Give each CMake glob variable one folder and do not combine patterns. Recurse
-only for repository-wide policy discovery. Order globs and target sources by
-source-tree order.
+## Source Organization
 
 Collocate each externally importable module interface and its corresponding
 implementation unit directly under `module/`. Store owner-only module pairs and
@@ -353,26 +363,6 @@ and `.cpp` for implementation units. Do not add textual C++ headers, C,
 Objective-C, Objective-C++, or alternate C++ source extensions under `source/`
 or `test/` (`memly_get_module_interface_metadata()`,
 `memly_validate_module_implementation()`, `memly_verify_source_extensions()`).
-
-Declare a target's globs, include roots, resources, and direct dependencies
-beside its source tree. Do not add a forwarding-only architectural
-`CMakeLists.txt`. Keep repository-wide policy at the root, add target
-directories from their nearest owner, and register modules and component
-dependencies through `memly_add_component()` and
-`memly_link_component_dependencies()`.
-
-Treat an explicitly configured `ICU_ROOT` as authoritative. Every discovered ICU
-include directory and library must resolve below that root
-(`memly_validate_explicit_icu_root()`).
-
-Map every named module owned by one component to one static component target.
-Put public module interfaces in its public `CXX_MODULES` file set and internal
-module interfaces in its private `CXX_MODULES` file set. Do not add primary
-routing modules, re-export umbrellas, or module partitions. Only implementation
-units in the owning component may import an `Internal` module; a public
-interface may not import one. CMake's module file-set visibility enforces this
-owner-only boundary (`memly_add_component()`,
-`memly_validate_component_import_graph()`).
 
 Place physical third-party and standard-library includes in the global module
 fragment, then declare the module before imports. Import Memly dependencies; do
@@ -390,29 +380,12 @@ imports of one component count adjacent, and separate consecutive component
 counts with exactly one blank line. Provably inactive branches do not establish
 module structure (`memly_validate_module_unit_structure()`).
 
-Declare component target relationships explicitly rather than deriving target
-edges from imports. Use `PUBLIC` when a public module interface imports the
-dependency and `PRIVATE` for an implementation-only import. Curate each static
-component's outward link interface to its public dependencies so private
-dependency BMIs do not reach indirect consumers, and explicitly link the
-complete static closure into the final executable. Every active cross-component
-Memly import requires a direct component edge, and every direct Memly component
-edge requires an active import. Make an edge `PUBLIC` exactly when an exported
-interface imports that component; otherwise make it `PRIVATE`. A transitively
-available BMI does not grant permission to import its module. Keep a third-party
-dependency private unless clients must name its API directly
-(`memly_link_component_dependencies()`,
-`memly_validate_component_import_graph()`,
-`memly_link_complete_component_closure()`).
-
 ## Enforcement and Suppressions
 
 Keep C++ AST enforcement in `.clang-tidy` YAML, including custom queries. Use a
 dedicated repository verifier only for a non-AST source or documentation policy
 and cite it from the rule it enforces. Do not add a compiled Clang-Tidy
 extension or a general prose-style linter.
-
-All applicable configured gates must pass.
 
 Keep an unavoidable `NOLINT` suppression local to the exact declaration or
 expression and name the suppressed check.

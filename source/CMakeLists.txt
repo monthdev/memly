@@ -46,7 +46,7 @@ memly_link_complete_component_closure(
   ICU::i18n
   ICU::uc
   duckdb
-  memly_asan
+  memly_sanitizers
 )
 
 qt_finalize_executable(memly)

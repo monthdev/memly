@@ -171,9 +171,9 @@ set_property(GLOBAL APPEND PROPERTY JOB_POOLS "memly_clang_tidy=${MEMLY_CLANG_TI
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 set(MEMLY_CMAKE_TOOL_DIRECTORY "${CMAKE_SOURCE_DIR}/tool/cmake")
-set(MEMLY_DEPRECATED_C_HEADER_VERIFIER "${MEMLY_CMAKE_TOOL_DIRECTORY}/verify_deprecated_c_headers.py")
+set(MEMLY_HEADER_INCLUDE_VERIFIER "${MEMLY_CMAKE_TOOL_DIRECTORY}/verify_header_includes.py")
 set(MEMLY_TIMING_SCRIPT "${MEMLY_CMAKE_TOOL_DIRECTORY}/report_elapsed_time.cmake")
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${MEMLY_DEPRECATED_C_HEADER_VERIFIER}")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${MEMLY_HEADER_INCLUDE_VERIFIER}")
 include("${MEMLY_TIMING_SCRIPT}")
 
 # Adds one configure-time policy check's duration to the reported aggregate.
@@ -194,7 +194,7 @@ endfunction()
 function(memly_verify_header_includes)
   memly_get_time_microseconds(MEMLY_HEADER_INCLUDE_CHECK_START_MICROSECONDS)
   execute_process(
-    COMMAND "${Python3_EXECUTABLE}" "${MEMLY_DEPRECATED_C_HEADER_VERIFIER}" "${CMAKE_SOURCE_DIR}" ${ARGN}
+    COMMAND "${Python3_EXECUTABLE}" "${MEMLY_HEADER_INCLUDE_VERIFIER}" "${CMAKE_SOURCE_DIR}" ${ARGN}
     RESULT_VARIABLE MEMLY_HEADER_INCLUDE_VERIFICATION_RESULT
     ERROR_VARIABLE MEMLY_HEADER_INCLUDE_VERIFICATION_ERROR
     ERROR_STRIP_TRAILING_WHITESPACE
@@ -418,13 +418,13 @@ set_target_properties(
   PROPERTIES IMPORTED_LOCATION "${_duckdb_lib}" INTERFACE_INCLUDE_DIRECTORIES "${_duckdb_inc}"
 )
 
-add_library(memly_asan INTERFACE)
+add_library(memly_sanitizers INTERFACE)
 target_compile_options(
-  memly_asan
-  INTERFACE $<$<CONFIG:Debug>:-fsanitize=address;-fno-omit-frame-pointer>
+  memly_sanitizers
+  INTERFACE $<$<CONFIG:Debug>:-fsanitize=address,undefined;-fno-omit-frame-pointer;-fno-sanitize-recover=undefined>
 )
 target_link_options(
-  memly_asan INTERFACE $<$<CONFIG:Debug>:-fsanitize=address>
+  memly_sanitizers INTERFACE $<$<CONFIG:Debug>:-fsanitize=address,undefined>
 )
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
@@ -472,7 +472,6 @@ function(memly_configure_authored_cxx_files MEMLY_TARGET)
   endforeach()
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${ARGN})
   set_property(GLOBAL APPEND PROPERTY MEMLY_REGISTERED_CXX_FILES ${ARGN})
-  set_property(TARGET "${MEMLY_TARGET}" APPEND PROPERTY MEMLY_AUTHORED_CXX_FILES ${ARGN})
 endfunction()
 
 # Computes and validates one component-owned named module interface.
@@ -1174,7 +1173,7 @@ function(memly_link_component_dependencies MEMLY_COMPONENT_TARGET)
   if(MEMLY_DEPENDENCIES_PUBLIC)
     target_link_libraries("${MEMLY_COMPONENT_TARGET}" PUBLIC ${MEMLY_DEPENDENCIES_PUBLIC})
   endif()
-  target_link_libraries("${MEMLY_COMPONENT_TARGET}" PRIVATE memly_asan ${MEMLY_DEPENDENCIES_PRIVATE})
+  target_link_libraries("${MEMLY_COMPONENT_TARGET}" PRIVATE memly_sanitizers ${MEMLY_DEPENDENCIES_PRIVATE})
 
   # Static-library PRIVATE dependencies normally escape through $<LINK_ONLY:...> entries. Curating the outward interface
   # keeps their BMIs unavailable to indirect component consumers; the executable supplies the full link closure
@@ -1367,8 +1366,24 @@ memly_verify_header_includes(${MEMLY_AUTHORED_CXX_FILES})
 get_property(MEMLY_CONFIGURATION_CHECK_MICROSECONDS GLOBAL PROPERTY MEMLY_CONFIGURATION_CHECK_MICROSECONDS)
 get_property(MEMLY_VALIDATED_MODULE_UNIT_COUNT GLOBAL PROPERTY MEMLY_VALIDATED_MODULE_UNIT_COUNT)
 memly_format_elapsed_time(MEMLY_CONFIGURATION_CHECK_ELAPSED_TIME "${MEMLY_CONFIGURATION_CHECK_MICROSECONDS}")
-message(STATUS "Memly configuration checks (${MEMLY_VALIDATED_MODULE_UNIT_COUNT} module units)")
-message(STATUS "Elapsed time: ${MEMLY_CONFIGURATION_CHECK_ELAPSED_TIME}")
+
+message(STATUS "Memly configuration")
+if(CMAKE_CONFIGURATION_TYPES)
+  list(JOIN CMAKE_CONFIGURATION_TYPES ";" MEMLY_BUILD_CONFIGURATION_SUMMARY)
+  message(STATUS "  -DCMAKE_CONFIGURATION_TYPES=\"${MEMLY_BUILD_CONFIGURATION_SUMMARY}\"")
+else()
+  message(STATUS "  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+endif()
+message(STATUS "  -DMEMLY_CLANG_TIDY_JOBS=${MEMLY_CLANG_TIDY_JOBS}")
+if(ICU_ROOT)
+  message(STATUS "  -DICU_ROOT=${ICU_ROOT}")
+else()
+  message(STATUS "  -DICU_ROOT=<unset; automatic discovery>")
+endif()
+
+message(STATUS "Memly configuration checks (${MEMLY_VALIDATED_MODULE_UNIT_COUNT} module units)"
+               " | Elapsed time: ${MEMLY_CONFIGURATION_CHECK_ELAPSED_TIME}"
+)
 
 get_property(MEMLY_COMPONENT_TARGETS GLOBAL PROPERTY MEMLY_COMPONENT_TARGETS)
 set(MEMLY_SOURCE_CLANG_TIDY_TARGETS ${MEMLY_COMPONENT_TARGETS} memly)

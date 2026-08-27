@@ -172,7 +172,7 @@ def include_directives(source_text: str):
 def main() -> int:
     if len(sys.argv) < 2:
         print(
-            "usage: verify_deprecated_c_headers.py <repository-root> [source-file ...]",
+            "usage: verify_header_includes.py <repository-root> [source-file ...]",
             file=sys.stderr,
         )
         return 2
