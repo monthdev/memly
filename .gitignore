@@ -37,20 +37,12 @@ compile_commands.json
 *.log
 *.stackdump
 
-# IDE and editor specific files
-.codex/*
-!.codex/hooks.json
-!.codex/hooks/
-.codex/hooks/*
-!.codex/hooks/check_agents_documentation.sh
-!.codex/hooks/check_repository_format.sh
-!.codex/hooks/lint_build_test_project.sh
-!.vscode/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+# Personal editor and agent files
+/.codex/
+/.vscode/
+/.kateproject
 /.kateproject.local
-.idea
+/.idea/
 *.code-workspace
 CMakeUserPresets.json
 

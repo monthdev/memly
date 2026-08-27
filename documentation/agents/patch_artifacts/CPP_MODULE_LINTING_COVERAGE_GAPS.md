@@ -78,24 +78,16 @@ The module branch changes these lint- and source-policy files:
   interface stamp follows only its recursive imported-interface closure. A
   content-stable compilation-database snapshot avoids nonsemantic full-gate
   invalidation.
-- `.vscode/settings.json` recognizes `.cppm`, removes IWYU, and runs the reduced
-  editor Clang-Tidy set separately for module interfaces and implementation
-  units against the root compilation database that CMake Tools refreshes from
-  the active configure preset. Native extensions own supported editor
-  formatting; Lint Runner remains the adapter for experimental YAML checks and
-  CMake commands.
-- `.codex/hooks/lint_build_test_project.sh` invokes the default build, whose
-  required `memly-clang-tidy` target runs after compilation has generated every
-  importer module map.
-- `.codex/hooks/check_repository_format.sh`,
-  `.github/workflows/CheckRepositoryFormat.yml`, and `.prettierignore` replace
+- `.gitignore` excludes personal editor workspaces and agent lifecycle hooks;
+  editor-neutral compiler, formatter, CMake, and CI policy remains tracked.
+- `.github/workflows/CheckRepositoryFormat.yml` and `.prettierignore` replace
   authored `.hpp` formatting coverage with `.cppm` coverage.
 - `memly_verify_source_extensions()`, invoked during CMake configuration,
   replaces the authored header/source extension policy with the `.cppm` and
   `.cpp` module policy.
 
 The module branch deletes `.iwyu.imp` and `tool/run_include_what_you_use.py`.
-IWYU is neither invoked by CMake nor exposed through Lint Runner on this branch.
+IWYU is not invoked by CMake on this branch.
 
 ## Resource Constraint
 
@@ -106,14 +98,6 @@ pool and the opt-in profiler. It defaults to four and accepts any positive
 integer so the developer can tune concurrency for the current machine. Ninja's
 overall worker limit still constrains the build path; the profiler uses the
 configured value directly.
-
-Before exact named modules, the editor's reduced `custom-memly-*` and
-unused-physical-header check set took 8.14 seconds for an exported service
-interface and 11.07 seconds for the deepest composition implementation unit.
-Each Lint Runner analysis starts one process, while clangd remains responsible
-for built-in diagnostics. Lint Runner has no project-wide process limit, so
-overlapping editor analyses must be assessed separately from the bounded
-full-tree gate.
 
 These gaps weaken direct-import and textual-header hygiene, not compiler type
 checking, authored-source warning coverage, or the module targets' binary ABI.

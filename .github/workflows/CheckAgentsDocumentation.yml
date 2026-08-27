@@ -21,4 +21,4 @@ jobs:
 
       - name: Check agents coding guide
         shell: bash
-        run: bash .codex/hooks/check_agents_documentation.sh
+        run: python3 tool/agents_hook/verify_agent_coding_guide.py "$GITHUB_WORKSPACE"
