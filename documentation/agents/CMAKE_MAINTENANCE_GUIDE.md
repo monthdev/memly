@@ -5,11 +5,12 @@
 Follow [`META_GUIDE.md`](META_GUIDE.md) for the shared structure and routing
 requirements of every guide.
 
-Keep this guide scoped to stable rules for Memly's CMake files and tools that
-CMake invokes, configures, or uses to validate generated build state. Put rules
-for authored project code and tools that directly enforce code spelling or
-structure in [`CODING_GUIDE.md`](CODING_GUIDE.md). Put investigation history,
-measurements, enforcement coverage changes and gaps, and other patch evidence in
+Keep this guide scoped to stable rules for Memly's CMake files, the toolchain
+installation CMake validates, and tools that CMake invokes, configures, or uses
+to validate generated build state. Put rules for authored project code and tools
+that directly enforce code spelling or structure in
+[`CODING_GUIDE.md`](CODING_GUIDE.md). Put investigation history, measurements,
+enforcement coverage changes and gaps, and other patch evidence in
 [`PATCH_ARTIFACTS_GUIDE.md`](PATCH_ARTIFACTS_GUIDE.md). Put optional local hook
 orchestration in
 [`HOOKS_RECOMMENDATION_GUIDE.md`](recommendation/HOOKS_RECOMMENDATION_GUIDE.md),
@@ -42,6 +43,16 @@ dependencies through `memly_add_component()` and
 Treat an explicitly configured `ICU_ROOT` as authoritative. Every discovered ICU
 include directory and library must resolve below that root
 (`memly_validate_explicit_icu_root()`).
+
+## LLVM Toolchain
+
+Do not hard-code an LLVM major version. Treat the configured upstream Clang
+major as the selected toolchain version, require LLD to report that major, and
+require every auxiliary LLVM program used by a checked-in project workflow to
+come from the configured compiler installation and report the same major when
+the program exposes version output. Register an auxiliary program even when
+CMake does not invoke it directly (`memly_require_llvm_program()`,
+`memly_require_matching_llvm_tool()`).
 
 ## Component and Module Targets
 

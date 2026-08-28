@@ -26,7 +26,7 @@ public:
 
     ~PreparedStatement() noexcept = default;
 
-    [[nodiscard]] auto Execute(std::source_location = std::source_location::current()) noexcept -> PreparedStatementExecution;
+    [[nodiscard]] auto Execute(std::source_location = std::source_location::current()) & noexcept [[clang::lifetimebound]] -> PreparedStatementExecution;
 };
 
 }

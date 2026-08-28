@@ -16,7 +16,7 @@ private:
     IndexCache::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
 
 public:
-    explicit DeckService(Repository::DeckRepository&) noexcept;
+    explicit DeckService([[clang::lifetimebound]] Repository::DeckRepository&) noexcept;
 
     explicit DeckService(const DeckService&) = delete;
     auto operator=(const DeckService&) -> DeckService& = delete;

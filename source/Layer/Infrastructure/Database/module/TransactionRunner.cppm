@@ -22,7 +22,7 @@ private:
     duckdb::Connection& m_DatabaseConnection;
 
 public:
-    explicit TransactionRunner(duckdb::Connection&) noexcept;
+    explicit TransactionRunner([[clang::lifetimebound]] duckdb::Connection&) noexcept;
 
     explicit TransactionRunner(const TransactionRunner&) = delete;
     auto operator=(const TransactionRunner&) -> TransactionRunner& = delete;

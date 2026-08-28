@@ -1,6 +1,7 @@
 module;
 
 #include <string>
+#include <string_view>
 
 export module Memly.Domain.HumanText;
 
@@ -24,8 +25,11 @@ public:
 
     [[nodiscard]] static auto FromPersisted(std::string&&, std::string&&) noexcept -> HumanText;
 
-    [[nodiscard]] auto GetNormalizedStdString() const noexcept -> const std::string&;
-    [[nodiscard]] auto GetNormalizedCaseFoldedStdString() const noexcept -> const std::string&;
+    [[nodiscard]] auto GetNormalizedStdStringView() const& noexcept [[clang::lifetimebound]] -> std::string_view;
+    [[nodiscard]] auto GetNormalizedStdStringView() const&& noexcept -> std::string_view = delete;
+
+    [[nodiscard]] auto GetNormalizedCaseFoldedStdStringView() const& noexcept [[clang::lifetimebound]] -> std::string_view;
+    [[nodiscard]] auto GetNormalizedCaseFoldedStdStringView() const&& noexcept -> std::string_view = delete;
 };
 
 }

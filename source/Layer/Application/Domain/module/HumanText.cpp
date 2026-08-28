@@ -1,6 +1,7 @@
 module;
 
 #include <string>
+#include <string_view>
 #include <utility>
 
 module Memly.Domain.HumanText;
@@ -16,12 +17,12 @@ HumanText::HumanText(std::string&& NormalizedText, std::string&& NormalizedCaseF
     return HumanText{ std::move(NormalizedText), std::move(NormalizedCaseFoldedText) };
 }
 
-[[nodiscard]] auto HumanText::GetNormalizedStdString() const noexcept -> const std::string& {
-    return this->m_NormalizedText;
+[[nodiscard]] auto HumanText::GetNormalizedStdStringView() const& noexcept -> std::string_view {
+    return std::string_view{ this->m_NormalizedText };
 }
 
-[[nodiscard]] auto HumanText::GetNormalizedCaseFoldedStdString() const noexcept -> const std::string& {
-    return this->m_NormalizedCaseFoldedText;
+[[nodiscard]] auto HumanText::GetNormalizedCaseFoldedStdStringView() const& noexcept -> std::string_view {
+    return std::string_view{ this->m_NormalizedCaseFoldedText };
 }
 
 }

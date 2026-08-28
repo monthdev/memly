@@ -28,7 +28,7 @@ public:
 
     ~MemlyException() noexcept override = default;
 
-    [[nodiscard]] auto what() const noexcept -> const char* override;
+    [[nodiscard]] auto what() const noexcept [[clang::lifetimebound]] -> const char* override;
 
 private:
     void ConstructErrorMessage(std::initializer_list<std::string_view>, std::source_location) noexcept;

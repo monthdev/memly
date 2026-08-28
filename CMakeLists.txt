@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 4.4)
 project(memly LANGUAGES CXX)
 
-set(MEMLY_LLVM_MAJOR_VERSION 22)
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
   message(FATAL_ERROR "Memly's Android and iOS toolchain contracts have not been defined yet")
 endif()
@@ -12,14 +10,14 @@ if(NOT CMAKE_SYSTEM_NAME MATCHES "^(Darwin|Linux|Windows)$")
 endif()
 
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  message(FATAL_ERROR "Memly desktop builds require upstream LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x; "
+  message(FATAL_ERROR "Memly desktop builds require upstream LLVM Clang; "
                       "configured compiler is ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
   )
 endif()
-string(REGEX MATCH "^[0-9]+" MEMLY_COMPILER_MAJOR_VERSION "${CMAKE_CXX_COMPILER_VERSION}")
-if(NOT MEMLY_COMPILER_MAJOR_VERSION STREQUAL "${MEMLY_LLVM_MAJOR_VERSION}")
-  message(FATAL_ERROR "Memly desktop builds require LLVM Clang ${MEMLY_LLVM_MAJOR_VERSION}.x; "
-                      "configured version is ${CMAKE_CXX_COMPILER_VERSION}"
+string(REGEX MATCH "^[0-9]+" MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION "${CMAKE_CXX_COMPILER_VERSION}")
+if(MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION STREQUAL "")
+  message(FATAL_ERROR "Unable to determine the configured LLVM Clang major version from "
+                      "${CMAKE_CXX_COMPILER_VERSION}"
   )
 endif()
 
@@ -38,15 +36,15 @@ endif()
 if(NOT CMAKE_CXX_COMPILER_LINKER_ID STREQUAL "LLD")
   message(
     FATAL_ERROR
-      "Memly desktop builds require LLVM LLD ${MEMLY_LLVM_MAJOR_VERSION}.x; "
+      "Memly desktop builds require LLVM LLD matching configured LLVM Clang " "${CMAKE_CXX_COMPILER_VERSION}; "
       "configured linker is ${CMAKE_CXX_COMPILER_LINKER_ID} ${CMAKE_CXX_COMPILER_LINKER_VERSION}. "
       "Configure with CMAKE_LINKER_TYPE=LLD."
   )
 endif()
 string(REGEX MATCH "^[0-9]+" MEMLY_LINKER_MAJOR_VERSION "${CMAKE_CXX_COMPILER_LINKER_VERSION}")
-if(NOT MEMLY_LINKER_MAJOR_VERSION STREQUAL "${MEMLY_LLVM_MAJOR_VERSION}")
-  message(FATAL_ERROR "Memly desktop builds require LLVM LLD ${MEMLY_LLVM_MAJOR_VERSION}.x; "
-                      "configured version is ${CMAKE_CXX_COMPILER_LINKER_VERSION}"
+if(NOT MEMLY_LINKER_MAJOR_VERSION STREQUAL "${MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION}")
+  message(FATAL_ERROR "Memly requires LLVM LLD ${MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION}.x to match configured "
+                      "LLVM Clang; configured linker version is ${CMAKE_CXX_COMPILER_LINKER_VERSION}"
   )
 endif()
 
@@ -118,19 +116,28 @@ endif()
 
 cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH MEMLY_LLVM_BINARY_DIRECTORY)
 cmake_path(GET MEMLY_LLVM_BINARY_DIRECTORY PARENT_PATH MEMLY_LLVM_INSTALL_DIRECTORY)
+set(MEMLY_LLVM_CLANG_SHARE_DIRECTORY "${MEMLY_LLVM_INSTALL_DIRECTORY}/share/clang")
 
-# Finds a tool in the configured LLVM installation and verifies its major version.
-function(memly_require_llvm_tool MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE MEMLY_LLVM_TOOL_NAME)
+# Finds a program in the configured LLVM installation.
+function(memly_require_llvm_program MEMLY_LLVM_PROGRAM_EXECUTABLE_VARIABLE MEMLY_LLVM_PROGRAM_NAME)
   find_program(
-    "${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE}"
+    "${MEMLY_LLVM_PROGRAM_EXECUTABLE_VARIABLE}"
     NAMES ${ARGN}
-    HINTS "${MEMLY_LLVM_BINARY_DIRECTORY}"
+    HINTS "${MEMLY_LLVM_BINARY_DIRECTORY}" "${MEMLY_LLVM_CLANG_SHARE_DIRECTORY}"
     NO_DEFAULT_PATH REQUIRED
   )
-  cmake_path(GET ${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE} PARENT_PATH MEMLY_LLVM_TOOL_BINARY_DIRECTORY)
-  if(NOT MEMLY_LLVM_TOOL_BINARY_DIRECTORY STREQUAL MEMLY_LLVM_BINARY_DIRECTORY)
-    message(FATAL_ERROR "Memly requires ${MEMLY_LLVM_TOOL_NAME} from the configured LLVM compiler installation")
+  cmake_path(GET ${MEMLY_LLVM_PROGRAM_EXECUTABLE_VARIABLE} PARENT_PATH MEMLY_LLVM_PROGRAM_DIRECTORY)
+  if(NOT MEMLY_LLVM_PROGRAM_DIRECTORY STREQUAL MEMLY_LLVM_BINARY_DIRECTORY
+     AND NOT MEMLY_LLVM_PROGRAM_DIRECTORY STREQUAL MEMLY_LLVM_CLANG_SHARE_DIRECTORY
+  )
+    message(FATAL_ERROR "Memly requires ${MEMLY_LLVM_PROGRAM_NAME} from the configured LLVM compiler installation")
   endif()
+  set(${MEMLY_LLVM_PROGRAM_EXECUTABLE_VARIABLE} "${${MEMLY_LLVM_PROGRAM_EXECUTABLE_VARIABLE}}" PARENT_SCOPE)
+endfunction()
+
+# Requires a configured-installation LLVM tool whose reported major matches Clang.
+function(memly_require_matching_llvm_tool MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE MEMLY_LLVM_TOOL_NAME)
+  memly_require_llvm_program("${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE}" "${MEMLY_LLVM_TOOL_NAME}" ${ARGN})
   execute_process(
     COMMAND "${${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE}}" --version
     RESULT_VARIABLE MEMLY_LLVM_TOOL_VERSION_RESULT
@@ -142,26 +149,27 @@ function(memly_require_llvm_tool MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE MEMLY_LLVM_
     message(FATAL_ERROR "Unable to read ${MEMLY_LLVM_TOOL_NAME} version: ${MEMLY_LLVM_TOOL_VERSION_ERROR}")
   endif()
   string(REGEX MATCH "version ([0-9]+)" MEMLY_LLVM_TOOL_VERSION_MATCH "${MEMLY_LLVM_TOOL_VERSION_OUTPUT}")
-  if(NOT MEMLY_LLVM_TOOL_VERSION_MATCH OR NOT CMAKE_MATCH_1 STREQUAL "${MEMLY_LLVM_MAJOR_VERSION}")
+  if(NOT MEMLY_LLVM_TOOL_VERSION_MATCH OR NOT CMAKE_MATCH_1 STREQUAL "${MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION}")
     message(
-      FATAL_ERROR
-        "Memly requires ${MEMLY_LLVM_TOOL_NAME} ${MEMLY_LLVM_MAJOR_VERSION}.x from the configured LLVM toolchain; "
-        "found ${MEMLY_LLVM_TOOL_VERSION_OUTPUT}"
+      FATAL_ERROR "Memly requires ${MEMLY_LLVM_TOOL_NAME} ${MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION}.x to match configured "
+                  "LLVM Clang; " "found ${MEMLY_LLVM_TOOL_VERSION_OUTPUT}"
     )
   endif()
   set(${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE} "${${MEMLY_LLVM_TOOL_EXECUTABLE_VARIABLE}}" PARENT_SCOPE)
 endfunction()
 
-memly_require_llvm_tool(MEMLY_LLVM_CLANG_TIDY_EXECUTABLE clang-tidy "clang-tidy-${MEMLY_LLVM_MAJOR_VERSION}" clang-tidy)
-memly_require_llvm_tool(MEMLY_LLVM_CLANGD_EXECUTABLE clangd "clangd-${MEMLY_LLVM_MAJOR_VERSION}" clangd)
-memly_require_llvm_tool(
-  MEMLY_LLVM_CLANG_FORMAT_EXECUTABLE clang-format "clang-format-${MEMLY_LLVM_MAJOR_VERSION}" clang-format
+memly_require_matching_llvm_tool(
+  MEMLY_LLVM_CLANG_TIDY_EXECUTABLE clang-tidy "clang-tidy-${MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION}" clang-tidy
 )
-find_program(
-  MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE
-  NAMES "run-clang-tidy-${MEMLY_LLVM_MAJOR_VERSION}" run-clang-tidy run-clang-tidy.py
-  HINTS "${MEMLY_LLVM_BINARY_DIRECTORY}" "${MEMLY_LLVM_INSTALL_DIRECTORY}/share/clang"
-  NO_DEFAULT_PATH REQUIRED
+memly_require_matching_llvm_tool(
+  MEMLY_LLVM_CLANGD_EXECUTABLE clangd "clangd-${MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION}" clangd
+)
+memly_require_matching_llvm_tool(
+  MEMLY_LLVM_CLANG_FORMAT_EXECUTABLE clang-format "clang-format-${MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION}" clang-format
+)
+memly_require_llvm_program(
+  MEMLY_LLVM_RUN_CLANG_TIDY_EXECUTABLE run-clang-tidy "run-clang-tidy-${MEMLY_LLVM_TOOLCHAIN_MAJOR_VERSION}"
+  run-clang-tidy run-clang-tidy.py
 )
 set(MEMLY_CLANG_TIDY_JOBS 4 CACHE STRING "Maximum concurrent Clang-Tidy processes")
 if(NOT MEMLY_CLANG_TIDY_JOBS MATCHES "^[1-9][0-9]*$")

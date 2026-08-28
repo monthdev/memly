@@ -17,7 +17,6 @@ jobs:
     env:
       AQTINSTALL_VERSION: "3.3.0"
       CMAKELANG_VERSION: "0.6.13"
-      LLVM_MAJOR: "22"
       NODE_VERSION: "26.5.1"
       PRETTIER_VERSION: "3.9.6"
       PYTHON_VERSION: "3.14.6"
@@ -52,10 +51,8 @@ jobs:
 
           echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
 
-      - name: Collect target C++ files
+      - name: Collect C++ files
         id: cxx_files
-        env:
-          BASE_SHA: ${{ steps.comparison.outputs.base_sha }}
         shell: bash
         run: |
           set -euo pipefail
@@ -66,28 +63,16 @@ jobs:
             ':(glob)test/**/*.cpp'
             ':(glob)test/**/*.cppm'
           )
-          mapfile -t CONFIG_FILES < <(
-            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              .clang-format \
-              .github/workflows/CheckRepositoryFormat.yml
-          )
-
-          if [[ ${#CONFIG_FILES[@]} -gt 0 ]]; then
-            echo "ClangFormat check configuration changed; checking all C++ files."
-            git ls-files "${CXX_PATHS[@]}" > /tmp/clang_format_files.txt
-          else
-            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$GITHUB_SHA" -- \
-              "${CXX_PATHS[@]}" > /tmp/clang_format_files.txt
-          fi
+          git ls-files "${CXX_PATHS[@]}" > /tmp/clang_format_files.txt
 
           if [[ ! -s /tmp/clang_format_files.txt ]]; then
             echo "has_files=false" >> "$GITHUB_OUTPUT"
-            echo "No C++ files changed."
+            echo "No C++ files found."
             exit 0
           fi
 
           echo "has_files=true" >> "$GITHUB_OUTPUT"
-          echo "Target C++ files:"
+          echo "C++ files:"
           cat /tmp/clang_format_files.txt
 
       - name: Collect target CMake listfiles
@@ -206,24 +191,19 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install clang-format ${{ env.LLVM_MAJOR }}
+      - name: Install latest stable clang-format
         if: steps.cxx_files.outputs.has_files == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y wget gnupg lsb-release software-properties-common
-          wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
-          sudo bash /tmp/llvm.sh "$LLVM_MAJOR"
-          sudo apt-get update
-          CLANG_FORMAT_PACKAGE="clang-format-${LLVM_MAJOR}"
-          sudo apt-get install --no-install-recommends -y "$CLANG_FORMAT_PACKAGE"
-          CLANG_FORMAT_EXECUTABLE="/usr/bin/${CLANG_FORMAT_PACKAGE}"
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew install clang-format
+          CLANG_FORMAT_EXECUTABLE="$(brew --prefix clang-format)/bin/clang-format"
           echo "CLANG_FORMAT_EXECUTABLE=$CLANG_FORMAT_EXECUTABLE" >> "$GITHUB_ENV"
-          VERSION_OUTPUT="$("$CLANG_FORMAT_EXECUTABLE" --version)"
-          echo "$VERSION_OUTPUT"
-          if [[ "$VERSION_OUTPUT" != *"version ${LLVM_MAJOR}."* ]]; then
-            echo "::error::Expected clang-format $LLVM_MAJOR.x, got: $VERSION_OUTPUT"
+          CLANG_FORMAT_VERSION_OUTPUT="$("$CLANG_FORMAT_EXECUTABLE" --version)"
+          echo "$CLANG_FORMAT_VERSION_OUTPUT"
+          if [[ ! "$CLANG_FORMAT_VERSION_OUTPUT" =~ version[[:space:]]+([0-9]+)\. ]]; then
+            echo "::error::Could not determine the latest stable clang-format major: $CLANG_FORMAT_VERSION_OUTPUT"
             exit 1
           fi
 

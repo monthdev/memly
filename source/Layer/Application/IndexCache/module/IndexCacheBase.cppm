@@ -48,7 +48,7 @@ public:
 
     [[nodiscard]] auto AcquireLease() -> IndexCacheLease {
         std::shared_ptr<typename IndexCacheDefinitionType::IndexType> IndexSharedPointer{ this->m_IndexWeakPointer.lock() };
-        if (IndexSharedPointer == nullptr) {
+        if (not IndexSharedPointer) {
             IndexSharedPointer = std::make_shared<typename IndexCacheDefinitionType::IndexType>();
             this->m_IndexWeakPointer = IndexSharedPointer;
         }
@@ -59,9 +59,12 @@ public:
         IndexCacheDefinitionType::RefreshIndex(*IndexCacheLease.m_IndexSharedPointer, std::move(IndexRefreshData));
     }
 
-    [[nodiscard]] auto GetIndex(const IndexCacheLease& IndexCacheLease) const noexcept -> const typename IndexCacheDefinitionType::IndexType& {
+    [[nodiscard]] auto GetIndex([[clang::lifetimebound]] const IndexCacheLease& IndexCacheLease) const& noexcept -> const
+        typename IndexCacheDefinitionType::IndexType& {
         return *IndexCacheLease.m_IndexSharedPointer;
     }
+
+    [[nodiscard]] auto GetIndex(const IndexCacheLease&&) const& noexcept -> const typename IndexCacheDefinitionType::IndexType& = delete;
 };
 
 }

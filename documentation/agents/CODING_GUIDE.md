@@ -140,8 +140,18 @@ value for general sized text
 Add top-level `const` in the `string_view` parameter definition
 (`custom-memly-string-view-definition-parameter-const`). Reserve
 `const char* const` for an already pointer-shaped, null-terminated boundary or
-an explicit non-allocating path. Store `string_view` only where design enforces
-its owner and invalidation boundary.
+an explicit non-allocating path. Return owner-backed borrowed text as
+`std::string_view` by value rather than exposing its owning `std::string` by
+reference. Restrict such an accessor to lvalue owners, delete its rvalue
+overload, and mark the lvalue declaration `[[clang::lifetimebound]]`. Store
+`string_view` only where design enforces its owner and invalidation boundary.
+
+Mark every intentional returned or stored lifetime dependency
+`[[clang::lifetimebound]]` on its module-interface declaration after enforcing
+the ownership, construction, destruction-order, or full-expression boundary in
+the API. The annotation communicates that boundary to cross-unit analysis; it
+does not replace the boundary or justify moving a runtime definition into a
+module interface.
 
 Declare every non-deleted, non-void method and free function except `main`
 `[[nodiscard]]` (`custom-memly-nodiscard-callable`), as well as every enum
