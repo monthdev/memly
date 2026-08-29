@@ -22,7 +22,8 @@ model is documented in
 - Clang-Tidy analyzes every authored module interface and implementation unit
   after its required BMIs and module maps exist. Per-file stamps invalidate an
   edited unit and its actual import dependents instead of the whole tree.
-- clangd parses the same CMake-produced module graph.
+- Ordinary clangd parses the same CMake-produced module graph. LLVM 23's
+  experimental mode instead builds a separate content-addressed BMI cache.
 - `misc-include-cleaner` still diagnoses unused standard-library and third-party
   physical headers in global module fragments.
 - A missing import remains a compiler error when the declaration is not already
@@ -30,8 +31,10 @@ model is documented in
 
 ## Known Gaps
 
-- A clean configure does not produce BMIs. clangd and standalone Clang-Tidy
-  cannot analyze an importer until CMake builds the imported interfaces.
+- A clean configure does not produce CMake BMIs. Ordinary clangd and standalone
+  Clang-Tidy cannot analyze an importer until CMake builds the imported
+  interfaces. LLVM 23 experimental clangd can synthesize its own BMIs, but
+  Clang-Tidy cannot consume that private cache.
 - An importer can temporarily be analyzed against the last-built dependency BMI
   after an interface edit. Rebuilding the interface refreshes consumer
   diagnostics.
@@ -50,17 +53,20 @@ model is documented in
   declarations supplied by named-module imports as missing textual headers.
   Redundant-declaration analysis is also disabled because imported libc++ BMIs
   produce false duplicate allocation-function diagnostics.
-- clangd 22 can assign different internal identities to identical declarations
-  repeated through global module fragments. This produces false ICU and libc++
-  ODR/type diagnostics while the compiler and Clang-Tidy accept the same units.
-  The upstream defect is tracked by
-  [LLVM issue #196678](https://github.com/llvm/llvm-project/issues/196678).
+- Ordinary clangd 23.1.0 still assigns different internal identities to
+  identical declarations repeated through global module fragments. This produces
+  false ICU and libc++ ODR/type diagnostics while the compiler and Clang-Tidy
+  accept the same units. The similar minimal reproduction in
+  [LLVM issue #196678](https://github.com/llvm/llvm-project/issues/196678) was
+  closed after a newer development snapshot fixed that reproduction, but the two
+  Memly cases remain reproducible in the 23.1.0 ordinary path.
 - Include What You Use 0.26 terminates with `SIGSEGV` when given the Clang 22
   BMI and module-map arguments. Removing those arguments makes imports
   unavailable, so IWYU is not a module-branch gate.
-- clangd's explicit experimental module mode took 33.82 seconds to parse
-  `main.cpp`, compared with 1.29 seconds through the ordinary CMake BMI path. It
-  remains disabled.
+- LLVM 23's experimental module mode fixes the two known false-diagnostic cases
+  in the actual LSP path, but not in `clangd --check`. It remains opt-in because
+  it duplicates CMake's BMI storage and has materially higher cold-start,
+  memory, and edit costs.
 
 ## Changed Files and Enforcement Authorities
 
@@ -73,6 +79,9 @@ model is documented in
   retains `Diagnostics.UnusedIncludes: Strict`, and removes `custom-memly-*`
   from clangd's interactive pass because the complete Clang-Tidy gate runs them
   separately.
+- [`memly_lsp_proxy.py`](../../../tool/lsp/memly_lsp_proxy.py) exposes
+  `--experimental-modules-support` as an explicit editor tradeoff without
+  changing the ordinary CMake-BMI default.
 - [`CMakeLists.txt`](../../../CMakeLists.txt) owns the active implementation:
   `memly_verify_source_extensions()` restricts authored C++ file types;
   `memly_get_module_interface_metadata()` and
@@ -104,7 +113,7 @@ model is documented in
 
 ## Resource and Build Findings
 
-The current tree contains 88 module units plus `main.cpp`, for 89 Clang-Tidy
+The current tree contains 87 module units plus `main.cpp`, for 88 Clang-Tidy
 inputs. Each lint worker can load a large transitive PCM closure. Four workers
 are the default on the 16 GiB development machine; `MEMLY_CLANG_TIDY_JOBS`
 accepts any positive integer for controlled machine-specific comparisons.
@@ -119,3 +128,51 @@ build-speed benefit.
 These gaps weaken direct-import and textual-header hygiene; they do not weaken
 compiler type checking, authored-source warning coverage, or the component
 targets' binary ABI.
+
+## LLVM 23 Experimental clangd Probe
+
+The August 29, 2026 probe used Homebrew clangd 23.1.0, CMake 4.4.3, the Debug
+compilation database, `--background-index=false`, and a fresh clangd process per
+measurement. Times are wall-clock times from `/usr/bin/time`; memory is maximum
+resident set size. `clangd --check` exercises additional per-token checks and
+does not match the actual LSP diagnostic path, so editor correctness was
+verified separately through `initialize`, `didOpen`, and every diagnostic
+publication observed for five seconds.
+
+| Input and state                                           | Ordinary CMake BMI | Experimental clangd BMI | Result                                           |
+| --------------------------------------------------------- | -----------------: | ----------------------: | ------------------------------------------------ |
+| `DeckForestSnapshotIndex.cpp`, existing build, `--check`  |    1.88 s / 195 MB |         2.18 s / 218 MB | Both reported the same false libc++ type errors. |
+| `HumanTextInput.cpp`, existing build, `--check`           |    0.64 s / 180 MB |         1.26 s / 216 MB | Both reported the same false ICU ODR error.      |
+| `main.cpp`, existing build, cold experimental cache       |    3.52 s / 494 MB |       36.84 s / 1.82 GB | Both completed without diagnostics.              |
+| `main.cpp`, existing build, warm experimental cache       |    3.52 s / 494 MB |         7.50 s / 544 MB | Both completed without diagnostics.              |
+| `DeckForestSnapshotIndex.cpp`, configure only, actual LSP |        unavailable |                  3.31 s | Experimental LSP published no diagnostics.       |
+| `HumanTextInput.cpp`, configure only, actual LSP          |        unavailable |                  2.81 s | Experimental LSP published no diagnostics.       |
+| `main.cpp`, configure only, actual LSP                    |        unavailable |                 25.55 s | Experimental LSP published no diagnostics.       |
+
+With existing generated state and a warm experimental cache, actual LSP
+diagnostics arrived in 0.87 seconds for `DeckForestSnapshotIndex.cpp`, 0.62
+seconds for `HumanTextInput.cpp`, and 5.03 seconds for `main.cpp`. Reanalyzing a
+same-process whitespace edit took about 1.00, 0.67, and 2.00 seconds
+respectively. A cold actual-LSP `main.cpp` open took 24.07 seconds and peaked at
+1.73 GB. This matches the
+[LLVM 23 module-support release notes](https://releases.llvm.org/23.1.0/tools/clang/tools/extra/docs/ReleaseNotes.html#improvements-to-c-20-modules-support):
+clangd now caches its built modules across invocations, but deliberately
+disables its normal preamble optimization for translation units that use
+modules.
+
+The configure-only compilation database contained neither `.pcm` nor `.modmap`
+files. Experimental clangd built private BMIs and produced correct LSP
+diagnostics, although its whole-database dependency scan logged failures for
+not-yet-generated Qt/QML/RCC sources. Running standalone Clang-Tidy afterward
+still failed on the absent CMake `.modmap` and unavailable named module. The
+experimental LSP did emit an intentionally introduced
+`readability-container-size-empty` diagnostic from clangd's integrated built-in
+Clang-Tidy pass before compilation. It therefore provides pre-build interactive
+built-in diagnostics for opened files, but cannot replace
+`memly-source-build-ready`, the content-stable Clang-Tidy compilation database,
+the YAML custom-check driver, or the per-unit lint stamps.
+
+The older LLVM 22 experiment measured 33.82 seconds for experimental `main.cpp`
+parsing versus 1.29 seconds through CMake's BMI path. LLVM 23's cross-invocation
+cache substantially improves repeat use and fixes the actual LSP false
+diagnostics, but does not justify pruning the CMake module or lint pipeline.

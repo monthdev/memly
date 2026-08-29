@@ -111,7 +111,13 @@ def _read_cmake_cache_executable(build_directory: Path, variable_name: str) -> P
 
 
 class _ClangdProxy:
-    def __init__(self, project_root: Path, clangd_path: Path, clang_tidy_path: Path) -> None:
+    def __init__(
+        self,
+        project_root: Path,
+        clangd_path: Path,
+        clang_tidy_path: Path,
+        experimental_modules_support: bool,
+    ) -> None:
         self._project_root = project_root
         self._clang_tidy_path = clang_tidy_path
         self._clangd_process = subprocess.Popen(
@@ -123,6 +129,7 @@ class _ClangdProxy:
                 "--limit-results=500",
                 "--completion-style=bundled",
                 f"--compile-commands-dir={project_root}",
+                *(("--experimental-modules-support",) if experimental_modules_support else ()),
             ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -395,6 +402,11 @@ class _ClangdProxy:
 def _create_argument_parser() -> argparse.ArgumentParser:
     argument_parser = argparse.ArgumentParser(description=__doc__)
     argument_parser.add_argument("--project-root", required=True, type=Path)
+    argument_parser.add_argument(
+        "--experimental-modules-support",
+        action="store_true",
+        help="let clangd build and cache named-module BMIs independently of CMake",
+    )
     return argument_parser
 
 
@@ -405,7 +417,12 @@ def main() -> int:
         active_build_directory = _active_build_directory(project_root)
         clangd_path = _read_cmake_cache_executable(active_build_directory, _CMAKE_CLANGD_VARIABLE)
         clang_tidy_path = _read_cmake_cache_executable(active_build_directory, _CMAKE_CLANG_TIDY_VARIABLE)
-        return _ClangdProxy(project_root, clangd_path, clang_tidy_path).run()
+        return _ClangdProxy(
+            project_root,
+            clangd_path,
+            clang_tidy_path,
+            arguments.experimental_modules_support,
+        ).run()
     except (OSError, RuntimeError, ValueError) as error:
         print(f"memly-lsp-proxy: {error}", file=sys.stderr)
         return 1

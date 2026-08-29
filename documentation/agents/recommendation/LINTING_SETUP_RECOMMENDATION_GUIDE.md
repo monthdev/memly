@@ -41,15 +41,27 @@ implements this model for editors that accept a custom LSP command.
 
 ## C++ Module Quirks
 
-- Configure before opening the editor, then build once. A clean configuration
-  publishes the compilation database but is insufficient by itself: clangd
-  cannot analyze importers until CMake builds their BMIs and module maps.
-- This build-first workflow is intentional. Memly accepts it instead of enabling
-  clangd's experimental module support, which took 33.82 seconds to parse
-  `main.cpp` versus 1.29 seconds through CMake's explicit BMI path in the
-  [recorded probe](../patch_artifact/CPP_MODULE_BUILD_AND_LINT_FINDINGS.md#known-gaps).
+- Configure before opening the editor, then build once when using clangd's
+  ordinary explicit-BMI path. A clean configuration publishes the compilation
+  database but does not create the BMIs and module maps that path consumes.
   Rebuild an edited interface before trusting importer diagnostics because
   clangd can temporarily analyze against the last-built dependency BMI.
+- LLVM 23's experimental module builder is an opt-in correctness workaround for
+  ordinary clangd's false ICU and libc++ module diagnostics. Pass
+  `--experimental-modules-support` to
+  [`memly_lsp_proxy.py`](../../../tool/lsp/memly_lsp_proxy.py) to use it. The
+  actual LSP path correctly analyzed `DeckForestSnapshotIndex.cpp` and
+  `HumanTextInput.cpp` from a configure-only tree, but it maintains a second BMI
+  cache and has materially higher cold-start, memory, and edit costs. See the
+  [recorded LLVM 23 probe](../patch_artifact/CPP_MODULE_BUILD_AND_LINT_FINDINGS.md#llvm-23-experimental-clangd-probe)
+  before making it an editor default.
+- Experimental clangd can run its integrated built-in Clang-Tidy checks for an
+  opened file before CMake compiles the module graph. It does not make
+  standalone Clang-Tidy or Memly's YAML custom checks pre-build capable.
+  Standalone Clang-Tidy still consumes CMake's generated module maps and BMIs,
+  so the mandatory gate must remain after the module build. `clangd --check`
+  also still reports the known false module diagnostics under the experimental
+  flag even though the long-lived LSP path does not.
 - Associate `.cppm` with C++.
 - Missing textual-include diagnostics are disabled because named-module imports
   produce false suggestions. Unused physical includes remain checked.
@@ -57,10 +69,11 @@ implements this model for editors that accept a custom LSP command.
   module implementation also receives its primary interface implicitly, so the
   tools cannot require a redundant explicit import for names already reachable
   there.
-- clangd can report false duplicate-type or ODR diagnostics when third-party
-  declarations repeat through global module fragments. When the compiler and the
-  mandatory Clang-Tidy gate accept the same unit, confirm the known tooling gap
-  before changing valid code to satisfy the editor.
+- Ordinary clangd can report false duplicate-type or ODR diagnostics when
+  third-party declarations repeat through global module fragments. When the
+  compiler and the mandatory Clang-Tidy gate accept the same unit, confirm the
+  known tooling gap or use the experimental LLVM 23 mode before changing valid
+  code to satisfy the editor.
 
 Standalone Clang-Tidy is a batch translation-unit analysis and is materially
 heavier than clangd's incremental path. Do not overlap an editor-triggered pass
