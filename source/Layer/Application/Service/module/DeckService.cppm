@@ -16,27 +16,49 @@ private:
     IndexCache::DeckForestSnapshotIndexCache m_DeckForestSnapshotIndexCache;
 
 public:
-    explicit DeckService([[clang::lifetimebound]] Repository::DeckRepository&) noexcept;
+    explicit DeckService(
+        [[clang::lifetimebound]] Repository::DeckRepository&
+    ) noexcept;
 
     explicit DeckService(const DeckService&) = delete;
-    auto operator=(const DeckService&) -> DeckService& = delete;
+    DeckService&
+    operator=(const DeckService&) = delete;
 
     explicit DeckService(DeckService&&) = delete;
-    auto operator=(DeckService&&) -> DeckService& = delete;
+    DeckService&
+    operator=(DeckService&&) = delete;
 
     ~DeckService() noexcept = default;
 
-    [[nodiscard]] auto AcquireDeckForestSnapshotIndexCacheLease() -> IndexCache::DeckForestSnapshotIndexCache::IndexCacheLease;
+    [[nodiscard]] IndexCache::DeckForestSnapshotIndexCache::IndexCacheLease
+    AcquireDeckForestSnapshotIndexCacheLease();
 
-    [[nodiscard]] static auto IsDeckNameLengthValid(const std::string&) noexcept -> bool;
+    [[nodiscard]] static bool
+    IsDeckNameLengthValid(const std::string&) noexcept;
 
-    void CreateRootDeck(const std::string&, std::uint8_t);
-    void CreateChildDeck(const std::string&, const std::string&);
-    void MoveDeckToRoot(const std::string&);
-    void MoveDeckUnderParent(const std::string&, const std::string&);
-    void RenameDeck(const std::string&, const std::string&);
-    void DeleteDeck(const std::string&);
-    void RefreshDeckForestSnapshotIndexCache(const IndexCache::DeckForestSnapshotIndexCache::IndexCacheLease&, std::int64_t);
+    void
+    CreateRootDeck(const std::string&, std::uint8_t);
+
+    void
+    CreateChildDeck(const std::string&, const std::string&);
+
+    void
+    MoveDeckToRoot(const std::string&);
+
+    void
+    MoveDeckUnderParent(const std::string&, const std::string&);
+
+    void
+    RenameDeck(const std::string&, const std::string&);
+
+    void
+    DeleteDeck(const std::string&);
+
+    void
+    RefreshDeckForestSnapshotIndexCache(
+        const IndexCache::DeckForestSnapshotIndexCache::IndexCacheLease&,
+        std::int64_t
+    );
 };
 
 }

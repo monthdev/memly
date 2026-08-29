@@ -14,20 +14,24 @@ export namespace Memly::Repository {
 class LibraryRepository final {
 private:
     Database::DatabaseRuntime& m_DatabaseRuntime;
-    Database::PreparedStatement m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
+    Database::PreparedStatement
+        m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement;
 
 public:
     explicit LibraryRepository(Database::DatabaseRuntime&);
 
     explicit LibraryRepository(const LibraryRepository&) = delete;
-    auto operator=(const LibraryRepository&) -> LibraryRepository& = delete;
+    LibraryRepository&
+    operator=(const LibraryRepository&) = delete;
 
     explicit LibraryRepository(LibraryRepository&&) = delete;
-    auto operator=(LibraryRepository&&) -> LibraryRepository& = delete;
+    LibraryRepository&
+    operator=(LibraryRepository&&) = delete;
 
     ~LibraryRepository() noexcept = default;
 
-    [[nodiscard]] auto ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(std::int64_t) -> std::optional<std::int64_t>;
+    [[nodiscard]] std::optional<std::int64_t>
+    ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(std::int64_t);
 };
 
 }

@@ -7,28 +7,40 @@ export module Memly.Repository.Internal.ReviewSessionSql;
 
 export namespace Memly::Repository::Internal {
 
-[[nodiscard]] auto SelectReviewSessionListRowsSql() -> std::string;
+[[nodiscard]] std::string
+SelectReviewSessionListRowsSql();
 
-[[nodiscard]] auto SelectDefaultReviewSessionIdByRootDeckIdSql() -> std::string;
+[[nodiscard]] std::string
+SelectDefaultReviewSessionIdByRootDeckIdSql();
 
-[[nodiscard]] auto SelectReviewSessionIdByReviewSessionDefinitionKeySql() -> std::string;
+[[nodiscard]] std::string
+SelectReviewSessionIdByReviewSessionDefinitionKeySql();
 
-[[nodiscard]] auto InsertCustomReviewSessionSql() -> std::string;
+[[nodiscard]] std::string
+InsertCustomReviewSessionSql();
 
-[[nodiscard]] auto InsertDefaultReviewSessionSql() -> std::string;
+[[nodiscard]] std::string
+InsertDefaultReviewSessionSql();
 
-[[nodiscard]] auto InsertCustomReviewSessionDeckSelectionSql() -> std::string;
+[[nodiscard]] std::string
+InsertCustomReviewSessionDeckSelectionSql();
 
-[[nodiscard]] auto UpdateReviewSessionNameSql() -> std::string;
+[[nodiscard]] std::string
+UpdateReviewSessionNameSql();
 
-[[nodiscard]] auto UpdateReviewSessionToDefaultSql() -> std::string;
+[[nodiscard]] std::string
+UpdateReviewSessionToDefaultSql();
 
-[[nodiscard]] auto UpdateReviewSessionToCustomSql() -> std::string;
+[[nodiscard]] std::string
+UpdateReviewSessionToCustomSql();
 
-[[nodiscard]] auto UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql() -> std::string;
+[[nodiscard]] std::string
+UpdateReviewSessionLastCardReviewAtMillisecondsSinceEpochSql();
 
-[[nodiscard]] auto DeleteCustomReviewSessionDeckSelectionsSql() -> std::string;
+[[nodiscard]] std::string
+DeleteCustomReviewSessionDeckSelectionsSql();
 
-[[nodiscard]] auto DeleteReviewSessionSql() -> std::string;
+[[nodiscard]] std::string
+DeleteReviewSessionSql();
 }
 #endif

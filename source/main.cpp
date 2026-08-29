@@ -13,26 +13,34 @@ import Memly.CompositionRoot.ApplicationRuntime;
 import Memly.Exception.ExceptionBoundary;
 import Memly.QtApp.QtAppStoragePath;
 
-auto main(int argc, char** argv) noexcept -> int {
-    return int{ Memly::Exception::TryCatchWrapper([&]() -> int {
-        Q_INIT_RESOURCE(DatabaseMigrationSql);
-        Q_INIT_RESOURCE(RepositoryDeckSql);
-        [[maybe_unused]] const QGuiApplication QtApplicationLifetime{ argc, argv };
-        constexpr const char* AppName{ "Memly" };
-        constexpr const char* OrgName{ "MemlyProject" };
-        QCoreApplication::setApplicationName(AppName);
-        QGuiApplication::setApplicationDisplayName(AppName);
-        QCoreApplication::setOrganizationDomain(OrgName);
-        QCoreApplication::setOrganizationName(OrgName);
-        [[maybe_unused]] const Memly::CompositionRoot::ApplicationRuntime ApplicationRuntime{ Memly::QtApp::DatabaseFilePath() };
-        QQmlApplicationEngine AppEngine{};
-        QObject::connect(
-            &AppEngine,
-            &QQmlApplicationEngine::objectCreationFailed,
-            QCoreApplication::instance(),
-            []() -> void { QCoreApplication::exit(EXIT_FAILURE); },
-            Qt::QueuedConnection);
-        AppEngine.loadFromModule(AppName, "MainWindow");
-        return int{ QGuiApplication::exec() };
-    }) };
+int
+main(int argc, char** argv) noexcept {
+    return int{
+        Memly::Exception::TryCatchWrapper([&] -> int {
+            Q_INIT_RESOURCE(DatabaseMigrationSql);
+            Q_INIT_RESOURCE(RepositoryDeckSql);
+            [[maybe_unused]] const QGuiApplication QtApplicationLifetime{ argc,
+                argv };
+            constexpr const char* AppName{ "Memly" };
+            constexpr const char* OrgName{ "MemlyProject" };
+            QCoreApplication::setApplicationName(AppName);
+            QGuiApplication::setApplicationDisplayName(AppName);
+            QCoreApplication::setOrganizationDomain(OrgName);
+            QCoreApplication::setOrganizationName(OrgName);
+            [[maybe_unused]] const Memly::CompositionRoot::ApplicationRuntime
+                ApplicationRuntime{ Memly::QtApp::DatabaseFilePath() };
+            QQmlApplicationEngine AppEngine{};
+            QObject::connect(
+                &AppEngine,
+                &QQmlApplicationEngine::objectCreationFailed,
+                QCoreApplication::instance(),
+                [] -> void {
+                    QCoreApplication::exit(EXIT_FAILURE);
+                },
+                Qt::QueuedConnection
+            );
+            AppEngine.loadFromModule(AppName, "MainWindow");
+            return int{ QGuiApplication::exec() };
+        }),
+    };
 }

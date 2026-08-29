@@ -1,5 +1,5 @@
 AccessModifierOffset: -4
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments:
   Enabled: false
   AcrossEmptyLines: false
@@ -24,23 +24,27 @@ AlignConsecutiveMacros:
   AlignFunctionDeclarations: false
   AlignFunctionPointers: false
   PadOperators: false
-AlignArrayOfStructures: Right
+AlignArrayOfStructures: None
 AlignEscapedNewlines: Left
 AlignOperands: Align
-AlignTrailingComments: false
+AlignTrailingComments:
+  Kind: Never
+  OverEmptyLines: 0
+AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Always
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortEnumsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine:
+  Empty: false
+  Inline: false
+  Other: false
 AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: true
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
+AllowShortLambdasOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: false
 AlwaysBreakBeforeMultilineStrings: false
-BreakTemplateDeclarations: "Yes"
-BinPackArguments: false
-BinPackParameters: OnePerLine
+BinPackLongBracedList: false
+BracedInitializerIndentWidth: 4
 BraceWrapping:
   AfterClass: false
   AfterControlStatement: Never
@@ -57,20 +61,31 @@ BraceWrapping:
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
+BreakAfterJavaFieldAnnotations: false
+BreakAfterOpenBracketFunction: true
+BreakAfterReturnType: All
 BreakBeforeBinaryOperators: None
+BreakBeforeCloseBracketFunction: true
 BreakBeforeBraces: Attach
 BreakBeforeInheritanceComma: false
+BreakBeforeReturnType: None
 BreakBeforeTernaryOperators: false
-BreakConstructorInitializersBeforeComma: false
-BreakConstructorInitializers: BeforeComma
-BreakAfterJavaFieldAnnotations: false
+BreakBinaryOperations:
+  Default: Never
+  PerOperator:
+    - Operators: ["&&", "||"]
+      Style: OnePerLine
+      MinChainLength: 3
+BreakConstructorInitializers: AfterColon
+BreakFunctionDeclarationParameters: false
+BreakFunctionDefinitionParameters: false
 BreakStringLiterals: false
-ColumnLimit: 160
+BreakTemplateDeclarations: "Yes"
+ColumnLimit: 80
 CompactNamespaces: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: Block
 DerivePointerAlignment: false
 DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
@@ -102,20 +117,29 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 MacroBlockBegin: ""
 MacroBlockEnd: ""
 MaxEmptyLinesToKeep: 1
+RemoveEmptyLinesInUnwrappedLines: true
 NamespaceIndentation: None
 ObjCBinPackProtocolList: Auto
 ObjCBlockIndentWidth: 8
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: true
+PackArguments:
+  BinPack: OnePerLine
+PackConstructorInitializers: BinPack
+PackParameters:
+  BinPack: OnePerLine
 
 # Taken from git's rules
 PenaltyBreakAssignment: 10
 PenaltyBreakBeforeFirstCallParameter: 30
+PenaltyBreakBeforeMemberAccess: 0
 PenaltyBreakComment: 10
 PenaltyBreakFirstLessLess: 0
+PenaltyBreakScopeResolution: 1000000
 PenaltyBreakString: 10
-PenaltyExcessCharacter: 100
-PenaltyReturnTypeOnItsOwnLine: 60
+PenaltyExcessCharacter: 1000000
+PenaltyIndentedWhitespace: 100
+PenaltyReturnTypeOnItsOwnLine: 0
 
 PointerAlignment: Left
 ReferenceAlignment: Left
@@ -132,16 +156,13 @@ SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatementsExceptControlMacros
 SpaceBeforeRangeBasedForLoopColon: true
-SpaceInEmptyParentheses: false
+SpaceInEmptyBraces: Never
 SpacesBeforeTrailingComments: 1
 SpacesInAngles: Never
 SpacesInContainerLiterals: false
-SpacesInCStyleCastParentheses: false
-SpacesInParentheses: false
+SpacesInParens: Never
 SpacesInSquareBrackets: false
 Language: Cpp
 Standard: Latest
 TabWidth: 4
 UseTab: Never
-
-AllowShortLambdasOnASingleLine: All

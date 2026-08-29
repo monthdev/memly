@@ -26,21 +26,29 @@ private:
         std::size_t m_RowInParentIndex;
         std::vector<std::size_t> m_ChildDeckNodeIndexesVector;
 
-        explicit DeckNode(Domain::DeckForestSnapshotNode&& DeckForestSnapshotNode,
-                          std::optional<std::size_t>&& ParentDeckNodeIndexOptional,
-                          const std::size_t RowInParentIndex,
-                          std::vector<std::size_t>&& ChildDeckNodeIndexesVector) noexcept
+        explicit DeckNode(
+            Domain::DeckForestSnapshotNode&& DeckForestSnapshotNode,
+            std::optional<std::size_t>&& ParentDeckNodeIndexOptional,
+            const std::size_t RowInParentIndex,
+            std::vector<std::size_t>&& ChildDeckNodeIndexesVector
+        ) noexcept
             : m_DeckForestSnapshotNode{ std::move(DeckForestSnapshotNode) }
-            , m_ParentDeckNodeIndexOptional{ std::move(ParentDeckNodeIndexOptional) }
+            , m_ParentDeckNodeIndexOptional{ std::move(
+                  ParentDeckNodeIndexOptional
+              ) }
             , m_RowInParentIndex{ RowInParentIndex }
-            , m_ChildDeckNodeIndexesVector{ std::move(ChildDeckNodeIndexesVector) } {
+            , m_ChildDeckNodeIndexesVector{
+                std::move(ChildDeckNodeIndexesVector)
+            } {
         }
 
         explicit DeckNode(const DeckNode&) = delete;
-        auto operator=(const DeckNode&) -> DeckNode& = delete;
+        DeckNode&
+        operator=(const DeckNode&) = delete;
 
         explicit DeckNode(DeckNode&&) noexcept = default;
-        auto operator=(DeckNode&&) -> DeckNode& = delete;
+        DeckNode&
+        operator=(DeckNode&&) = delete;
 
         ~DeckNode() noexcept = default;
     };
@@ -55,10 +63,12 @@ public:
     explicit DeckForestModel(QObject* = nullptr) noexcept;
 
     explicit DeckForestModel(const DeckForestModel&) = delete;
-    auto operator=(const DeckForestModel&) -> DeckForestModel& = delete;
+    DeckForestModel&
+    operator=(const DeckForestModel&) = delete;
 
     explicit DeckForestModel(DeckForestModel&&) = delete;
-    auto operator=(DeckForestModel&&) -> DeckForestModel& = delete;
+    DeckForestModel&
+    operator=(DeckForestModel&&) = delete;
 
     ~DeckForestModel() noexcept override = default;
 
@@ -84,23 +94,50 @@ public:
         SubtreeTotalCountColumn
     };
 
-    [[nodiscard]] QModelIndex index(int, int, const QModelIndex& = QModelIndex{}) const noexcept override;
-    [[nodiscard]] QModelIndex parent(const QModelIndex&) const noexcept override;
-    [[nodiscard]] int rowCount(const QModelIndex& = QModelIndex{}) const noexcept override;
-    [[nodiscard]] int columnCount(const QModelIndex& = QModelIndex{}) const noexcept override;
-    [[nodiscard]] QVariant data(const QModelIndex&, int) const noexcept override;
-    [[nodiscard]] bool hasChildren(const QModelIndex& = QModelIndex{}) const noexcept override;
-    void sort(int, Qt::SortOrder = Qt::AscendingOrder) noexcept override;
+    [[nodiscard]] QModelIndex
+    index(int, int, const QModelIndex& = QModelIndex{}) const noexcept override;
 
-    void ReplaceAll(std::vector<Domain::DeckForestSnapshotNode>&&) noexcept;
+    [[nodiscard]] QModelIndex
+    parent(const QModelIndex&) const noexcept override;
+
+    [[nodiscard]] int
+    rowCount(const QModelIndex& = QModelIndex{}) const noexcept override;
+
+    [[nodiscard]] int
+    columnCount(const QModelIndex& = QModelIndex{}) const noexcept override;
+
+    [[nodiscard]] QVariant
+    data(const QModelIndex&, int) const noexcept override;
+
+    [[nodiscard]] bool
+    hasChildren(const QModelIndex& = QModelIndex{}) const noexcept override;
+
+    void
+    sort(int, Qt::SortOrder = Qt::AscendingOrder) noexcept override;
+
+    void
+    ReplaceAll(std::vector<Domain::DeckForestSnapshotNode>&&) noexcept;
 
 private:
-    [[nodiscard]] std::optional<std::reference_wrapper<const DeckNode>> TryGetDeckNode(const QModelIndex&) const noexcept;
-    [[nodiscard]] const std::vector<std::size_t>& GetChildDeckNodeIndexes(const QModelIndex&) const;
-    void ApplyCurrentSort();
-    void SortSiblingDeckNodeIndexes(std::vector<std::size_t>&);
-    void UpdateSiblingRowIndexes(const std::optional<std::size_t>& = std::nullopt) noexcept;
-    [[nodiscard]] int CompareDeckNodes(std::size_t, std::size_t) const noexcept;
+    [[nodiscard]] std::optional<std::reference_wrapper<const DeckNode>>
+    TryGetDeckNode(const QModelIndex&) const noexcept;
+
+    [[nodiscard]] const std::vector<std::size_t>&
+    GetChildDeckNodeIndexes(const QModelIndex&) const;
+
+    void
+    ApplyCurrentSort();
+
+    void
+    SortSiblingDeckNodeIndexes(std::vector<std::size_t>&);
+
+    void
+    UpdateSiblingRowIndexes(
+        const std::optional<std::size_t>& = std::nullopt
+    ) noexcept;
+
+    [[nodiscard]] int
+    CompareDeckNodes(std::size_t, std::size_t) const noexcept;
 };
 }
 #endif

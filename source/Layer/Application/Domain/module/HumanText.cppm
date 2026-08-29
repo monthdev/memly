@@ -16,20 +16,29 @@ private:
 
 public:
     explicit HumanText(const HumanText&) = delete;
-    auto operator=(const HumanText&) -> HumanText& = delete;
+    HumanText&
+    operator=(const HumanText&) = delete;
 
     explicit HumanText(HumanText&&) noexcept = default;
-    auto operator=(HumanText&&) -> HumanText& = delete;
+    HumanText&
+    operator=(HumanText&&) = delete;
 
     ~HumanText() noexcept = default;
 
-    [[nodiscard]] static auto FromPersisted(std::string&&, std::string&&) noexcept -> HumanText;
+    [[nodiscard]] static HumanText
+    FromPersisted(std::string&&, std::string&&) noexcept;
 
-    [[nodiscard]] auto GetNormalizedStdStringView() const& noexcept [[clang::lifetimebound]] -> std::string_view;
-    [[nodiscard]] auto GetNormalizedStdStringView() const&& noexcept -> std::string_view = delete;
+    [[nodiscard]] std::string_view
+    GetNormalizedStdStringView() const& noexcept [[clang::lifetimebound]];
 
-    [[nodiscard]] auto GetNormalizedCaseFoldedStdStringView() const& noexcept [[clang::lifetimebound]] -> std::string_view;
-    [[nodiscard]] auto GetNormalizedCaseFoldedStdStringView() const&& noexcept -> std::string_view = delete;
+    [[nodiscard]] std::string_view
+    GetNormalizedStdStringView() const&& noexcept = delete;
+
+    [[nodiscard]] std::string_view
+    GetNormalizedCaseFoldedStdStringView() const& noexcept
+        [[clang::lifetimebound]];
+    [[nodiscard]] std::string_view
+    GetNormalizedCaseFoldedStdStringView() const&& noexcept = delete;
 };
 
 }

@@ -6,13 +6,18 @@ export module Memly.Database.Internal.MigrationSql;
 
 export namespace Memly::Database::Internal {
 
-[[nodiscard]] auto CreateMigrationsLogSql() -> std::string;
+[[nodiscard]] std::string
+CreateMigrationsLogSql();
 
-[[nodiscard]] auto M01CreateSchemaSql() -> std::string;
+[[nodiscard]] std::string
+M01CreateSchemaSql();
 
-[[nodiscard]] auto M02SeedTableDefaultsSql() -> std::string;
+[[nodiscard]] std::string
+M02SeedTableDefaultsSql();
 
-[[nodiscard]] auto SelectAppliedMigrationVersionsSql() -> std::string;
+[[nodiscard]] std::string
+SelectAppliedMigrationVersionsSql();
 
-[[nodiscard]] auto InsertMigrationLogEntrySql() -> std::string;
+[[nodiscard]] std::string
+InsertMigrationLogEntrySql();
 }

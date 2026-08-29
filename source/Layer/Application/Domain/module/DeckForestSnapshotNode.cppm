@@ -22,21 +22,27 @@ struct DeckForestSnapshotNode final {
     std::uint32_t m_SubtreeByTodayCount;
     std::uint32_t m_SubtreeTotalCount;
 
-    explicit DeckForestSnapshotNode(std::string&&,
-                                    std::optional<std::string>&&,
-                                    std::string&&,
-                                    std::int64_t,
-                                    const std::optional<std::int64_t>&,
-                                    std::uint32_t,
-                                    std::uint32_t,
-                                    std::uint32_t,
-                                    std::uint8_t) noexcept;
+    explicit DeckForestSnapshotNode(
+        std::string&&,
+        std::optional<std::string>&&,
+        std::string&&,
+        std::int64_t,
+        const std::optional<std::int64_t>&,
+        std::uint32_t,
+        std::uint32_t,
+        std::uint32_t,
+        std::uint8_t
+    ) noexcept;
 
     explicit DeckForestSnapshotNode(const DeckForestSnapshotNode&) = delete;
-    auto operator=(const DeckForestSnapshotNode&) -> DeckForestSnapshotNode& = delete;
+    DeckForestSnapshotNode&
+    operator=(const DeckForestSnapshotNode&) = delete;
 
-    explicit DeckForestSnapshotNode(DeckForestSnapshotNode&&) noexcept = default;
-    auto operator=(DeckForestSnapshotNode&&) -> DeckForestSnapshotNode& = delete;
+    explicit DeckForestSnapshotNode(
+        DeckForestSnapshotNode&&
+    ) noexcept = default;
+    DeckForestSnapshotNode&
+    operator=(DeckForestSnapshotNode&&) = delete;
 
     ~DeckForestSnapshotNode() noexcept = default;
 };

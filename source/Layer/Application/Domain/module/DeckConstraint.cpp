@@ -8,7 +8,8 @@ module Memly.Domain.DeckConstraint;
 
 namespace Memly::Domain {
 
-[[nodiscard]] auto IsDeckNameLengthValid(const std::string& DeckName) noexcept -> bool {
+[[nodiscard]] bool
+IsDeckNameLengthValid(const std::string& DeckName) noexcept {
     static constexpr std::size_t s_DeckNameMaximumLength{ 40 };
     assert(not DeckName.empty());
     return bool{ DeckName.size() <= s_DeckNameMaximumLength };

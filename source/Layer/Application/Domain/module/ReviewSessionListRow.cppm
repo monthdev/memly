@@ -15,25 +15,34 @@ struct [[nodiscard]] ReviewSessionListRow final {
     std::string m_ReviewSessionName;
     std::int64_t m_CreatedAtMillisecondsSinceEpoch;
     std::optional<std::int64_t> m_LastUpdatedAtMillisecondsSinceEpochOptional;
-    std::optional<std::int64_t> m_LastCardReviewAtMillisecondsSinceEpochOptional;
+    std::optional<std::int64_t>
+        m_LastCardReviewAtMillisecondsSinceEpochOptional;
 
-    explicit ReviewSessionListRow(std::string&& ReviewSessionId,
-                                  std::string&& ReviewSessionName,
-                                  const std::int64_t CreatedAtMillisecondsSinceEpoch,
-                                  const std::optional<std::int64_t>& LastUpdatedAtMillisecondsSinceEpochOptional,
-                                  const std::optional<std::int64_t>& LastCardReviewAtMillisecondsSinceEpochOptional) noexcept
+    explicit ReviewSessionListRow(
+        std::string&& ReviewSessionId,
+        std::string&& ReviewSessionName,
+        const std::int64_t CreatedAtMillisecondsSinceEpoch,
+        const std::optional<std::int64_t>&
+            LastUpdatedAtMillisecondsSinceEpochOptional,
+        const std::optional<std::int64_t>&
+            LastCardReviewAtMillisecondsSinceEpochOptional
+    ) noexcept
         : m_ReviewSessionId{ std::move(ReviewSessionId) }
         , m_ReviewSessionName{ std::move(ReviewSessionName) }
         , m_CreatedAtMillisecondsSinceEpoch{ CreatedAtMillisecondsSinceEpoch }
         , m_LastUpdatedAtMillisecondsSinceEpochOptional{ LastUpdatedAtMillisecondsSinceEpochOptional }
-        , m_LastCardReviewAtMillisecondsSinceEpochOptional{ LastCardReviewAtMillisecondsSinceEpochOptional } {
+        , m_LastCardReviewAtMillisecondsSinceEpochOptional{
+            LastCardReviewAtMillisecondsSinceEpochOptional
+        } {
     }
 
     explicit ReviewSessionListRow(const ReviewSessionListRow&) = delete;
-    auto operator=(const ReviewSessionListRow&) -> ReviewSessionListRow& = delete;
+    ReviewSessionListRow&
+    operator=(const ReviewSessionListRow&) = delete;
 
     explicit ReviewSessionListRow(ReviewSessionListRow&&) noexcept = default;
-    auto operator=(ReviewSessionListRow&&) -> ReviewSessionListRow& = delete;
+    ReviewSessionListRow&
+    operator=(ReviewSessionListRow&&) = delete;
 
     ~ReviewSessionListRow() noexcept = default;
 };

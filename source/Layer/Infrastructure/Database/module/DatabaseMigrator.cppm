@@ -19,14 +19,17 @@ public:
     explicit DatabaseMigrator(const std::string&);
 
     explicit DatabaseMigrator(const DatabaseMigrator&) = delete;
-    auto operator=(const DatabaseMigrator&) -> DatabaseMigrator& = delete;
+    DatabaseMigrator&
+    operator=(const DatabaseMigrator&) = delete;
 
     explicit DatabaseMigrator(DatabaseMigrator&&) = delete;
-    auto operator=(DatabaseMigrator&&) -> DatabaseMigrator& = delete;
+    DatabaseMigrator&
+    operator=(DatabaseMigrator&&) = delete;
 
     ~DatabaseMigrator() noexcept = default;
 
-    [[nodiscard]] auto ApplyMigrations() && -> DatabaseRuntime;
+    [[nodiscard]] DatabaseRuntime
+    ApplyMigrations() &&;
 };
 
 }

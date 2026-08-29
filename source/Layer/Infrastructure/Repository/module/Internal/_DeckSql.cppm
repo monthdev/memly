@@ -6,21 +6,30 @@ export module Memly.Repository.Internal.DeckSql;
 
 export namespace Memly::Repository::Internal {
 
-[[nodiscard]] auto SelectDeckSnapshotRecordsSql() -> std::string;
+[[nodiscard]] std::string
+SelectDeckSnapshotRecordsSql();
 
-[[nodiscard]] auto InsertRootDeckSql() -> std::string;
+[[nodiscard]] std::string
+InsertRootDeckSql();
 
-[[nodiscard]] auto InsertChildDeckSql() -> std::string;
+[[nodiscard]] std::string
+InsertChildDeckSql();
 
-[[nodiscard]] auto UpdateDeckParentToRootSql() -> std::string;
+[[nodiscard]] std::string
+UpdateDeckParentToRootSql();
 
-[[nodiscard]] auto UpdateDeckParentSql() -> std::string;
+[[nodiscard]] std::string
+UpdateDeckParentSql();
 
-[[nodiscard]] auto UpdateDeckNameSql() -> std::string;
+[[nodiscard]] std::string
+UpdateDeckNameSql();
 
-[[nodiscard]] auto DeleteDeckCardReviewsSql() -> std::string;
+[[nodiscard]] std::string
+DeleteDeckCardReviewsSql();
 
-[[nodiscard]] auto DeleteDeckCardsSql() -> std::string;
+[[nodiscard]] std::string
+DeleteDeckCardsSql();
 
-[[nodiscard]] auto DeleteDeckSql() -> std::string;
+[[nodiscard]] std::string
+DeleteDeckSql();
 }

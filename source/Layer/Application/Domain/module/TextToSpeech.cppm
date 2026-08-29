@@ -47,7 +47,8 @@ export module Memly.Domain.TextToSpeech;
 //     QJsonArray top = doc.array();
 //     QString    out;
 //     for (const QJsonValue& seg : top[0].toArray()) {
-//         if (seg.isArray() && seg.toArray()[0].isString()) out += seg.toArray()[0].toString();
+//         if (seg.isArray() && seg.toArray()[0].isString()) out +=
+//         seg.toArray()[0].toString();
 //     }
 //     qDebug() << "Translation:" << out;
 //     // app.quit();

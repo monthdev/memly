@@ -18,20 +18,30 @@ private:
     std::size_t m_ErrorMessageSize;
 
 public:
-    explicit MemlyException(std::initializer_list<std::string_view>, std::source_location = std::source_location::current()) noexcept;
+    explicit MemlyException(
+        std::initializer_list<std::string_view>,
+        std::source_location = std::source_location::current()
+    ) noexcept;
 
     explicit MemlyException(const MemlyException&) = delete;
-    auto operator=(const MemlyException&) -> MemlyException& = delete;
+    MemlyException&
+    operator=(const MemlyException&) = delete;
 
     explicit MemlyException(MemlyException&&) = delete;
-    auto operator=(MemlyException&&) -> MemlyException& = delete;
+    MemlyException&
+    operator=(MemlyException&&) = delete;
 
     ~MemlyException() noexcept override = default;
 
-    [[nodiscard]] auto what() const noexcept [[clang::lifetimebound]] -> const char* override;
+    [[nodiscard]] const char*
+    what() const noexcept [[clang::lifetimebound]] override;
 
 private:
-    void ConstructErrorMessage(std::initializer_list<std::string_view>, std::source_location) noexcept;
+    void ConstructErrorMessage(
+        std::initializer_list<std::string_view>,
+        std::source_location
+    ) noexcept;
+
     void AppendErrorMessage(std::string_view) noexcept;
 };
 }

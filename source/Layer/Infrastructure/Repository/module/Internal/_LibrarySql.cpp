@@ -7,8 +7,11 @@ module Memly.Repository.Internal.LibrarySql;
 
 namespace Memly::Repository::Internal {
 
-[[nodiscard]] auto SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string {
-    return QtApp::ReadQtAppResourceBytes(":/Sql/Library/Select/SelectNextLibraryInvalidationAtMillisecondsSinceEpoch.sql");
+[[nodiscard]] std::string
+SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() {
+    return QtApp::ReadQtAppResourceBytes(
+        ":/Sql/Library/Select/SelectNextLibraryInvalidationAtMillisecondsSinceEpoch.sql"
+    );
 }
 }
 #endif

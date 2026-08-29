@@ -17,18 +17,26 @@ private:
 
 public:
     explicit HumanTextInput(const HumanTextInput&) = delete;
-    auto operator=(const HumanTextInput&) -> HumanTextInput& = delete;
+    HumanTextInput&
+    operator=(const HumanTextInput&) = delete;
 
     explicit HumanTextInput(HumanTextInput&&) noexcept = default;
-    auto operator=(HumanTextInput&&) -> HumanTextInput& = delete;
+    HumanTextInput&
+    operator=(HumanTextInput&&) = delete;
 
     ~HumanTextInput() noexcept = default;
 
-    [[nodiscard]] static auto FromInput(const std::string&) -> HumanTextInput;
+    [[nodiscard]] static HumanTextInput
+    FromInput(const std::string&);
 
-    [[nodiscard]] auto ComputeGraphemeClusterLength() const -> std::size_t;
-    [[nodiscard]] auto ToNormalizedStdString() const -> std::string;
-    [[nodiscard]] auto ToNormalizedCaseFoldedStdString() && -> std::string;
+    [[nodiscard]] std::size_t
+    ComputeGraphemeClusterLength() const;
+
+    [[nodiscard]] std::string
+    ToNormalizedStdString() const;
+
+    [[nodiscard]] std::string
+    ToNormalizedCaseFoldedStdString() &&;
 };
 
 }

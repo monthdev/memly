@@ -7,6 +7,7 @@ export module Memly.Repository.Internal.LibrarySql;
 
 export namespace Memly::Repository::Internal {
 
-[[nodiscard]] auto SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql() -> std::string;
+[[nodiscard]] std::string
+SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql();
 }
 #endif

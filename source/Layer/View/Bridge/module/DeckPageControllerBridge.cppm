@@ -17,7 +17,10 @@ export namespace Memly::Bridge {
 
 class DeckPageControllerBridge : public QObject {
     Q_OBJECT
-    Q_PROPERTY(DeckForestProxyModel* deckForestModel READ GetDeckForestProxyModel CONSTANT)
+    Q_PROPERTY(
+        DeckForestProxyModel* deckForestModel READ GetDeckForestProxyModel
+            CONSTANT
+    )
     QML_NAMED_ELEMENT(DeckPageController)
 
 private:
@@ -25,25 +28,39 @@ private:
     DeckForestProxyModel m_DeckForestProxyModel;
 
 public:
-    explicit DeckPageControllerBridge(Invalidation::LibraryInvalidationChannel&,
-                                      Service::DeckService&,
-                                      QObject* = nullptr);
+    explicit DeckPageControllerBridge(
+        Invalidation::LibraryInvalidationChannel&,
+        Service::DeckService&,
+        QObject* = nullptr
+    );
 
     explicit DeckPageControllerBridge(const DeckPageControllerBridge&) = delete;
-    auto operator=(const DeckPageControllerBridge&) -> DeckPageControllerBridge& = delete;
+    DeckPageControllerBridge&
+    operator=(const DeckPageControllerBridge&) = delete;
 
     explicit DeckPageControllerBridge(DeckPageControllerBridge&&) = delete;
-    auto operator=(DeckPageControllerBridge&&) -> DeckPageControllerBridge& = delete;
+    DeckPageControllerBridge&
+    operator=(DeckPageControllerBridge&&) = delete;
 
     ~DeckPageControllerBridge() noexcept override = default;
 
-    [[nodiscard]] DeckForestProxyModel* GetDeckForestProxyModel() noexcept;
+    [[nodiscard]] DeckForestProxyModel*
+    GetDeckForestProxyModel() noexcept;
 
-    [[nodiscard]] Q_INVOKABLE QString CreateRootDeck(const QString&, quint8) noexcept;
-    [[nodiscard]] Q_INVOKABLE QString CreateChildDeck(const QString&, const QString&) noexcept;
-    [[nodiscard]] Q_INVOKABLE QString MoveDeck(const QString&, const QString& = QString{}) noexcept;
-    [[nodiscard]] Q_INVOKABLE QString RenameDeck(const QString&, const QString&) noexcept;
-    [[nodiscard]] Q_INVOKABLE QString DeleteDeck(const QString&) noexcept;
+    [[nodiscard]] Q_INVOKABLE QString
+    CreateRootDeck(const QString&, quint8) noexcept;
+
+    [[nodiscard]] Q_INVOKABLE QString
+    CreateChildDeck(const QString&, const QString&) noexcept;
+
+    [[nodiscard]] Q_INVOKABLE QString
+    MoveDeck(const QString&, const QString& = QString{}) noexcept;
+
+    [[nodiscard]] Q_INVOKABLE QString
+    RenameDeck(const QString&, const QString&) noexcept;
+
+    [[nodiscard]] Q_INVOKABLE QString
+    DeleteDeck(const QString&) noexcept;
 };
 
 }

@@ -20,47 +20,71 @@ import Memly.Exception.MemlyException;
 
 namespace Memly::Domain {
 
-HumanTextInput::HumanTextInput(icu::UnicodeString&& NormalizedUnicodeString) noexcept
-    : m_NormalizedUnicodeString{ std::move(NormalizedUnicodeString) } {
+HumanTextInput::HumanTextInput(
+    icu::UnicodeString&& NormalizedUnicodeString
+) noexcept : m_NormalizedUnicodeString{ std::move(NormalizedUnicodeString) } {
 }
 
 namespace {
 
-void u_ThrowOnIcuError(const icu::ErrorCode& IcuErrorCode) {
+void
+u_ThrowOnIcuError(const icu::ErrorCode& IcuErrorCode) {
     if (IcuErrorCode.isFailure() not_eq 0) {
-        throw Exception::MemlyException{ std::initializer_list<std::string_view>{ IcuErrorCode.errorName() } };
+        throw Exception::MemlyException{ std::initializer_list<
+            std::string_view>{
+            IcuErrorCode.errorName(),
+        } };
     }
 }
 
-[[nodiscard]] auto u_NormalizeText(const icu::UnicodeString& UnicodeString) -> icu::UnicodeString {
+[[nodiscard]] icu::UnicodeString
+u_NormalizeText(const icu::UnicodeString& UnicodeString) {
     icu::ErrorCode IcuErrorCode{};
-    const icu::Normalizer2* NormalizerPointer{ icu::Normalizer2::getNFCInstance(IcuErrorCode) };
+    const icu::Normalizer2* NormalizerPointer{
+        icu::Normalizer2::getNFCInstance(IcuErrorCode),
+    };
     u_ThrowOnIcuError(IcuErrorCode);
     icu::UnicodeString NormalizedUnicodeString{};
-    NormalizerPointer->normalize(UnicodeString, NormalizedUnicodeString, IcuErrorCode);
+    NormalizerPointer
+        ->normalize(UnicodeString, NormalizedUnicodeString, IcuErrorCode);
     u_ThrowOnIcuError(IcuErrorCode);
     return icu::UnicodeString{ std::move(NormalizedUnicodeString) };
 }
 
 }
 
-[[nodiscard]] auto HumanTextInput::FromInput(const std::string& Text) -> HumanTextInput {
-    return HumanTextInput{ u_NormalizeText(icu::UnicodeString::fromUTF8(Text)) };
+[[nodiscard]] HumanTextInput
+HumanTextInput::FromInput(const std::string& Text) {
+    return HumanTextInput{
+        u_NormalizeText(icu::UnicodeString::fromUTF8(Text))
+    };
 }
 
 namespace {
 
-[[nodiscard]] auto u_GetThreadLocalIcuBreakIterator() -> icu::BreakIterator& {
+[[nodiscard]] icu::BreakIterator&
+u_GetThreadLocalIcuBreakIterator() {
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
 #endif
-    thread_local std::unique_ptr<icu::BreakIterator> s_IcuBreakIteratorUniquePointer{ std::invoke([]() -> std::unique_ptr<icu::BreakIterator> {
-        icu::ErrorCode IcuErrorCode{};
-        std::unique_ptr<icu::BreakIterator> IcuBreakIteratorUniquePointer{ icu::BreakIterator::createCharacterInstance(icu::Locale::getRoot(), IcuErrorCode) };
-        u_ThrowOnIcuError(IcuErrorCode);
-        return std::unique_ptr<icu::BreakIterator>{ std::move(IcuBreakIteratorUniquePointer) };
-    }) };
+    thread_local std::unique_ptr<icu::BreakIterator>
+        s_IcuBreakIteratorUniquePointer{
+            std::invoke([] -> std::unique_ptr<icu::BreakIterator> {
+                icu::ErrorCode IcuErrorCode{};
+                std::unique_ptr<icu::BreakIterator>
+                    IcuBreakIteratorUniquePointer{
+                        icu::BreakIterator::createCharacterInstance(
+                            icu::Locale::getRoot(),
+                            IcuErrorCode
+                        )
+                    };
+                u_ThrowOnIcuError(IcuErrorCode);
+                return std::unique_ptr<icu::BreakIterator>{
+                    std::move(IcuBreakIteratorUniquePointer)
+                };
+            }),
+        };
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
@@ -69,22 +93,27 @@ namespace {
 
 }
 
-[[nodiscard]] auto HumanTextInput::ComputeGraphemeClusterLength() const -> std::size_t {
+[[nodiscard]] std::size_t
+HumanTextInput::ComputeGraphemeClusterLength() const {
     icu::BreakIterator& IcuBreakIterator{ u_GetThreadLocalIcuBreakIterator() };
     IcuBreakIterator.setText(this->m_NormalizedUnicodeString);
     std::size_t GraphemeClusterLength{ 0 };
     IcuBreakIterator.first();
-    while (IcuBreakIterator.next() not_eq icu::BreakIterator::DONE) { ++GraphemeClusterLength; }
+    while (IcuBreakIterator.next() not_eq icu::BreakIterator::DONE) {
+        ++GraphemeClusterLength;
+    }
     return std::size_t{ GraphemeClusterLength };
 }
 
-[[nodiscard]] auto HumanTextInput::ToNormalizedStdString() const -> std::string {
+[[nodiscard]] std::string
+HumanTextInput::ToNormalizedStdString() const {
     std::string Text{};
     this->m_NormalizedUnicodeString.toUTF8String(Text);
     return std::string{ std::move(Text) };
 }
 
-[[nodiscard]] auto HumanTextInput::ToNormalizedCaseFoldedStdString() && -> std::string {
+[[nodiscard]] std::string
+HumanTextInput::ToNormalizedCaseFoldedStdString() && {
     std::string Text{};
     this->m_NormalizedUnicodeString.foldCase().toUTF8String(Text);
     return std::string{ std::move(Text) };

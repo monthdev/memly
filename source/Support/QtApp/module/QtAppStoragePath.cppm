@@ -5,9 +5,12 @@ module;
 export module Memly.QtApp.QtAppStoragePath;
 
 export namespace Memly::QtApp {
-[[nodiscard]] auto AudioDirectoryPath() -> std::string;
+[[nodiscard]] std::string
+AudioDirectoryPath();
 
-[[nodiscard]] auto ExceptionLogFilePath() -> std::string;
+[[nodiscard]] std::string
+ExceptionLogFilePath();
 
-[[nodiscard]] auto DatabaseFilePath() -> std::string;
+[[nodiscard]] std::string
+DatabaseFilePath();
 }

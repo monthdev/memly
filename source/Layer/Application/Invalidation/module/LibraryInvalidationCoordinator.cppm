@@ -21,25 +21,43 @@ private:
     QTimer m_LibraryInvalidationQTimer;
 
 public:
-    explicit LibraryInvalidationCoordinator(LibraryInvalidationChannel&,
-                                            Repository::LibraryRepository&,
-                                            QObject* = nullptr);
+    explicit LibraryInvalidationCoordinator(
+        LibraryInvalidationChannel&,
+        Repository::LibraryRepository&,
+        QObject* = nullptr
+    );
 
-    explicit LibraryInvalidationCoordinator(const LibraryInvalidationCoordinator&) = delete;
-    auto operator=(const LibraryInvalidationCoordinator&) -> LibraryInvalidationCoordinator& = delete;
+    explicit LibraryInvalidationCoordinator(
+        const LibraryInvalidationCoordinator&
+    ) = delete;
+    LibraryInvalidationCoordinator&
+    operator=(const LibraryInvalidationCoordinator&) = delete;
 
-    explicit LibraryInvalidationCoordinator(LibraryInvalidationCoordinator&&) = delete;
-    auto operator=(LibraryInvalidationCoordinator&&) -> LibraryInvalidationCoordinator& = delete;
+    explicit LibraryInvalidationCoordinator(
+        LibraryInvalidationCoordinator&&
+    ) = delete;
+    LibraryInvalidationCoordinator&
+    operator=(LibraryInvalidationCoordinator&&) = delete;
 
     ~LibraryInvalidationCoordinator() noexcept override = default;
 
-    void Invalidate(const LibraryInvalidationTargetBitset&) noexcept;
-    void InvalidateWithReschedule(const LibraryInvalidationTargetBitset&) noexcept;
-    void InvalidateWithRescheduleAndNewSnapshotEpoch(const LibraryInvalidationTargetBitset&) noexcept;
+    void
+    Invalidate(const LibraryInvalidationTargetBitset&) noexcept;
+
+    void
+    InvalidateWithReschedule(const LibraryInvalidationTargetBitset&) noexcept;
+
+    void
+    InvalidateWithRescheduleAndNewSnapshotEpoch(
+        const LibraryInvalidationTargetBitset&
+    ) noexcept;
 
 private:
-    void HandleScheduledInvalidation() noexcept;
-    void ScheduleNextLibraryInvalidation() noexcept;
+    void
+    HandleScheduledInvalidation() noexcept;
+
+    void
+    ScheduleNextLibraryInvalidation() noexcept;
 };
 
 }

@@ -15,17 +15,22 @@ private:
     Repository::ReviewSessionRepository& m_ReviewSessionRepository;
 
 public:
-    explicit ReviewSessionListService(Repository::ReviewSessionRepository&) noexcept;
+    explicit ReviewSessionListService(
+        Repository::ReviewSessionRepository&
+    ) noexcept;
 
     explicit ReviewSessionListService(const ReviewSessionListService&) = delete;
-    auto operator=(const ReviewSessionListService&) -> ReviewSessionListService& = delete;
+    ReviewSessionListService&
+    operator=(const ReviewSessionListService&) = delete;
 
     explicit ReviewSessionListService(ReviewSessionListService&&) = delete;
-    auto operator=(ReviewSessionListService&&) -> ReviewSessionListService& = delete;
+    ReviewSessionListService&
+    operator=(ReviewSessionListService&&) = delete;
 
     ~ReviewSessionListService() noexcept = default;
 
-    [[nodiscard]] auto ReadReviewSessionListRows() -> std::vector<Domain::ReviewSessionListRow>;
+    [[nodiscard]] std::vector<Domain::ReviewSessionListRow>
+    ReadReviewSessionListRows();
 };
 
 }

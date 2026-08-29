@@ -28,20 +28,35 @@ public:
     explicit DeckRepository(Database::DatabaseRuntime&);
 
     explicit DeckRepository(const DeckRepository&) = delete;
-    auto operator=(const DeckRepository&) -> DeckRepository& = delete;
+    DeckRepository&
+    operator=(const DeckRepository&) = delete;
 
     explicit DeckRepository(DeckRepository&&) = delete;
-    auto operator=(DeckRepository&&) -> DeckRepository& = delete;
+    DeckRepository&
+    operator=(DeckRepository&&) = delete;
 
     ~DeckRepository() noexcept = default;
 
-    [[nodiscard]] auto ReadDeckSnapshotRecords(std::int64_t) -> std::vector<DeckSnapshotRecord>;
-    void CreateRootDeck(const std::string&, std::uint8_t);
-    void CreateChildDeck(const std::string&, const std::string&);
-    void MoveDeckToRoot(const std::string&);
-    void MoveDeckUnderParent(const std::string&, const std::string&);
-    void RenameDeck(const std::string&, const std::string&);
-    void DeleteDeck(const std::string&);
+    [[nodiscard]] std::vector<DeckSnapshotRecord>
+    ReadDeckSnapshotRecords(std::int64_t);
+
+    void
+    CreateRootDeck(const std::string&, std::uint8_t);
+
+    void
+    CreateChildDeck(const std::string&, const std::string&);
+
+    void
+    MoveDeckToRoot(const std::string&);
+
+    void
+    MoveDeckUnderParent(const std::string&, const std::string&);
+
+    void
+    RenameDeck(const std::string&, const std::string&);
+
+    void
+    DeleteDeck(const std::string&);
 };
 
 }

@@ -20,14 +20,20 @@ public:
     explicit DatabaseRuntime(duckdb::DatabaseInstance&, duckdb::Connection&&);
 
     explicit DatabaseRuntime(const DatabaseRuntime&) = delete;
-    auto operator=(const DatabaseRuntime&) -> DatabaseRuntime& = delete;
+    DatabaseRuntime&
+    operator=(const DatabaseRuntime&) = delete;
 
     explicit DatabaseRuntime(DatabaseRuntime&&) = delete;
-    auto operator=(DatabaseRuntime&&) -> DatabaseRuntime& = delete;
+    DatabaseRuntime&
+    operator=(DatabaseRuntime&&) = delete;
 
     ~DatabaseRuntime() noexcept = default;
 
-    [[nodiscard]] auto PrepareStatement(const std::string&, std::source_location = std::source_location::current()) -> PreparedStatement;
+    [[nodiscard]] PreparedStatement
+    PrepareStatement(
+        const std::string&,
+        std::source_location = std::source_location::current()
+    );
 };
 
 }

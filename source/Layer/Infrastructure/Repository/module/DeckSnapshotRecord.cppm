@@ -10,15 +10,17 @@ import Memly.Database.DecodableQueryResultRowMixin;
 
 export namespace Memly::Repository {
 
-struct [[nodiscard]] DeckSnapshotRecord final : public Database::DecodableQueryResultRowMixin<std::string,
-                                                                                              std::optional<std::string>,
-                                                                                              std::string,
-                                                                                              std::int64_t,
-                                                                                              std::optional<std::int64_t>,
-                                                                                              std::uint32_t,
-                                                                                              std::uint32_t,
-                                                                                              std::uint32_t,
-                                                                                              std::uint8_t> {
+struct [[nodiscard]] DeckSnapshotRecord final
+    : public Database::DecodableQueryResultRowMixin<
+          std::string,
+          std::optional<std::string>,
+          std::string,
+          std::int64_t,
+          std::optional<std::int64_t>,
+          std::uint32_t,
+          std::uint32_t,
+          std::uint32_t,
+          std::uint8_t> {
     std::string m_DeckId;
     std::optional<std::string> m_ParentDeckIdOptional;
     std::string m_DeckName;
@@ -29,21 +31,25 @@ struct [[nodiscard]] DeckSnapshotRecord final : public Database::DecodableQueryR
     std::uint32_t m_SelfTotalCount;
     std::uint8_t m_TargetLanguageCode;
 
-    explicit DeckSnapshotRecord(std::string&&,
-                                std::optional<std::string>&&,
-                                std::string&&,
-                                std::int64_t,
-                                const std::optional<std::int64_t>&,
-                                std::uint32_t,
-                                std::uint32_t,
-                                std::uint32_t,
-                                std::uint8_t) noexcept;
+    explicit DeckSnapshotRecord(
+        std::string&&,
+        std::optional<std::string>&&,
+        std::string&&,
+        std::int64_t,
+        const std::optional<std::int64_t>&,
+        std::uint32_t,
+        std::uint32_t,
+        std::uint32_t,
+        std::uint8_t
+    ) noexcept;
 
     explicit DeckSnapshotRecord(const DeckSnapshotRecord&) = delete;
-    auto operator=(const DeckSnapshotRecord&) -> DeckSnapshotRecord& = delete;
+    DeckSnapshotRecord&
+    operator=(const DeckSnapshotRecord&) = delete;
 
     explicit DeckSnapshotRecord(DeckSnapshotRecord&&) noexcept = default;
-    auto operator=(DeckSnapshotRecord&&) -> DeckSnapshotRecord& = delete;
+    DeckSnapshotRecord&
+    operator=(DeckSnapshotRecord&&) = delete;
 
     ~DeckSnapshotRecord() noexcept = default;
 };

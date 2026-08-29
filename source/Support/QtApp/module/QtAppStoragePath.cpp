@@ -10,25 +10,38 @@ module Memly.QtApp.QtAppStoragePath;
 
 namespace Memly::QtApp {
 namespace {
-[[nodiscard]] auto u_EnsureDirectory(const QString& Directory) -> std::string {
+[[nodiscard]] std::string
+u_EnsureDirectory(const QString& Directory) {
     QDir().mkpath(Directory);
     return std::string{ Directory.toStdString() };
 }
 
-[[nodiscard]] auto u_BaseDirectoryPath() -> std::string {
-    return std::string{ u_EnsureDirectory(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)) };
+[[nodiscard]] std::string
+u_BaseDirectoryPath() {
+    return std::string{
+        u_EnsureDirectory(
+            QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+        ),
+    };
 }
 }
 
-[[nodiscard]] auto AudioDirectoryPath() -> std::string {
-    return std::string{ u_EnsureDirectory(QString::fromStdString(u_BaseDirectoryPath() + "/Audio")) };
+[[nodiscard]] std::string
+AudioDirectoryPath() {
+    return std::string{
+        u_EnsureDirectory(
+            QString::fromStdString(u_BaseDirectoryPath() + "/Audio")
+        ),
+    };
 }
 
-[[nodiscard]] auto ExceptionLogFilePath() -> std::string {
+[[nodiscard]] std::string
+ExceptionLogFilePath() {
     return std::string{ u_BaseDirectoryPath() + "/exception.log" };
 }
 
-[[nodiscard]] auto DatabaseFilePath() -> std::string {
+[[nodiscard]] std::string
+DatabaseFilePath() {
     return std::string{ u_BaseDirectoryPath() + "/memly.duckdb" };
 }
 }

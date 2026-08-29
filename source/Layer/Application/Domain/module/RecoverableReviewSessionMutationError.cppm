@@ -7,7 +7,8 @@ export module Memly.Domain.RecoverableReviewSessionMutationError;
 
 export namespace Memly::Domain {
 
-enum class [[nodiscard]] RecoverableReviewSessionMutationErrorEnum : std::uint8_t {
+enum class
+    [[nodiscard]] RecoverableReviewSessionMutationErrorEnum : std::uint8_t {
     ReviewSessionNameLengthError,
     DuplicateReviewSessionDefinitionKeyError,
     ConflictingReviewSessionDeckSelfSelectionError,

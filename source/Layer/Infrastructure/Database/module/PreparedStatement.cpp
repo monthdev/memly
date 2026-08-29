@@ -12,12 +12,17 @@ import Memly.Database.PreparedStatementExecution;
 
 namespace Memly::Database {
 
-PreparedStatement::PreparedStatement(std::unique_ptr<duckdb::PreparedStatement>&& DuckDbPreparedStatement) noexcept
-    : m_DuckDbPreparedStatement{ std::move(DuckDbPreparedStatement) } {
+PreparedStatement::PreparedStatement(
+    std::unique_ptr<duckdb::PreparedStatement>&& DuckDbPreparedStatement
+) noexcept : m_DuckDbPreparedStatement{ std::move(DuckDbPreparedStatement) } {
 }
 
-[[nodiscard]] auto PreparedStatement::Execute(const std::source_location SourceLocation) & noexcept -> PreparedStatementExecution {
-    return PreparedStatementExecution{ *this->m_DuckDbPreparedStatement, SourceLocation };
+[[nodiscard]] PreparedStatementExecution
+PreparedStatement::Execute(
+    const std::source_location SourceLocation
+) & noexcept {
+    return PreparedStatementExecution{ *this->m_DuckDbPreparedStatement,
+        SourceLocation };
 }
 
 }

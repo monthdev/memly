@@ -13,11 +13,17 @@ protected:
     explicit DecodableQueryResultRowMixin() noexcept = default;
 
 public:
-    explicit DecodableQueryResultRowMixin(const DecodableQueryResultRowMixin&) = delete;
-    auto operator=(const DecodableQueryResultRowMixin&) -> DecodableQueryResultRowMixin& = delete;
+    explicit DecodableQueryResultRowMixin(
+        const DecodableQueryResultRowMixin&
+    ) = delete;
+    DecodableQueryResultRowMixin&
+    operator=(const DecodableQueryResultRowMixin&) = delete;
 
-    explicit DecodableQueryResultRowMixin(DecodableQueryResultRowMixin&&) noexcept = default;
-    auto operator=(DecodableQueryResultRowMixin&&) -> DecodableQueryResultRowMixin& = delete;
+    explicit DecodableQueryResultRowMixin(
+        DecodableQueryResultRowMixin&&
+    ) noexcept = default;
+    DecodableQueryResultRowMixin&
+    operator=(DecodableQueryResultRowMixin&&) = delete;
 
     ~DecodableQueryResultRowMixin() noexcept = default;
 
@@ -26,9 +32,13 @@ public:
 };
 
 template <typename QueryResultRowType>
-concept DecodableQueryResultRow = requires {
-    typename QueryResultRowType::DecodableQueryResultRowMixinType;
-    typename QueryResultRowType::QueryResultColumnTypeTuple;
-} and std::derived_from<QueryResultRowType, typename QueryResultRowType::DecodableQueryResultRowMixinType>;
+concept DecodableQueryResultRow =
+    requires {
+        typename QueryResultRowType::DecodableQueryResultRowMixinType;
+        typename QueryResultRowType::QueryResultColumnTypeTuple;
+    } and
+    std::derived_from<
+        QueryResultRowType,
+        typename QueryResultRowType::DecodableQueryResultRowMixinType>;
 
 }

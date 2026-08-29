@@ -15,7 +15,8 @@ void LogException(std::string_view) noexcept;
 
 template <typename LambdaType>
     requires std::invocable<LambdaType&&>
-[[nodiscard]] auto TryCatchWrapper(LambdaType&& Lambda) noexcept -> std::invoke_result_t<LambdaType&&> {
+[[nodiscard]] std::invoke_result_t<LambdaType&&>
+TryCatchWrapper(LambdaType&& Lambda) noexcept {
     try {
         return std::invoke(std::forward<LambdaType>(Lambda));
     } catch (const std::exception& CaughtException) {

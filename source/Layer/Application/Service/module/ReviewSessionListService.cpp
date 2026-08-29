@@ -13,11 +13,13 @@ module Memly.Service.ReviewSessionListService;
 namespace Memly::Service {
 
 ReviewSessionListService::ReviewSessionListService(
-    Repository::ReviewSessionRepository& ReviewSessionRepository) noexcept
+    Repository::ReviewSessionRepository& ReviewSessionRepository
+) noexcept
     : m_ReviewSessionRepository{ ReviewSessionRepository } {
 }
 
-[[nodiscard]] auto ReviewSessionListService::ReadReviewSessionListRows() -> std::vector<Domain::ReviewSessionListRow> {
+[[nodiscard]] std::vector<Domain::ReviewSessionListRow>
+ReviewSessionListService::ReadReviewSessionListRows() {
     return this->m_ReviewSessionRepository.ReadReviewSessionListRows();
 }
 

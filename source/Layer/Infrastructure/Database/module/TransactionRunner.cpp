@@ -6,8 +6,9 @@ module Memly.Database.TransactionRunner;
 
 namespace Memly::Database {
 
-TransactionRunner::TransactionRunner(duckdb::Connection& DatabaseConnection) noexcept
-    : m_DatabaseConnection{ DatabaseConnection } {
+TransactionRunner::TransactionRunner(
+    duckdb::Connection& DatabaseConnection
+) noexcept : m_DatabaseConnection{ DatabaseConnection } {
 }
 
 }

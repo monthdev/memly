@@ -90,9 +90,11 @@ operation (`custom-memly-defaulted-or-deleted-copy-move-operation`). Define a
 destructor in-class as `= default` or `= delete`, or out of line as `= default`
 (`custom-memly-defaulted-or-deleted-destructor-definition`).
 
-After ordinary constructors, place the copy constructor and assignment together,
-then the move constructor and assignment, then the destructor, with a blank line
-between groups.
+After ordinary constructors, group the copy constructor with the copy
+assignment, then group the move constructor with the move assignment, then place
+the destructor. Use no blank line within either copy or move group and exactly
+one blank line between those groups. Separate all other consecutive method
+declarations and definitions with exactly one blank line.
 
 Spell `noexcept` on a non-throwing defaulted move and `override` on an
 overriding destructor. Do not add `constexpr` to a defaulted special member

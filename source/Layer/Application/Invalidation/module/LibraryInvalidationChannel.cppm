@@ -25,61 +25,106 @@ private:
 public:
     explicit LibraryInvalidationChannel(QObject* = nullptr);
 
-    explicit LibraryInvalidationChannel(const LibraryInvalidationChannel&) = delete;
-    auto operator=(const LibraryInvalidationChannel&) -> LibraryInvalidationChannel& = delete;
+    explicit LibraryInvalidationChannel(
+        const LibraryInvalidationChannel&
+    ) = delete;
+    LibraryInvalidationChannel&
+    operator=(const LibraryInvalidationChannel&) = delete;
 
     explicit LibraryInvalidationChannel(LibraryInvalidationChannel&&) = delete;
-    auto operator=(LibraryInvalidationChannel&&) -> LibraryInvalidationChannel& = delete;
+    LibraryInvalidationChannel&
+    operator=(LibraryInvalidationChannel&&) = delete;
 
     ~LibraryInvalidationChannel() noexcept override = default;
 
-    [[nodiscard]] auto GetCurrentSnapshotAsOfMillisecondsSinceEpoch() const noexcept -> std::int64_t;
-    void SetCurrentSnapshotAsOfMillisecondsSinceEpoch(std::int64_t) noexcept;
-    void PublishInvalidation(const LibraryInvalidationTargetBitset&) noexcept;
+    [[nodiscard]] std::int64_t
+    GetCurrentSnapshotAsOfMillisecondsSinceEpoch() const noexcept;
+
+    void
+    SetCurrentSnapshotAsOfMillisecondsSinceEpoch(std::int64_t) noexcept;
+
+    void
+    PublishInvalidation(const LibraryInvalidationTargetBitset&) noexcept;
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
-        requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*>
-    void Connect(ControllerType* ControllerPointer,
-                 const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
-                 const ControllerRefreshMethodType ControllerRefreshMethod) {
-        this->ConnectInvalidationSignal(ControllerPointer, ControllerLibraryInvalidationTarget, [ControllerPointer, ControllerRefreshMethod]() noexcept -> void {
-            std::invoke(ControllerRefreshMethod, ControllerPointer);
-        });
+        requires std::is_member_function_pointer_v<
+                     ControllerRefreshMethodType> and
+                 std::is_nothrow_invocable_v<
+                     ControllerRefreshMethodType,
+                     ControllerType*>
+    void
+    Connect(
+        ControllerType* ControllerPointer,
+        const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
+        const ControllerRefreshMethodType ControllerRefreshMethod
+    ) {
+        this->ConnectInvalidationSignal(
+            ControllerPointer,
+            ControllerLibraryInvalidationTarget,
+            [ControllerPointer, ControllerRefreshMethod]() noexcept -> void {
+                std::invoke(ControllerRefreshMethod, ControllerPointer);
+            }
+        );
     }
 
     template <typename ControllerType, typename ControllerRefreshMethodType>
-        requires std::is_member_function_pointer_v<ControllerRefreshMethodType> and
-                 std::is_nothrow_invocable_v<ControllerRefreshMethodType, ControllerType*, std::int64_t>
-    void ConnectSnapshot(ControllerType* ControllerPointer,
-                         const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
-                         const ControllerRefreshMethodType ControllerRefreshMethod) {
+        requires std::is_member_function_pointer_v<
+                     ControllerRefreshMethodType> and
+                 std::is_nothrow_invocable_v<
+                     ControllerRefreshMethodType,
+                     ControllerType*,
+                     std::int64_t>
+    void
+    ConnectSnapshot(
+        ControllerType* ControllerPointer,
+        const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
+        const ControllerRefreshMethodType ControllerRefreshMethod
+    ) {
         this->ConnectInvalidationSignal(
-            ControllerPointer, ControllerLibraryInvalidationTarget, [this, ControllerPointer, ControllerRefreshMethod]() noexcept -> void {
-                std::invoke(ControllerRefreshMethod, ControllerPointer, this->m_CurrentSnapshotAsOfMillisecondsSinceEpoch);
-            });
+            ControllerPointer,
+            ControllerLibraryInvalidationTarget,
+            [this, ControllerPointer, ControllerRefreshMethod]() noexcept
+                -> void {
+                std::invoke(
+                    ControllerRefreshMethod,
+                    ControllerPointer,
+                    this->m_CurrentSnapshotAsOfMillisecondsSinceEpoch
+                );
+            }
+        );
     }
 
 private:
-    Q_SIGNAL void InvalidationSignal(const LibraryInvalidationTargetBitset&);
+    Q_SIGNAL void
+    InvalidationSignal(const LibraryInvalidationTargetBitset&);
 
     // NOLINTBEGIN(cppcoreguidelines-missing-std-forward)
     template <typename ControllerType, typename ControllerRefreshMethodType>
         requires std::is_nothrow_invocable_v<ControllerRefreshMethodType&>
-    void ConnectInvalidationSignal(ControllerType* ControllerPointer,
-                                   const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
-                                   ControllerRefreshMethodType&& ControllerRefreshMethod) {
+    void
+    ConnectInvalidationSignal(
+        ControllerType* ControllerPointer,
+        const LibraryInvalidationTargetEnum ControllerLibraryInvalidationTarget,
+        ControllerRefreshMethodType&& ControllerRefreshMethod
+    ) {
         std::invoke(ControllerRefreshMethod);
         QObject::connect(
             this,
             &LibraryInvalidationChannel::InvalidationSignal,
             ControllerPointer,
-            [ControllerLibraryInvalidationTarget, CapturedControllerRefreshMethod{ std::forward<ControllerRefreshMethodType>(ControllerRefreshMethod) }](
-                const LibraryInvalidationTargetBitset& CoordinatorLibraryInvalidationTargetBitset) noexcept -> void {
-                if (CoordinatorLibraryInvalidationTargetBitset.Contains(ControllerLibraryInvalidationTarget)) {
+            [ControllerLibraryInvalidationTarget,
+                CapturedControllerRefreshMethod{ std::forward<
+                    ControllerRefreshMethodType>(ControllerRefreshMethod) }](
+                const LibraryInvalidationTargetBitset&
+                    CoordinatorLibraryInvalidationTargetBitset
+            ) noexcept -> void {
+                if (CoordinatorLibraryInvalidationTargetBitset
+                        .Contains(ControllerLibraryInvalidationTarget)) {
                     std::invoke(CapturedControllerRefreshMethod);
                 }
             },
-            Qt::DirectConnection);
+            Qt::DirectConnection
+        );
     }
 
     // NOLINTEND(cppcoreguidelines-missing-std-forward)

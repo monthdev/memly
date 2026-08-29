@@ -9,9 +9,8 @@ import Memly.Database.DecodableQueryResultRowMixin;
 
 namespace Memly::Repository {
 
-MutatedId::MutatedId(std::string&& MutatedId) noexcept
-    : DecodableQueryResultRowMixin{}
-    , m_MutatedId{ std::move(MutatedId) } {
+MutatedId::MutatedId(std::string&& MutatedId) noexcept :
+    DecodableQueryResultRowMixin{}, m_MutatedId{ std::move(MutatedId) } {
 }
 
 }

@@ -19,25 +19,37 @@ namespace Memly::Repository {
 LibraryRepository::LibraryRepository(Database::DatabaseRuntime& DatabaseRuntime)
     : m_DatabaseRuntime{ DatabaseRuntime }
     , m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement{
-        DatabaseRuntime.PrepareStatement(Internal::SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql())
+        DatabaseRuntime.PrepareStatement(
+            Internal::SelectNextLibraryInvalidationAtMillisecondsSinceEpochSql()
+        )
     } {
 }
 
-[[nodiscard]] auto LibraryRepository::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(const std::int64_t AsOfMillisecondsSinceEpoch)
-    -> std::optional<std::int64_t> {
-    std::unique_ptr<duckdb::QueryResult> QueryResult{
-        this->m_DatabaseRuntime.ExecutePreparedStatement(this->m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement)
-            .WithParameters(AsOfMillisecondsSinceEpoch)
-    };
-    std::optional<std::int64_t> NextLibraryInvalidationAtMillisecondsSinceEpochOptional{};
+[[nodiscard]] std::optional<std::int64_t>
+LibraryRepository::ReadNextLibraryInvalidationAtMillisecondsSinceEpoch(
+    const std::int64_t AsOfMillisecondsSinceEpoch
+) {
+    std::unique_ptr<duckdb::QueryResult> QueryResult{ this->m_DatabaseRuntime
+            .ExecutePreparedStatement(
+                this->m_SelectNextLibraryInvalidationAtMillisecondsSinceEpochPreparedStatement
+            )
+            .WithParameters(AsOfMillisecondsSinceEpoch) };
+    std::optional<std::int64_t>
+        NextLibraryInvalidationAtMillisecondsSinceEpochOptional{};
     std::size_t ResultRowCount{ 0 };
-    while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{ this->m_DatabaseRuntime.FetchNextDataChunk(*QueryResult) }) {
-        for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size(); ++RowIndex) {
+    while (const duckdb::unique_ptr<duckdb::DataChunk> DataChunk{
+        this->m_DatabaseRuntime.FetchNextDataChunk(*QueryResult) }) {
+        for (duckdb::idx_t RowIndex{ 0 }; RowIndex < DataChunk->size();
+            ++RowIndex) {
             ++ResultRowCount;
-            const duckdb::Value NextLibraryInvalidationAtMillisecondsSinceEpochValue{ DataChunk->GetValue(0, RowIndex) };
-            if (not NextLibraryInvalidationAtMillisecondsSinceEpochValue.IsNull()) {
+            const duckdb::Value
+                NextLibraryInvalidationAtMillisecondsSinceEpochValue{ DataChunk
+                        ->GetValue(0, RowIndex) };
+            if (not NextLibraryInvalidationAtMillisecondsSinceEpochValue
+                    .IsNull()) {
                 NextLibraryInvalidationAtMillisecondsSinceEpochOptional =
-                    NextLibraryInvalidationAtMillisecondsSinceEpochValue.GetValue<std::int64_t>();
+                    NextLibraryInvalidationAtMillisecondsSinceEpochValue
+                        .GetValue<std::int64_t>();
             }
         }
     }

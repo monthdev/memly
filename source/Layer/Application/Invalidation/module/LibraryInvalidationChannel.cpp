@@ -14,19 +14,29 @@ namespace Memly::Invalidation {
 
 LibraryInvalidationChannel::LibraryInvalidationChannel(QObject* Parent)
     : QObject{ Parent }
-    , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{ static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch()) } {
+    , m_CurrentSnapshotAsOfMillisecondsSinceEpoch{
+        static_cast<std::int64_t>(QDateTime::currentMSecsSinceEpoch())
+    } {
 }
 
-[[nodiscard]] auto LibraryInvalidationChannel::GetCurrentSnapshotAsOfMillisecondsSinceEpoch() const noexcept -> std::int64_t {
+[[nodiscard]] std::int64_t
+LibraryInvalidationChannel::
+    GetCurrentSnapshotAsOfMillisecondsSinceEpoch() const noexcept {
     return std::int64_t{ this->m_CurrentSnapshotAsOfMillisecondsSinceEpoch };
 }
 
-void LibraryInvalidationChannel::SetCurrentSnapshotAsOfMillisecondsSinceEpoch(
-    const std::int64_t CurrentSnapshotAsOfMillisecondsSinceEpoch) noexcept {
-    this->m_CurrentSnapshotAsOfMillisecondsSinceEpoch = CurrentSnapshotAsOfMillisecondsSinceEpoch;
+void
+LibraryInvalidationChannel::SetCurrentSnapshotAsOfMillisecondsSinceEpoch(
+    const std::int64_t CurrentSnapshotAsOfMillisecondsSinceEpoch
+) noexcept {
+    this->m_CurrentSnapshotAsOfMillisecondsSinceEpoch =
+        CurrentSnapshotAsOfMillisecondsSinceEpoch;
 }
 
-void LibraryInvalidationChannel::PublishInvalidation(const LibraryInvalidationTargetBitset& LibraryInvalidationTargetBitset) noexcept {
+void
+LibraryInvalidationChannel::PublishInvalidation(
+    const LibraryInvalidationTargetBitset& LibraryInvalidationTargetBitset
+) noexcept {
     emit this->InvalidationSignal(LibraryInvalidationTargetBitset);
 }
 

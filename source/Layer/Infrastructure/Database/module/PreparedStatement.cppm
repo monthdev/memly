@@ -16,17 +16,23 @@ private:
     std::unique_ptr<duckdb::PreparedStatement> m_DuckDbPreparedStatement;
 
 public:
-    explicit PreparedStatement(std::unique_ptr<duckdb::PreparedStatement>&&) noexcept;
+    explicit PreparedStatement(
+        std::unique_ptr<duckdb::PreparedStatement>&&
+    ) noexcept;
 
     explicit PreparedStatement(const PreparedStatement&) = delete;
-    auto operator=(const PreparedStatement&) -> PreparedStatement& = delete;
+    PreparedStatement&
+    operator=(const PreparedStatement&) = delete;
 
     explicit PreparedStatement(PreparedStatement&&) = delete;
-    auto operator=(PreparedStatement&&) -> PreparedStatement& = delete;
+    PreparedStatement&
+    operator=(PreparedStatement&&) = delete;
 
     ~PreparedStatement() noexcept = default;
 
-    [[nodiscard]] auto Execute(std::source_location = std::source_location::current()) & noexcept [[clang::lifetimebound]] -> PreparedStatementExecution;
+    [[nodiscard]] PreparedStatementExecution
+    Execute(std::source_location = std::source_location::current()) & noexcept
+        [[clang::lifetimebound]];
 };
 
 }

@@ -20,16 +20,25 @@ struct ReviewSessionDeckSelection {
     std::string m_DeckId;
     DeckSelectionTypeEnum m_DeckSelectionType;
 
-    explicit ReviewSessionDeckSelection(std::string&& DeckId, const DeckSelectionTypeEnum DeckSelectionType) noexcept
+    explicit ReviewSessionDeckSelection(
+        std::string&& DeckId,
+        const DeckSelectionTypeEnum DeckSelectionType
+    ) noexcept
         : m_DeckId{ std::move(DeckId) }
         , m_DeckSelectionType{ DeckSelectionType } {
     }
 
-    explicit ReviewSessionDeckSelection(const ReviewSessionDeckSelection&) = delete;
-    auto operator=(const ReviewSessionDeckSelection&) -> ReviewSessionDeckSelection& = delete;
+    explicit ReviewSessionDeckSelection(
+        const ReviewSessionDeckSelection&
+    ) = delete;
+    ReviewSessionDeckSelection&
+    operator=(const ReviewSessionDeckSelection&) = delete;
 
-    explicit ReviewSessionDeckSelection(ReviewSessionDeckSelection&&) noexcept = default;
-    auto operator=(ReviewSessionDeckSelection&&) -> ReviewSessionDeckSelection& = delete;
+    explicit ReviewSessionDeckSelection(
+        ReviewSessionDeckSelection&&
+    ) noexcept = default;
+    ReviewSessionDeckSelection&
+    operator=(ReviewSessionDeckSelection&&) = delete;
 
     ~ReviewSessionDeckSelection() noexcept = default;
 };
