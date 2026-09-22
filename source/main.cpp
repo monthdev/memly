@@ -9,7 +9,7 @@
 
 #include <cstdlib>
 
-import Memly.CompositionRoot.ApplicationRuntime;
+import Memly.Client.LibraryRuntime;
 import Memly.Exception.ExceptionBoundary;
 import Memly.QtApp.QtAppStoragePath;
 
@@ -27,8 +27,9 @@ main(int argc, char** argv) noexcept {
             QGuiApplication::setApplicationDisplayName(AppName);
             QCoreApplication::setOrganizationDomain(OrgName);
             QCoreApplication::setOrganizationName(OrgName);
-            [[maybe_unused]] const Memly::CompositionRoot::ApplicationRuntime
-                ApplicationRuntime{ Memly::QtApp::DatabaseFilePath() };
+            [[maybe_unused]] const Memly::Client::LibraryRuntime LibraryRuntime{
+                Memly::QtApp::DatabaseFilePath(),
+            };
             QQmlApplicationEngine AppEngine{};
             QObject::connect(
                 &AppEngine,

@@ -1,17 +1,17 @@
 /// \file
-/// \brief Defines construction of the owned application runtime object graph.
+/// \brief Defines construction of the owned library runtime object graph.
 
 module;
 
 #include <string>
 
-module Memly.CompositionRoot.ApplicationRuntime;
+module Memly.Client.LibraryRuntime;
 
 import Memly.Database.DatabaseMigrator;
 
-namespace Memly::CompositionRoot {
+namespace Memly::Client {
 
-ApplicationRuntime::ApplicationRuntime(const std::string& DatabaseFilePath) :
+LibraryRuntime::LibraryRuntime(const std::string& DatabaseFilePath) :
     m_DatabaseRuntime{
         Database::DatabaseMigrator{ DatabaseFilePath }.ApplyMigrations(),
     } // , m_LibraryInvalidationChannel{}

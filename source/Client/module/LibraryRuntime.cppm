@@ -1,21 +1,21 @@
 /// \file
-/// \brief Declares the owned application runtime object graph.
+/// \brief Declares the owned library runtime object graph.
 
 module;
 
 #include <string>
 
-export module Memly.CompositionRoot.ApplicationRuntime;
+export module Memly.Client.LibraryRuntime;
 
 import Memly.Database.DatabaseRuntime;
 import Memly.Repository.DeckRepository;
 import Memly.Service.DeckService;
 
-export namespace Memly::CompositionRoot {
+export namespace Memly::Client {
 
-/// \attention Keep `ApplicationRuntime` members ordered from lower-level
+/// \attention Keep `LibraryRuntime` members ordered from lower-level
 /// dependencies to higher-level dependents.
-class ApplicationRuntime final {
+class LibraryRuntime final {
 private:
     Database::DatabaseRuntime m_DatabaseRuntime;
     // Invalidation::LibraryInvalidationChannel m_LibraryInvalidationChannel;
@@ -29,17 +29,17 @@ private:
     // Service::ReviewSessionService m_ReviewSessionService;
 
 public:
-    explicit ApplicationRuntime(const std::string&);
+    explicit LibraryRuntime(const std::string&);
 
-    explicit ApplicationRuntime(const ApplicationRuntime&) = delete;
-    ApplicationRuntime&
-    operator=(const ApplicationRuntime&) = delete;
+    explicit LibraryRuntime(const LibraryRuntime&) = delete;
+    LibraryRuntime&
+    operator=(const LibraryRuntime&) = delete;
 
-    explicit ApplicationRuntime(ApplicationRuntime&&) = delete;
-    ApplicationRuntime&
-    operator=(ApplicationRuntime&&) = delete;
+    explicit LibraryRuntime(LibraryRuntime&&) = delete;
+    LibraryRuntime&
+    operator=(LibraryRuntime&&) = delete;
 
-    ~ApplicationRuntime() noexcept = default;
+    ~LibraryRuntime() noexcept = default;
 };
 
 }

@@ -29,10 +29,10 @@ enforcement change.
 
 ## Runtime Composition and Services
 
-Keep `ApplicationRuntime` dependencies before dependents in construction and
+Keep `LibraryRuntime` dependencies before dependents in construction and
 ownership order, and destroy the QML engine before objects it can access. Expose
-only narrow View-layer factories to QML; never expose `ApplicationRuntime` or
-let a lower layer retrieve dependencies from it.
+only narrow View-layer factories to QML; never expose `LibraryRuntime` or let a
+lower layer retrieve dependencies from it.
 
 Services expose domain capabilities to application commands rather than model
 stateful entities. Keep a state-free domain operation on its service rather than

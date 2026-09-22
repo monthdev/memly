@@ -10,7 +10,7 @@ add_subdirectory(Layer/Presentation/Model)
 add_subdirectory(Layer/Presentation/Controller)
 add_subdirectory(Layer/View/Bridge)
 add_subdirectory(Layer/View/Qml)
-add_subdirectory(CompositionRoot)
+add_subdirectory(Client)
 
 set(MEMLY_EXECUTABLE_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 
@@ -26,7 +26,7 @@ set_target_properties(
 memly_link_complete_component_closure(
   memly
   COMPONENTS
-  Memly.CompositionRoot
+  Memly.Client
   Memly.Bridge
   Memly.Controller
   Memly.Invalidation
